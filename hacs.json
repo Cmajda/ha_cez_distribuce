@@ -2,7 +2,7 @@
 	"name": "ČEZ HDO",
 	"render_readme": true,
 	"description": "ČEZ HDO sensory",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"domains": [
 		"binary_sensor",
 		"sensor"
