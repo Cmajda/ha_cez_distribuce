@@ -1,0 +1,9 @@
+{
+	"name": "CEZ Distribuce CZ_dev",
+	"render_readme": false,
+	"domains": [
+		"binary_sensor"
+	],
+	"country": "CZ",
+	"homeassistant": "0.110.0"
+}

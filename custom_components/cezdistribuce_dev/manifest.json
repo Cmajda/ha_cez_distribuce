@@ -1,0 +1,13 @@
+{
+	"domain": "cezdistribuce_dev",
+	"name": "CEZ Distribuce_dev",
+	"version": "0.4.5",
+	"documentation": "https://github.com/zigul/HomeAssistant-CEZdistribuce",
+	"issue_tracker": "https://github.com/zigul/HomeAssistant-CEZdistribuce/issues",
+	"dependencies": [],
+	"codeowners": [ "@zigul" ],
+	"requirements": [],
+	"quality_scale": "silver",
+	"iot_class": "cloud_polling",
+	"config_flow": false
+}
