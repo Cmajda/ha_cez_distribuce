@@ -1,49 +1,53 @@
-# CEZ Distribuce - Home Assistant Sensor DEV Cmajda
+# CEZ HDO - Senzor pro Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
+[![hacs_badge](https://img.shields.io/badge/HACS-Výchozí-oranžová.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 
-This sensor is downloading data from https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html. The integration needs the **region** and the **code**. One can get this information from the contract with CEZ CZ or https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.
-The **region** and the **code** have to be defined in configuration.yaml
+Tento senzor stahuje data z webu https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html. Integrace vyžaduje **region** a **kód**. Tyto informace lze získat ze smlouvy s ČEZ CZ nebo z https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.  
+**Region** a **kód** je třeba definovat v souboru configuration.yaml.
 
+Tento senzor zobrazuje
+- aktuální stav HDO zda je aktivní nízký nebo vysoký tarif
+- čas od kdy do kdy je tarif aktivní
+- zbývající čas aktivního tarifu
 
-This sensor shows
-- current state of HDO
+## Instalace
 
-## Installation
+### Krok 1: Stažení souborů
 
-### Step 1: Download files
+#### Možnost 1: Přes HACS
 
-#### Option 1: Via HACS
+Ujistěte se, že máte nainstalovaný HACS. Pokud ne, spusťte `curl -sfSL https://hacs.xyz/install | bash -` v HA.
+Poté zvolte položku "Components" v rámci HACS. Vyberte menu v pravém horním rohu a zvolte "Custom repositories". Pak přidejte URL tohoto repozitáře. Měli byste mít možnost zvolit "Install now".
 
-Make sure you have HACS installed. If you don't, run `curl -sfSL https://hacs.xyz/install | bash -` in HA.
-Then choose Components under HACS. Choose the menu in the upper right, and select Custom repositories. Then add this repo's URL. You should be able to choose to Install now.
+#### Možnost 2: Manuální
+Klonujte tento repozitář nebo stáhněte zdrojový kód jako ZIP soubor a přidejte/slučte složku `custom_components/` s jejím obsahem do vašeho konfiguračního adresáře.
 
-#### Option 2: Manual
-Clone this repository or download the source code as a zip file and add/merge the `custom_components/` folder with its contents in your configuration directory.
-
-### Step 2: Configure
-Add the following to your `configuration.yaml` file:
+### Krok 2: Konfigurace
+Přidejte následující kód do vašeho souboru `configuration.yaml`:
 
 ```yaml
-# Example configuration.yaml entry for showing current HDO state
+# Příklad záznamu v configuration.yaml pro zobrazení aktuálního stavu HDO
 binary_sensor:
-  - platform: cezdistribuce
-    name: nizky tarif
-    region: stred
-    code: A1B5DP6
-```
-set your **region** and **code**
+  - platform: cez_hdo
+    region: střed
+    code: 405
 
-#### supported regions:
-* zapad
+sensor:
+  - platform: cez_hdo
+    region: střed
+    code: 405
+```
+nastavte svůj **region** a **kód**  
+
+#### Podporované regiony:
+* západ
 * sever
-* stred
-* vychod
+* střed
+* východ
 * morava
 
-### Step 3: Restart HA
-For the newly added integration to be loaded, HA needs to be restarted.
+### Krok 3: Restartování HA
+Pro načtení nově přidané integrace je třeba restartovat Home Assistant.
 
-
-## References
-- PRE Distribuce - Home Assistant Sensor (https://github.com/slesinger/HomeAssistant-PREdistribuce)
+Reference
+PRE Distribuce - Senzor pro Home Assistant (https://github.com/slesinger/HomeAssistant-PREdistribuce)

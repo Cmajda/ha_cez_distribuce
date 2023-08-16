@@ -1,10 +1,12 @@
-__version__ = "0.2"
-
+"""Platform for sensor integration."""
+from __future__ import annotations
 import logging
 from . import downloader
 import voluptuous as vol
 from datetime import timedelta, datetime, date
-from homeassistant.components.sensor import PLATFORM_SCHEMA
+from homeassistant.components.sensor import (
+    PLATFORM_SCHEMA
+)
 import homeassistant.helpers.config_validation as cv
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.util import Throttle
@@ -15,35 +17,32 @@ from lxml import html, etree
 MIN_TIME_BETWEEN_SCANS = timedelta(seconds=3600)
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "cezdistribuce_dev"
+DOMAIN = "cez_hdo"
 CONF_REGION = "region"
 CONF_CODE = "code"
-CONF_NAME = "name"
 
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_REGION): cv.string,
         vol.Required(CONF_CODE): cv.string,
-        vol.Required(CONF_NAME): cv.string,
     }
 )
 
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
-    name = config.get(CONF_NAME)
     region = config.get(CONF_REGION)
     code = config.get(CONF_CODE)
 
     ents = []
-    ents.append(CezDistribuce_dev(name, region, code))
+    ents.append(CezHdo(region, code))
     add_entities(ents)
 
 
-class CezDistribuce_dev(BinarySensorEntity):
-    def __init__(self, name, region, code):
+class CezHdo(BinarySensorEntity):
+    def __init__(self, region, code):
         """Initialize the sensor."""
-        self._name = name
+        self._name = "LowTariffActive"
         self.region = region
         self.code = code
         self.responseJson = "[]"
@@ -51,7 +50,7 @@ class CezDistribuce_dev(BinarySensorEntity):
 
     @property
     def name(self):
-        return self._name
+        return DOMAIN + "_" + self._name
 
     @property
     def icon(self):
@@ -59,7 +58,9 @@ class CezDistribuce_dev(BinarySensorEntity):
 
     @property
     def is_on(self):
-        return downloader.isHdo(self.responseJson["data"])
+        result = downloader.isHdo(self.responseJson["data"])
+        low_tariff, closest_start_timeL, closest_end_timeL, duration_time_L, high_tariff, closest_start_timeH, closest_end_timeH, duration_time_H = result
+        return low_tariff
 
     @property
     def extra_state_attributes(self):
@@ -81,12 +82,10 @@ class CezDistribuce_dev(BinarySensorEntity):
 
     @property
     def unique_id(self):
-        return "cezdistribuce_dev_" + self._name
+        return DOMAIN + "_" + self._name
 
     @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self):
-        # REGION = "regionStred"
-        # CODE = "A1B5DP6"
 
         response = requests.get(
             downloader.getRequestUrl(self.region, self.code))
