@@ -41,6 +41,19 @@ def parseTime(date_time_str):
         return datetime.datetime.strptime(date_time_str, "%H:%M").time()
 
 
+def duration(time1, time2):
+    if time1 <= time2:
+        datetime1 = datetime.datetime.combine(datetime.datetime.today(), time1)
+        datetime2 = datetime.datetime.combine(datetime.datetime.today(), time2)
+    else:
+        datetime1 = datetime.datetime.combine(datetime.datetime.today(), time1)
+        datetime2 = datetime.datetime.combine(
+            datetime.datetime.today() + timedelta(days=1), time2)
+
+    time_difference = datetime2 - datetime1
+    return time_difference
+
+
 def isHdo(jsonCalendar):
     """
     Find out if the HDO is enabled for the current timestamp
