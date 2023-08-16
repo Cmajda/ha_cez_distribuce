@@ -1,9 +1,15 @@
 {
-	"name": "CEZ Distribuce CZ_dev",
-	"render_readme": false,
+	"name": "ČEZ HDO",
+	"render_readme": true,
+	"description": "ČEZ HDO sensory",
+	"version": "1.0.0",
 	"domains": [
-		"binary_sensor"
+		"binary_sensor",
+		"sensor"
 	],
 	"country": "CZ",
+	"hide": false,
+	"i18n": false,
+	"hacs": true,
 	"homeassistant": "0.110.0"
 }
