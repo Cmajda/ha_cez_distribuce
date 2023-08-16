@@ -15,7 +15,7 @@ from lxml import html, etree
 MIN_TIME_BETWEEN_SCANS = timedelta(seconds=3600)
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "cezdistribuce"
+DOMAIN = "cezdistribuce_dev"
 CONF_REGION = "region"
 CONF_CODE = "code"
 CONF_NAME = "name"
@@ -36,11 +36,11 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     code = config.get(CONF_CODE)
 
     ents = []
-    ents.append(CezDistribuce(name, region, code))
+    ents.append(CezDistribuce_dev(name, region, code))
     add_entities(ents)
 
 
-class CezDistribuce(BinarySensorEntity):
+class CezDistribuce_dev(BinarySensorEntity):
     def __init__(self, name, region, code):
         """Initialize the sensor."""
         self._name = name
@@ -81,14 +81,15 @@ class CezDistribuce(BinarySensorEntity):
 
     @property
     def unique_id(self):
-        return "cezdistribuce_" + self._name
+        return "cezdistribuce_dev_" + self._name
 
     @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self):
         # REGION = "regionStred"
         # CODE = "A1B5DP6"
 
-        response = requests.get(downloader.getRequestUrl(self.region, self.code))
+        response = requests.get(
+            downloader.getRequestUrl(self.region, self.code))
         if response.status_code == 200:
             self.responseJson = response.json()
             self.last_update_success = True
