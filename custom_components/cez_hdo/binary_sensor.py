@@ -35,11 +35,12 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     code = config.get(CONF_CODE)
 
     ents = []
-    ents.append(CezHdo(region, code))
+    ents.append(LowTariffActive(region, code))
+    ents.append(HighTariffActive(region, code))
     add_entities(ents)
 
 
-class CezHdo(BinarySensorEntity):
+class LowTariffActive(BinarySensorEntity):
     def __init__(self, region, code):
         """Initialize the sensor."""
         self._name = "LowTariffActive"
@@ -61,6 +62,62 @@ class CezHdo(BinarySensorEntity):
         result = downloader.isHdo(self.responseJson["data"])
         low_tariff, closest_start_timeL, closest_end_timeL, duration_time_L, high_tariff, closest_start_timeH, closest_end_timeH, duration_time_H = result
         return low_tariff
+
+    @property
+    def extra_state_attributes(self):
+        attributes = {}
+        attributes["response_json"] = self.responseJson
+        return attributes
+
+    @property
+    def should_poll(self):
+        return True
+
+    @property
+    def available(self):
+        return self.last_update_success
+
+    @property
+    def device_class(self):
+        return ""
+
+    @property
+    def unique_id(self):
+        return DOMAIN + "_" + self._name
+
+    @Throttle(MIN_TIME_BETWEEN_SCANS)
+    def update(self):
+
+        response = requests.get(
+            downloader.getRequestUrl(self.region, self.code))
+        if response.status_code == 200:
+            self.responseJson = response.json()
+            self.last_update_success = True
+        else:
+            self.last_update_success = False
+
+class HighTariffActive(BinarySensorEntity):
+    def __init__(self, region, code):
+        """Initialize the sensor."""
+        self._name = "HighTariffActive"
+        self.region = region
+        self.code = code
+        self.responseJson = "[]"
+        self.update()
+
+    @property
+    def name(self):
+        return DOMAIN + "_" + self._name
+
+    @property
+    def icon(self):
+        return "mdi:power"
+
+    @property
+    def is_on(self):
+        result = downloader.isHdo(self.responseJson["data"])
+        low_tariff, closest_start_timeL, closest_end_timeL, duration_time_L, high_tariff, closest_start_timeH, closest_end_timeH, duration_time_H = result
+        return high_tariff
 
     @property
     def extra_state_attributes(self):

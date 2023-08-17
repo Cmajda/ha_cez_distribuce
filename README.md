@@ -2,14 +2,42 @@
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Výchozí-oranžová.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 
+Integrace vychází z původního kódu uživatele [@zigul](https://github.com/zigul). [Repozitář](https://github.com/zigul/HomeAssistant-CEZdistribuce)  
 Tento senzor stahuje data z webu https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html. Integrace vyžaduje **region** a **kód**. Tyto informace lze získat ze smlouvy s ČEZ CZ nebo z https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.  
 **Region** a **kód** je třeba definovat v souboru configuration.yaml.
+Pro otestování zda je správně použit region a kod, lze otevřít odkaz v prohlížeči ve tvaru:
+
+`https://www.cezdistribuce.cz/distHdo/adam/containers/`REGION`?code=`kód  
+
+Příklad:  
+```
+https://www.cezdistribuce.cz/distHdo/adam/containers/stred?code=406
+```
 
 Tento senzor zobrazuje
 - aktuální stav HDO zda je aktivní nízký nebo vysoký tarif
-- čas od kdy do kdy je tarif aktivní
+- začátek a konec nízkého/vysokého tarifu
 - zbývající čas aktivního tarifu
 
+## Karta Entity
+
+![entity_card](entity_card.png)
+
+### Yaml code
+```yaml
+type: entities
+entities:
+  - entity: update.cez_hdo_update
+  - entity: binary_sensor.cez_hdo_hightariffactive
+  - entity: binary_sensor.cez_hdo_lowtariffactive
+  - entity: sensor.lowtariffstart
+  - entity: sensor.lowtariffend
+  - entity: sensor.cez_hdo_lowtariffduration
+  - entity: sensor.cez_hdo_hightariffstart
+  - entity: sensor.cez_hdo_hightariffend
+  - entity: sensor.cez_hdo_hightariffduration
+state_color: true
+```
 ## Instalace
 
 ### Krok 1: Stažení souborů

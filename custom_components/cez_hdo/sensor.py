@@ -41,6 +41,9 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     ents.append(LowTariffStart(region, code))
     ents.append(LowTariffEnd(region, code))
     ents.append(LowTariffDuration(region, code))
+    ents.append(HighTariffStart(region, code))
+    ents.append(HighTariffEnd(region, code))
+    ents.append(HighTariffDuration(region, code))
     add_entities(ents)
 
 class LowTariffStart(SensorEntity):
@@ -167,6 +170,141 @@ class LowTariffDuration(SensorEntity):
         result = downloader.isHdo(self.responseJson["data"])
         low_tariff, closest_start_timeL, closest_end_timeL, duration_time_L, high_tariff, closest_start_timeH, closest_end_timeH, duration_time_H = result
         return duration_time_L
+    
+    @Throttle(MIN_TIME_BETWEEN_SCANS)
+    def update(self):
+        response = requests.get(
+            downloader.getRequestUrl(self.region, self.code))
+        if response.status_code == 200:
+            self.responseJson = response.json()
+            self.last_update_success = True
+        else:
+            self.last_update_success = False
+
+class HighTariffStart(SensorEntity):
+    def __init__(self, region, code):
+        """Initialize the sensor."""
+        self._name = "HighTariffStart"
+        self.region = region
+        self.code = code
+        self.responseJson = "[]"
+        self.update()
+
+    """Representation of a Sensor."""
+
+    @property
+    def name(self):
+        return DOMAIN + "_" + self._name
+    
+    @property
+    def unique_id(self):
+        return DOMAIN + self._name
+    
+    @property
+    def icon(self):
+        return "mdi:home-clock"
+    
+    @property
+    def should_poll(self):
+        return True
+    
+    @property
+    def extra_state_attributes(self):
+        attributes = {}
+        attributes["response_json"] = self.responseJson
+        return attributes
+    
+    @property
+    def native_value(self):
+        result = downloader.isHdo(self.responseJson["data"])
+        low_tariff, closest_start_timeL, closest_end_timeL, duration_time_L, high_tariff, closest_start_timeH, closest_end_timeH, duration_time_H = result
+        return closest_start_timeH
+    
+    @Throttle(MIN_TIME_BETWEEN_SCANS)
+    def update(self):
+        response = requests.get(
+            downloader.getRequestUrl(self.region, self.code))
+        if response.status_code == 200:
+            self.responseJson = response.json()
+            self.last_update_success = True
+        else:
+            self.last_update_success = False
+            
+class HighTariffEnd(SensorEntity):
+    def __init__(self, region, code):
+        """Initialize the sensor."""
+        self._name = "HighTariffEnd"
+        self.region = region
+        self.code = code
+        self.responseJson = "[]"
+        self.update()
+
+    """Representation of a Sensor."""
+
+    @property
+    def name(self):
+        return DOMAIN + "_" + self._name
+    
+    @property
+    def unique_id(self):
+        return DOMAIN + self._name
+    
+    @property
+    def icon(self):
+        return "mdi:home-clock-outline"
+    
+    @property
+    def should_poll(self):
+        return True
+        
+    @property
+    def native_value(self):
+        result = downloader.isHdo(self.responseJson["data"])
+        low_tariff, closest_start_timeL, closest_end_timeL, duration_time_L, high_tariff, closest_start_timeH, closest_end_timeH, duration_time_H = result
+        return closest_end_timeH
+    
+    @Throttle(MIN_TIME_BETWEEN_SCANS)
+    def update(self):
+        response = requests.get(
+            downloader.getRequestUrl(self.region, self.code))
+        if response.status_code == 200:
+            self.responseJson = response.json()
+            self.last_update_success = True
+        else:
+            self.last_update_success = False
+            
+class HighTariffDuration(SensorEntity):
+    def __init__(self, region, code):
+        """Initialize the sensor."""
+        self._name = "HighTariffDuration"
+        self.region = region
+        self.code = code
+        self.responseJson = "[]"
+        self.update()
+
+    """Representation of a Sensor."""
+
+    @property
+    def name(self):
+        return DOMAIN + "_" + self._name
+    
+    @property
+    def unique_id(self):
+        return DOMAIN + self._name
+    
+    @property
+    def icon(self):
+        return "mdi:timer"
+    
+    @property
+    def should_poll(self):
+        return True
+        
+    @property
+    def native_value(self):
+        result = downloader.isHdo(self.responseJson["data"])
+        low_tariff, closest_start_timeL, closest_end_timeL, duration_time_L, high_tariff, closest_start_timeH, closest_end_timeH, duration_time_H = result
+        return duration_time_H
     
     @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self):
