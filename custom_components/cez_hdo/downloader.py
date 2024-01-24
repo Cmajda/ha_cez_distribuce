@@ -10,9 +10,9 @@ except ImportError:
     from backports.zoneinfo import ZoneInfo
 
 
-BASE_URL = "https://www.cezdistribuce.cz/distHdo/adam/containers/"
+BASE_URL = "https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/"
 CEZ_TIMEZONE = ZoneInfo("Europe/Prague")
-
+#https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/stred?code=405
 
 def getCorrectRegionName(region):
     region = region.lower()
@@ -23,7 +23,7 @@ def getCorrectRegionName(region):
 
 def getRequestUrl(region, code):
     region = getCorrectRegionName(region)
-    return BASE_URL + region + "?&code=" + code.upper()
+    return BASE_URL + region + "?code=" + code.upper()
 
 
 def timeInRange(start, end, x):
