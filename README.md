@@ -7,11 +7,11 @@ Tento senzor stahuje data z webu https://www.cezdistribuce.cz/cs/pro-zakazniky/s
 **Region** a **kód** je třeba definovat v souboru configuration.yaml.
 Pro otestování zda je správně použit region a kod, lze otevřít odkaz v prohlížeči ve tvaru:
 
-`https://www.cezdistribuce.cz/distHdo/adam/containers/`REGION`?code=`kód  
+`https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/`REGION`?code=`kód  
 
 Příklad:  
 ```
-https://www.cezdistribuce.cz/distHdo/adam/containers/stred?code=406
+https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/stred?code=405
 ```
 
 Tento senzor zobrazuje
@@ -27,16 +27,16 @@ Tento senzor zobrazuje
 ```yaml
 type: entities
 entities:
-  - entity: update.cez_hdo_update
   - entity: binary_sensor.cez_hdo_hightariffactive
   - entity: binary_sensor.cez_hdo_lowtariffactive
-  - entity: sensor.lowtariffstart
-  - entity: sensor.lowtariffend
+  - entity: sensor.cez_hdo_lowtariffstart
+  - entity: sensor.cez_hdo_lowtariffend
   - entity: sensor.cez_hdo_lowtariffduration
   - entity: sensor.cez_hdo_hightariffstart
   - entity: sensor.cez_hdo_hightariffend
   - entity: sensor.cez_hdo_hightariffduration
 state_color: true
+
 ```
 ## Instalace
 
