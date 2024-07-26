@@ -1,6 +1,8 @@
 # CEZ HDO - Senzor pro Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Výchozí-oranžová.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)  
+
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
 Integrace vychází z původního kódu uživatele [@zigul](https://github.com/zigul). [Repozitář](https://github.com/zigul/HomeAssistant-CEZdistribuce)  
 Tento senzor stahuje data z webu https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html. Integrace vyžaduje **region** a **kód**. Tyto informace lze získat ze smlouvy s ČEZ CZ nebo z https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.  
@@ -57,12 +59,12 @@ Přidejte následující kód do vašeho souboru `configuration.yaml`:
 # Příklad záznamu v configuration.yaml pro zobrazení aktuálního stavu HDO
 binary_sensor:
   - platform: cez_hdo
-    region: střed
+    region: stred
     code: 405
 
 sensor:
   - platform: cez_hdo
-    region: střed
+    region: stred
     code: 405
 ```
 nastavte svůj **region** a **kód**  
@@ -73,6 +75,9 @@ nastavte svůj **region** a **kód**
 * střed
 * východ
 * morava
+
+> [!WARNING]
+> :skull_and_crossbones: V `configuration.yaml` nepoužívejte diakritiku :skull_and_crossbones:!
 
 ### Krok 3: Restartování HA
 Pro načtení nově přidané integrace je třeba restartovat Home Assistant.
