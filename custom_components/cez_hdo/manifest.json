@@ -7,7 +7,7 @@
 	"documentation": "https://github.com/Cmajda/ha_cez_distribuce",
 	"iot_class": "cloud_polling",
 	"issue_tracker": "https://github.com/Cmajda/ha_cez_distribuce/issues",
-	"requirements": [],
 	"quality_scale": "silver",
+	"requirements": [],
 	"version": "1.0.0"
 }
