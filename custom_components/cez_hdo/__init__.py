@@ -16,8 +16,7 @@ DOMAIN = "cez_hdo"
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
-    # Register frontend resources
-    await _register_frontend_resources(hass)
+    _LOGGER.info("Setting up ČEZ HDO integration")
     return True
 
 
@@ -39,16 +38,37 @@ async def _register_frontend_resources(hass: HomeAssistant) -> None:
         frontend_dir = integration_dir / "frontend" / "dist"
         
         if frontend_dir.exists():
-            # Register the frontend card files
+            # Use the modern web server registration method
             hass.http.register_static_path(
                 "/hacsfiles/cez-hdo-card",
                 str(frontend_dir),
-                cache_headers=False,
+                cache_headers=True
             )
             
             _LOGGER.info("ČEZ HDO frontend resources registered successfully")
         else:
             _LOGGER.warning("Frontend directory not found at %s, custom card will not be available", frontend_dir)
+            
+    except AttributeError:
+        # Fallback for newer HA versions
+        try:
+            from homeassistant.components.http.static import StaticPathConfig
+            
+            integration_dir = Path(__file__).parent
+            frontend_dir = integration_dir / "frontend" / "dist"
+            
+            if frontend_dir.exists():
+                static_config = StaticPathConfig(
+                    url_path="/hacsfiles/cez-hdo-card",
+                    path=str(frontend_dir),
+                    cache_headers=True
+                )
+                hass.http.register_static_path(static_config)
+                _LOGGER.info("ČEZ HDO frontend resources registered successfully (fallback method)")
+            
+        except Exception as fallback_err:
+            _LOGGER.warning("Could not register frontend resources with fallback method: %s", fallback_err)
+            _LOGGER.info("Custom card will need to be installed manually")
             
     except Exception as err:
         _LOGGER.error("Failed to register frontend resources: %s", err)
