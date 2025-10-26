@@ -21,6 +21,33 @@ Tento senzor zobrazuje
 - začátek a konec nízkého/vysokého tarifu
 - zbývající čas aktivního tarifu
 
+## 🎨 Custom Lovelace Card
+
+Integrace obsahuje vlastní Lovelace kartu pro lepší zobrazení HDO informací:
+
+![Custom Card Preview](custom_components/cez_hdo/frontend/card-preview.png)
+
+### Funkce custom karty
+- 📊 Přehledné zobrazení aktuálního tarifu
+- ⏰ Časy začátku, konce a zbývající doba
+- 🎨 Přizpůsobitelné barvy a styly
+- 📱 Responzivní design
+
+### Použití custom karty
+
+```yaml
+type: custom:cez-hdo-card
+entities:
+  low_tariff: binary_sensor.cez_hdo_lowtariffactive
+  high_tariff: binary_sensor.cez_hdo_hightariffactive
+  low_start: sensor.cez_hdo_lowtariffstart
+  low_end: sensor.cez_hdo_lowtariffend
+  low_duration: sensor.cez_hdo_lowtariffduration
+  high_start: sensor.cez_hdo_hightariffstart
+  high_end: sensor.cez_hdo_hightariffend
+  high_duration: sensor.cez_hdo_hightariffduration
+```
+
 ## Karta Entity
 
 ![entity_card](entity_card.png)

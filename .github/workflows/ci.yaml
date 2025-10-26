@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: pre-commit/action@v3.0.1
+
+  validate-integrations:
+    runs-on: ubuntu-latest
+    needs: pre-commit
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check integration structure
+        run: |
+          # Verify required files exist
+          test -f custom_components/cez_hdo/__init__.py
+          test -f custom_components/cez_hdo/manifest.json
+          test -f hacs.json
+          test -f README.md
+          echo "✅ All required files present"
+          
+          # Verify no Python syntax errors
+          python -m py_compile custom_components/cez_hdo/*.py
+          echo "✅ Python syntax validation passed"
