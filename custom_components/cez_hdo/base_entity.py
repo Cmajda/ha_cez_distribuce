@@ -62,7 +62,7 @@ class CezHdoBaseEntity(Entity):
         """Fetch new state data for the sensor."""
         try:
             response = requests.get(
-                downloader.getRequestUrl(self.region, self.code),
+                downloader.get_request_url(self.region, self.code),
                 timeout=30
             )
             response.raise_for_status()

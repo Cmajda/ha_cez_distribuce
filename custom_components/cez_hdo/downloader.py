@@ -141,16 +141,3 @@ def isHdo(json_calendar: list[dict]) -> tuple[bool, time | None, time | None, ti
         
     return (low_tariff_active, low_start, low_end, low_duration,
             high_tariff_active, high_start, high_end, high_duration)
-
-
-# Backwards compatibility - deprecated functions
-def getCorrectRegionName(region: str) -> str | None:
-    """Deprecated: Use get_correct_region_name instead."""
-    _LOGGER.warning("getCorrectRegionName is deprecated, use get_correct_region_name")
-    return get_correct_region_name(region)
-
-
-def getRequestUrl(region: str, code: str) -> str:
-    """Deprecated: Use get_request_url instead."""
-    _LOGGER.warning("getRequestUrl is deprecated, use get_request_url")
-    return get_request_url(region, code)
