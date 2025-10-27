@@ -165,3 +165,4 @@ test2.py
 *.bak
 *.backup
 *.orig
+*local*
