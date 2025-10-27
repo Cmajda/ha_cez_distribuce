@@ -35,6 +35,17 @@ Integrace obsahuje vlastní Lovelace kartu pro lepší zobrazení HDO informací
 
 ### Použití custom karty
 
+**⚠️ DŮLEŽITÉ: Před použitím karty musíte přidat frontend resource:**
+
+1. **Jděte do Home Assistant** → **Nastavení** → **Dashboards** → **Resources**
+2. **Klikněte "Add Resource"**
+3. **Zadejte URL:** `/local/cez-hdo-card.js`
+4. **Resource type:** `JavaScript Module`
+5. **Klikněte "Create"**
+6. **Obnovte stránku** (Ctrl+F5)
+
+**Potom můžete přidat kartu:**
+
 ```yaml
 type: custom:cez-hdo-card
 entities:
@@ -46,7 +57,13 @@ entities:
   high_start: sensor.cez_hdo_hightariffstart
   high_end: sensor.cez_hdo_hightariffend
   high_duration: sensor.cez_hdo_hightariffduration
+title: "ČEZ HDO Status"
+show_times: true
+show_duration: true
+compact_mode: false
 ```
+
+**💡 Tip:** Karta se automaticky zobrazí v "Add Card" dialogu jako "ČEZ HDO Card".
 
 ## Karta Entity
 
