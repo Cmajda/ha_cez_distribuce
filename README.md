@@ -12,7 +12,8 @@ Pro otestování zda je správně použit region a kod, lze otevřít odkaz v pr
 `https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/`REGION`?code=`kód  
 
 Příklad:  
-```
+
+```Text
 https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/stred?code=405
 ```
 
@@ -33,6 +34,7 @@ Klikněte na tlačítko níže pro automatické otevření HACS:
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
 **Nebo manuálně:**
+
 1. Otevřete HACS v Home Assistant
 2. Jděte na **Integrations**
 3. Klikněte na **⋮** → **Custom repositories**
@@ -87,10 +89,12 @@ Integrace obsahuje vlastní Lovelace kartu pro lepší zobrazení HDO informací
 Integrace vytváří následující entity:
 
 ### Binary Sensors
+
 - `binary_sensor.cez_hdo_lowtariffactive` - Je aktivní nízký tarif?
 - `binary_sensor.cez_hdo_hightariffactive` - Je aktivní vysoký tarif?
 
 ### Sensors
+
 - `sensor.cez_hdo_lowtariffstart` - Začátek nízkého tarifu
 - `sensor.cez_hdo_lowtariffend` - Konec nízkého tarifu  
 - `sensor.cez_hdo_lowtariffduration` - Zbývající čas nízkého tarifu
@@ -99,6 +103,7 @@ Integrace vytváří následující entity:
 - `sensor.cez_hdo_hightariffduration` - Zbývající čas vysokého tarifu
 
 ### Atributy
+
 Každý senzor obsahuje v atributech kompletní API odpověď s detailními informacemi o HDO rozpisech.
 
 ## 🔧 Řešení problémů

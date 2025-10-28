@@ -5,7 +5,7 @@ Integrace pro sledování HDO (High/Low tariff) tarifů ČEZ Distribuce s automa
 ## ✨ Nové ve verzi 1.1.0
 
 - 🎨 **Custom Lovelace Card** - TypeScript karta pro lepší zobrazení HDO
-- 🔧 **Automatická instalace** frontend resources 
+- 🔧 **Automatická instalace** frontend resources
 - ♻️ **Refaktorovaný Python kód** - 60% méně duplikace kódu
 - 🏛️ **Podpora státních svátků** - automaticky aplikuje víkendový tarif
 - ⏰ **Vylepšený formát času** - bez milisekund pro lepší čitelnost
@@ -33,6 +33,7 @@ sensor:
 ### 2. Přidání frontend resource
 
 **Pro použití custom karty:**
+
 - Jděte do **Nastavení** → **Dashboards** → **Resources**
 - Přidejte URL: `/local/cez-hdo-card.js`
 - Type: **JavaScript Module**
@@ -44,12 +45,14 @@ Po restartu budou k dispozici entity a custom karta.
 ## 🎨 Custom Lovelace Card
 
 ### Automatické přidání karty:
+
 1. Otevřete Lovelace editor
 2. Klikněte **"Přidat kartu"**
 3. Najděte **"ČEZ HDO Card"** v seznamu
 4. Karta se automaticky nakonfiguruje!
 
 ### Ruční konfigurace:
+
 ```yaml
 type: custom:cez-hdo-card
 entities:
@@ -70,10 +73,12 @@ compact_mode: false
 ## 📊 Vytvořené entity
 
 ### Binary Sensors
+
 - `binary_sensor.cez_hdo_lowtariffactive` - Je aktivní nízký tarif?
 - `binary_sensor.cez_hdo_hightariffactive` - Je aktivní vysoký tarif?
 
 ### Sensors  
+
 - `sensor.cez_hdo_lowtariffstart` - Začátek nízkého tarifu
 - `sensor.cez_hdo_lowtariffend` - Konec nízkého tarifu
 - `sensor.cez_hdo_lowtariffduration` - Zbývající čas nízkého tarifu
