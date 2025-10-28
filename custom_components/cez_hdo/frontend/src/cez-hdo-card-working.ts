@@ -135,9 +135,32 @@ export class CezHdoCard extends LitElement {
   `;
 
   setConfig(config: CezHdoCardConfig): void {
+    console.log('CezHdoCard setConfig called with:', config);
+    
+    // If entities are missing, auto-fill with default configuration
     if (!config.entities) {
-      throw new Error('entities configuration is required');
+      console.log('Entities missing, auto-filling with default configuration');
+      const defaultConfig = {
+        entities: {
+          low_tariff: 'binary_sensor.cez_hdo_lowtariffactive',
+          high_tariff: 'binary_sensor.cez_hdo_hightariffactive',
+          low_start: 'sensor.cez_hdo_lowtariffstart',
+          low_end: 'sensor.cez_hdo_lowtariffend',
+          low_duration: 'sensor.cez_hdo_lowtariffduration',
+          high_start: 'sensor.cez_hdo_hightariffstart',
+          high_end: 'sensor.cez_hdo_hightariffend',
+          high_duration: 'sensor.cez_hdo_hightariffduration'
+        },
+        title: 'ČEZ HDO Status',
+        show_times: true,
+        show_duration: true,
+        compact_mode: false
+      };
+      config = { ...defaultConfig, ...config };
+      console.log('Auto-filled config:', config);
     }
+    
+    console.log('Config validation passed');
     this.config = config;
   }
 
@@ -233,4 +256,4 @@ export class CezHdoCard extends LitElement {
   preview: true,
 });
 
-console.info('ČEZ HDO Card v1.1.0 loaded successfully');
+console.info('ČEZ HDO Card v1.1.0-beta.1 loaded successfully');

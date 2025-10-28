@@ -66,6 +66,24 @@ export class CezHdoCard extends LitElement implements LovelaceCard {
       throw new Error('Invalid configuration');
     }
 
+    // Debug: Log the received config
+    console.log('ČEZ HDO Card config:', config);
+
+    // Validate entities configuration with more lenient check
+    if (!config.entities || typeof config.entities !== 'object') {
+      throw new Error(`ČEZ HDO Card vyžaduje konfiguraci entities. Příklad:
+
+entities:
+  low_tariff: binary_sensor.cez_hdo_lowtariffactive
+  high_tariff: binary_sensor.cez_hdo_hightariffactive
+  low_start: sensor.cez_hdo_lowtariffstart
+  low_end: sensor.cez_hdo_lowtariffend
+  low_duration: sensor.cez_hdo_lowtariffduration
+  high_start: sensor.cez_hdo_hightariffstart
+  high_end: sensor.cez_hdo_hightariffend
+  high_duration: sensor.cez_hdo_hightariffduration`);
+    }
+
     this.config = {
       show_header: true,
       show_current_state: true,
