@@ -1,28 +1,25 @@
-"""Platform for sensor integration."""
+"""Platform for binary sensor integration."""
 from __future__ import annotations
 import logging
-from . import downloader
 import voluptuous as vol
-from datetime import timedelta, datetime, date
-from homeassistant.components.sensor import (
-    PLATFORM_SCHEMA
+
+from homeassistant.components.binary_sensor import (
+    BinarySensorEntity,
 )
+from homeassistant.components.sensor import PLATFORM_SCHEMA as BASE_PLATFORM_SCHEMA
 import homeassistant.helpers.config_validation as cv
-from homeassistant.components.binary_sensor import BinarySensorEntity
-from homeassistant.util import Throttle
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-import requests
-from lxml import html, etree
+from .base_entity import CezHdoBaseEntity
 
-MIN_TIME_BETWEEN_SCANS = timedelta(seconds=3600)
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = "cez_hdo"
 CONF_REGION = "region"
 CONF_CODE = "code"
 
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+PLATFORM_SCHEMA = BASE_PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_REGION): cv.string,
         vol.Required(CONF_CODE): cv.string,
@@ -30,124 +27,60 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
-    region = config.get(CONF_REGION)
-    code = config.get(CONF_CODE)
+def setup_platform(
+    hass: HomeAssistant,
+    config: ConfigType,
+    add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None,
+) -> None:
+    """Set up the CEZ HDO binary sensor platform."""
+    region = config[CONF_REGION]
+    code = config[CONF_CODE]
 
-    ents = []
-    ents.append(LowTariffActive(region, code))
-    ents.append(HighTariffActive(region, code))
-    add_entities(ents)
+    entities = [
+        LowTariffActive(region, code),
+        HighTariffActive(region, code),
+    ]
+    add_entities(entities, True)
 
 
-class LowTariffActive(BinarySensorEntity):
-    def __init__(self, region, code):
-        """Initialize the sensor."""
-        self._name = "LowTariffActive"
-        self.region = region
-        self.code = code
-        self.responseJson = "[]"
-        self.update()
-
-    @property
-    def name(self):
-        return DOMAIN + "_" + self._name
+class CezHdoBinarySensor(CezHdoBaseEntity, BinarySensorEntity):
+    """Base class for CEZ HDO binary sensors."""
 
     @property
-    def icon(self):
+    def icon(self) -> str:
+        """Return the icon of the sensor."""
         return "mdi:power"
 
     @property
-    def is_on(self):
-        result = downloader.isHdo(self.responseJson["data"])
-        low_tariff, closest_start_timeL, closest_end_timeL, duration_time_L, high_tariff, closest_start_timeH, closest_end_timeH, duration_time_H = result
-        return low_tariff
+    def device_class(self) -> str | None:
+        """Return the device class of the sensor."""
+        return None
 
-    @property
-    def extra_state_attributes(self):
-        attributes = {}
-        attributes["response_json"] = self.responseJson
-        return attributes
 
-    @property
-    def should_poll(self):
-        return True
+class LowTariffActive(CezHdoBinarySensor):
+    """Binary sensor for low tariff active state."""
 
-    @property
-    def available(self):
-        return self.last_update_success
-
-    @property
-    def device_class(self):
-        return ""
-
-    @property
-    def unique_id(self):
-        return DOMAIN + "_" + self._name
-
-    @Throttle(MIN_TIME_BETWEEN_SCANS)
-    def update(self):
-
-        response = requests.get(
-            downloader.getRequestUrl(self.region, self.code))
-        if response.status_code == 200:
-            self.responseJson = response.json()
-            self.last_update_success = True
-        else:
-            self.last_update_success = False
-
-class HighTariffActive(BinarySensorEntity):
-    def __init__(self, region, code):
+    def __init__(self, region: str, code: str) -> None:
         """Initialize the sensor."""
-        self._name = "HighTariffActive"
-        self.region = region
-        self.code = code
-        self.responseJson = "[]"
-        self.update()
+        super().__init__(region, code, "LowTariffActive")
 
     @property
-    def name(self):
-        return DOMAIN + "_" + self._name
+    def is_on(self) -> bool:
+        """Return True if low tariff is active."""
+        hdo_data = self._get_hdo_data()
+        return hdo_data[0]  # low_tariff_active
+
+
+class HighTariffActive(CezHdoBinarySensor):
+    """Binary sensor for high tariff active state."""
+
+    def __init__(self, region: str, code: str) -> None:
+        """Initialize the sensor."""
+        super().__init__(region, code, "HighTariffActive")
 
     @property
-    def icon(self):
-        return "mdi:power"
-
-    @property
-    def is_on(self):
-        result = downloader.isHdo(self.responseJson["data"])
-        low_tariff, closest_start_timeL, closest_end_timeL, duration_time_L, high_tariff, closest_start_timeH, closest_end_timeH, duration_time_H = result
-        return high_tariff
-
-    @property
-    def extra_state_attributes(self):
-        attributes = {}
-        attributes["response_json"] = self.responseJson
-        return attributes
-
-    @property
-    def should_poll(self):
-        return True
-
-    @property
-    def available(self):
-        return self.last_update_success
-
-    @property
-    def device_class(self):
-        return ""
-
-    @property
-    def unique_id(self):
-        return DOMAIN + "_" + self._name
-
-    @Throttle(MIN_TIME_BETWEEN_SCANS)
-    def update(self):
-
-        response = requests.get(
-            downloader.getRequestUrl(self.region, self.code))
-        if response.status_code == 200:
-            self.responseJson = response.json()
-            self.last_update_success = True
-        else:
-            self.last_update_success = False
+    def is_on(self) -> bool:
+        """Return True if high tariff is active."""
+        hdo_data = self._get_hdo_data()
+        return hdo_data[4]  # high_tariff_active

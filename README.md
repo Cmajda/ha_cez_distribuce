@@ -1,86 +1,116 @@
-# CEZ HDO - Senzor pro Home Assistant
+# ČEZ HDO - Senzor pro Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)  
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-Integrace vychází z původního kódu uživatele [@zigul](https://github.com/zigul). [Repozitář](https://github.com/zigul/HomeAssistant-CEZdistribuce)  
-Tento senzor stahuje data z webu https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html. Integrace vyžaduje **region** a **kód**. Tyto informace lze získat ze smlouvy s ČEZ CZ nebo z https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.  
-**Region** a **kód** je třeba definovat v souboru configuration.yaml.
+Tento senzor stahuje data z webu https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.
+Integrace vyžaduje **region** a **kód**. Tyto informace lze získat ze smlouvy s ČEZ CZ nebo z https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.
+
 Pro otestování zda je správně použit region a kod, lze otevřít odkaz v prohlížeči ve tvaru:
 
-`https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/`REGION`?code=`kód  
+`https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/`REGION`?code=`kód
 
-Příklad:  
-```
+Příklad:
+
+```Text
 https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/stred?code=405
 ```
 
-Tento senzor zobrazuje
-- aktuální stav HDO zda je aktivní nízký nebo vysoký tarif
-- začátek a konec nízkého/vysokého tarifu
-- zbývající čas aktivního tarifu
+## ✨ Funkce integrace
 
-## Karta Entity
+- ✅ **Aktuální stav HDO** - zobrazuje zda je aktivní nízký nebo vysoký tarif
+- ✅ **Časy začátku a konce** nízkého/vysokého tarifu
+- ✅ **Zbývající čas** aktivního tarifu
+- ✅ **Podpora státních svátků** - automaticky aplikuje víkendový tarif
+- ✅ **Custom Lovelace karta** pro přehledné zobrazení
 
-![entity_card](entity_card.png)
+## 🚀 Instalace
 
-### Yaml code
-```yaml
-type: entities
-entities:
-  - entity: binary_sensor.cez_hdo_hightariffactive
-  - entity: binary_sensor.cez_hdo_lowtariffactive
-  - entity: sensor.cez_hdo_lowtariffstart
-  - entity: sensor.cez_hdo_lowtariffend
-  - entity: sensor.cez_hdo_lowtariffduration
-  - entity: sensor.cez_hdo_hightariffstart
-  - entity: sensor.cez_hdo_hightariffend
-  - entity: sensor.cez_hdo_hightariffduration
-state_color: true
+### Krok 1: Instalace přes HACS
 
-```
-## Instalace
+Klikněte na tlačítko níže pro automatické otevření HACS:
 
-### Krok 1: Stažení souborů
+[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-#### Možnost 1: Přes HACS
+**Nebo manuálně:**
 
-Ujistěte se, že máte nainstalovaný HACS. Pokud ne, spusťte `curl -sfSL https://hacs.xyz/install | bash -` v HA.
-Poté zvolte položku "Components" v rámci HACS. Vyberte menu v pravém horním rohu a zvolte "Custom repositories". Pak přidejte URL tohoto repozitáře. Měli byste mít možnost zvolit "Install now".
-
-#### Možnost 2: Manuální
-Klonujte tento repozitář nebo stáhněte zdrojový kód jako ZIP soubor a přidejte/slučte složku `custom_components/` s jejím obsahem do vašeho konfiguračního adresáře.
+1. Otevřete HACS v Home Assistant
+2. Jděte na **Integrations**
+3. Klikněte na **⋮** → **Custom repositories**
+4. Přidejte URL: `https://github.com/Cmajda/ha_cez_distribuce`
+5. Kategorie: **Integration**
+6. Klikněte **Add**
+7. Najděte **"ČEZ HDO"** a nainstalujte
 
 ### Krok 2: Konfigurace
-Přidejte následující kód do vašeho souboru `configuration.yaml`:
+
+Přidejte do `configuration.yaml`:
 
 ```yaml
-# Příklad záznamu v configuration.yaml pro zobrazení aktuálního stavu HDO
+# ČEZ HDO integrace
 binary_sensor:
   - platform: cez_hdo
-    region: stred
-    code: 405
+    region: stred  # váš region: zapad/sever/stred/vychod/morava
+    code: 405      # váš HDO kód
 
 sensor:
   - platform: cez_hdo
     region: stred
     code: 405
 ```
-nastavte svůj **region** a **kód**  
 
-#### Podporované regiony:
-* západ
-* sever
-* střed
-* východ
-* morava
+#### Podporované regiony
 
-> [!WARNING]
-> :skull_and_crossbones: V `configuration.yaml` nepoužívejte diakritiku :skull_and_crossbones:!
+- západ
+- sever
+- střed
+- východ
+- morava
 
-### Krok 3: Restartování HA
-Pro načtení nově přidané integrace je třeba restartovat Home Assistant.
+### Krok 3: Přidání frontend resource
 
-Reference
-PRE Distribuce - Senzor pro Home Assistant (https://github.com/slesinger/HomeAssistant-PREdistribuce)
+- Jděte do **Nastavení** → **Dashboards** → **Resources**
+- Klikněte **"Add Resource"**
+- URL: `/local/cez-hdo-card.js`
+- Resource type: **JavaScript Module**
+- Klikněte **"Create"**
+
+### Krok 4: Restartování HA
+
+Po přidání konfigurace restartujte Home Assistant.
+
+## 🎨 Custom Lovelace Card
+
+Integrace obsahuje vlastní Lovelace kartu pro lepší zobrazení HDO informací:
+
+## 📊 Entity
+
+Integrace vytváří následující entity:
+
+### Binary Sensors
+
+- `binary_sensor.cez_hdo_lowtariffactive` - Je aktivní nízký tarif?
+- `binary_sensor.cez_hdo_hightariffactive` - Je aktivní vysoký tarif?
+
+### Sensors
+
+- `sensor.cez_hdo_lowtariffstart` - Začátek nízkého tarifu
+- `sensor.cez_hdo_lowtariffend` - Konec nízkého tarifu
+- `sensor.cez_hdo_lowtariffduration` - Zbývající čas nízkého tarifu
+- `sensor.cez_hdo_hightariffstart` - Začátek vysokého tarifu
+- `sensor.cez_hdo_hightariffend` - Konec vysokého tarifu
+- `sensor.cez_hdo_hightariffduration` - Zbývající čas vysokého tarifu
+
+### Atributy
+
+Každý senzor obsahuje v atributech kompletní API odpověď s detailními informacemi o HDO rozpisech.
+
+## 🔧 Řešení problémů
+
+Pokud máte problémy s integrací:
+
+1. **Zkontrolujte region a kód** - otestujte URL v prohlížeči
+2. **Zkontrolujte logy** - Developer Tools → Logs
+3. **Restartujte HA** po změnách konfigurace
+4. **Vyčistěte cache** prohlížeče (Ctrl+F5) pro Lovelace kartu
