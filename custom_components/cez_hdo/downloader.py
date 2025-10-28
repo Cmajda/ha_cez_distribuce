@@ -2,7 +2,7 @@
 from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, time
-from typing import NamedTuple
+from typing import NamedTuple, cast
 
 try:
     # python 3.9+
@@ -207,7 +207,7 @@ def isHdo(
                 low_periods.append({"start": start_time, "end": end_time, "index": i})
 
         # Sort periods by start time
-        low_periods.sort(key=lambda x: x["start"])
+        low_periods.sort(key=lambda x: cast(time, x["start"]))
 
         _LOGGER.warning(
             "🔍 Low tariff periods: %s",
@@ -217,24 +217,26 @@ def isHdo(
         # Check if we're currently in a low tariff period
         current_low_period = None
         for period in low_periods:
-            if time_in_range(period["start"], period["end"], checked_time):
+            period_start = cast(time, period["start"])
+            period_end = cast(time, period["end"])
+            if time_in_range(period_start, period_end, checked_time):
                 current_low_period = period
                 break
 
         if current_low_period:
             # We're in LOW tariff period
             low_tariff_active = True
-            low_start = current_low_period["start"]
-            low_end = current_low_period["end"]
-            low_duration = calculate_duration(checked_time, current_low_period["end"])
+            low_start = cast(time, current_low_period["start"])
+            low_end = cast(time, current_low_period["end"])
+            low_duration = calculate_duration(checked_time, low_end)
 
             # Find next high tariff (starts when current low ends)
-            high_start = current_low_period["end"]
+            high_start = cast(time, current_low_period["end"])
 
             # Find next low period after current one
             current_index = low_periods.index(current_low_period)
             next_low_period = low_periods[(current_index + 1) % len(low_periods)]
-            high_end = next_low_period["start"]
+            high_end = cast(time, next_low_period["start"])
             high_duration = timedelta(0)  # Not active now
 
             _LOGGER.warning(
@@ -254,7 +256,8 @@ def isHdo(
             next_low = None
 
             for i, period in enumerate(low_periods):
-                if period["start"] > checked_time:
+                period_start = cast(time, period["start"])
+                if period_start > checked_time:
                     next_low = period
                     if i > 0:
                         prev_low = low_periods[i - 1]
@@ -270,14 +273,14 @@ def isHdo(
                 prev_low = low_periods[-1]  # Last period of today
 
             if prev_low and next_low:
-                high_start = prev_low["end"]
-                high_end = next_low["start"]
+                high_start = cast(time, prev_low["end"])
+                high_end = cast(time, next_low["start"])
                 high_duration = calculate_duration(checked_time, high_end)
 
                 # Next low tariff info
-                low_start = next_low["start"]
-                low_end = next_low["end"]
-                low_duration = calculate_duration(checked_time, next_low["start"])
+                low_start = cast(time, next_low["start"])
+                low_end = cast(time, next_low["end"])
+                low_duration = calculate_duration(checked_time, low_start)
 
                 _LOGGER.warning(
                     "🔴 IN HIGH TARIFF: %s-%s, remaining: %s, next low: %s",
