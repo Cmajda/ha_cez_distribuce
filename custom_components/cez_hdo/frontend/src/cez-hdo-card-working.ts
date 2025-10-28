@@ -218,12 +218,12 @@ export class CezHdoCard extends LitElement {
                 <span class="detail-value">${lowStart}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">NT konec</span>
-                <span class="detail-value">${lowEnd}</span>
-              </div>
-              <div class="detail-item">
                 <span class="detail-label">VT začátek</span>
                 <span class="detail-value">${highStart}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">NT konec</span>
+                <span class="detail-value">${lowEnd}</span>
               </div>
               <div class="detail-item">
                 <span class="detail-label">VT konec</span>
@@ -256,4 +256,4 @@ export class CezHdoCard extends LitElement {
   preview: true,
 });
 
-console.info("ČEZ HDO Card v1.1.0 loaded successfully");
+console.info("ČEZ HDO Card v1.1.1 loaded successfully");

@@ -195,36 +195,99 @@ def isHdo(
     high_duration = None
 
     try:
+        # Build list of all low tariff periods
+        low_periods = []
+
         # Process up to 10 time periods
         for i in range(1, 11):
-            next_index = 1 if i < 10 else 0
+            start_time = parse_time(day_calendar.get(f"CAS_ZAP_{i}"))
+            end_time = parse_time(day_calendar.get(f"CAS_VYP_{i}"))
 
-            start_time_low = parse_time(day_calendar.get(f"CAS_ZAP_{i}"))
-            end_time_low = parse_time(day_calendar.get(f"CAS_VYP_{i}"))
-            start_time_high = parse_time(day_calendar.get(f"CAS_VYP_{i}"))
-            end_time_high = parse_time(day_calendar.get(f"CAS_ZAP_{i + next_index}"))
+            if start_time is not None and end_time is not None:
+                low_periods.append({"start": start_time, "end": end_time, "index": i})
 
-            # Check low tariff
-            if start_time_low != end_time_low and time_in_range(
-                start_time_low, end_time_low, checked_time
-            ):
-                low_tariff_active = True
-                low_start = start_time_low
-                low_end = end_time_low
-                low_duration = calculate_duration(checked_time, end_time_low)
-                high_start = end_time_low
-                high_end = end_time_high  # Set high tariff end time
-                high_duration = timedelta(0)
+        # Sort periods by start time
+        low_periods.sort(key=lambda x: x["start"])
 
-            # Check high tariff
-            elif start_time_high != end_time_high and time_in_range(
-                start_time_high, end_time_high, checked_time
-            ):
-                high_tariff_active = True
-                high_start = start_time_high
-                high_end = end_time_high
-                high_duration = calculate_duration(checked_time, end_time_high)
-                low_end = start_time_low  # Set low tariff end time for next period
+        _LOGGER.warning(
+            "🔍 Low tariff periods: %s",
+            [f"{p['start']}-{p['end']}" for p in low_periods],
+        )
+
+        # Check if we're currently in a low tariff period
+        current_low_period = None
+        for period in low_periods:
+            if time_in_range(period["start"], period["end"], checked_time):
+                current_low_period = period
+                break
+
+        if current_low_period:
+            # We're in LOW tariff period
+            low_tariff_active = True
+            low_start = current_low_period["start"]
+            low_end = current_low_period["end"]
+            low_duration = calculate_duration(checked_time, current_low_period["end"])
+
+            # Find next high tariff (starts when current low ends)
+            high_start = current_low_period["end"]
+
+            # Find next low period after current one
+            current_index = low_periods.index(current_low_period)
+            next_low_period = low_periods[(current_index + 1) % len(low_periods)]
+            high_end = next_low_period["start"]
+            high_duration = timedelta(0)  # Not active now
+
+            _LOGGER.warning(
+                "✅ IN LOW TARIFF: %s-%s, remaining: %s",
+                low_start,
+                low_end,
+                format_duration(low_duration),
+            )
+        else:
+            # We're in HIGH tariff period
+            high_tariff_active = True
+
+            # Find which high tariff period we're in
+            # by finding the low period that ended before current time
+            # and the low period that starts after current time
+            prev_low = None
+            next_low = None
+
+            for i, period in enumerate(low_periods):
+                if period["start"] > checked_time:
+                    next_low = period
+                    if i > 0:
+                        prev_low = low_periods[i - 1]
+                    else:
+                        # Current time is before first low period
+                        # Previous low period is the last one (from previous day)
+                        prev_low = low_periods[-1] if low_periods else None
+                    break
+
+            # If no next_low found, it means we're after last period
+            if next_low is None and low_periods:
+                next_low = low_periods[0]  # First period of next day
+                prev_low = low_periods[-1]  # Last period of today
+
+            if prev_low and next_low:
+                high_start = prev_low["end"]
+                high_end = next_low["start"]
+                high_duration = calculate_duration(checked_time, high_end)
+
+                # Next low tariff info
+                low_start = next_low["start"]
+                low_end = next_low["end"]
+                low_duration = calculate_duration(checked_time, next_low["start"])
+
+                _LOGGER.warning(
+                    "🔴 IN HIGH TARIFF: %s-%s, remaining: %s, next low: %s",
+                    high_start,
+                    high_end,
+                    format_duration(high_duration),
+                    low_start,
+                )
+            else:
+                _LOGGER.error("Could not determine high tariff period boundaries")
 
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("Error processing calendar data: %s", err)

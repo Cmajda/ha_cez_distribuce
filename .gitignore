@@ -140,9 +140,10 @@ public
 .out
 .storybook-out
 
-# Temporary folders
+# Temporary and dev folders
 tmp/
 temp/
+dev/
 
 # Logs
 logs

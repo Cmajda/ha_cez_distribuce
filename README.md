@@ -2,8 +2,6 @@
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
-
 Tento senzor stahuje data z webu https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.
 Integrace vyžaduje **region** a **kód**. Tyto informace lze získat ze smlouvy s ČEZ CZ nebo z https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.
 
@@ -49,40 +47,54 @@ Přidejte do `configuration.yaml`:
 
 ```yaml
 # ČEZ HDO integrace
-binary_sensor:
-  - platform: cez_hdo
-    region: stred  # váš region: zapad/sever/stred/vychod/morava
-    code: 405      # váš HDO kód
-
 sensor:
   - platform: cez_hdo
-    region: stred
-    code: 405
+    kod_distribuce: "CZE"  # Váš distribuční kód
+    name: "ČEZ HDO"
+    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
+
+binary_sensor:
+  - platform: cez_hdo
+    kod_distribuce: "CZE"  # Váš distribuční kód
+    name: "ČEZ HDO Binary"
+    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
 ```
 
-#### Podporované regiony
+#### Podporované distribuční kódy
 
-- západ
-- sever
-- střed
-- východ
-- morava
+- **CZE** - ČEZ Distribuce (celá ČR)
+- Další kódy budou přidány dle potřeby
 
-### Krok 3: Přidání frontend resource
+### Krok 3: Přidání Lovelace karty
 
-- Jděte do **Nastavení** → **Dashboards** → **Resources**
-- Klikněte **"Add Resource"**
-- URL: `/local/cez-hdo-card.js`
-- Resource type: **JavaScript Module**
-- Klikněte **"Create"**
+Karta se automaticky nainstaluje při prvním spuštění integrace. Pro ruční konfiguraci přidejte do dashboardu:
 
-### Krok 4: Restartování HA
+```yaml
+type: custom:cez-hdo-card
+entities:
+  nt_binary: binary_sensor.cez_hdo_nt_active
+  vt_binary: binary_sensor.cez_hdo_vt_active
+  nt_start: sensor.cez_hdo_nt_start
+  nt_end: sensor.cez_hdo_nt_end
+  vt_start: sensor.cez_hdo_vt_start
+  vt_end: sensor.cez_hdo_vt_end
+  nt_remaining: sensor.cez_hdo_nt_remaining
+  vt_remaining: sensor.cez_hdo_vt_remaining
+title: "ČEZ HDO Status"
+show_times: true
+show_duration: true
+compact_mode: false
+```
+
+### Krok 4: Restartování Home Assistant
 
 Po přidání konfigurace restartujte Home Assistant.
 
 ## 🎨 Custom Lovelace Card
 
 Integrace obsahuje vlastní Lovelace kartu pro lepší zobrazení HDO informací:
+
+![ČEZ HDO Card](entity_card.png)
 
 ## 📊 Entity
 
