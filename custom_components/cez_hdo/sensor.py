@@ -15,6 +15,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .base_entity import CezHdoBaseEntity
+from . import downloader
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -111,7 +112,7 @@ class LowTariffDuration(CezHdoSensor):
         duration = hdo_data[3]  # low_tariff_duration
         if duration is None:
             return None
-        return str(duration)
+        return downloader.format_duration(duration)
 
 
 class HighTariffStart(CezHdoSensor):
@@ -166,4 +167,4 @@ class HighTariffDuration(CezHdoSensor):
         duration = hdo_data[7]  # high_tariff_duration
         if duration is None:
             return None
-        return str(duration)
+        return downloader.format_duration(duration)
