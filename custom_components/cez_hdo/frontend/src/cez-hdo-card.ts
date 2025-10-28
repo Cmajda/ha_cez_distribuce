@@ -5,11 +5,19 @@ import { HomeAssistant, LovelaceCard, LovelaceCardConfig } from './types';
 export interface CezHdoCardConfig extends LovelaceCardConfig {
   type: 'custom:cez-hdo-card';
   title?: string;
-  show_header?: boolean;
-  show_current_state?: boolean;
-  show_schedule?: boolean;
-  theme?: 'auto' | 'light' | 'dark';
-  entities?: string[];
+  show_times?: boolean;
+  show_duration?: boolean;
+  compact_mode?: boolean;
+  entities?: {
+    low_tariff?: string;
+    high_tariff?: string;
+    low_start?: string;
+    low_end?: string;
+    low_duration?: string;
+    high_start?: string;
+    high_end?: string;
+    high_duration?: string;
+  };
 }
 
 interface CezHdoData {
@@ -36,11 +44,20 @@ export class CezHdoCard extends LitElement implements LovelaceCard {
   public static getStubConfig(): CezHdoCardConfig {
     return {
       type: 'custom:cez-hdo-card',
-      title: 'ČEZ HDO',
-      show_header: true,
-      show_current_state: true,
-      show_schedule: true,
-      theme: 'auto'
+      title: 'ČEZ HDO Status',
+      show_times: true,
+      show_duration: true,
+      compact_mode: false,
+      entities: {
+        low_tariff: 'binary_sensor.cez_hdo_lowtariffactive',
+        high_tariff: 'binary_sensor.cez_hdo_hightariffactive',
+        low_start: 'sensor.cez_hdo_lowtariffstart',
+        low_end: 'sensor.cez_hdo_lowtariffend',
+        low_duration: 'sensor.cez_hdo_lowtariffduration',
+        high_start: 'sensor.cez_hdo_hightariffstart',
+        high_end: 'sensor.cez_hdo_hightariffend',
+        high_duration: 'sensor.cez_hdo_hightariffduration'
+      }
     };
   }
 
