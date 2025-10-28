@@ -136,7 +136,7 @@ export class CezHdoCard extends LitElement {
 
   setConfig(config: CezHdoCardConfig): void {
     console.log('CezHdoCard setConfig called with:', config);
-    
+
     // If entities are missing, auto-fill with default configuration
     if (!config.entities) {
       console.log('Entities missing, auto-filling with default configuration');
@@ -159,7 +159,7 @@ export class CezHdoCard extends LitElement {
       config = { ...defaultConfig, ...config };
       console.log('Auto-filled config:', config);
     }
-    
+
     console.log('Config validation passed');
     this.config = config;
   }
@@ -182,7 +182,7 @@ export class CezHdoCard extends LitElement {
     const { entities } = this.config;
     const lowTariffActive = this.isEntityOn(entities.low_tariff);
     const highTariffActive = this.isEntityOn(entities.high_tariff);
-    
+
     const lowStart = this.getEntityState(entities.low_start);
     const lowEnd = this.getEntityState(entities.low_end);
     const lowDuration = this.getEntityState(entities.low_duration);
@@ -198,7 +198,7 @@ export class CezHdoCard extends LitElement {
     return html`
       <ha-card class="${compactMode ? 'compact' : ''}">
         ${title ? html`<div class="card-header">${title}</div>` : ''}
-        
+
         <div class="status-container">
           <div class="status-item ${lowTariffActive ? 'active low-tariff' : 'inactive'}">
             <div class="status-title">Nízký tarif</div>

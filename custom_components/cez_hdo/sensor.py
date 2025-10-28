@@ -1,8 +1,7 @@
 """Platform for sensor integration."""
 from __future__ import annotations
 import logging
-from datetime import time, timedelta
-from typing import Any
+from datetime import time
 import voluptuous as vol
 
 from homeassistant.components.sensor import (

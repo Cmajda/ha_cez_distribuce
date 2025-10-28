@@ -28,7 +28,7 @@ jobs:
           test -f hacs.json
           test -f README.md
           echo "✅ All required files present"
-          
+
           # Verify no Python syntax errors
           python -m py_compile custom_components/cez_hdo/*.py
           echo "✅ Python syntax validation passed"

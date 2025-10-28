@@ -1,17 +1,17 @@
 # ČEZ HDO - Senzor pro Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)  
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-Tento senzor stahuje data z webu https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.  
-Integrace vyžaduje **region** a **kód**. Tyto informace lze získat ze smlouvy s ČEZ CZ nebo z https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.  
+Tento senzor stahuje data z webu https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.
+Integrace vyžaduje **region** a **kód**. Tyto informace lze získat ze smlouvy s ČEZ CZ nebo z https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html.
 
 Pro otestování zda je správně použit region a kod, lze otevřít odkaz v prohlížeči ve tvaru:
 
-`https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/`REGION`?code=`kód  
+`https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/`REGION`?code=`kód
 
-Příklad:  
+Příklad:
 
 ```Text
 https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/stred?code=405
@@ -20,7 +20,7 @@ https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/stred?code=405
 ## ✨ Funkce integrace
 
 - ✅ **Aktuální stav HDO** - zobrazuje zda je aktivní nízký nebo vysoký tarif
-- ✅ **Časy začátku a konce** nízkého/vysokého tarifu  
+- ✅ **Časy začátku a konce** nízkého/vysokého tarifu
 - ✅ **Zbývající čas** aktivního tarifu
 - ✅ **Podpora státních svátků** - automaticky aplikuje víkendový tarif
 - ✅ **Custom Lovelace karta** pro přehledné zobrazení
@@ -63,7 +63,7 @@ sensor:
 #### Podporované regiony
 
 - západ
-- sever  
+- sever
 - střed
 - východ
 - morava
@@ -96,7 +96,7 @@ Integrace vytváří následující entity:
 ### Sensors
 
 - `sensor.cez_hdo_lowtariffstart` - Začátek nízkého tarifu
-- `sensor.cez_hdo_lowtariffend` - Konec nízkého tarifu  
+- `sensor.cez_hdo_lowtariffend` - Konec nízkého tarifu
 - `sensor.cez_hdo_lowtariffduration` - Zbývající čas nízkého tarifu
 - `sensor.cez_hdo_hightariffstart` - Začátek vysokého tarifu
 - `sensor.cez_hdo_hightariffend` - Konec vysokého tarifu

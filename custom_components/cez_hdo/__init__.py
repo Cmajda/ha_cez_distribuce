@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-import os
 import shutil
 from pathlib import Path
 
@@ -18,10 +17,10 @@ DOMAIN = "cez_hdo"
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
-    
+
     # Auto-copy frontend card to www directory
     await _ensure_frontend_card(hass)
-    
+
     return True
 
 
@@ -41,24 +40,28 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
         # Get integration directory
         integration_dir = Path(__file__).parent
         frontend_file = integration_dir / "frontend" / "dist" / "cez-hdo-card.js"
-        
+
         # Get Home Assistant www directory
         www_dir = Path(hass.config.config_dir) / "www"
         www_file = www_dir / "cez-hdo-card.js"
-        
+
         # Create www directory if it doesn't exist
         www_dir.mkdir(exist_ok=True)
-        
+
         # Copy frontend file if it exists and is newer or doesn't exist in www
         if frontend_file.exists():
-            if not www_file.exists() or frontend_file.stat().st_mtime > www_file.stat().st_mtime:
+            if (
+                not www_file.exists()
+                or frontend_file.stat().st_mtime > www_file.stat().st_mtime
+            ):
                 shutil.copy2(frontend_file, www_file)
                 _LOGGER.info("ČEZ HDO frontend card copied to /local/cez-hdo-card.js")
             else:
                 _LOGGER.debug("ČEZ HDO frontend card already up to date")
         else:
-            _LOGGER.warning("ČEZ HDO frontend card source file not found at %s", frontend_file)
-            
+            _LOGGER.warning(
+                "ČEZ HDO frontend card source file not found at %s", frontend_file
+            )
+
     except Exception as err:
         _LOGGER.error("Failed to copy ČEZ HDO frontend card: %s", err)
-

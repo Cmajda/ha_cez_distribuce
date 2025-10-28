@@ -19,13 +19,13 @@ export class CezHdoCardEditor extends LitElement implements LovelaceCardEditor {
 
     const target = ev.target as any;
     const configValue = target.configValue;
-    
+
     if (this.config[configValue] === target.value) {
       return;
     }
 
     const newConfig = { ...this.config };
-    
+
     if (target.checked !== undefined) {
       newConfig[configValue] = target.checked;
     } else {
@@ -37,7 +37,7 @@ export class CezHdoCardEditor extends LitElement implements LovelaceCardEditor {
       bubbles: true,
       composed: true
     });
-    
+
     this.dispatchEvent(event);
   }
 

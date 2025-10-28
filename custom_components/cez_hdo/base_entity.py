@@ -5,7 +5,6 @@ from datetime import timedelta
 from typing import Any
 
 import requests
-from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
@@ -62,8 +61,7 @@ class CezHdoBaseEntity(Entity):
         """Fetch new state data for the sensor."""
         try:
             response = requests.get(
-                downloader.get_request_url(self.region, self.code),
-                timeout=30
+                downloader.get_request_url(self.region, self.code), timeout=30
             )
             response.raise_for_status()
             self._response_data = response.json()
@@ -80,7 +78,7 @@ class CezHdoBaseEntity(Entity):
         """Get HDO data from response."""
         if self._response_data is None:
             return False, None, None, None, False, None, None, None
-        
+
         try:
             return downloader.isHdo(self._response_data["data"])
         except (KeyError, TypeError) as err:

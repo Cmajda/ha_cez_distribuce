@@ -77,7 +77,7 @@ compact_mode: false
 - `binary_sensor.cez_hdo_lowtariffactive` - Je aktivní nízký tarif?
 - `binary_sensor.cez_hdo_hightariffactive` - Je aktivní vysoký tarif?
 
-### Sensors  
+### Sensors
 
 - `sensor.cez_hdo_lowtariffstart` - Začátek nízkého tarifu
 - `sensor.cez_hdo_lowtariffend` - Konec nízkého tarifu

@@ -107,12 +107,12 @@ entities:
       if (!oldHass) return true;
 
       // Check if any CEZ HDO entities have changed
-      const cezEntities = Object.keys(this.hass.states).filter(id => 
-        id.startsWith('binary_sensor.cez_hdo_') || 
+      const cezEntities = Object.keys(this.hass.states).filter(id =>
+        id.startsWith('binary_sensor.cez_hdo_') ||
         id.startsWith('sensor.cez_hdo_')
       );
 
-      return cezEntities.some(entityId => 
+      return cezEntities.some(entityId =>
         oldHass.states[entityId] !== this.hass.states[entityId]
       );
     }
@@ -149,7 +149,7 @@ entities:
 
   private renderHeader() {
     if (!this.config.show_header) return '';
-    
+
     return html`
       <div class="card-header">
         <h3>${this.config.title || 'ČEZ HDO'}</h3>
@@ -162,24 +162,24 @@ entities:
 
     const isLowTariff = this.hdoData.lowTariffActive;
     const isHighTariff = this.hdoData.highTariffActive;
-    
+
     return html`
       <div class="current-state">
         <div class="state-indicator ${isLowTariff ? 'low-active' : isHighTariff ? 'high-active' : 'inactive'}">
-          <ha-icon 
+          <ha-icon
             icon="${isLowTariff ? 'mdi:flash' : isHighTariff ? 'mdi:flash-outline' : 'mdi:flash-off'}"
           ></ha-icon>
           <span class="state-text">
             ${isLowTariff ? 'Nízký tarif' : isHighTariff ? 'Vysoký tarif' : 'Neaktivní'}
           </span>
         </div>
-        
+
         ${isLowTariff ? html`
           <div class="duration-info">
             <span>Zbývá: ${this.formatDuration(this.hdoData.lowTariffDuration)}</span>
           </div>
         ` : ''}
-        
+
         ${isHighTariff ? html`
           <div class="duration-info">
             <span>Zbývá: ${this.formatDuration(this.hdoData.highTariffDuration)}</span>
@@ -195,7 +195,7 @@ entities:
     return html`
       <div class="schedule">
         <h4>Dnešní rozvrh</h4>
-        
+
         <div class="schedule-item low-tariff">
           <ha-icon icon="mdi:flash"></ha-icon>
           <span class="tariff-label">Nízký tarif:</span>
@@ -203,7 +203,7 @@ entities:
             ${this.formatTime(this.hdoData.lowTariffStart)} - ${this.formatTime(this.hdoData.lowTariffEnd)}
           </span>
         </div>
-        
+
         <div class="schedule-item high-tariff">
           <ha-icon icon="mdi:flash-outline"></ha-icon>
           <span class="tariff-label">Vysoký tarif:</span>
@@ -222,20 +222,20 @@ entities:
 
   private formatDuration(durationStr: string): string {
     if (!durationStr || durationStr === 'unavailable') return '--:--';
-    
+
     // Parse timedelta string like "1:23:45" or "0:15:30"
     const parts = durationStr.split(':');
     if (parts.length === 3) {
       const hours = parseInt(parts[0]);
       const minutes = parseInt(parts[1]);
-      
+
       if (hours > 0) {
         return `${hours}h ${minutes}m`;
       } else {
         return `${minutes}m`;
       }
     }
-    
+
     return durationStr;
   }
 

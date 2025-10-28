@@ -47,12 +47,12 @@ npm run build
 # Check if build was successful
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Build successful!${NC}"
-    
+
     # Show output files
     if [ -d "dist" ]; then
         echo -e "${BLUE}📄 Generated files:${NC}"
         ls -la dist/
-        
+
         # Calculate file sizes
         for file in dist/*; do
             if [ -f "$file" ]; then
@@ -61,7 +61,7 @@ if [ $? -eq 0 ]; then
             fi
         done
     fi
-    
+
     echo -e "${GREEN}🎉 CEZ HDO Frontend build completed successfully!${NC}"
     echo -e "${BLUE}💡 Files are ready in: $FRONTEND_DIR/dist${NC}"
 else
