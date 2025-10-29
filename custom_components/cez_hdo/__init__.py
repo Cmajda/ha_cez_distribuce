@@ -7,6 +7,7 @@ import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.components.frontend import add_extra_js_url
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
@@ -21,16 +22,17 @@ CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXT
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
-
-    # Note: HACS will handle frontend deployment automatically
-    # when "frontend": true is set in manifest.json
-
+    
+    # Register frontend card automatically
+    frontend_url = "/hacsfiles/integrations/cez_hdo/cez-hdo-card.js"
+    add_extra_js_url(hass, frontend_url)
+    _LOGGER.info("Frontend card automatically registered at %s", frontend_url)
+    
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up ČEZ HDO from a config entry."""
-    # Note: HACS will handle frontend deployment automatically
     return True
 
 
