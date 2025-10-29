@@ -17,15 +17,14 @@ DOMAIN = "cez_hdo"
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
-
-    # Auto-copy frontend card to www directory
-    await _ensure_frontend_card(hass)
-
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up ČEZ HDO from a config entry."""
+    # Auto-copy frontend card to www directory on every setup
+    await _ensure_frontend_card(hass)
+    
     return True
 
 
@@ -45,8 +44,14 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
         www_dir = Path(hass.config.config_dir) / "www"
         www_file = www_dir / "cez-hdo-card.js"
 
+        _LOGGER.info("ČEZ HDO: Checking frontend installation")
+        _LOGGER.info("Source file: %s (exists: %s)", frontend_file, frontend_file.exists())
+        _LOGGER.info("Target directory: %s", www_dir)
+        _LOGGER.info("Target file: %s", www_file)
+
         # Create www directory if it doesn't exist
         www_dir.mkdir(exist_ok=True)
+        _LOGGER.info("WWW directory created/verified: %s", www_dir)
 
         # Copy frontend file if it exists and is newer or doesn't exist in www
         if frontend_file.exists():
@@ -58,9 +63,9 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
                 await hass.async_add_executor_job(shutil.copy2, frontend_file, www_file)
                 _LOGGER.info("ČEZ HDO frontend card copied to /local/cez-hdo-card.js")
             else:
-                _LOGGER.debug("ČEZ HDO frontend card already up to date")
+                _LOGGER.info("ČEZ HDO frontend card already up to date")
         else:
-            _LOGGER.warning(
+            _LOGGER.error(
                 "ČEZ HDO frontend card source file not found at %s", frontend_file
             )
 
