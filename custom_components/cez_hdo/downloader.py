@@ -168,14 +168,31 @@ def isHdo(
     current_time = datetime.now(tz=CEZ_TIMEZONE)
 
     # Choose appropriate calendar (weekday vs weekend/holiday)
+    # Find the correct calendar by PLATNOST field
+    weekday_calendar = None
+    weekend_calendar = None
+
+    for calendar in json_calendar:
+        platnost = calendar.get("PLATNOST", "")
+        if "Po" in platnost and "Pá" in platnost:  # "Po - Pá"
+            weekday_calendar = calendar
+        elif "So" in platnost and "Ne" in platnost:  # "So - Ne"
+            weekend_calendar = calendar
+
     # Use weekend calendar for Saturday, Sunday, and public holidays
     is_weekend_or_holiday = (
         current_time.weekday() >= 5  # Saturday (5) or Sunday (6)
         or is_czech_holiday(current_time)  # Czech public holiday
     )
-    day_calendar = json_calendar[0] if not is_weekend_or_holiday else json_calendar[1]
 
-    _LOGGER.warning(
+    day_calendar = weekday_calendar if not is_weekend_or_holiday else weekend_calendar
+
+    # Safety check
+    if day_calendar is None:
+        _LOGGER.error("Could not find appropriate calendar for current time")
+        return (False, None, None, None, False, None, None, None)
+
+    _LOGGER.debug(
         "🗓️  HDO Calendar Selection: Date=%s, Weekday=%d, Is_Holiday=%s, Using=%s calendar, PLATNOST=%s",
         current_time.date(),
         current_time.weekday(),
@@ -209,7 +226,7 @@ def isHdo(
         # Sort periods by start time
         low_periods.sort(key=lambda x: cast(time, x["start"]))
 
-        _LOGGER.warning(
+        _LOGGER.debug(
             "🔍 Low tariff periods: %s",
             [f"{p['start']}-{p['end']}" for p in low_periods],
         )
@@ -237,9 +254,9 @@ def isHdo(
             current_index = low_periods.index(current_low_period)
             next_low_period = low_periods[(current_index + 1) % len(low_periods)]
             high_end = cast(time, next_low_period["start"])
-            high_duration = timedelta(0)  # Not active now
+            high_duration = timedelta(0)  # HIGH tariff is not active, so remaining = 0
 
-            _LOGGER.warning(
+            _LOGGER.debug(
                 "✅ IN LOW TARIFF: %s-%s, remaining: %s",
                 low_start,
                 low_end,
@@ -277,12 +294,14 @@ def isHdo(
                 high_end = cast(time, next_low["start"])
                 high_duration = calculate_duration(checked_time, high_end)
 
-                # Next low tariff info
+                # Next low tariff info (for display purposes)
                 low_start = cast(time, next_low["start"])
                 low_end = cast(time, next_low["end"])
-                low_duration = calculate_duration(checked_time, low_start)
+                low_duration = timedelta(
+                    0
+                )  # LOW tariff is not active, so remaining = 0
 
-                _LOGGER.warning(
+                _LOGGER.debug(
                     "🔴 IN HIGH TARIFF: %s-%s, remaining: %s, next low: %s",
                     high_start,
                     high_end,

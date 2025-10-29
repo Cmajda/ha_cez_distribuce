@@ -118,7 +118,30 @@ Integrace vytváří následující entity:
 
 Každý senzor obsahuje v atributech kompletní API odpověď s detailními informacemi o HDO rozpisech.
 
-## 🔧 Řešení problémů
+## � Debug logování
+
+Pro detailní logování a troubleshooting přidejte do `configuration.yaml`:
+
+```yaml
+logger:
+  default: error
+  logs:
+    custom_components.cez_hdo.downloader: debug
+```
+
+**Debug logy obsahují:**
+
+- 🗓️ Výběr kalendáře (pracovní dny vs víkendy/svátky)
+- 🔍 Seznam všech HDO období pro aktuální den
+- ✅ Aktuální stav (nízký/vysoký tarif) se zbývajícím časem
+
+**Zobrazení debug logů:**
+
+1. **Developer Tools** → **Logs**
+2. **Klikněte na "Zobrazit nezpracované logy"**
+3. **Filtrujte:** `custom_components.cez_hdo`
+
+## �🔧 Řešení problémů
 
 Pokud máte problémy s integrací:
 
