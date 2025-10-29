@@ -141,7 +141,7 @@ logger:
 2. **Klikněte na "Zobrazit nezpracované logy"**
 3. **Filtrujte:** `custom_components.cez_hdo`
 
-## �🔧 Řešení problémů
+## 🔧 Řešení problémů
 
 Pokud máte problémy s integrací:
 
@@ -149,3 +149,17 @@ Pokud máte problémy s integrací:
 2. **Zkontrolujte logy** - Developer Tools → Logs
 3. **Restartujte HA** po změnách konfigurace
 4. **Vyčistěte cache** prohlížeče (Ctrl+F5) pro Lovelace kartu
+
+## 🤖 GitHub Copilot - Pracovní instrukce
+
+Pro vývojáře pracující s GitHub Copilot na tomto projektu:
+
+**Template pro začátek práce:**
+
+```text
+@GitHub Copilot - pracovní instrukce:
+- Používej isBackground: true pro všechny terminálové příkazy
+- Dev struktura: /dev/, Production: /custom_components/
+- Build: ./dev/deploy-dev.sh, Clean: ./dev/deploy-dev.sh clean
+Řiď se těmito pravidly.
+```

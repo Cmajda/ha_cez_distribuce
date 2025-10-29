@@ -70,12 +70,34 @@ if [ "$1" = "clean" ]; then
     find "${HA_CONFIG_DIR:-/mnt/ha-config}/custom_components" -name "*.pyc" -delete 2>/dev/null || true
     echo -e "${GREEN}✅ Python cache cleaned${NC}"
     
+    # Ask about configuration removal
+    CONFIG_FILE="${HA_CONFIG_DIR:-/mnt/ha-config}/configuration.yaml"
+    if [ -f "$CONFIG_FILE" ] && grep -q "platform: cez_hdo" "$CONFIG_FILE"; then
+        echo ""
+        echo -e "${YELLOW}❓ Remove ČEZ HDO configuration from configuration.yaml? [y/N]${NC}"
+        read -r response
+        if [[ "$response" =~ ^[Yy]$ ]]; then
+            # Backup before removing
+            cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
+            
+            # Remove ČEZ HDO configuration (from comment to end of binary_sensor block)
+            sed -i '/# ČEZ HDO integrace/,/^binary_sensor:/{ /^binary_sensor:/!d; }' "$CONFIG_FILE"
+            sed -i '/^binary_sensor:/,/platform: cez_hdo/{ /platform: cez_hdo/,/scan_interval: 300/d; }' "$CONFIG_FILE"
+            
+            echo -e "${GREEN}✅ ČEZ HDO configuration removed from configuration.yaml${NC}"
+            echo -e "${YELLOW}📝 Backup saved with timestamp${NC}"
+        else
+            echo -e "${YELLOW}⚠️  Configuration left in configuration.yaml (manual removal needed)${NC}"
+        fi
+    fi
+    
     echo ""
     echo -e "${GREEN}✨ ČEZ HDO cleanup completed!${NC}"
     echo -e "${YELLOW}📋 Next steps:${NC}"
     echo "   1. Restart Home Assistant"
     echo "   2. Check that entities are gone"
     echo "   3. Verify Lovelace card is removed"
+    echo "   4. Check configuration.yaml if needed"
     echo ""
     
     exit 0
@@ -191,10 +213,50 @@ else
     exit 1
 fi
 
+# Step 7: Configuration setup
+echo -e "${BLUE}⚙️ Step 7: Checking configuration...${NC}"
+CONFIG_FILE="${HA_CONFIG_DIR:-/mnt/ha-config}/configuration.yaml"
+
+if [ -f "$CONFIG_FILE" ]; then
+    # Check if ČEZ HDO configuration already exists
+    if grep -q "platform: cez_hdo" "$CONFIG_FILE"; then
+        echo -e "${YELLOW}⚠️  ČEZ HDO configuration already exists in configuration.yaml${NC}"
+    else
+        echo -e "${BLUE}📝 Adding ČEZ HDO configuration to configuration.yaml...${NC}"
+        
+        # Backup configuration file
+        cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
+        echo -e "${GREEN}✅ Configuration backup created${NC}"
+        
+        # Add configuration
+        cat >> "$CONFIG_FILE" << 'EOF'
+
+# ČEZ HDO integrace
+sensor:
+  - platform: cez_hdo
+    code: "405"  # Váš distribuční kód
+    region: stred # Váš region
+    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
+
+binary_sensor:
+  - platform: cez_hdo
+    code: "405"  # Váš distribuční kód
+    region: stred # Váš region
+    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
+EOF
+        
+        echo -e "${GREEN}✅ ČEZ HDO configuration added to configuration.yaml${NC}"
+        echo -e "${YELLOW}📝 Note: Update code and region parameters as needed${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️  configuration.yaml not found at $CONFIG_FILE${NC}"
+fi
+
 echo ""
 echo -e "${GREEN}✨ ČEZ HDO deployment completed!${NC}"
 echo -e "${YELLOW}📋 Next steps:${NC}"
-echo "   1. Restart Home Assistant"
-echo "   2. Check logs for any errors"
-echo "   3. Verify entities are working"
-echo "   4. Test Lovelace card functionality"
+echo "   1. Update code and region in configuration.yaml if needed"
+echo "   2. Restart Home Assistant"
+echo "   3. Check logs for any errors"
+echo "   4. Verify entities are working"
+echo "   5. Test Lovelace card functionality"
