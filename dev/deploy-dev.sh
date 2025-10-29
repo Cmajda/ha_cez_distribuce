@@ -21,7 +21,7 @@ PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Target directories - customize these for your Home Assistant installation
 TARGET_DIR="${HA_CONFIG_DIR:-/mnt/ha-config}/custom_components/cez_hdo"
-WWW_TARGET="${HA_CONFIG_DIR:-/mnt/ha-config}/www"
+WWW_TARGET="${HA_CONFIG_DIR:-/mnt/ha-config}/www/cez_hdo"
 
 set -e
 
@@ -34,7 +34,7 @@ if [ "$1" = "clean" ]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
     TARGET_DIR="${HA_CONFIG_DIR:-/mnt/ha-config}/custom_components/cez_hdo"
-    WWW_TARGET="${HA_CONFIG_DIR:-/mnt/ha-config}/www"
+    WWW_TARGET="${HA_CONFIG_DIR:-/mnt/ha-config}/www/cez_hdo"
     
     # Colors
     GREEN='\033[0;32m'

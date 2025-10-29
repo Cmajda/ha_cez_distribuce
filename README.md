@@ -4,10 +4,13 @@
 
 ## 📑 Obsah
 
+- [� Obsah](#-obsah)
 - [📋 O doplňku](#-o-doplňku)
 - [🚀 Instalace](#-instalace)
 - [⚙️ Konfigurace](#️-konfigurace)
 - [🎨 Frontend karta](#-frontend-karta)
+  - [Automatická instalace](#automatická-instalace)
+  - [Ruční přidání (pokud automatická nefunguje)](#ruční-přidání-pokud-automatická-nefunguje)
 - [🖼️ Ukázka karty](#️-ukázka-karty)
 - [👥 Pro vývojáře](#-pro-vývojáře)
 
@@ -69,10 +72,18 @@ Karta se automaticky nainstaluje při prvním spuštění integrace po restartu 
 
 1. **Přidejte zdroj do Lovelace:**
    - Nastavení → Dashboardy → Zdroje
-   - URL: `/local/cez-hdo-card.js`
+   - URL: `/local/cez_hdo/cez-hdo-card.js`
    - Typ: JavaScript Module
 
-2. **Restartujte Home Assistant**
+2. **Přidejte kartu do dashboardu:**
+   ```yaml
+   type: custom:cez-hdo-card
+   # Automaticky použije výchozí entity pokud nejsou specifikovány
+   ```
+
+3. **Restartujte Home Assistant**
+
+> 💡 **Tip:** Karta automaticky najde správné entity pokud nejsou zadány explicitně.
 
 > 📖 **Podrobná konfigurace karty** včetně YAML nastavení je v [uživatelské dokumentaci](docs/user-guide.md#lovelace-karta).
 
