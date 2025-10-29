@@ -17,6 +17,9 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "cez_hdo"
 
+# Track if frontend is already registered to avoid duplicates
+_FRONTEND_REGISTERED = False
+
 # Configuration schema - integrace se konfiguruje pouze přes platformy
 CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXTRA)
 
@@ -27,6 +30,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Deploy and register frontend card automatically
     await _ensure_frontend_card(hass)
+
+    # Register service to reload frontend card
+    async def reload_frontend_card(call):
+        """Service to reload frontend card."""
+        global _FRONTEND_REGISTERED
+        _FRONTEND_REGISTERED = False
+        await _ensure_frontend_card(hass)
+        
+    hass.services.async_register(DOMAIN, "reload_frontend_card", reload_frontend_card)
 
     return True
 
@@ -43,6 +55,8 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def _ensure_frontend_card(hass: HomeAssistant) -> None:
     """Ensure frontend card is available and registered."""
+    global _FRONTEND_REGISTERED
+    
     try:
         # Get integration directory
         integration_dir = Path(__file__).parent
@@ -74,12 +88,18 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
             else:
                 _LOGGER.info("ČEZ HDO frontend card already up to date")
 
-            # Register the frontend card automatically
-            frontend_url = "/local/cez_hdo/cez-hdo-card.js"
-            add_extra_js_url(hass, frontend_url)
-            _LOGGER.info(
-                "ČEZ HDO frontend card automatically registered at %s", frontend_url
-            )
+            # Register the frontend card automatically with cache busting, but only once
+            if not _FRONTEND_REGISTERED:
+                import time
+                cache_buster = int(time.time())
+                frontend_url = f"/local/cez_hdo/cez-hdo-card.js?v={cache_buster}"
+                add_extra_js_url(hass, frontend_url)
+                _FRONTEND_REGISTERED = True
+                _LOGGER.info(
+                    "ČEZ HDO frontend card automatically registered at %s", frontend_url
+                )
+            else:
+                _LOGGER.info("ČEZ HDO frontend card already registered, skipping")
 
         else:
             _LOGGER.error(
