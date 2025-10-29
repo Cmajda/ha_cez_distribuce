@@ -368,7 +368,7 @@ entities:
 });
 
 console.info(
-  `%c  CEZ-HDO-CARD %c  Version 1.0.1  `,
+  `%c  CEZ-HDO-CARD %c  Version 1.2.1  `,
   'color: orange; font-weight: bold; background: black',
   'color: white; font-weight: bold; background: dimgray',
 );

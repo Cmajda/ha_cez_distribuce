@@ -1,6 +1,6 @@
 {
   "name": "cez-hdo-card",
-  "version": "1.1.2",
+  "version": "1.2.1",
   "description": "ČEZ HDO Lovelace card for Home Assistant",
   "main": "dist/cez-hdo-card.js",
   "scripts": {
