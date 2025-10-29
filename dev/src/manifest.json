@@ -1,0 +1,13 @@
+{
+	"domain": "cez_hdo",
+	"name": "ČEZ HDO",
+	"codeowners": [ "@zigul", "@cmajda" ],
+	"config_flow": false,
+	"dependencies": [],
+	"documentation": "https://github.com/Cmajda/ha_cez_distribuce",
+	"iot_class": "cloud_polling",
+	"issue_tracker": "https://github.com/Cmajda/ha_cez_distribuce/issues",
+	"quality_scale": "silver",
+	"requirements": ["requests", "lxml"],
+	"version": "1.1.2"
+}
