@@ -168,7 +168,7 @@ mkdir -p "$TARGET_DIR/frontend/dist"
 # Copy Python files from dev
     cp "$PROJECT_DIR/dev/cez_hdo"/*.py "$TARGET_DIR/"
     cp "$PROJECT_DIR/dev/cez_hdo/manifest.json" "$TARGET_DIR/"
-    
+
 # Copy built frontend files
 if [ -f "$PROJECT_DIR/dev/frontend/dist/cez-hdo-card.js" ]; then
     cp "$PROJECT_DIR/dev/frontend/dist"/* "$TARGET_DIR/frontend/dist/"

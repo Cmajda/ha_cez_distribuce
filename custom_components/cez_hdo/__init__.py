@@ -24,10 +24,10 @@ CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXT
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
-    
+
     # Deploy and register frontend card automatically
     await _ensure_frontend_card(hass)
-    
+
     return True
 
 
@@ -73,14 +73,18 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
                 _LOGGER.info("ČEZ HDO frontend card copied to %s", www_file)
             else:
                 _LOGGER.info("ČEZ HDO frontend card already up to date")
-            
+
             # Register the frontend card automatically
             frontend_url = "/local/cez_hdo/cez-hdo-card.js"
             add_extra_js_url(hass, frontend_url)
-            _LOGGER.info("ČEZ HDO frontend card automatically registered at %s", frontend_url)
-            
+            _LOGGER.info(
+                "ČEZ HDO frontend card automatically registered at %s", frontend_url
+            )
+
         else:
-            _LOGGER.error("ČEZ HDO frontend card source file not found at %s", frontend_file)
+            _LOGGER.error(
+                "ČEZ HDO frontend card source file not found at %s", frontend_file
+            )
 
     except Exception as err:
         _LOGGER.error("Failed to setup ČEZ HDO frontend card: %s", err)
