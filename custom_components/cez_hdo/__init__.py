@@ -37,7 +37,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         global _FRONTEND_REGISTERED
         _FRONTEND_REGISTERED = False
         await _ensure_frontend_card(hass)
-        
+
     hass.services.async_register(DOMAIN, "reload_frontend_card", reload_frontend_card)
 
     return True
@@ -56,7 +56,7 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def _ensure_frontend_card(hass: HomeAssistant) -> None:
     """Ensure frontend card is available and registered."""
     global _FRONTEND_REGISTERED
-    
+
     try:
         # Get integration directory
         integration_dir = Path(__file__).parent
@@ -91,6 +91,7 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
             # Register the frontend card automatically with cache busting, but only once
             if not _FRONTEND_REGISTERED:
                 import time
+
                 cache_buster = int(time.time())
                 frontend_url = f"/local/cez_hdo/cez-hdo-card.js?v={cache_buster}"
                 add_extra_js_url(hass, frontend_url)
