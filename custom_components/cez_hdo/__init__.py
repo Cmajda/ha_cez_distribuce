@@ -17,10 +17,10 @@ DOMAIN = "cez_hdo"
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
-    
+
     # Auto-copy frontend card to www directory for YAML configuration
     await _ensure_frontend_card(hass)
-    
+
     return True
 
 
@@ -28,7 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up ČEZ HDO from a config entry."""
     # Auto-copy frontend card to www directory for UI configuration
     await _ensure_frontend_card(hass)
-    
+
     return True
 
 
@@ -49,7 +49,9 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
         www_file = www_dir / "cez-hdo-card.js"
 
         _LOGGER.info("ČEZ HDO: Checking frontend installation")
-        _LOGGER.info("Source file: %s (exists: %s)", frontend_file, frontend_file.exists())
+        _LOGGER.info(
+            "Source file: %s (exists: %s)", frontend_file, frontend_file.exists()
+        )
         _LOGGER.info("Target directory: %s", www_dir)
         _LOGGER.info("Target file: %s", www_file)
 
@@ -69,7 +71,9 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
             ):
                 # Use executor for file I/O to avoid blocking the event loop
                 await hass.async_add_executor_job(shutil.copy2, frontend_file, www_file)
-                _LOGGER.info("ČEZ HDO frontend card copied to /local/cez_hdo/cez-hdo-card.js")
+                _LOGGER.info(
+                    "ČEZ HDO frontend card copied to /local/cez_hdo/cez-hdo-card.js"
+                )
             else:
                 _LOGGER.info("ČEZ HDO frontend card already up to date")
         else:

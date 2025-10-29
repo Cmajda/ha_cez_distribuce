@@ -29,23 +29,23 @@ set -e
 if [ "$1" = "clean" ]; then
     echo "🧹 ČEZ HDO Development Cleanup"
     echo "=============================="
-    
+
     # Configuration
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
     TARGET_DIR="${HA_CONFIG_DIR:-/mnt/ha-config}/custom_components/cez_hdo"
     WWW_TARGET="${HA_CONFIG_DIR:-/mnt/ha-config}/www/cez_hdo"
-    
+
     # Colors
     GREEN='\033[0;32m'
     YELLOW='\033[1;33m'
     RED='\033[0;31m'
     NC='\033[0m'
-    
+
     echo "🎯 Target directory: $TARGET_DIR"
     echo "🌐 WWW directory: $WWW_TARGET"
     echo ""
-    
+
     # Remove component
     if [ -d "$TARGET_DIR" ]; then
         echo -e "${YELLOW}🗑️  Removing ČEZ HDO component...${NC}"
@@ -54,7 +54,7 @@ if [ "$1" = "clean" ]; then
     else
         echo -e "${YELLOW}⚠️  Component not found in $TARGET_DIR${NC}"
     fi
-    
+
     # Remove frontend from www
     if [ -f "$WWW_TARGET/cez-hdo-card.js" ]; then
         echo -e "${YELLOW}🗑️  Removing frontend card...${NC}"
@@ -63,13 +63,13 @@ if [ "$1" = "clean" ]; then
     else
         echo -e "${YELLOW}⚠️  Frontend card not found in $WWW_TARGET${NC}"
     fi
-    
+
     # Clean Python cache
     echo -e "${YELLOW}🧹 Cleaning Python cache...${NC}"
     find "${HA_CONFIG_DIR:-/mnt/ha-config}/custom_components" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
     find "${HA_CONFIG_DIR:-/mnt/ha-config}/custom_components" -name "*.pyc" -delete 2>/dev/null || true
     echo -e "${GREEN}✅ Python cache cleaned${NC}"
-    
+
     # Ask about configuration removal
     CONFIG_FILE="${HA_CONFIG_DIR:-/mnt/ha-config}/configuration.yaml"
     if [ -f "$CONFIG_FILE" ] && grep -q "platform: cez_hdo" "$CONFIG_FILE"; then
@@ -79,18 +79,18 @@ if [ "$1" = "clean" ]; then
         if [[ "$response" =~ ^[Yy]$ ]]; then
             # Backup before removing
             cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
-            
+
             # Remove ČEZ HDO configuration (from comment to end of binary_sensor block)
             sed -i '/# ČEZ HDO integrace/,/^binary_sensor:/{ /^binary_sensor:/!d; }' "$CONFIG_FILE"
             sed -i '/^binary_sensor:/,/platform: cez_hdo/{ /platform: cez_hdo/,/scan_interval: 300/d; }' "$CONFIG_FILE"
-            
+
             echo -e "${GREEN}✅ ČEZ HDO configuration removed from configuration.yaml${NC}"
             echo -e "${YELLOW}📝 Backup saved with timestamp${NC}"
         else
             echo -e "${YELLOW}⚠️  Configuration left in configuration.yaml (manual removal needed)${NC}"
         fi
     fi
-    
+
     echo ""
     echo -e "${GREEN}✨ ČEZ HDO cleanup completed!${NC}"
     echo -e "${YELLOW}📋 Next steps:${NC}"
@@ -99,7 +99,7 @@ if [ "$1" = "clean" ]; then
     echo "   3. Verify Lovelace card is removed"
     echo "   4. Check configuration.yaml if needed"
     echo ""
-    
+
     exit 0
 fi
 
@@ -141,7 +141,7 @@ if command -v npm >/dev/null 2>&1; then
         echo "Installing npm dependencies..."
         npm install
     fi
-    
+
     # Build frontend
     echo "Building production bundle..."
     npm run build
@@ -200,10 +200,10 @@ fi
 echo -e "${BLUE}🔍 Step 6: Verification...${NC}"
 if [ -d "$TARGET_DIR" ] && [ -f "$TARGET_DIR/__init__.py" ]; then
     echo -e "${GREEN}✅ Component installed successfully${NC}"
-    
+
     echo "📂 Files installed:"
     ls -la "$TARGET_DIR" | head -10
-    
+
     if [ -f "$WWW_TARGET/cez-hdo-card.js" ]; then
         echo -e "\n🌐 Frontend file:"
         ls -la "$WWW_TARGET/cez-hdo-card.js"
@@ -223,11 +223,11 @@ if [ -f "$CONFIG_FILE" ]; then
         echo -e "${YELLOW}⚠️  ČEZ HDO configuration already exists in configuration.yaml${NC}"
     else
         echo -e "${BLUE}📝 Adding ČEZ HDO configuration to configuration.yaml...${NC}"
-        
+
         # Backup configuration file
         cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
         echo -e "${GREEN}✅ Configuration backup created${NC}"
-        
+
         # Add configuration
         cat >> "$CONFIG_FILE" << 'EOF'
 
@@ -244,7 +244,7 @@ binary_sensor:
     region: stred # Váš region
     scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
 EOF
-        
+
         echo -e "${GREEN}✅ ČEZ HDO configuration added to configuration.yaml${NC}"
         echo -e "${YELLOW}📝 Note: Update code and region parameters as needed${NC}"
     fi

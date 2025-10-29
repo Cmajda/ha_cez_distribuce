@@ -65,74 +65,100 @@ class CezHdoBaseEntity(Entity):
         # Pokusit se načíst z cache jako první priorita
         cache_paths = [
             "/config/www/cez_hdo/cez_hdo.json",
-            "/config/www/cez_hdo_debug.json", 
+            "/config/www/cez_hdo_debug.json",
             "/mnt/ha-config/www/cez_hdo/cez_hdo.json",
-            "/mnt/ha-config/www/cez_hdo_debug.json"
+            "/mnt/ha-config/www/cez_hdo_debug.json",
         ]
-        
+
         # Nejdříve zkusit načíst z cache
         for cache_path in cache_paths:
             if self._load_from_cache(cache_path):
                 _LOGGER.info("CEZ HDO: Loaded from cache: %s", cache_path)
                 return
-                
-        # Pokud cache není dostupná, zkusit API se zkrácenným timeoutem  
+
+        # Pokud cache není dostupná, zkusit API se zkrácenným timeoutem
         for attempt in range(2):  # Až 2 pokusy
             try:
                 api_url = downloader.get_request_url(self.region, self.code)
-                _LOGGER.info("🌐 CEZ HDO: Cache not found, trying API (attempt %d/2) - URL: %s", attempt + 1, api_url)
-                
+                _LOGGER.info(
+                    "🌐 CEZ HDO: Cache not found, trying API (attempt %d/2) - URL: %s",
+                    attempt + 1,
+                    api_url,
+                )
+
                 response = requests.get(api_url, timeout=10)
-                
+
                 _LOGGER.info("CEZ HDO: HTTP Response status: %d", response.status_code)
-                
+
                 if response.status_code == 200:
                     try:
-                        content_str = response.content.decode('utf-8')
-                        _LOGGER.debug("CEZ HDO: Response content length: %d bytes", len(content_str))
-                        
+                        content_str = response.content.decode("utf-8")
+                        _LOGGER.debug(
+                            "CEZ HDO: Response content length: %d bytes",
+                            len(content_str),
+                        )
+
                         json_data = json.loads(content_str)
-                        data_count = len(json_data.get('data', []))
+                        data_count = len(json_data.get("data", []))
                         _LOGGER.info("✅ CEZ HDO: API success, records: %d", data_count)
-                        
+
                         if data_count > 0:
                             self._response_data = json_data
                             self._last_update_success = True
-                            
+
                             # Uložit do cache
                             for cache_path in cache_paths:
                                 try:
                                     cache_dir = Path(cache_path).parent
                                     cache_dir.mkdir(parents=True, exist_ok=True)
                                     with open(cache_path, "w", encoding="utf-8") as f:
-                                        json.dump(json_data, f, ensure_ascii=False, indent=2)
-                                    _LOGGER.info("💾 CEZ HDO: Data saved to cache: %s", cache_path)
+                                        json.dump(
+                                            json_data, f, ensure_ascii=False, indent=2
+                                        )
+                                    _LOGGER.info(
+                                        "💾 CEZ HDO: Data saved to cache: %s",
+                                        cache_path,
+                                    )
                                     break
                                 except Exception as cache_err:
-                                    _LOGGER.warning("CEZ HDO: Cache save failed for %s: %s", cache_path, cache_err)
+                                    _LOGGER.warning(
+                                        "CEZ HDO: Cache save failed for %s: %s",
+                                        cache_path,
+                                        cache_err,
+                                    )
                             return
                         else:
                             _LOGGER.warning("CEZ HDO: API returned empty data array")
                     except (json.JSONDecodeError, UnicodeDecodeError) as parse_err:
-                        _LOGGER.error("CEZ HDO: Failed to parse API response: %s", parse_err)
+                        _LOGGER.error(
+                            "CEZ HDO: Failed to parse API response: %s", parse_err
+                        )
                 elif response.status_code == 502:
-                    _LOGGER.warning("CEZ HDO: Server error 502 - retrying in 3 seconds...")
+                    _LOGGER.warning(
+                        "CEZ HDO: Server error 502 - retrying in 3 seconds..."
+                    )
                     if attempt == 0:  # Pouze při prvním pokusu čekej
                         time.sleep(3)
                         continue
                 else:
-                    _LOGGER.error("CEZ HDO: API request failed - Status: %d", response.status_code)
-                        
+                    _LOGGER.error(
+                        "CEZ HDO: API request failed - Status: %d", response.status_code
+                    )
+
             except requests.RequestException as req_err:
-                _LOGGER.error("CEZ HDO: Network error (attempt %d/2): %s", attempt + 1, req_err)
+                _LOGGER.error(
+                    "CEZ HDO: Network error (attempt %d/2): %s", attempt + 1, req_err
+                )
                 if attempt == 0:  # Pouze při prvním pokusu čekej
                     time.sleep(2)
                     continue
             except Exception as general_err:
-                _LOGGER.error("CEZ HDO: Unexpected error during API call: %s", general_err)
-            
+                _LOGGER.error(
+                    "CEZ HDO: Unexpected error during API call: %s", general_err
+                )
+
             break  # Ukončit smyčku pokud nedošlo k 502 nebo network error
-        
+
         # Pokud vše selže
         _LOGGER.warning("CEZ HDO: Both cache and API failed")
         self._last_update_success = False
@@ -143,7 +169,7 @@ class CezHdoBaseEntity(Entity):
             # Zajistit že složka existuje
             cache_dir = Path(cache_file).parent
             cache_dir.mkdir(parents=True, exist_ok=True)
-            
+
             # Uložit soubor
             with open(cache_file, "w", encoding="utf-8") as f:
                 f.write(content)
@@ -156,23 +182,26 @@ class CezHdoBaseEntity(Entity):
         try:
             if not Path(cache_file).exists():
                 return False
-                
+
             with open(cache_file, "r", encoding="utf-8") as f:
                 content = f.read()
-                
+
             json_data = json.loads(content)
             self._response_data = json_data
             self._last_update_success = True
             return True
-            
+
         except Exception:
             return False
 
     def _get_hdo_data(self) -> tuple[bool, Any, Any, Any, bool, Any, Any, Any]:
         """Get HDO data from response."""
         if self._response_data is None or not self._last_update_success:
-            _LOGGER.warning("CEZ HDO: No data available for parsing (data=%s, success=%s)", 
-                          self._response_data is not None, self._last_update_success)
+            _LOGGER.warning(
+                "CEZ HDO: No data available for parsing (data=%s, success=%s)",
+                self._response_data is not None,
+                self._last_update_success,
+            )
             return False, None, None, None, False, None, None, None
 
         try:
