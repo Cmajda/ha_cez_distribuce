@@ -49,14 +49,14 @@ Přidejte do `configuration.yaml`:
 # ČEZ HDO integrace
 sensor:
   - platform: cez_hdo
-    kod_distribuce: "CZE"  # Váš distribuční kód
-    name: "ČEZ HDO"
+    code: "405"  # Váš distribuční kód
+    region: stred # Váš region
     scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
 
 binary_sensor:
   - platform: cez_hdo
-    kod_distribuce: "CZE"  # Váš distribuční kód
-    name: "ČEZ HDO Binary"
+    code: "405"  # Váš distribuční kód
+    region: stred # Váš region
     scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
 ```
 
