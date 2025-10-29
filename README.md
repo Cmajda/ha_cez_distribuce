@@ -66,7 +66,7 @@ https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/REGION?code=KÓD
 
 ## 🎨 Frontend karta
 
-### ✨ Automatická instalace 
+### ✨ Automatická instalace
 
 🎯 **Karta se instaluje a registruje úplně automaticky!**
 
@@ -89,7 +89,7 @@ type: custom:cez-hdo-card
 Pokud by se karta z nějakého důvodu nezaregistrovala automaticky:
 
 1. **Přidejte zdroj do Lovelace:**
-   - Nastavení → Dashboardy → Zdroje  
+   - Nastavení → Dashboardy → Zdroje
    - URL: `/local/cez_hdo/cez-hdo-card.js`
    - Typ: JavaScript Module
 
