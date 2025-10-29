@@ -24,7 +24,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Note: HACS will handle frontend deployment automatically
     # when "frontend": true is set in manifest.json
-    
+
     return True
 
 
