@@ -54,8 +54,12 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
         _LOGGER.info("Target file: %s", www_file)
 
         # Create www directory if it doesn't exist
-        www_dir.mkdir(exist_ok=True)
-        _LOGGER.info("WWW directory created/verified: %s", www_dir)
+        try:
+            www_dir.mkdir(parents=True, exist_ok=True)
+            _LOGGER.info("WWW directory created/verified: %s", www_dir)
+        except Exception as err:
+            _LOGGER.error("Failed to create WWW directory %s: %s", www_dir, err)
+            return
 
         # Copy frontend file if it exists and is newer or doesn't exist in www
         if frontend_file.exists():
