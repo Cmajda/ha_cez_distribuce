@@ -41,9 +41,15 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
         integration_dir = Path(__file__).parent
         frontend_file = integration_dir / "frontend" / "dist" / "cez-hdo-card.js"
 
+        _LOGGER.info("Checking frontend file at: %s", frontend_file)
+        _LOGGER.info("Frontend file exists: %s", frontend_file.exists())
+
         # Get Home Assistant www directory
         www_dir = Path(hass.config.config_dir) / "www"
         www_file = www_dir / "cez-hdo-card.js"
+
+        _LOGGER.info("WWW directory: %s", www_dir)
+        _LOGGER.info("Target file: %s", www_file)
 
         # Create www directory if it doesn't exist
         www_dir.mkdir(exist_ok=True)
