@@ -45,7 +45,7 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
         frontend_file = integration_dir / "frontend" / "dist" / "cez-hdo-card.js"
 
         # Get Home Assistant www directory
-        www_dir = Path(hass.config.config_dir) / "www"
+        www_dir = Path(hass.config.config_dir) / "www" / "cez_hdo"
         www_file = www_dir / "cez-hdo-card.js"
 
         _LOGGER.info("ČEZ HDO: Checking frontend installation")
@@ -65,7 +65,7 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
             ):
                 # Use executor for file I/O to avoid blocking the event loop
                 await hass.async_add_executor_job(shutil.copy2, frontend_file, www_file)
-                _LOGGER.info("ČEZ HDO frontend card copied to /local/cez-hdo-card.js")
+                _LOGGER.info("ČEZ HDO frontend card copied to /local/cez_hdo/cez-hdo-card.js")
             else:
                 _LOGGER.info("ČEZ HDO frontend card already up to date")
         else:
