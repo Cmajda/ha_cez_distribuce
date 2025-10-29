@@ -167,7 +167,9 @@ mkdir -p "$TARGET_DIR/frontend/dist"
 
 # Copy Python files from dev
     cp "$PROJECT_DIR/dev/cez_hdo"/*.py "$TARGET_DIR/"
-    cp "$PROJECT_DIR/dev/cez_hdo/manifest.json" "$TARGET_DIR/"# Copy built frontend files
+    cp "$PROJECT_DIR/dev/cez_hdo/manifest.json" "$TARGET_DIR/"
+    
+# Copy built frontend files
 if [ -f "$PROJECT_DIR/dev/frontend/dist/cez-hdo-card.js" ]; then
     cp "$PROJECT_DIR/dev/frontend/dist"/* "$TARGET_DIR/frontend/dist/"
     echo -e "${GREEN}✅ Frontend files copied from dev build${NC}"
@@ -182,17 +184,11 @@ fi
 
 echo -e "${GREEN}✅ Component files deployed${NC}"
 
-# Step 5: Deploy frontend to www
-echo -e "${BLUE}🌐 Step 5: Deploying frontend to www...${NC}"
-# Create www directory if it doesn't exist
-mkdir -p "$WWW_TARGET"
-
-if [ -f "$TARGET_DIR/frontend/dist/cez-hdo-card.js" ]; then
-    cp "$TARGET_DIR/frontend/dist/cez-hdo-card.js" "$WWW_TARGET/"
-    echo -e "${GREEN}✅ Frontend deployed to www${NC}"
-else
-    echo -e "${YELLOW}⚠️  Frontend file not found${NC}"
-fi
+# Step 5: HACS Frontend Integration
+echo -e "${BLUE}🌐 Step 5: HACS Frontend Integration...${NC}"
+echo -e "${GREEN}✅ Frontend will be served automatically by HACS from:${NC}"
+echo -e "${GREEN}   /hacsfiles/integrations/cez_hdo/cez-hdo-card.js${NC}"
+echo -e "${YELLOW}ℹ️  No manual www deployment needed - HACS handles frontend${NC}"
 
 # Step 6: Verification
 echo -e "${BLUE}🔍 Step 6: Verification...${NC}"
