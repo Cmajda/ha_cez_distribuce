@@ -2,18 +2,30 @@
 
 ## 📑 Obsah
 
+- [📑 Obsah](#-obsah)
 - [🚀 Instalace](#-instalace)
   - [Automatická instalace přes HACS](#automatická-instalace-přes-hacs)
   - [Manuální instalace](#manuální-instalace)
 - [⚙️ Konfigurace](#️-konfigurace)
   - [Základní konfigurace](#základní-konfigurace)
   - [Podporované distribuční kódy](#podporované-distribuční-kódy)
+    - [**Region STŘED**](#region-střed)
+    - [**Region MORAVA**](#region-morava)
+    - [**Region ZÁPAD**](#region-západ)
+    - [**Region VÝCHOD**](#region-východ)
+    - [**Region SEVER**](#region-sever)
 - [🎨 Lovelace karta](#-lovelace-karta)
-  - [Automatická instalace karty](#automatická-instalace-karty)
-  - [Ruční přidání karty](#ruční-přidání-karty)
+  - [✨ Automatická instalace karty](#-automatická-instalace-karty)
+  - [🔧 Ruční přidání karty (pouze pokud automatická selže)](#-ruční-přidání-karty-pouze-pokud-automatická-selže)
   - [Konfigurace karty](#konfigurace-karty)
 - [📊 Entity a senzory](#-entity-a-senzory)
+  - [Binary Sensors](#binary-sensors)
+  - [Sensors](#sensors)
+  - [Atributy](#atributy)
 - [🔍 Debug a řešení problémů](#-debug-a-řešení-problémů)
+  - [Debug logování](#debug-logování)
+  - [Řešení problémů](#řešení-problémů)
+  - [Debug logy obsahují](#debug-logy-obsahují)
 
 ## 🚀 Instalace
 
@@ -122,20 +134,27 @@ binary_sensor:
 
 ## 🎨 Lovelace karta
 
-### Automatická instalace karty
+### ✨ Automatická instalace karty
 
-Po restartu Home Assistant se karta automaticky přidá do zdrojů.
+🎯 **Karta se instaluje a registruje úplně automaticky!**
 
-### Ruční přidání karty
+Po instalaci integrace a restartu Home Assistant se karta:
+- ✅ **Automaticky zkopíruje** do `/config/www/cez_hdo/`
+- ✅ **Automaticky zaregistruje** v systému bez manuální konfigurace
+- ✅ **Ihned k použití** - žádné další kroky nejsou potřeba
 
-Pokud automatická instalace nefunguje:
+### 🔧 Ruční přidání karty (pouze pokud automatická selže)
+
+Pokud by se karta z nějakého důvodu nezaregistrovala automaticky:
 
 1. **Přidejte zdroj do Lovelace:**
    - Jděte na **Nastavení** → **Dashboardy** → **Zdroje**
    - Klikněte **Přidat zdroj**
-   - URL: `/hacsfiles/integrations/cez_hdo/cez-hdo-card.js`
+   - URL: `/local/cez_hdo/cez-hdo-card.js`
    - Typ zdroje: **JavaScript Module**
    - Klikněte **Vytvořit**
+
+2. **Restartujte Home Assistant**
 
 ### Konfigurace karty
 

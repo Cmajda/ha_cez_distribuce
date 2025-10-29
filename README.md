@@ -4,13 +4,14 @@
 
 ## 📑 Obsah
 
-- [� Obsah](#-obsah)
+- [📑 Obsah](#-obsah)
 - [📋 O doplňku](#-o-doplňku)
 - [🚀 Instalace](#-instalace)
 - [⚙️ Konfigurace](#️-konfigurace)
 - [🎨 Frontend karta](#-frontend-karta)
-  - [Automatická instalace](#automatická-instalace)
-  - [Ruční přidání (pokud automatická nefunguje)](#ruční-přidání-pokud-automatická-nefunguje)
+  - [✨ Automatická instalace](#-automatická-instalace)
+  - [📋 Použití karty](#-použití-karty)
+  - [🔧 Ruční registrace (pouze pokud automatická selže)](#-ruční-registrace-pouze-pokud-automatická-selže)
 - [🖼️ Ukázka karty](#️-ukázka-karty)
 - [👥 Pro vývojáře](#-pro-vývojáře)
 
@@ -22,7 +23,8 @@ Tento doplněk pro Home Assistant stahuje data o HDO (hromadné dálkové ovlád
 - ✅ **Časy začátku a konce** nízkého/vysokého tarifu
 - ✅ **Zbývající čas** aktivního tarifu
 - ✅ **Podpora státních svátků** - automaticky aplikuje víkendový tarif
-- ✅ **Custom Lovelace karta** pro přehledné zobrazení
+- ✅ **Custom Lovelace karta** s automatickou instalací a registrací
+- ✅ **Plug & play** - žádná manuální konfigurace frontend karty není potřeba
 
 ## 🚀 Instalace
 
@@ -64,26 +66,36 @@ https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/REGION?code=KÓD
 
 ## 🎨 Frontend karta
 
-### Automatická instalace
+### ✨ Automatická instalace 
 
-Karta se automaticky nainstaluje při prvním spuštění integrace po restartu Home Assistant.
+🎯 **Karta se instaluje a registruje úplně automaticky!**
 
-### Ruční přidání (pokud automatická nefunguje)
+Po instalaci integrace a restartu Home Assistant se karta:
+- ✅ **Automaticky zkopíruje** do `/config/www/cez_hdo/`
+- ✅ **Automaticky zaregistruje** v systému bez manuální konfigurace
+- ✅ **Ihned k použití** - žádné další kroky nejsou potřeba
+
+### 📋 Použití karty
+
+Jednoduše přidejte do vašeho Lovelace dashboardu:
+
+```yaml
+type: custom:cez-hdo-card
+# Automaticky použije výchozí entity pokud nejsou specifikovány
+```
+
+### 🔧 Ruční registrace (pouze pokud automatická selže)
+
+Pokud by se karta z nějakého důvodu nezaregistrovala automaticky:
 
 1. **Přidejte zdroj do Lovelace:**
-   - Nastavení → Dashboardy → Zdroje
-   - URL: `/hacsfiles/integrations/cez_hdo/cez-hdo-card.js`
+   - Nastavení → Dashboardy → Zdroje  
+   - URL: `/local/cez_hdo/cez-hdo-card.js`
    - Typ: JavaScript Module
 
-2. **Přidejte kartu do dashboardu:**
-   ```yaml
-   type: custom:cez-hdo-card
-   # Automaticky použije výchozí entity pokud nejsou specifikovány
-   ```
+2. **Restartujte Home Assistant**
 
-3. **Restartujte Home Assistant**
-
-> 💡 **Tip:** Karta automaticky najde správné entity pokud nejsou zadány explicitně.
+> 💡 **Tip:** Karta automaticky najde správné entity pokud nejsou zadány explicitně a instaluje se zcela automaticky bez potřeby manuální konfigurace.
 
 > 📖 **Podrobná konfigurace karty** včetně YAML nastavení je v [uživatelské dokumentaci](docs/user-guide.md#lovelace-karta).
 

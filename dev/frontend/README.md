@@ -13,24 +13,29 @@ Vlastní Lovelace karta pro zobrazení informací o HDO (Hromadné dálkové ovl
 
 ## Installation
 
-### Manual Installation
+### Automatic Installation (Recommended)
+
+The card is automatically installed and registered when you install the ČEZ HDO integration:
+
+1. Install the ČEZ HDO integration through HACS
+2. Restart Home Assistant
+3. Card is automatically copied to `/config/www/cez_hdo/` and registered
+4. Ready to use immediately - no manual configuration needed!
+
+### Manual Installation (Fallback)
+
+If automatic installation fails for some reason:
 
 1. Download the `cez-hdo-card.js` file
-2. Copy it to `<config>/www/community/cez-hdo-card/`
-3. Add the resource to your `configuration.yaml`:
-
-```yaml
-lovelace:
-  resources:
-    - url: /local/community/cez-hdo-card/cez-hdo-card.js
-      type: module
-```
-
+2. Copy it to `<config>/www/cez_hdo/`
+3. Add the resource manually in Lovelace → Settings → Resources:
+   - URL: `/local/cez_hdo/cez-hdo-card.js`
+   - Type: JavaScript Module
 4. Restart Home Assistant
 
-### HACS Installation
+### HACS Integration
 
-This card will be available through HACS once the integration is published.
+This card is integrated with the ČEZ HDO integration and deploys automatically.
 
 ## Configuration
 
