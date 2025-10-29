@@ -6,7 +6,7 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
+#dist/
 downloads/
 eggs/
 .eggs/
@@ -130,7 +130,7 @@ out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
+#dist
 
 # Gatsby files
 .cache/
@@ -140,22 +140,28 @@ public
 .out
 .storybook-out
 
-# Temporary and dev folders
-tmp/
-temp/
-dev/
+# Development structure
+dev/frontend/node_modules/
+dev/frontend/dist/
+dev/frontend/.cache/
+dev/frontend/coverage/
+dev/www/
+
+# Keep dev source files but ignore builds
+dev/build/
+dev/temp/
+dev/tmp/
 
 # Logs
 logs
 *.log
 
-# Frontend specific
-custom_components/cez_hdo/frontend/node_modules/
-custom_components/cez_hdo/frontend/.cache/
-custom_components/cez_hdo/frontend/coverage/
+# Production files - keep only compiled output
+# (source files are now in /dev structure)
 
-# Keep only built frontend files, not source
-custom_components/cez_hdo/frontend/src/cez-hdo-card-simple.ts
+# Build and deployment artifacts
+*.log.backup
+deploy_*.log
 
 # Custom files to ignore
 test2.py
