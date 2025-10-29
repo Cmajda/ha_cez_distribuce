@@ -54,7 +54,8 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
                 not www_file.exists()
                 or frontend_file.stat().st_mtime > www_file.stat().st_mtime
             ):
-                shutil.copy2(frontend_file, www_file)
+                # Use executor for file I/O to avoid blocking the event loop
+                await hass.async_add_executor_job(shutil.copy2, frontend_file, www_file)
                 _LOGGER.info("ČEZ HDO frontend card copied to /local/cez-hdo-card.js")
             else:
                 _LOGGER.debug("ČEZ HDO frontend card already up to date")
