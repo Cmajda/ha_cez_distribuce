@@ -17,12 +17,16 @@ DOMAIN = "cez_hdo"
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
+    
+    # Auto-copy frontend card to www directory for YAML configuration
+    await _ensure_frontend_card(hass)
+    
     return True
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up ČEZ HDO from a config entry."""
-    # Auto-copy frontend card to www directory on every setup
+    # Auto-copy frontend card to www directory for UI configuration
     await _ensure_frontend_card(hass)
     
     return True
