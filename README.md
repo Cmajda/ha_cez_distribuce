@@ -72,7 +72,7 @@ Karta se automaticky nainstaluje při prvním spuštění integrace po restartu 
 
 1. **Přidejte zdroj do Lovelace:**
    - Nastavení → Dashboardy → Zdroje
-   - URL: `/local/cez_hdo/cez-hdo-card.js`
+   - URL: `/hacsfiles/integrations/cez_hdo/cez-hdo-card.js`
    - Typ: JavaScript Module
 
 2. **Přidejte kartu do dashboardu:**

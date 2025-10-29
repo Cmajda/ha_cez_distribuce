@@ -133,7 +133,7 @@ Pokud automatická instalace nefunguje:
 1. **Přidejte zdroj do Lovelace:**
    - Jděte na **Nastavení** → **Dashboardy** → **Zdroje**
    - Klikněte **Přidat zdroj**
-   - URL: `/local/cez_hdo/cez-hdo-card.js`
+   - URL: `/hacsfiles/integrations/cez_hdo/cez-hdo-card.js`
    - Typ zdroje: **JavaScript Module**
    - Klikněte **Vytvořit**
 
