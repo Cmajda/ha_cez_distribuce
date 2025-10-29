@@ -5,13 +5,19 @@ import logging
 import shutil
 from pathlib import Path
 
+import voluptuous as vol
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "cez_hdo"
+
+# Configuration schema - integrace se konfiguruje pouze přes platformy
+CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXTRA)
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -38,26 +44,30 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def _ensure_frontend_card(hass: HomeAssistant) -> None:
-    """Ensure frontend card is available in www/cez_hdo directory."""
+    """Ensure frontend card is available in www directory."""
     try:
         # Get integration directory
         integration_dir = Path(__file__).parent
         frontend_file = integration_dir / "frontend" / "dist" / "cez-hdo-card.js"
 
-        # Get Home Assistant www/cez_hdo directory
-        www_cez_hdo_dir = Path(hass.config.config_dir) / "www" / "cez_hdo"
-        www_file = www_cez_hdo_dir / "cez-hdo-card.js"
+        # Get Home Assistant www directory
+        www_dir = Path(hass.config.config_dir) / "www" / "cez_hdo"
+        www_file = www_dir / "cez-hdo-card.js"
 
         _LOGGER.info("ČEZ HDO: Checking frontend installation")
         _LOGGER.info(
             "Source file: %s (exists: %s)", frontend_file, frontend_file.exists()
         )
-        _LOGGER.info("Target directory: %s", www_cez_hdo_dir)
+        _LOGGER.info("Target directory: %s", www_dir)
         _LOGGER.info("Target file: %s", www_file)
 
-        # Create www/cez_hdo directory if it doesn't exist
-        www_cez_hdo_dir.mkdir(parents=True, exist_ok=True)
-        _LOGGER.info("ČEZ HDO directory created/verified: %s", www_cez_hdo_dir)
+        # Create www directory if it doesn't exist
+        try:
+            www_dir.mkdir(parents=True, exist_ok=True)
+            _LOGGER.info("WWW directory created/verified: %s", www_dir)
+        except Exception as err:
+            _LOGGER.error("Failed to create WWW directory %s: %s", www_dir, err)
+            return
 
         # Copy frontend file if it exists and is newer or doesn't exist in www
         if frontend_file.exists():

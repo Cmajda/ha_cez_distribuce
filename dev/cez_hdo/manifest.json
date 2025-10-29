@@ -1,7 +1,7 @@
 {
 	"domain": "cez_hdo",
 	"name": "ČEZ HDO",
-	"codeowners": [ "@zigul", "@cmajda" ],
+	"codeowners": ["@cmajda"],
 	"config_flow": false,
 	"dependencies": [],
 	"documentation": "https://github.com/Cmajda/ha_cez_distribuce",

@@ -121,7 +121,7 @@ NC='\033[0m'
 
 # Step 1: Version checking
 echo -e "${BLUE}🔍 Step 1: Checking versions...${NC}"
-DEV_VERSION=$(grep '"version"' "$PROJECT_DIR/dev/src/manifest.json" | sed 's/.*"version": "\([^"]*\)".*/\1/')
+DEV_VERSION=$(grep '"version"' "$PROJECT_DIR/dev/cez_hdo/manifest.json" | sed 's/.*"version": "\([^"]*\)".*/\1/')
 PROD_VERSION=$(grep '"version"' "$PROJECT_DIR/custom_components/cez_hdo/manifest.json" | sed 's/.*"version": "\([^"]*\)".*/\1/' 2>/dev/null || echo "none")
 
 echo "📦 Dev version: $DEV_VERSION"
@@ -166,10 +166,8 @@ echo -e "${BLUE}📁 Step 4: Deploying component files...${NC}"
 mkdir -p "$TARGET_DIR/frontend/dist"
 
 # Copy Python files from dev
-cp "$PROJECT_DIR/dev/src"/*.py "$TARGET_DIR/"
-cp "$PROJECT_DIR/dev/src/manifest.json" "$TARGET_DIR/"
-
-# Copy built frontend files
+    cp "$PROJECT_DIR/dev/cez_hdo"/*.py "$TARGET_DIR/"
+    cp "$PROJECT_DIR/dev/cez_hdo/manifest.json" "$TARGET_DIR/"# Copy built frontend files
 if [ -f "$PROJECT_DIR/dev/frontend/dist/cez-hdo-card.js" ]; then
     cp "$PROJECT_DIR/dev/frontend/dist"/* "$TARGET_DIR/frontend/dist/"
     echo -e "${GREEN}✅ Frontend files copied from dev build${NC}"
