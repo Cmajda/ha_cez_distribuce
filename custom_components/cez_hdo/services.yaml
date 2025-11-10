@@ -1,0 +1,11 @@
+# Služby pro ČEZ HDO integraci
+
+reload_frontend_card:
+  name: Reload Frontend Card
+  description: Znovu načte a registruje frontend kartu pro ČEZ HDO
+  fields: {}
+
+clear_cache:
+  name: Clear Cache
+  description: Vymaže cache soubory ČEZ HDO (užitečné po změně region/kódu)
+  fields: {}
