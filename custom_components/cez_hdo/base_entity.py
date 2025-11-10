@@ -22,13 +22,14 @@ DOMAIN = "cez_hdo"
 class CezHdoBaseEntity(Entity):
     """Base class for CEZ HDO entities."""
 
-    def __init__(self, region: str, code: str, name: str) -> None:
+    def __init__(self, region: str, code: str, name: str, hass=None) -> None:
         """Initialize the sensor."""
         self.region = region
         self.code = code
         self._name = name
         self._response_data: dict[str, Any] | None = None
         self._last_update_success = False
+        self._hass = hass
         self.update()
 
     @property
@@ -62,13 +63,23 @@ class CezHdoBaseEntity(Entity):
     @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self) -> None:
         """Fetch new state data for the sensor with cache fallback."""
-        # Pokusit se načíst z cache jako první priorita
-        cache_paths = [
-            "/config/www/cez_hdo/cez_hdo.json",
-            "/config/www/cez_hdo_debug.json",
-            "/mnt/ha-config/www/cez_hdo/cez_hdo.json",
-            "/mnt/ha-config/www/cez_hdo_debug.json",
-        ]
+        # Pokusit se načíst z cache jako první priorita - s region/code v názvu
+        cache_filename = f"cez_hdo_{self.region}_{self.code}.json"
+        debug_filename = f"cez_hdo_debug_{self.region}_{self.code}.json"
+        
+        # Use dynamic config directory if hass is available
+        if self._hass and hasattr(self._hass, 'config') and hasattr(self._hass.config, 'config_dir'):
+            config_dir = Path(self._hass.config.config_dir)
+            cache_paths = [
+                str(config_dir / "www" / "cez_hdo" / cache_filename),
+                str(config_dir / "www" / debug_filename),
+            ]
+        else:
+            # Fallback to standard paths
+            cache_paths = [
+                f"/config/www/cez_hdo/{cache_filename}",
+                f"/config/www/{debug_filename}",
+            ]
 
         # Nejdříve zkusit načíst z cache
         for cache_path in cache_paths:

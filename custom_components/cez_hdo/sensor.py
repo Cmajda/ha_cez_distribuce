@@ -40,12 +40,12 @@ def setup_platform(
     code = config[CONF_CODE]
 
     entities = [
-        LowTariffStart(region, code),
-        LowTariffEnd(region, code),
-        LowTariffDuration(region, code),
-        HighTariffStart(region, code),
-        HighTariffEnd(region, code),
-        HighTariffDuration(region, code),
+        LowTariffStart(region, code, hass),
+        LowTariffEnd(region, code, hass),
+        LowTariffDuration(region, code, hass),
+        HighTariffStart(region, code, hass),
+        HighTariffEnd(region, code, hass),
+        HighTariffDuration(region, code, hass),
     ]
     add_entities(entities, True)
 

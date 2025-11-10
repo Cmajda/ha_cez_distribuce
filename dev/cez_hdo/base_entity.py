@@ -62,12 +62,13 @@ class CezHdoBaseEntity(Entity):
     @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self) -> None:
         """Fetch new state data for the sensor with cache fallback."""
-        # Pokusit se načíst z cache jako první priorita
+        # Pokusit se načíst z cache jako první priorita - s region/code v názvu
+        cache_filename = f"cez_hdo_{self.region}_{self.code}.json"
+        debug_filename = f"cez_hdo_debug_{self.region}_{self.code}.json"
+        
         cache_paths = [
-            "/config/www/cez_hdo/cez_hdo.json",
-            "/config/www/cez_hdo_debug.json",
-            "/mnt/ha-config/www/cez_hdo/cez_hdo.json",
-            "/mnt/ha-config/www/cez_hdo_debug.json",
+            f"/config/www/cez_hdo/{cache_filename}",
+            f"/config/www/{debug_filename}",
         ]
 
         # Nejdříve zkusit načíst z cache

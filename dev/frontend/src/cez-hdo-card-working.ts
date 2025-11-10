@@ -256,4 +256,4 @@ export class CezHdoCard extends LitElement {
   preview: true,
 });
 
-console.info("ČEZ HDO Card v1.2.1 loaded successfully");
+console.info("ČEZ HDO Card v1.2.2 loaded successfully");

@@ -219,6 +219,21 @@ logger:
 2. **Zkontrolujte logy** - Developer Tools → Logs
 3. **Restartujte HA** po změnách konfigurace
 4. **Vyčistěte cache** prohlížeče (Ctrl+F5) pro Lovelace kartu
+5. **Po změně region/kódu smažte cache** - integrace cachuje data podle region/kódu:
+   
+   **Automaticky přes službu** (doporučeno):
+   - Developer Tools → Services
+   - Služba: `ČEZ HDO: Clear cache`
+   - Klikněte "CALL SERVICE"
+   
+   **Manuálně smazáním souborů:**
+
+   ```bash
+   /config/www/cez_hdo/cez_hdo_*.json
+   /config/www/cez_hdo_debug_*.json
+   ```
+
+   Nebo restartujte Home Assistant a počkejte na expiraci cache (1 hodina)
 
 ### Debug logy obsahují
 

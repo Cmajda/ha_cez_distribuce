@@ -38,8 +38,8 @@ def setup_platform(
     code = config[CONF_CODE]
 
     entities = [
-        LowTariffActive(region, code),
-        HighTariffActive(region, code),
+        LowTariffActive(region, code, hass),
+        HighTariffActive(region, code, hass),
     ]
     add_entities(entities, True)
 
@@ -61,9 +61,9 @@ class CezHdoBinarySensor(CezHdoBaseEntity, BinarySensorEntity):
 class LowTariffActive(CezHdoBinarySensor):
     """Binary sensor for low tariff active state."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, region: str, code: str, hass=None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "LowTariffActive")
+        super().__init__(region, code, "LowTariffActive", hass)
 
     @property
     def is_on(self) -> bool:
@@ -75,9 +75,9 @@ class LowTariffActive(CezHdoBinarySensor):
 class HighTariffActive(CezHdoBinarySensor):
     """Binary sensor for high tariff active state."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, region: str, code: str, hass=None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "HighTariffActive")
+        super().__init__(region, code, "HighTariffActive", hass)
 
     @property
     def is_on(self) -> bool:

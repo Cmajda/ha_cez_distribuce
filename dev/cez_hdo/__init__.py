@@ -17,6 +17,9 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "cez_hdo"
 
+# Track if frontend is already registered to avoid duplicates
+_FRONTEND_REGISTERED = False
+
 # Configuration schema - integrace se konfiguruje pouze přes platformy
 CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXTRA)
 
@@ -27,6 +30,45 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Deploy and register frontend card automatically
     await _ensure_frontend_card(hass)
+
+    # Register service to reload frontend card
+    async def reload_frontend_card(call):
+        """Service to reload frontend card."""
+        global _FRONTEND_REGISTERED
+        _FRONTEND_REGISTERED = False
+        await _ensure_frontend_card(hass)
+
+    async def clear_cache(call):
+        """Service to clear ČEZ HDO cache."""
+        import glob
+        from pathlib import Path
+        
+        # Use Home Assistant config directory dynamically
+        config_dir = Path(hass.config.config_dir)
+        
+        cache_patterns = [
+            str(config_dir / "www" / "cez_hdo" / "cez_hdo_*.json"),
+            str(config_dir / "www" / "cez_hdo_debug_*.json"),
+        ]
+        
+        removed_count = 0
+        for pattern in cache_patterns:
+            try:
+                cache_files = glob.glob(pattern)
+                for cache_file in cache_files:
+                    try:
+                        Path(cache_file).unlink(missing_ok=True)
+                        removed_count += 1
+                        _LOGGER.info("ČEZ HDO: Cache file removed: %s", cache_file)
+                    except Exception as e:
+                        _LOGGER.warning("ČEZ HDO: Failed to remove cache file %s: %s", cache_file, e)
+            except Exception as e:
+                _LOGGER.warning("ČEZ HDO: Error processing pattern %s: %s", pattern, e)
+        
+        _LOGGER.info("ČEZ HDO: Cache cleared, %d files removed", removed_count)
+
+    hass.services.async_register(DOMAIN, "reload_frontend_card", reload_frontend_card)
+    hass.services.async_register(DOMAIN, "clear_cache", clear_cache)
 
     return True
 
