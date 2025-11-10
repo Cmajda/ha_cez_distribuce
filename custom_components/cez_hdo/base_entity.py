@@ -66,9 +66,13 @@ class CezHdoBaseEntity(Entity):
         # Pokusit se načíst z cache jako první priorita - s region/code v názvu
         cache_filename = f"cez_hdo_{self.region}_{self.code}.json"
         debug_filename = f"cez_hdo_debug_{self.region}_{self.code}.json"
-        
+
         # Use dynamic config directory if hass is available
-        if self._hass and hasattr(self._hass, 'config') and hasattr(self._hass.config, 'config_dir'):
+        if (
+            self._hass
+            and hasattr(self._hass, "config")
+            and hasattr(self._hass.config, "config_dir")
+        ):
             config_dir = Path(self._hass.config.config_dir)
             cache_paths = [
                 str(config_dir / "www" / "cez_hdo" / cache_filename),

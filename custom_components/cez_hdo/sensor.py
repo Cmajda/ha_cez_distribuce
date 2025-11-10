@@ -62,9 +62,9 @@ class CezHdoSensor(CezHdoBaseEntity, SensorEntity):
 class LowTariffStart(CezHdoSensor):
     """Sensor for low tariff start time."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, region: str, code: str, hass=None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "LowTariffStart")
+        super().__init__(region, code, "LowTariffStart", hass)
 
     @property
     def native_value(self) -> time | None:
@@ -76,9 +76,9 @@ class LowTariffStart(CezHdoSensor):
 class LowTariffEnd(CezHdoSensor):
     """Sensor for low tariff end time."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, region: str, code: str, hass=None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "LowTariffEnd")
+        super().__init__(region, code, "LowTariffEnd", hass)
 
     @property
     def icon(self) -> str:
@@ -95,9 +95,9 @@ class LowTariffEnd(CezHdoSensor):
 class LowTariffDuration(CezHdoSensor):
     """Sensor for low tariff duration."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, region: str, code: str, hass=None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "LowTariffDuration")
+        super().__init__(region, code, "LowTariffDuration", hass)
 
     @property
     def icon(self) -> str:
@@ -117,9 +117,9 @@ class LowTariffDuration(CezHdoSensor):
 class HighTariffStart(CezHdoSensor):
     """Sensor for high tariff start time."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, region: str, code: str, hass=None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "HighTariffStart")
+        super().__init__(region, code, "HighTariffStart", hass)
 
     @property
     def native_value(self) -> time | None:
@@ -131,9 +131,9 @@ class HighTariffStart(CezHdoSensor):
 class HighTariffEnd(CezHdoSensor):
     """Sensor for high tariff end time."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, region: str, code: str, hass=None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "HighTariffEnd")
+        super().__init__(region, code, "HighTariffEnd", hass)
 
     @property
     def icon(self) -> str:
@@ -150,9 +150,9 @@ class HighTariffEnd(CezHdoSensor):
 class HighTariffDuration(CezHdoSensor):
     """Sensor for high tariff duration."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, region: str, code: str, hass=None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "HighTariffDuration")
+        super().__init__(region, code, "HighTariffDuration", hass)
 
     @property
     def icon(self) -> str:

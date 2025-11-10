@@ -65,7 +65,7 @@ class CezHdoBaseEntity(Entity):
         # Pokusit se načíst z cache jako první priorita - s region/code v názvu
         cache_filename = f"cez_hdo_{self.region}_{self.code}.json"
         debug_filename = f"cez_hdo_debug_{self.region}_{self.code}.json"
-        
+
         cache_paths = [
             f"/config/www/cez_hdo/{cache_filename}",
             f"/config/www/{debug_filename}",
