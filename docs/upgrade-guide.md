@@ -16,7 +16,7 @@ sensor:
 ```yaml
 sensor:
   - platform: cez_hdo
-    ean: "VA_EAN_ČÍSLO"   # ✅ Nový povinný parametr
+    ean: "VAŠE_EAN_ČÍSLO"   # ✅ Nový povinný parametr
     signal: "a3b4dp01"    # ✅ Volitelný - konkrétní HDO signál
 ```
 
@@ -28,7 +28,7 @@ EAN číslo vašeho odběrného místa najdete:
 - 🌐 **V zákaznickém portálu ČEZ** - v detailech vaší smlouvy
 - 📞 **Kontaktováním zákaznické linky ČEZ**
 
-**Formát:** Dlouhé číselné kód (18 číslic), například `"859182400609846929"`
+**Formát:** Dlouhé číselné kód (18 číslic), například `"129345678910111213"`
 
 ### 🛠️ Postup migrace
 

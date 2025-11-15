@@ -9,7 +9,7 @@
 - [⚙️ Konfigurace](#️-konfigurace)
   - [Základní konfigurace](#základní-konfigurace)
   - [EAN číslo - jak ho najít](#ean-číslo---jak-ho-najít)
-  - [Dostupné signály a jejich výběr](#dostupné-signály-a-jejich-výběr)
+  - [Zjištění dostupných signálů](#zjištění-dostupných-signálů)
 - [🎨 Lovelace karta](#-lovelace-karta)
   - [✨ Automatická instalace karty](#-automatická-instalace-karty)
   - [🔧 Ruční přidání karty (pouze pokud automatická selže)](#-ruční-přidání-karty-pouze-pokud-automatická-selže)
@@ -51,20 +51,45 @@ Přidejte do `configuration.yaml`:
 # ČEZ HDO integrace
 sensor:
   - platform: cez_hdo
-    code: "405"  # Váš distribuční kód
-    region: stred # Váš region
+    ean: "VAŠE_EAN_ČÍSLO"  # Váš EAN kód odběrného místa
+    signal: "HDO1"  # Volitelně - konkrétní signál (jinak se vybere automaticky)
     scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
 
 binary_sensor:
   - platform: cez_hdo
-    code: "405"  # Váš distribuční kód
-    region: stred # Váš region
+    ean: "VAŠE_EAN_ČÍSLO"  # Váš EAN kód odběrného místa
+    signal: "HDO1"  # Volitelně - konkrétní signál (jinak se vybere automaticky)
     scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
 ```
 
 **Chování bez specifikace signálu:**
-- Integrace automaticky použije **první nalezený signál** pro daný den
-- Pro většinu uživatelů je toto dostatečné
+
+- Integrace automaticky použije **nejpravděpodobnější signál** z dostupných pro daný EAN
+- Pro většinu uživatelů je automatický výběr dostatečný
+- Můžete použít službu `cez_hdo.list_signals` pro zjištění dostupných signálů
+
+### EAN číslo - jak ho najít
+
+EAN číslo (13 nebo 18 číslic) najdete na:
+
+- **Faktuře od ČEZ Distribuce** - obvykle v záhlaví nebo v detailech odběrného místa
+- **Smlouvě o připojení** - jako identifikace odběrného místa
+- **Aplikaci ČEZ** - v detailech odběrného místa
+- **Zákaznickém portálu ČEZ** - v sekci odběrná místa
+
+**Formát EAN:** `123456789101112113` (18 číslic) nebo `1234567891456` (13 číslic)
+
+### Zjištění dostupných signálů
+
+Pro zjištění všech dostupných HDO signálů pro váš EAN použijte službu:
+
+```yaml
+service: cez_hdo.list_signals
+data:
+  ean: "VAŠE_EAN_ČÍSLO"
+```
+
+Služba vrátí seznam všech dostupných signálů s jejich názvy a časovými rozpisy.
 
 ## 🎨 Lovelace karta
 
@@ -146,18 +171,18 @@ logger:
 
 ### Řešení problémů
 
-1. **Zkontrolujte region a kód** - otestujte URL v prohlížeči:
-   ```
-   https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/REGION?code=KÓD
-   ```
-2. **Zkontrolujte logy** - Developer Tools → Logs
-3. **Restartujte HA** po změnách konfigurace
-4. **Vyčistěte cache** prohlížeče (Ctrl+F5) pro Lovelace kartu
+1. **Zkontrolujte EAN číslo** - musí být ve formátu 13 nebo 18 číslic
+2. **Otestujte dostupné signály** - použijte službu `cez_hdo.list_signals`
+3. **Zkontrolujte logy** - Developer Tools → Logs
+4. **Restartujte HA** po změnách konfigurace
+5. **Vyčistěte cache** prohlížeče (Ctrl+F5) pro Lovelace kartu
 
 ### Debug logy obsahují
 
-- 🗓️ Výběr kalendáře (pracovní dny vs víkendy/svátky)
-- 🔍 Seznam všech HDO období pro aktuální den
+- 📡 Volání ČEZ API s EAN parametrem
+- 🔍 Seznam všech dostupných signálů pro EAN
+- 🎯 Automatický výběr nejvhodnějšího signálu
+- 🗓️ Zpracování časových období HDO
 - ✅ Aktuální stav (nízký/vysoký tarif) se zbývajícím časem
 
 **Zobrazení debug logů:**
