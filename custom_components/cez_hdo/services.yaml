@@ -1,0 +1,16 @@
+# ČEZ HDO Services
+list_signals:
+  name: Zobrazit dostupné signály
+  description: Zobrazí seznam dostupných HDO signálů pro zadané EAN číslo v logách Home Assistant
+  fields:
+    ean:
+      name: EAN číslo
+      description: EAN číslo odběrného místa (najdete na faktutře)
+      required: true
+      example: "859182400609846929"
+      selector:
+        text:
+
+reload_frontend_card:
+  name: Obnovit frontend kartu
+  description: Aktualizuje frontend kartu ČEZ HDO (užitečné při vývoji)

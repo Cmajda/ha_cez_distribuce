@@ -169,6 +169,12 @@ mkdir -p "$TARGET_DIR/frontend/dist"
     cp "$PROJECT_DIR/dev/cez_hdo"/*.py "$TARGET_DIR/"
     cp "$PROJECT_DIR/dev/cez_hdo/manifest.json" "$TARGET_DIR/"
 
+    # Copy services.yaml if it exists
+    if [ -f "$PROJECT_DIR/dev/cez_hdo/services.yaml" ]; then
+        cp "$PROJECT_DIR/dev/cez_hdo/services.yaml" "$TARGET_DIR/"
+        echo -e "${GREEN}✅ services.yaml copied${NC}"
+    fi
+
 # Copy built frontend files
 if [ -f "$PROJECT_DIR/dev/frontend/dist/cez-hdo-card.js" ]; then
     cp "$PROJECT_DIR/dev/frontend/dist"/* "$TARGET_DIR/frontend/dist/"

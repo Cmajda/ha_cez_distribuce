@@ -13,16 +13,19 @@
   - [📋 Použití karty](#-použití-karty)
   - [🔧 Ruční registrace (pouze pokud automatická selže)](#-ruční-registrace-pouze-pokud-automatická-selže)
 - [🖼️ Ukázka karty](#️-ukázka-karty)
+- [📚 Dokumentace](#-dokumentace)
 - [👥 Pro vývojáře](#-pro-vývojáře)
 
 ## 📋 O doplňku
 
-Tento doplněk pro Home Assistant stahuje data o HDO (hromadné dálkové ovládání) z [ČEZ Distribuce](https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html) a poskytuje:
+Tento doplněk pro Home Assistant stahuje data o HDO (hromadné dálkové ovládání) z nového API [ČEZ Distribuce](https://dip.cezdistribuce.cz/) a poskytuje:
 
+- ✅ **EAN-based konfigurace** - používá EAN číslo odběrného místa místo starých kódů
 - ✅ **Aktuální stav HDO** - zobrazuje zda je aktivní nízký nebo vysoký tarif
+- ✅ **Automatický výběr signálu** - nebo možnost specifikace konkrétního signálu
 - ✅ **Časy začátku a konce** nízkého/vysokého tarifu
 - ✅ **Zbývající čas** aktivního tarifu
-- ✅ **Podpora státních svátků** - automaticky aplikuje víkendový tarif
+- ✅ **Service pro zjištění signálů** - `cez_hdo.list_signals`
 - ✅ **Custom Lovelace karta** s automatickou instalací a registrací
 - ✅ **Plug & play** - žádná manuální konfigurace frontend karty není potřeba
 
@@ -34,35 +37,42 @@ Klikněte na tlačítko níže pro automatické otevření HACS:
 
 > 📖 **Podrobné instrukce instalace** včetně manuální instalace najdete v [uživatelské dokumentaci](docs/user-guide.md).
 
+> ⚙️ **Pokročilá konfigurace** a seznam všech možností je v [uživatelské dokumentaci](docs/user-guide.md).
+
+> 🛠️ **Průvodce services** včetně `list_signals` najdete v [service dokumentaci](docs/service-guide.md).
+
 ## ⚙️ Konfigurace
 
 Přidejte do `configuration.yaml`:
 
 ```yaml
-# ČEZ HDO integrace
+# ČEZ HDO integrace - nové EAN API
 sensor:
   - platform: cez_hdo
-    code: "405"  # Váš distribuční kód
-    region: stred # Váš region
-    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
+    ean: "VAŠE_EAN_ČÍSLO"  # EAN odběrného místa z faktury
+    signal: "a3b4dp01"     # Volitelný - konkrétní signál (zjistíte přes service)
+    scan_interval: 300      # Aktualizace každých 5 minut (volitelné)
 
 binary_sensor:
   - platform: cez_hdo
-    code: "405"  # Váš distribuční kód
-    region: stred # Váš region
-    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
+    ean: "VAŠE_EAN_ČÍSLO"  # Stejné EAN jako u sensoru
+    signal: "a3b4dp01"     # Volitelný - stejný signál jako u sensoru
 ```
 
-**Zjištění vašeho kódu a regionu:**
+**Zjištění dostupných signálů:**
 
-Informace najdete ve smlouvě s ČEZ nebo na [webových stránkách ČEZ Distribuce](https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo.html).
-
-Pro ověření správnosti použijte URL ve tvaru:
+Použijte service k zjištění dostupných HDO signálů:
+```yaml
+# V Developer Tools → Services
+action: cez_hdo.list_signals
+data:
+  ean: "VAŠE_EAN_ČÍSLO"
 ```
-https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/REGION?code=KÓD
-```
 
-> 📖 **Kompletní seznam kódů** pro všechny regiony najdete v [uživatelské dokumentaci](docs/user-guide.md#podporované-distribuční-kódy).
+**EAN číslo najdete:**
+- Na vaší faktuře za elektřinu
+- V zákaznickém portálu ČEZ
+- Má formát dlouhého číselného kódu (např. "859182400609846929")
 
 ## 🎨 Frontend karta
 
@@ -108,6 +118,13 @@ Karta zobrazuje:
 - ⏰ Časy začátku a konce tarifů
 - ⏳ Zbývající čas do změny tarifu
 - 📅 Rozlišení pracovních dnů a víkendů
+
+## 📚 Dokumentace
+
+- 📖 **[Uživatelská dokumentace](docs/user-guide.md)** - kompletní návod k instalaci a konfiguraci
+- 🛠️ **[Průvodce services](docs/service-guide.md)** - jak použít `list_signals` service a signal selection
+- 🔄 **[Upgrade Guide](docs/upgrade-guide.md)** - migrace ze staré verze (code/region → EAN)
+- 🏗️ **[Vývojářská dokumentace](docs/developer-guide.md)** - pro vývojáře a přispěvatele
 
 ## 👥 Pro vývojáře
 

@@ -22,10 +22,10 @@ DOMAIN = "cez_hdo"
 class CezHdoBaseEntity(Entity):
     """Base class for CEZ HDO entities."""
 
-    def __init__(self, region: str, code: str, name: str) -> None:
+    def __init__(self, ean: str, name: str, signal: str | None = None) -> None:
         """Initialize the sensor."""
-        self.region = region
-        self.code = code
+        self.ean = ean
+        self.signal = signal
         self._name = name
         self._response_data: dict[str, Any] | None = None
         self._last_update_success = False
@@ -76,17 +76,29 @@ class CezHdoBaseEntity(Entity):
                 _LOGGER.info("CEZ HDO: Loaded from cache: %s", cache_path)
                 return
 
-        # Pokud cache není dostupná, zkusit API se zkrácenným timeoutem
+        # Pokud cache není dostupná, zkusit API se zkrácenými timeouty
         for attempt in range(2):  # Až 2 pokusy
             try:
-                api_url = downloader.get_request_url(self.region, self.code)
+                api_url = downloader.BASE_URL
+                request_data = downloader.get_request_data(self.ean)
+
                 _LOGGER.info(
-                    "🌐 CEZ HDO: Cache not found, trying API (attempt %d/2) - URL: %s",
+                    "🌐 CEZ HDO: Cache not found, trying API (attempt %d/2) - URL: %s, EAN: %s",
                     attempt + 1,
                     api_url,
+                    self.ean,
                 )
 
-                response = requests.get(api_url, timeout=10)
+                response = requests.post(
+                    api_url,
+                    json=request_data,
+                    timeout=10,
+                    headers={
+                        "Accept": "application/json, text/plain, */*",
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                    },
+                )
 
                 _LOGGER.info("CEZ HDO: HTTP Response status: %d", response.status_code)
 
@@ -99,10 +111,16 @@ class CezHdoBaseEntity(Entity):
                         )
 
                         json_data = json.loads(content_str)
-                        data_count = len(json_data.get("data", []))
-                        _LOGGER.info("✅ CEZ HDO: API success, records: %d", data_count)
 
-                        if data_count > 0:
+                        # Check if we have signals data
+                        signals_count = len(
+                            json_data.get("data", {}).get("signals", [])
+                        )
+                        _LOGGER.info(
+                            "✅ CEZ HDO: API success, signals: %d", signals_count
+                        )
+
+                        if signals_count > 0:
                             self._response_data = json_data
                             self._last_update_success = True
 
@@ -128,7 +146,7 @@ class CezHdoBaseEntity(Entity):
                                     )
                             return
                         else:
-                            _LOGGER.warning("CEZ HDO: API returned empty data array")
+                            _LOGGER.warning("CEZ HDO: API returned empty signals array")
                     except (json.JSONDecodeError, UnicodeDecodeError) as parse_err:
                         _LOGGER.error(
                             "CEZ HDO: Failed to parse API response: %s", parse_err
@@ -205,7 +223,13 @@ class CezHdoBaseEntity(Entity):
             return False, None, None, None, False, None, None, None
 
         try:
-            result = downloader.isHdo(self._response_data["data"])
+            # Pass signal parameter to isHdo if specified
+            if self.signal:
+                result = downloader.isHdo(
+                    self._response_data, preferred_signal=self.signal
+                )
+            else:
+                result = downloader.isHdo(self._response_data)
             _LOGGER.info("CEZ HDO: Parser result: %s", result)
             return result
         except (KeyError, TypeError) as err:

@@ -16,13 +16,13 @@ from .base_entity import CezHdoBaseEntity
 
 _LOGGER = logging.getLogger(__name__)
 
-CONF_REGION = "region"
-CONF_CODE = "code"
+CONF_EAN = "ean"
+CONF_SIGNAL = "signal"
 
 PLATFORM_SCHEMA = BASE_PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_REGION): cv.string,
-        vol.Required(CONF_CODE): cv.string,
+        vol.Required(CONF_EAN): cv.string,
+        vol.Optional(CONF_SIGNAL): cv.string,
     }
 )
 
@@ -34,12 +34,12 @@ def setup_platform(
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     """Set up the CEZ HDO binary sensor platform."""
-    region = config[CONF_REGION]
-    code = config[CONF_CODE]
+    ean = config[CONF_EAN]
+    signal = config.get(CONF_SIGNAL)
 
     entities = [
-        LowTariffActive(region, code),
-        HighTariffActive(region, code),
+        LowTariffActive(ean, signal),
+        HighTariffActive(ean, signal),
     ]
     add_entities(entities, True)
 
@@ -61,9 +61,9 @@ class CezHdoBinarySensor(CezHdoBaseEntity, BinarySensorEntity):
 class LowTariffActive(CezHdoBinarySensor):
     """Binary sensor for low tariff active state."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, ean: str, signal: str | None = None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "LowTariffActive")
+        super().__init__(ean, "LowTariffActive", signal)
 
     @property
     def is_on(self) -> bool:
@@ -75,9 +75,9 @@ class LowTariffActive(CezHdoBinarySensor):
 class HighTariffActive(CezHdoBinarySensor):
     """Binary sensor for high tariff active state."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, ean: str, signal: str | None = None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "HighTariffActive")
+        super().__init__(ean, "HighTariffActive", signal)
 
     @property
     def is_on(self) -> bool:
