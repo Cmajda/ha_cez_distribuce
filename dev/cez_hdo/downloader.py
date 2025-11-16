@@ -13,9 +13,8 @@ except ImportError:
 
 _LOGGER = logging.getLogger(__name__)
 
-BASE_URL = "https://www.cezdistribuce.cz/webpublic/distHdo/adam/containers/"
+BASE_URL = "https://dip.cezdistribuce.cz/irj/portal/anonymous/casy-spinani?path=switch-times/signals"
 CEZ_TIMEZONE = ZoneInfo("Europe/Prague")
-SUPPORTED_REGIONS = {"zapad", "sever", "stred", "vychod", "morava"}
 
 
 class HdoData(NamedTuple):
@@ -31,22 +30,9 @@ class HdoData(NamedTuple):
     high_tariff_duration: timedelta | None
 
 
-def get_correct_region_name(region: str) -> str | None:
-    """Get correct region name from user input."""
-    region_lower = region.lower()
-    for supported_region in SUPPORTED_REGIONS:
-        if supported_region in region_lower:
-            return supported_region
-    _LOGGER.warning("Unsupported region: %s", region)
-    return None
-
-
-def get_request_url(region: str, code: str) -> str:
-    """Build request URL for CEZ API."""
-    correct_region = get_correct_region_name(region)
-    if correct_region is None:
-        raise ValueError(f"Unsupported region: {region}")
-    return f"{BASE_URL}{correct_region}?code={code.upper()}"
+def get_request_data(ean: str) -> dict:
+    """Build request data for CEZ API."""
+    return {"ean": ean}
 
 
 def time_in_range(start: time, end: time, check_time: time) -> bool:
@@ -56,15 +42,18 @@ def time_in_range(start: time, end: time, check_time: time) -> bool:
     return start <= check_time or check_time <= end
 
 
-def parse_time(time_str: str | None) -> time:
+def parse_time(time_str: str | None) -> time | None:
     """Parse time string to time object."""
     if not time_str:
-        return datetime.min.time()
+        return None
     try:
+        # Handle 24:00 as 00:00 (midnight of next day)
+        if time_str.strip() == "24:00":
+            return datetime.strptime("00:00", "%H:%M").time()
         return datetime.strptime(time_str, "%H:%M").time()
     except ValueError as err:
         _LOGGER.error("Error parsing time string '%s': %s", time_str, err)
-        return datetime.min.time()
+        return None
 
 
 def format_duration(duration: timedelta) -> str:
@@ -139,8 +128,79 @@ def is_czech_holiday(date: datetime) -> bool:
     return False
 
 
+def parse_time_periods(casy_string: str) -> list[tuple[time, time]]:
+    """Parse time periods from casy string like '00:00-06:00; 07:00-09:00'."""
+    periods: list[tuple[time, time]] = []
+    if not casy_string:
+        return periods
+
+    # Split by semicolon and clean up whitespace
+    time_ranges = [
+        period.strip() for period in casy_string.split(";") if period.strip()
+    ]
+
+    for time_range in time_ranges:
+        if "-" in time_range:
+            start_str, end_str = time_range.split("-", 1)
+            start_time = parse_time(start_str.strip())
+            end_time = parse_time(end_str.strip())
+            if start_time is not None and end_time is not None:
+                periods.append((start_time, end_time))
+
+    return periods
+
+
+def get_today_schedule(
+    json_data: dict, preferred_signal: str | None = None
+) -> list[tuple[time, time]]:
+    """Get today's schedule from API response."""
+    if not json_data or "data" not in json_data or "signals" not in json_data["data"]:
+        _LOGGER.error("Invalid API response structure")
+        return []
+
+    current_time = datetime.now(tz=CEZ_TIMEZONE)
+    today_date = current_time.strftime("%d.%m.%Y")
+
+    # Find all today's schedules
+    today_signals = []
+    for signal in json_data["data"]["signals"]:
+        if signal.get("datum") == today_date:
+            today_signals.append(signal)
+
+    if not today_signals:
+        _LOGGER.warning("No schedule found for today %s", today_date)
+        return []
+
+    # If preferred signal is specified, try to find it
+    if preferred_signal:
+        for signal in today_signals:
+            if signal.get("signal") == preferred_signal:
+                casy = signal.get("casy", "")
+                signal_name = signal.get("signal", "unknown")
+                _LOGGER.info(
+                    "Found preferred signal %s for today %s: %s",
+                    signal_name,
+                    today_date,
+                    casy,
+                )
+                return parse_time_periods(casy)
+        _LOGGER.warning(
+            "Preferred signal %s not found for today, using first available",
+            preferred_signal,
+        )
+
+    # If no preferred signal or not found, pick the first one
+    first_signal = today_signals[0]
+    casy = first_signal.get("casy", "")
+    signal_name = first_signal.get("signal", "unknown")
+    _LOGGER.info("Using signal %s for today %s: %s", signal_name, today_date, casy)
+
+    return parse_time_periods(casy)
+
+
 def isHdo(
-    json_calendar: list[dict],
+    json_data: dict,
+    preferred_signal: str | None = None,
 ) -> tuple[
     bool,
     time | None,
@@ -155,52 +215,21 @@ def isHdo(
     Determine HDO state for current timestamp.
 
     Args:
-        json_calendar: JSON calendar schedule from CEZ
+        json_data: JSON response from CEZ new API
+        preferred_signal: Optional preferred signal name
 
     Returns:
         Tuple with HDO data: (low_tariff_active, low_start, low_end, low_duration,
                              high_tariff_active, high_start, high_end, high_duration)
     """
-    if not json_calendar or len(json_calendar) < 2:
-        _LOGGER.error("Invalid calendar data")
+    # Get today's schedule with preferred signal
+    low_periods = get_today_schedule(json_data, preferred_signal)
+
+    if not low_periods:
+        _LOGGER.error("No schedule data available")
         return False, None, None, None, False, None, None, None
 
     current_time = datetime.now(tz=CEZ_TIMEZONE)
-
-    # Choose appropriate calendar (weekday vs weekend/holiday)
-    # Find the correct calendar by PLATNOST field
-    weekday_calendar = None
-    weekend_calendar = None
-
-    for calendar in json_calendar:
-        platnost = calendar.get("PLATNOST", "")
-        if "Po" in platnost and "Pá" in platnost:  # "Po - Pá"
-            weekday_calendar = calendar
-        elif "So" in platnost and "Ne" in platnost:  # "So - Ne"
-            weekend_calendar = calendar
-
-    # Use weekend calendar for Saturday, Sunday, and public holidays
-    is_weekend_or_holiday = (
-        current_time.weekday() >= 5  # Saturday (5) or Sunday (6)
-        or is_czech_holiday(current_time)  # Czech public holiday
-    )
-
-    day_calendar = weekday_calendar if not is_weekend_or_holiday else weekend_calendar
-
-    # Safety check
-    if day_calendar is None:
-        _LOGGER.error("Could not find appropriate calendar for current time")
-        return (False, None, None, None, False, None, None, None)
-
-    _LOGGER.debug(
-        "🗓️  HDO Calendar Selection: Date=%s, Weekday=%d, Is_Holiday=%s, Using=%s calendar, PLATNOST=%s",
-        current_time.date(),
-        current_time.weekday(),
-        is_czech_holiday(current_time),
-        "weekend/holiday" if is_weekend_or_holiday else "weekday",
-        day_calendar.get("PLATNOST", "Unknown"),
-    )
-
     checked_time = current_time.time()
 
     # Initialize return values
@@ -212,28 +241,19 @@ def isHdo(
     high_duration = None
 
     try:
-        # Build list of all low tariff periods
-        low_periods = []
-
-        # Process up to 10 time periods
-        for i in range(1, 11):
-            start_time = parse_time(day_calendar.get(f"CAS_ZAP_{i}"))
-            end_time = parse_time(day_calendar.get(f"CAS_VYP_{i}"))
-
-            if start_time is not None and end_time is not None:
-                low_periods.append({"start": start_time, "end": end_time, "index": i})
-
-        # Sort periods by start time
-        low_periods.sort(key=lambda x: cast(time, x["start"]))
+        # Convert periods to the same format as before
+        periods_list = []
+        for i, (start_time, end_time) in enumerate(low_periods):
+            periods_list.append({"start": start_time, "end": end_time, "index": i})
 
         _LOGGER.debug(
             "🔍 Low tariff periods: %s",
-            [f"{p['start']}-{p['end']}" for p in low_periods],
+            [f"{p['start']}-{p['end']}" for p in periods_list],
         )
 
         # Check if we're currently in a low tariff period
         current_low_period = None
-        for period in low_periods:
+        for period in periods_list:
             period_start = cast(time, period["start"])
             period_end = cast(time, period["end"])
             if time_in_range(period_start, period_end, checked_time):
@@ -251,8 +271,8 @@ def isHdo(
             high_start = cast(time, current_low_period["end"])
 
             # Find next low period after current one
-            current_index = low_periods.index(current_low_period)
-            next_low_period = low_periods[(current_index + 1) % len(low_periods)]
+            current_index = periods_list.index(current_low_period)
+            next_low_period = periods_list[(current_index + 1) % len(periods_list)]
             high_end = cast(time, next_low_period["start"])
             high_duration = timedelta(0)  # HIGH tariff is not active, so remaining = 0
 
@@ -267,27 +287,24 @@ def isHdo(
             high_tariff_active = True
 
             # Find which high tariff period we're in
-            # by finding the low period that ended before current time
-            # and the low period that starts after current time
             prev_low = None
             next_low = None
 
-            for i, period in enumerate(low_periods):
+            for i, period in enumerate(periods_list):
                 period_start = cast(time, period["start"])
                 if period_start > checked_time:
                     next_low = period
                     if i > 0:
-                        prev_low = low_periods[i - 1]
+                        prev_low = periods_list[i - 1]
                     else:
                         # Current time is before first low period
-                        # Previous low period is the last one (from previous day)
-                        prev_low = low_periods[-1] if low_periods else None
+                        prev_low = periods_list[-1] if periods_list else None
                     break
 
             # If no next_low found, it means we're after last period
-            if next_low is None and low_periods:
-                next_low = low_periods[0]  # First period of next day
-                prev_low = low_periods[-1]  # Last period of today
+            if next_low is None and periods_list:
+                next_low = periods_list[0]  # First period of next day
+                prev_low = periods_list[-1]  # Last period of today
 
             if prev_low and next_low:
                 high_start = cast(time, prev_low["end"])
@@ -297,9 +314,7 @@ def isHdo(
                 # Next low tariff info (for display purposes)
                 low_start = cast(time, next_low["start"])
                 low_end = cast(time, next_low["end"])
-                low_duration = timedelta(
-                    0
-                )  # LOW tariff is not active, so remaining = 0
+                low_duration = timedelta(0)
 
                 _LOGGER.debug(
                     "🔴 IN HIGH TARIFF: %s-%s, remaining: %s, next low: %s",
@@ -312,7 +327,7 @@ def isHdo(
                 _LOGGER.error("Could not determine high tariff period boundaries")
 
     except (KeyError, TypeError, ValueError) as err:
-        _LOGGER.error("Error processing calendar data: %s", err)
+        _LOGGER.error("Error processing schedule data: %s", err)
 
     return (
         low_tariff_active,

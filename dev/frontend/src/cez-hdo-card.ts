@@ -31,7 +31,6 @@ interface CezHdoData {
   highTariffDuration: string;
 }
 
-@customElement('cez-hdo-card')
 export class CezHdoCard extends LitElement implements LovelaceCard {
   @property({ attribute: false }) public hass!: HomeAssistant;
   @state() private config!: CezHdoCardConfig;
@@ -359,6 +358,14 @@ entities:
   }
 }
 
+// Safe registration - only register if not already defined
+if (!customElements.get('cez-hdo-card')) {
+  customElements.define('cez-hdo-card', CezHdoCard);
+  console.info('✅ ČEZ HDO Card registered successfully');
+} else {
+  console.info('ℹ️ ČEZ HDO Card already registered, skipping');
+}
+
 // Register the card
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
@@ -368,7 +375,7 @@ entities:
 });
 
 console.info(
-  `%c  CEZ-HDO-CARD %c  Version 1.2.1  `,
+  `%c  CEZ-HDO-CARD %c  Version 2.0.0  `,
   'color: orange; font-weight: bold; background: black',
   'color: white; font-weight: bold; background: dimgray',
 );

@@ -18,13 +18,13 @@ from . import downloader
 
 _LOGGER = logging.getLogger(__name__)
 
-CONF_REGION = "region"
-CONF_CODE = "code"
+CONF_EAN = "ean"
+CONF_SIGNAL = "signal"
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
-        vol.Required(CONF_REGION): cv.string,
-        vol.Required(CONF_CODE): cv.string,
+        vol.Required(CONF_EAN): cv.string,
+        vol.Optional(CONF_SIGNAL): cv.string,
     }
 )
 
@@ -36,16 +36,16 @@ def setup_platform(
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     """Set up the CEZ HDO sensor platform."""
-    region = config[CONF_REGION]
-    code = config[CONF_CODE]
+    ean = config[CONF_EAN]
+    signal = config.get(CONF_SIGNAL)
 
     entities = [
-        LowTariffStart(region, code),
-        LowTariffEnd(region, code),
-        LowTariffDuration(region, code),
-        HighTariffStart(region, code),
-        HighTariffEnd(region, code),
-        HighTariffDuration(region, code),
+        LowTariffStart(ean, signal),
+        LowTariffEnd(ean, signal),
+        LowTariffDuration(ean, signal),
+        HighTariffStart(ean, signal),
+        HighTariffEnd(ean, signal),
+        HighTariffDuration(ean, signal),
     ]
     add_entities(entities, True)
 
@@ -62,9 +62,9 @@ class CezHdoSensor(CezHdoBaseEntity, SensorEntity):
 class LowTariffStart(CezHdoSensor):
     """Sensor for low tariff start time."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, ean: str, signal: str | None = None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "LowTariffStart")
+        super().__init__(ean, "LowTariffStart", signal)
 
     @property
     def native_value(self) -> time | None:
@@ -76,9 +76,9 @@ class LowTariffStart(CezHdoSensor):
 class LowTariffEnd(CezHdoSensor):
     """Sensor for low tariff end time."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, ean: str, signal: str | None = None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "LowTariffEnd")
+        super().__init__(ean, "LowTariffEnd", signal)
 
     @property
     def icon(self) -> str:
@@ -95,9 +95,9 @@ class LowTariffEnd(CezHdoSensor):
 class LowTariffDuration(CezHdoSensor):
     """Sensor for low tariff duration."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, ean: str, signal: str | None = None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "LowTariffDuration")
+        super().__init__(ean, "LowTariffDuration", signal)
 
     @property
     def icon(self) -> str:
@@ -117,9 +117,9 @@ class LowTariffDuration(CezHdoSensor):
 class HighTariffStart(CezHdoSensor):
     """Sensor for high tariff start time."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, ean: str, signal: str | None = None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "HighTariffStart")
+        super().__init__(ean, "HighTariffStart", signal)
 
     @property
     def native_value(self) -> time | None:
@@ -131,9 +131,9 @@ class HighTariffStart(CezHdoSensor):
 class HighTariffEnd(CezHdoSensor):
     """Sensor for high tariff end time."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, ean: str, signal: str | None = None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "HighTariffEnd")
+        super().__init__(ean, "HighTariffEnd", signal)
 
     @property
     def icon(self) -> str:
@@ -150,9 +150,9 @@ class HighTariffEnd(CezHdoSensor):
 class HighTariffDuration(CezHdoSensor):
     """Sensor for high tariff duration."""
 
-    def __init__(self, region: str, code: str) -> None:
+    def __init__(self, ean: str, signal: str | None = None) -> None:
         """Initialize the sensor."""
-        super().__init__(region, code, "HighTariffDuration")
+        super().__init__(ean, "HighTariffDuration", signal)
 
     @property
     def icon(self) -> str:
