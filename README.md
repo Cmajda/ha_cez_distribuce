@@ -15,6 +15,7 @@
 - [🖼️ Ukázka karty](#️-ukázka-karty)
 - [📚 Dokumentace](#-dokumentace)
 - [👥 Pro vývojáře](#-pro-vývojáře)
+- [🔧 Upgrade z verze 1.x.x na 2.x.x](#-upgrade-z-verze-1xx-na-2xx)
 
 ## 📋 O doplňku
 
@@ -125,6 +126,15 @@ Karta zobrazuje:
 - 🛠️ **[Průvodce services](docs/service-guide.md)** - jak použít `list_signals` service a signal selection
 - 🔄 **[Upgrade Guide](docs/upgrade-guide.md)** - migrace ze staré verze (code/region → EAN)
 - 🏗️ **[Vývojářská dokumentace](docs/developer-guide.md)** - pro vývojáře a přispěvatele
+
+## 🔧 Upgrade z verze 1.x.x na 2.x.x
+
+1. **smazat/zakomentovat všechny senzory pro HDO v configuration.yaml**
+2. **smaž složku "www\cez-hdo"**
+3. **odinstalovat doplněk**
+4. **restartuj HA**
+5. **Proveď novou instalaci dle dokumentace**
+6. **Restart HA**
 
 ## 👥 Pro vývojáře
 
