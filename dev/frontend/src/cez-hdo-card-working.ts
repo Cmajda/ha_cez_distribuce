@@ -25,7 +25,6 @@ interface CezHdoCardConfig {
   compact_mode?: boolean;
 }
 
-@customElement('cez-hdo-card')
 export class CezHdoCard extends LitElement {
   @property({ attribute: false }) public hass: any;
   @state() private config!: CezHdoCardConfig;
@@ -247,6 +246,11 @@ export class CezHdoCard extends LitElement {
   }
 }
 
+// Register the custom element if not already registered
+if (!customElements.get('cez-hdo-card')) {
+  customElements.define('cez-hdo-card', CezHdoCard);
+}
+
 // Register the card
 (window as any).customCards = (window as any).customCards || [];
 (window as any).customCards.push({
@@ -256,4 +260,4 @@ export class CezHdoCard extends LitElement {
   preview: true,
 });
 
-console.info("ČEZ HDO Card v2.0.0 loaded successfully");
+console.info("ČEZ HDO Card v2.0.1 loaded successfully");

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 import time
-from datetime import timedelta
+from datetime import timedelta, datetime
 from pathlib import Path
 from typing import Any
 
@@ -120,30 +120,36 @@ class CezHdoBaseEntity(Entity):
                             "✅ CEZ HDO: API success, signals: %d", signals_count
                         )
 
+                        # Vždy uloží data do cache pro budoucí použití (i když jsou prázdná)
+                        for cache_path in cache_paths:
+                            try:
+                                cache_dir = Path(cache_path).parent
+                                cache_dir.mkdir(parents=True, exist_ok=True)
+                                # Přidáme timestamp pro debugging
+                                cache_data = {
+                                    "timestamp": datetime.now().isoformat(),
+                                    "data": json_data,
+                                }
+                                with open(cache_path, "w", encoding="utf-8") as f:
+                                    json.dump(
+                                        cache_data, f, ensure_ascii=False, indent=2
+                                    )
+                                _LOGGER.info(
+                                    "💾 CEZ HDO: Data saved to cache: %s (signals: %d)",
+                                    cache_path,
+                                    signals_count,
+                                )
+                                break
+                            except Exception as cache_err:
+                                _LOGGER.warning(
+                                    "CEZ HDO: Cache save failed for %s: %s",
+                                    cache_path,
+                                    cache_err,
+                                )
+
                         if signals_count > 0:
                             self._response_data = json_data
                             self._last_update_success = True
-
-                            # Uložit do cache
-                            for cache_path in cache_paths:
-                                try:
-                                    cache_dir = Path(cache_path).parent
-                                    cache_dir.mkdir(parents=True, exist_ok=True)
-                                    with open(cache_path, "w", encoding="utf-8") as f:
-                                        json.dump(
-                                            json_data, f, ensure_ascii=False, indent=2
-                                        )
-                                    _LOGGER.info(
-                                        "💾 CEZ HDO: Data saved to cache: %s",
-                                        cache_path,
-                                    )
-                                    break
-                                except Exception as cache_err:
-                                    _LOGGER.warning(
-                                        "CEZ HDO: Cache save failed for %s: %s",
-                                        cache_path,
-                                        cache_err,
-                                    )
                             return
                         else:
                             _LOGGER.warning("CEZ HDO: API returned empty signals array")
@@ -204,12 +210,28 @@ class CezHdoBaseEntity(Entity):
             with open(cache_file, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            json_data = json.loads(content)
+            cache_data = json.loads(content)
+
+            # Podporovat nový formát s timestampem i starý
+            if "data" in cache_data and "timestamp" in cache_data:
+                json_data = cache_data["data"]
+                timestamp = cache_data["timestamp"]
+                _LOGGER.info(
+                    "CEZ HDO: Loaded cache from %s (timestamp: %s)",
+                    cache_file,
+                    timestamp,
+                )
+            else:
+                # Starý formát - přímo data
+                json_data = cache_data
+                _LOGGER.info("CEZ HDO: Loaded legacy cache from %s", cache_file)
+
             self._response_data = json_data
             self._last_update_success = True
             return True
 
-        except Exception:
+        except Exception as e:
+            _LOGGER.warning("CEZ HDO: Failed to load cache from %s: %s", cache_file, e)
             return False
 
     def _get_hdo_data(self) -> tuple[bool, Any, Any, Any, bool, Any, Any, Any]:
