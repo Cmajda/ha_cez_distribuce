@@ -61,29 +61,26 @@ class CezHdoBaseEntity(Entity):
 
     @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self) -> None:
-        """Fetch new state data for the sensor with cache fallback."""
-        # Pokusit se načíst z cache jako první priorita
+        """Fetch new state data for the sensor with cache fallback and validity check."""
         cache_paths = [
             "/config/www/cez_hdo/cez_hdo.json",
             "/config/www/cez_hdo_debug.json",
-            "/mnt/ha-config/www/cez_hdo/cez_hdo.json",
-            "/mnt/ha-config/www/cez_hdo_debug.json",
         ]
 
-        # Nejdříve zkusit načíst z cache
+        # Zkusit načíst platná data z cache
         for cache_path in cache_paths:
-            if self._load_from_cache(cache_path):
-                _LOGGER.info("CEZ HDO: Loaded from cache: %s", cache_path)
+            if self._load_from_cache(cache_path, check_validity=True):
+                _LOGGER.info("CEZ HDO: Loaded valid cache: %s", cache_path)
                 return
 
-        # Pokud cache není dostupná, zkusit API se zkrácenými timeouty
-        for attempt in range(2):  # Až 2 pokusy
+        # Pokud cache není dostupná nebo je neplatná, zkusit API
+        for attempt in range(2):
             try:
                 api_url = downloader.BASE_URL
                 request_data = downloader.get_request_data(self.ean)
 
                 _LOGGER.info(
-                    "🌐 CEZ HDO: Cache not found, trying API (attempt %d/2) - URL: %s, EAN: %s",
+                    "🌐 CEZ HDO: Cache not found or expired, trying API (attempt %d/2) - URL: %s, EAN: %s",
                     attempt + 1,
                     api_url,
                     self.ean,
@@ -112,7 +109,6 @@ class CezHdoBaseEntity(Entity):
 
                         json_data = json.loads(content_str)
 
-                        # Check if we have signals data
                         signals_count = len(
                             json_data.get("data", {}).get("signals", [])
                         )
@@ -120,12 +116,11 @@ class CezHdoBaseEntity(Entity):
                             "✅ CEZ HDO: API success, signals: %d", signals_count
                         )
 
-                        # Vždy uloží data do cache pro budoucí použití (i když jsou prázdná)
+                        # Uložit nová data do cache
                         for cache_path in cache_paths:
                             try:
                                 cache_dir = Path(cache_path).parent
                                 cache_dir.mkdir(parents=True, exist_ok=True)
-                                # Přidáme timestamp pro debugging
                                 cache_data = {
                                     "timestamp": datetime.now().isoformat(),
                                     "data": json_data,
@@ -201,8 +196,8 @@ class CezHdoBaseEntity(Entity):
         except Exception as e:
             _LOGGER.warning("CEZ HDO: Cache save failed: %s", str(e)[:50])
 
-    def _load_from_cache(self, cache_file: str) -> bool:
-        """Load data from cache file. Returns True if successful."""
+    def _load_from_cache(self, cache_file: str, check_validity: bool = False) -> bool:
+        """Load data from cache file. Returns True if successful and valid."""
         try:
             if not Path(cache_file).exists():
                 return False
@@ -212,17 +207,30 @@ class CezHdoBaseEntity(Entity):
 
             cache_data = json.loads(content)
 
-            # Podporovat nový formát s timestampem i starý
+            # Nový formát s timestampem
             if "data" in cache_data and "timestamp" in cache_data:
                 json_data = cache_data["data"]
                 timestamp = cache_data["timestamp"]
+                cache_time = datetime.fromisoformat(timestamp)
+                now = datetime.now()
+                age = now - cache_time
+                if check_validity and age > timedelta(days=1):
+                    _LOGGER.info(
+                        "CEZ HDO: Cache expired (%s, age: %s), ignoring.",
+                        cache_file,
+                        age,
+                    )
+                    return False
                 _LOGGER.info(
                     "CEZ HDO: Loaded cache from %s (timestamp: %s)",
                     cache_file,
                     timestamp,
                 )
             else:
-                # Starý formát - přímo data
+                # Starý formát - přímo data, vždy považovat za neplatné pokud je vyžadována validita
+                if check_validity:
+                    _LOGGER.info("CEZ HDO: Legacy cache format, ignoring for validity.")
+                    return False
                 json_data = cache_data
                 _LOGGER.info("CEZ HDO: Loaded legacy cache from %s", cache_file)
 
