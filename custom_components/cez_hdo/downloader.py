@@ -198,9 +198,9 @@ def get_today_schedule(
     periods_today = parse_time_periods(casy)
 
     # Pokud poslední interval dne končí ve 24:00, spoj s prvním intervalem následujícího dne
-    if periods_today and periods_today[-1][1].strftime('%H:%M') == '00:00':
+    if periods_today and periods_today[-1][1].strftime("%H:%M") == "00:00":
         # Najdi zítra v datech
-        next_date = (current_time + timedelta(days=1)).strftime('%d.%m.%Y')
+        next_date = (current_time + timedelta(days=1)).strftime("%d.%m.%Y")
         next_signal = None
         for signal in json_data["data"]["signals"]:
             if signal.get("datum") == next_date and signal.get("signal") == signal_name:
@@ -209,7 +209,7 @@ def get_today_schedule(
         if next_signal:
             next_casy = next_signal.get("casy", "")
             periods_next = parse_time_periods(next_casy)
-            if periods_next and periods_next[0][0].strftime('%H:%M') == '00:00':
+            if periods_next and periods_next[0][0].strftime("%H:%M") == "00:00":
                 # Spoj poslední dnešní a první zítřejší interval
                 merged_period = (periods_today[-1][0], periods_next[0][1])
                 periods_today = periods_today[:-1] + [merged_period] + periods_next[1:]
