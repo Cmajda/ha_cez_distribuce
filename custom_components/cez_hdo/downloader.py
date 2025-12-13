@@ -210,11 +210,20 @@ def get_today_schedule(
         if prev_signal:
             prev_casy = prev_signal.get("casy", "")
             periods_prev = parse_time_periods(prev_casy)
-            if periods_prev and periods_prev[-1][1].strftime("%H:%M") in ["00:00", "24:00"]:
+            if periods_prev and periods_prev[-1][1].strftime("%H:%M") in [
+                "00:00",
+                "24:00",
+            ]:
                 # Debug logování vypnuto
                 merged_period = (periods_prev[-1][0], periods_today[0][1])
                 # Odstraň všechny dnešní intervaly začínající v 00:00 a končící stejně jako merged_period
-                periods_today = [merged_period] + [p for p in periods_today[1:] if not (p[0].strftime("%H:%M") == "00:00" and p[1] == merged_period[1])]
+                periods_today = [merged_period] + [
+                    p
+                    for p in periods_today[1:]
+                    if not (
+                        p[0].strftime("%H:%M") == "00:00" and p[1] == merged_period[1]
+                    )
+                ]
     # Stále platí i logika spojování přes půlnoc na konci dne
     if periods_today and periods_today[-1][1].strftime("%H:%M") == "00:00":
         # Debug logování vypnuto
@@ -232,7 +241,13 @@ def get_today_schedule(
                 # Debug logování vypnuto
                 merged_period = (periods_today[-1][0], periods_next[0][1])
                 # Odstraň všechny dnešní intervaly začínající v 00:00 a končící stejně jako merged_period
-                periods_today = [p for p in periods_today[:-1] if not (p[0].strftime("%H:%M") == "00:00" and p[1] == merged_period[1])]
+                periods_today = [
+                    p
+                    for p in periods_today[:-1]
+                    if not (
+                        p[0].strftime("%H:%M") == "00:00" and p[1] == merged_period[1]
+                    )
+                ]
                 periods_today.append(merged_period)
                 # Necháme pouze dnešní intervaly, zítřejší už nepřidáváme (patří do dalšího dne)
             else:
