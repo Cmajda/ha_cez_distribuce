@@ -196,10 +196,28 @@ def get_today_schedule(
     _LOGGER.info("Using signal %s for today %s: %s", signal_name, today_date, casy)
 
     periods_today = parse_time_periods(casy)
+    # Debug logování vypnuto
 
-    # Pokud poslední interval dne končí ve 24:00, spoj s prvním intervalem následujícího dne
+    # Pokud první interval dne začíná v 00:00, spoj s posledním intervalem předchozího dne, pokud navazují
+    if periods_today and periods_today[0][0].strftime("%H:%M") == "00:00":
+        # Debug logování vypnuto
+        prev_date = (current_time - timedelta(days=1)).strftime("%d.%m.%Y")
+        prev_signal = None
+        for signal in json_data["data"]["signals"]:
+            if signal.get("datum") == prev_date and signal.get("signal") == signal_name:
+                prev_signal = signal
+                break
+        if prev_signal:
+            prev_casy = prev_signal.get("casy", "")
+            periods_prev = parse_time_periods(prev_casy)
+            if periods_prev and periods_prev[-1][1].strftime("%H:%M") in ["00:00", "24:00"]:
+                # Debug logování vypnuto
+                merged_period = (periods_prev[-1][0], periods_today[0][1])
+                # Odstraň všechny dnešní intervaly začínající v 00:00 a končící stejně jako merged_period
+                periods_today = [merged_period] + [p for p in periods_today[1:] if not (p[0].strftime("%H:%M") == "00:00" and p[1] == merged_period[1])]
+    # Stále platí i logika spojování přes půlnoc na konci dne
     if periods_today and periods_today[-1][1].strftime("%H:%M") == "00:00":
-        # Najdi zítra v datech
+        # Debug logování vypnuto
         next_date = (current_time + timedelta(days=1)).strftime("%d.%m.%Y")
         next_signal = None
         for signal in json_data["data"]["signals"]:
@@ -209,10 +227,20 @@ def get_today_schedule(
         if next_signal:
             next_casy = next_signal.get("casy", "")
             periods_next = parse_time_periods(next_casy)
+            # Pokud první interval zítřka začíná v 00:00, spoj je
             if periods_next and periods_next[0][0].strftime("%H:%M") == "00:00":
-                # Spoj poslední dnešní a první zítřejší interval
+                # Debug logování vypnuto
                 merged_period = (periods_today[-1][0], periods_next[0][1])
-                periods_today = periods_today[:-1] + [merged_period] + periods_next[1:]
+                # Odstraň všechny dnešní intervaly začínající v 00:00 a končící stejně jako merged_period
+                periods_today = [p for p in periods_today[:-1] if not (p[0].strftime("%H:%M") == "00:00" and p[1] == merged_period[1])]
+                periods_today.append(merged_period)
+                # Necháme pouze dnešní intervaly, zítřejší už nepřidáváme (patří do dalšího dne)
+            else:
+                # Pokud by vznikl interval 00:00-00:00, odstraň ho
+                if periods_today[-1][0].strftime("%H:%M") == "00:00":
+                    # Debug logování vypnuto
+                    periods_today = periods_today[:-1]
+    # Debug logování vypnuto
     return periods_today
 
 
