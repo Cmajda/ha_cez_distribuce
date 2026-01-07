@@ -281,14 +281,15 @@ def isHdo(
 
     Returns:
         Tuple with HDO data: (low_tariff_active, low_start, low_end, low_duration,
-                             high_tariff_active, high_start, high_end, high_duration)
+                             high_tariff_active, high_start, high_end, high_duration,
+                             next_low_start, next_low_end)
     """
     # Get today's schedule with preferred signal
     low_periods = get_today_schedule(json_data, preferred_signal)
 
     if not low_periods:
         _LOGGER.error("No schedule data available")
-        return False, None, None, None, False, None, None, None
+        return False, None, None, None, False, None, None, None, None, None
 
     current_time = datetime.now(tz=CEZ_TIMEZONE)
     checked_time = current_time.time()
@@ -300,6 +301,7 @@ def isHdo(
     high_tariff_active = False
     high_start = high_end = None
     high_duration = None
+    next_low_start = next_low_end = None
 
     try:
         # Convert periods to the same format as before
@@ -307,90 +309,86 @@ def isHdo(
         for i, (start_time, end_time) in enumerate(low_periods):
             periods_list.append({"start": start_time, "end": end_time, "index": i})
 
-        _LOGGER.debug(
-            "🔍 Low tariff periods: %s",
-            [f"{p['start']}-{p['end']}" for p in periods_list],
-        )
-
-        # Check if we're currently in a low tariff period
+        # Najdi aktuální a následující NT interval
         current_low_period = None
-        for period in periods_list:
+        next_low_period = None
+        for i, period in enumerate(periods_list):
             period_start = cast(time, period["start"])
             period_end = cast(time, period["end"])
             if time_in_range(period_start, period_end, checked_time):
                 current_low_period = period
+                # Další NT interval je ten následující v seznamu (pokud existuje)
+                if i + 1 < len(periods_list):
+                    next_low_period = periods_list[i + 1]
+                else:
+                    next_low_period = None
                 break
+            elif period_start > checked_time and next_low_period is None:
+                next_low_period = period
 
         if current_low_period:
-            # We're in LOW tariff period
+            # Jsme v NT intervalu
             low_tariff_active = True
             low_start = cast(time, current_low_period["start"])
             low_end = cast(time, current_low_period["end"])
             low_duration = calculate_duration(checked_time, low_end)
-
-            # Find next high tariff (starts when current low ends)
             high_start = cast(time, current_low_period["end"])
-
-            # Find next low period after current one
-            current_index = periods_list.index(current_low_period)
-            next_low_period = periods_list[(current_index + 1) % len(periods_list)]
-            high_end = cast(time, next_low_period["start"])
-            high_duration = timedelta(0)  # HIGH tariff is not active, so remaining = 0
-
-            _LOGGER.debug(
-                "✅ IN LOW TARIFF: %s-%s, remaining: %s",
-                low_start,
-                low_end,
-                format_duration(low_duration),
-            )
+            # Další NT interval
+            if next_low_period:
+                next_low_start = cast(time, next_low_period["start"])
+                next_low_end = cast(time, next_low_period["end"])
+            else:
+                next_low_start = next_low_end = None
+            # Najdi začátek dalšího VT (mezi NT intervaly)
+            if next_low_period:
+                high_end = cast(time, next_low_period["start"])
+            else:
+                high_end = None
+            high_duration = timedelta(0)
         else:
-            # We're in HIGH tariff period
+            # Jsme ve VT intervalu
             high_tariff_active = True
-
-            # Find which high tariff period we're in
+            # Najdi předchozí a následující NT interval
             prev_low = None
-            next_low = None
-
             for i, period in enumerate(periods_list):
                 period_start = cast(time, period["start"])
                 if period_start > checked_time:
-                    next_low = period
+                    next_low_period = period
                     if i > 0:
                         prev_low = periods_list[i - 1]
                     else:
-                        # Current time is before first low period
                         prev_low = periods_list[-1] if periods_list else None
                     break
-
-            # If no next_low found, it means we're after last period
-            if next_low is None and periods_list:
-                next_low = periods_list[0]  # First period of next day
-                prev_low = periods_list[-1]  # Last period of today
-
-            if prev_low and next_low:
+            if next_low_period is None and periods_list:
+                next_low_period = periods_list[0]
+                prev_low = periods_list[-1]
+            if prev_low and next_low_period:
                 high_start = cast(time, prev_low["end"])
-                high_end = cast(time, next_low["start"])
+                high_end = cast(time, next_low_period["start"])
                 high_duration = calculate_duration(checked_time, high_end)
-
-                # Next low tariff info (for display purposes)
-                low_start = cast(time, next_low["start"])
-                low_end = cast(time, next_low["end"])
+                # Pro zobrazení dalšího NT intervalu
+                next_low_start = cast(time, next_low_period["start"])
+                next_low_end = cast(time, next_low_period["end"])
+                # low_start/low_end/low_duration nejsou relevantní, nastavíme None
+                low_start = low_end = None
                 low_duration = timedelta(0)
-
-                _LOGGER.debug(
-                    "🔴 IN HIGH TARIFF: %s-%s, remaining: %s, next low: %s",
-                    high_start,
-                    high_end,
-                    format_duration(high_duration),
-                    low_start,
-                )
             else:
                 _LOGGER.error("Could not determine high tariff period boundaries")
-
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("Error processing schedule data: %s", err)
 
     return (
+        low_tariff_active,
+        low_start,
+        low_end,
+        low_duration,
+        high_tariff_active,
+        high_start,
+        high_end,
+        high_duration,
+        next_low_start,
+        next_low_end,
+    )
         low_tariff_active,
         low_start,
         low_end,

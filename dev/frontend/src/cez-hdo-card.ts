@@ -29,6 +29,14 @@ interface CezHdoData {
   highTariffStart: string;
   highTariffEnd: string;
   highTariffDuration: string;
+  ntAktualniZacatek?: string;
+  ntAktualniKonec?: string;
+  ntDalsiZacatek?: string;
+  ntDalsiKonec?: string;
+  vtAktualniZacatek?: string;
+  vtAktualniKonec?: string;
+  vtDalsiZacatek?: string;
+  vtDalsiKonec?: string;
 }
 
 export class CezHdoCard extends LitElement implements LovelaceCard {
@@ -134,6 +142,13 @@ entities:
       return entity ? entity.state : 'unavailable';
     };
 
+    // Získat entity z hlavní entity (např. cez_hdo), kde jsou nové atributy
+    const cezHdoEntity = Object.values(this.hass.states).find(
+      (e: any) => e.entity_id && e.entity_id.startsWith('sensor.cez_hdo') && e.attributes && (
+        'nt_aktualni_zacatek' in e.attributes || 'nt_dalsi_zacatek' in e.attributes
+      )
+    ) as any;
+
     this.hdoData = {
       lowTariffActive: getEntityValue('binary_sensor.cez_hdo_lowtariffactive') === 'on',
       highTariffActive: getEntityValue('binary_sensor.cez_hdo_hightariffactive') === 'on',
@@ -142,7 +157,15 @@ entities:
       lowTariffDuration: getEntityValue('sensor.cez_hdo_lowtariffduration'),
       highTariffStart: getEntityValue('sensor.cez_hdo_hightariffstart'),
       highTariffEnd: getEntityValue('sensor.cez_hdo_hightariffend'),
-      highTariffDuration: getEntityValue('sensor.cez_hdo_hightariffduration')
+      highTariffDuration: getEntityValue('sensor.cez_hdo_hightariffduration'),
+      ntAktualniZacatek: cezHdoEntity?.attributes?.nt_aktualni_zacatek ?? '',
+      ntAktualniKonec: cezHdoEntity?.attributes?.nt_aktualni_konec ?? '',
+      ntDalsiZacatek: cezHdoEntity?.attributes?.nt_dalsi_zacatek ?? '',
+      ntDalsiKonec: cezHdoEntity?.attributes?.nt_dalsi_konec ?? '',
+      vtAktualniZacatek: cezHdoEntity?.attributes?.vt_aktualni_zacatek ?? '',
+      vtAktualniKonec: cezHdoEntity?.attributes?.vt_aktualni_konec ?? '',
+      vtDalsiZacatek: cezHdoEntity?.attributes?.vt_dalsi_zacatek ?? '',
+      vtDalsiKonec: cezHdoEntity?.attributes?.vt_dalsi_konec ?? '',
     };
   }
 
@@ -193,21 +216,34 @@ entities:
 
     return html`
       <div class="schedule">
-        <h4>Dnešní rozvrh</h4>
+        <h4>Aktuální a následující intervaly</h4>
 
         <div class="schedule-item low-tariff">
           <ha-icon icon="mdi:flash"></ha-icon>
-          <span class="tariff-label">Nízký tarif:</span>
+          <span class="tariff-label">Aktuální NT:</span>
           <span class="time-range">
-            ${this.formatTime(this.hdoData.lowTariffStart)} - ${this.formatTime(this.hdoData.lowTariffEnd)}
+            ${this.formatTime(this.hdoData.ntAktualniZacatek)} - ${this.formatTime(this.hdoData.ntAktualniKonec)}
           </span>
         </div>
-
+        <div class="schedule-item low-tariff">
+          <ha-icon icon="mdi:flash"></ha-icon>
+          <span class="tariff-label">Následující NT:</span>
+          <span class="time-range">
+            ${this.formatTime(this.hdoData.ntDalsiZacatek)} - ${this.formatTime(this.hdoData.ntDalsiKonec)}
+          </span>
+        </div>
         <div class="schedule-item high-tariff">
           <ha-icon icon="mdi:flash-outline"></ha-icon>
-          <span class="tariff-label">Vysoký tarif:</span>
+          <span class="tariff-label">Aktuální VT:</span>
           <span class="time-range">
-            ${this.formatTime(this.hdoData.highTariffStart)} - ${this.formatTime(this.hdoData.highTariffEnd)}
+            ${this.formatTime(this.hdoData.vtAktualniZacatek)} - ${this.formatTime(this.hdoData.vtAktualniKonec)}
+          </span>
+        </div>
+        <div class="schedule-item high-tariff">
+          <ha-icon icon="mdi:flash-outline"></ha-icon>
+          <span class="tariff-label">Následující VT:</span>
+          <span class="time-range">
+            ${this.formatTime(this.hdoData.vtDalsiZacatek)} - ${this.formatTime(this.hdoData.vtDalsiKonec)}
           </span>
         </div>
       </div>

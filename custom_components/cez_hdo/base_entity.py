@@ -56,6 +56,72 @@ class CezHdoBaseEntity(Entity):
         """Return the state attributes."""
         attributes = {}
         if self._response_data is not None:
+            # Získej aktuální a následující NT intervaly
+            try:
+                result = self._get_hdo_data()
+                (
+                    low_tariff_active,
+                    low_start,
+                    low_end,
+                    low_duration,
+                    high_tariff_active,
+                    high_start,
+                    high_end,
+                    high_duration,
+                    next_low_start,
+                    next_low_end,
+                ) = result if len(result) == 10 else (*result, None, None)
+
+                # Aktuální NT interval
+                if low_tariff_active and low_start and low_end:
+                    attributes["nt_aktualni_zacatek"] = low_start.strftime("%H:%M:%S")
+                    attributes["nt_aktualni_konec"] = low_end.strftime("%H:%M:%S")
+                # Následující NT interval
+                if next_low_start and next_low_end:
+                    attributes["nt_dalsi_zacatek"] = next_low_start.strftime("%H:%M:%S")
+                    attributes["nt_dalsi_konec"] = next_low_end.strftime("%H:%M:%S")
+                # Aktuální VT interval
+                if high_tariff_active and high_start and high_end:
+                    attributes["vt_aktualni_zacatek"] = high_start.strftime("%H:%M:%S")
+                    attributes["vt_aktualni_konec"] = high_end.strftime("%H:%M:%S")
+                # Následující VT interval (mezi NT intervaly)
+                # Najdi další VT interval podle pořadí intervalů
+                # Pokud jsme v NT, další VT je mezi aktuálním a následujícím NT
+                if low_tariff_active and low_end and next_low_start:
+                    attributes["vt_dalsi_zacatek"] = low_end.strftime("%H:%M:%S")
+                    attributes["vt_dalsi_konec"] = next_low_start.strftime("%H:%M:%S")
+                # Pokud jsme ve VT, další VT je až po následujícím NT
+                if high_tariff_active and next_low_end and next_low_start:
+                    attributes["vt_dalsi_zacatek"] = next_low_end.strftime("%H:%M:%S")
+                    # Najdi konec dalšího VT (začátek dalšího NT, pokud existuje)
+                    # Získáme seznam všech NT intervalů
+                    nt_intervals = []
+                    if self._response_data is not None:
+                        try:
+                            result2 = self._get_hdo_data()
+                            (
+                                _lta, _ls, _le, _ld, _hta, _hs, _he, _hd, nls, nle
+                            ) = result2 if len(result2) == 10 else (*result2, None, None)
+                            if nls and nle:
+                                nt_intervals.append((nls, nle))
+                        except Exception:
+                            pass
+                    # Pokud existuje další NT interval po next_low_end
+                    if len(nt_intervals) > 0:
+                        # Najdi první NT interval, který začíná po next_low_end
+                        dalsi_nt = None
+                        for s, e in nt_intervals:
+                            if s > next_low_end:
+                                dalsi_nt = (s, e)
+                                break
+                        if dalsi_nt:
+                            attributes["vt_dalsi_konec"] = dalsi_nt[0].strftime("%H:%M:%S")
+                        else:
+                            attributes["vt_dalsi_konec"] = None
+                    else:
+                        attributes["vt_dalsi_konec"] = None
+            except Exception as err:
+                attributes["hdo_error"] = str(err)
             attributes["response_json"] = self._response_data
         return attributes
 
