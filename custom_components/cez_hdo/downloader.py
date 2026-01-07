@@ -389,12 +389,3 @@ def isHdo(
         next_low_start,
         next_low_end,
     )
-        low_tariff_active,
-        low_start,
-        low_end,
-        low_duration,
-        high_tariff_active,
-        high_start,
-        high_end,
-        high_duration,
-    )
