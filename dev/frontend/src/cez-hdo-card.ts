@@ -411,7 +411,7 @@ if (!customElements.get('cez-hdo-card')) {
 });
 
 console.info(
-  `%c  CEZ-HDO-CARD %c  Version 2.0.4  `,
+  `%c  CEZ-HDO-CARD %c  Version 2.0.6  `,
   'color: orange; font-weight: bold; background: black',
   'color: white; font-weight: bold; background: dimgray',
 );

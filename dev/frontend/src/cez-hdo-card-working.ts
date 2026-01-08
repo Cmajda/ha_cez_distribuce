@@ -260,4 +260,4 @@ if (!customElements.get('cez-hdo-card')) {
   preview: true,
 });
 
-console.info("ČEZ HDO Card v2.0.4 loaded successfully");
+console.info("ČEZ HDO Card v2.0.6 loaded successfully");
