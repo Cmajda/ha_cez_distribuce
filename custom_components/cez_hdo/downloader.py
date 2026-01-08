@@ -30,9 +30,9 @@ class HdoData(NamedTuple):
     high_tariff_duration: timedelta | None
 
 
-def get_request_data(ean: str) -> dict:
-    """Build request data for CEZ API."""
-    return {"ean": ean}
+def get_request_data(ean: str, days: int = 0) -> dict:
+    """Build request data for CEZ API. Parametr days: 0=dnes, -1=včera, 1=zitra."""
+    return {"ean": ean, "days": days}
 
 
 def time_in_range(start: time, end: time, check_time: time) -> bool:
@@ -323,8 +323,27 @@ def isHdo(
                 else:
                     next_low_period = None
                 break
-            elif period_start > checked_time and next_low_period is None:
-                next_low_period = period
+        # Pokud jsme nenašli aktuální NT, najdi nejbližší následující NT interval
+        if not current_low_period:
+            for period in periods_list:
+                period_start = cast(time, period["start"])
+                if period_start > checked_time:
+                    next_low_period = period
+                    break
+            # Pokud není žádný další NT dnes, použij první zítra
+            if not next_low_period:
+                # Zkus najít první NT zítra
+                next_date = (current_time + timedelta(days=1)).strftime("%d.%m.%Y")
+                next_signal = None
+                for signal in json_data["data"]["signals"]:
+                    if signal.get("datum") == next_date:
+                        next_signal = signal
+                        break
+                if next_signal:
+                    next_casy = next_signal.get("casy", "")
+                    periods_next = parse_time_periods(next_casy)
+                    if periods_next:
+                        next_low_period = {"start": periods_next[0][0], "end": periods_next[0][1], "index": 0}
 
         if current_low_period:
             # Jsme v NT intervalu
@@ -348,32 +367,30 @@ def isHdo(
         else:
             # Jsme ve VT intervalu
             high_tariff_active = True
-            # Najdi předchozí a následující NT interval
+            # Najdi předchozí NT interval
             prev_low = None
             for i, period in enumerate(periods_list):
                 period_start = cast(time, period["start"])
                 if period_start > checked_time:
-                    next_low_period = period
                     if i > 0:
                         prev_low = periods_list[i - 1]
                     else:
                         prev_low = periods_list[-1] if periods_list else None
                     break
-            if next_low_period is None and periods_list:
-                next_low_period = periods_list[0]
-                prev_low = periods_list[-1]
-            if prev_low and next_low_period:
-                high_start = cast(time, prev_low["end"])
+            if next_low_period:
                 high_end = cast(time, next_low_period["start"])
-                high_duration = calculate_duration(checked_time, high_end)
-                # Pro zobrazení dalšího NT intervalu
                 next_low_start = cast(time, next_low_period["start"])
                 next_low_end = cast(time, next_low_period["end"])
-                # low_start/low_end/low_duration nejsou relevantní, nastavíme None
-                low_start = low_end = None
-                low_duration = timedelta(0)
             else:
-                _LOGGER.error("Could not determine high tariff period boundaries")
+                high_end = next_low_start = next_low_end = None
+            if prev_low:
+                high_start = cast(time, prev_low["end"])
+            else:
+                high_start = None
+            high_duration = calculate_duration(checked_time, high_end) if high_end else None
+            # low_start/low_end/low_duration nejsou relevantní, nastavíme None
+            low_start = low_end = None
+            low_duration = timedelta(0)
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("Error processing schedule data: %s", err)
 

@@ -149,81 +149,98 @@ class CezHdoBaseEntity(Entity):
                     "🌐 CEZ HDO: Cache not found or expired, trying API (attempt %d/2) - URL: %s, EAN: %s",
                     attempt + 1,
                     api_url,
-                    self.ean,
-                )
+                    for attempt in range(2):
+                        try:
+                            api_url = downloader.BASE_URL
+                            # Stáhnout data pro předchozí den i pro dnešek
+                            request_data_today = downloader.get_request_data(self.ean, days=0)
+                            request_data_prev = downloader.get_request_data(self.ean, days=-1)
 
-                response = requests.post(
-                    api_url,
-                    json=request_data,
-                    timeout=10,
-                    headers={
-                        "Accept": "application/json, text/plain, */*",
-                        "Content-Type": "application/json",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                    },
-                )
+                            _LOGGER.info(
+                                "🌐 CEZ HDO: Cache not found or expired, trying API (attempt %d/2) - URL: %s, EAN: %s",
+                                attempt + 1,
+                                api_url,
+                                self.ean,
+                            )
 
-                _LOGGER.info("CEZ HDO: HTTP Response status: %d", response.status_code)
+                            response_today = requests.post(
+                                api_url,
+                                json=request_data_today,
+                                timeout=10,
+                                headers={
+                                    "Accept": "application/json, text/plain, */*",
+                                    "Content-Type": "application/json",
+                                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                                },
+                            )
+                            response_prev = requests.post(
+                                api_url,
+                                json=request_data_prev,
+                                timeout=10,
+                                headers={
+                                    "Accept": "application/json, text/plain, */*",
+                                    "Content-Type": "application/json",
+                                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                                },
+                            )
 
-                if response.status_code == 200:
-                    try:
-                        content_str = response.content.decode("utf-8")
-                        _LOGGER.debug(
-                            "CEZ HDO: Response content length: %d bytes",
-                            len(content_str),
-                        )
+                            _LOGGER.info("CEZ HDO: HTTP Response status (today): %d", response_today.status_code)
+                            _LOGGER.info("CEZ HDO: HTTP Response status (prev): %d", response_prev.status_code)
 
-                        json_data = json.loads(content_str)
+                            if response_today.status_code == 200 and response_prev.status_code == 200:
+                                try:
+                                    content_today = response_today.content.decode("utf-8")
+                                    content_prev = response_prev.content.decode("utf-8")
+                                    json_today = json.loads(content_today)
+                                    json_prev = json.loads(content_prev)
 
-                        signals_count = len(
-                            json_data.get("data", {}).get("signals", [])
-                        )
-                        _LOGGER.info(
-                            "✅ CEZ HDO: API success, signals: %d", signals_count
-                        )
+                                    # Sloučit signály z obou odpovědí
+                                    signals_today = json_today.get("data", {}).get("signals", [])
+                                    signals_prev = json_prev.get("data", {}).get("signals", [])
+                                    merged_signals = signals_prev + signals_today
+                                    merged_json = json_today
+                                    if "data" not in merged_json:
+                                        merged_json["data"] = {}
+                                    merged_json["data"]["signals"] = merged_signals
 
-                        # Uložit nová data do cache
-                        for cache_path in cache_paths:
-                            try:
-                                cache_dir = Path(cache_path).parent
-                                cache_dir.mkdir(parents=True, exist_ok=True)
-                                cache_data = {
-                                    "timestamp": datetime.now().isoformat(),
-                                    "data": json_data,
-                                }
-                                with open(cache_path, "w", encoding="utf-8") as f:
-                                    json.dump(
-                                        cache_data, f, ensure_ascii=False, indent=2
+                                    signals_count = len(merged_signals)
+                                    _LOGGER.info(
+                                        "✅ CEZ HDO: API success, merged signals: %d", signals_count
                                     )
-                                _LOGGER.info(
-                                    "💾 CEZ HDO: Data saved to cache: %s (signals: %d)",
-                                    cache_path,
-                                    signals_count,
-                                )
-                                break
-                            except Exception as cache_err:
-                                _LOGGER.warning(
-                                    "CEZ HDO: Cache save failed for %s: %s",
-                                    cache_path,
-                                    cache_err,
-                                )
 
-                        if signals_count > 0:
-                            self._response_data = json_data
-                            self._last_update_success = True
-                            return
-                        else:
-                            _LOGGER.warning("CEZ HDO: API returned empty signals array")
-                    except (json.JSONDecodeError, UnicodeDecodeError) as parse_err:
-                        _LOGGER.error(
-                            "CEZ HDO: Failed to parse API response: %s", parse_err
-                        )
-                elif response.status_code == 502:
-                    _LOGGER.warning(
-                        "CEZ HDO: Server error 502 - retrying in 3 seconds..."
-                    )
-                    if attempt == 0:  # Pouze při prvním pokusu čekej
-                        time.sleep(3)
+                                    # Uložit nová data do cache
+                                    for cache_path in cache_paths:
+                                        try:
+                                            cache_dir = Path(cache_path).parent
+                                            cache_dir.mkdir(parents=True, exist_ok=True)
+                                            cache_data = {
+                                                "timestamp": datetime.now().isoformat(),
+                                                "data": merged_json,
+                                            }
+                                            with open(cache_path, "w", encoding="utf-8") as f:
+                                                json.dump(
+                                                    cache_data, f, ensure_ascii=False, indent=2
+                                                )
+                                            _LOGGER.info(
+                                                "💾 CEZ HDO: Data saved to cache: %s (signals: %d)",
+                                                cache_path,
+                                                signals_count,
+                                            )
+                                        except Exception as cache_err:
+                                            _LOGGER.warning(
+                                                "CEZ HDO: Failed to save cache: %s (%s)",
+                                                cache_path,
+                                                cache_err,
+                                            )
+                                    self._response_data = merged_json
+                                    self._last_update_success = True
+                                    return
+                                except Exception as parse_err:
+                                    _LOGGER.error("CEZ HDO: Failed to parse/merge API response: %s", parse_err)
+                            else:
+                                _LOGGER.error("CEZ HDO: API HTTP error: today=%d, prev=%d", response_today.status_code, response_prev.status_code)
+                        except Exception as e:
+                            _LOGGER.error("CEZ HDO: API request failed: %s", e)
                         continue
                 else:
                     _LOGGER.error(
