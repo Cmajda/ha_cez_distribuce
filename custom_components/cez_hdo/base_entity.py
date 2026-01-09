@@ -56,121 +56,42 @@ class CezHdoBaseEntity(Entity):
         """Return the state attributes."""
         attributes = {}
         if self._response_data is not None:
-            # Získej aktuální a následující NT intervaly
-            try:
-                result = self._get_hdo_data()
-                (
-                    low_tariff_active,
-                    low_start,
-                    low_end,
-                    low_duration,
-                    high_tariff_active,
-                    high_start,
-                    high_end,
-                    high_duration,
-                    next_low_start,
-                    next_low_end,
-                ) = result if len(result) == 10 else (*result, None, None)
-
-                # Aktuální NT interval
-                if low_tariff_active and low_start and low_end:
-                    attributes["nt_aktualni_zacatek"] = low_start.strftime("%H:%M:%S")
-                    attributes["nt_aktualni_konec"] = low_end.strftime("%H:%M:%S")
-                # Následující NT interval
-                if next_low_start and next_low_end:
-                    attributes["nt_dalsi_zacatek"] = next_low_start.strftime("%H:%M:%S")
-                    attributes["nt_dalsi_konec"] = next_low_end.strftime("%H:%M:%S")
-                # Aktuální VT interval
-                if high_tariff_active and high_start and high_end:
-                    attributes["vt_aktualni_zacatek"] = high_start.strftime("%H:%M:%S")
-                    attributes["vt_aktualni_konec"] = high_end.strftime("%H:%M:%S")
-                # Následující VT interval (mezi NT intervaly)
-                # Najdi další VT interval podle pořadí intervalů
-                # Pokud jsme v NT, další VT je mezi aktuálním a následujícím NT
-                if low_tariff_active and low_end and next_low_start:
-                    attributes["vt_dalsi_zacatek"] = low_end.strftime("%H:%M:%S")
-                    attributes["vt_dalsi_konec"] = next_low_start.strftime("%H:%M:%S")
-                # Pokud jsme ve VT, další VT je až po následujícím NT
-                if high_tariff_active and next_low_end and next_low_start:
-                    attributes["vt_dalsi_zacatek"] = next_low_end.strftime("%H:%M:%S")
-                    # Najdi konec dalšího VT (začátek dalšího NT, pokud existuje)
-                    # Získáme seznam všech NT intervalů
-                    nt_intervals = []
-                    if self._response_data is not None:
-                        try:
-                            result2 = self._get_hdo_data()
-                            (_lta, _ls, _le, _ld, _hta, _hs, _he, _hd, nls, nle) = (
-                                result2
-                                if len(result2) == 10
-                                else (*result2, None, None)
-                            )
-                            if nls and nle:
-                                nt_intervals.append((nls, nle))
-                        except Exception:
-                            pass
-                    # Pokud existuje další NT interval po next_low_end
-                    if len(nt_intervals) > 0:
-                        # Najdi první NT interval, který začíná po next_low_end
-                        dalsi_nt = None
-                        for s, e in nt_intervals:
-                            if s > next_low_end:
-                                dalsi_nt = (s, e)
-                                break
-                        if dalsi_nt:
-                            attributes["vt_dalsi_konec"] = dalsi_nt[0].strftime(
-                                "%H:%M:%S"
-                            )
-                        else:
-                            attributes["vt_dalsi_konec"] = None
-                    else:
-                        attributes["vt_dalsi_konec"] = None
-            except Exception as err:
-                attributes["hdo_error"] = str(err)
             attributes["response_json"] = self._response_data
         return attributes
 
     @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self) -> None:
-        """Fetch new state data for the sensor with cache fallback and validity check."""
+        """Fetch new state data for the sensor with cache fallback."""
+        # Pokusit se načíst z cache jako první priorita
         cache_paths = [
             "/config/www/cez_hdo/cez_hdo.json",
             "/config/www/cez_hdo_debug.json",
+            "/mnt/ha-config/www/cez_hdo/cez_hdo.json",
+            "/mnt/ha-config/www/cez_hdo_debug.json",
         ]
 
-        # Zkusit načíst platná data z cache
+        # Nejdříve zkusit načíst z cache
         for cache_path in cache_paths:
-            if self._load_from_cache(cache_path, check_validity=True):
-                _LOGGER.info("CEZ HDO: Loaded valid cache: %s", cache_path)
+            if self._load_from_cache(cache_path):
+                _LOGGER.info("CEZ HDO: Loaded from cache: %s", cache_path)
                 return
 
-        # Pokud cache není dostupná nebo je neplatná, zkusit API
-        for attempt in range(2):
+        # Pokud cache není dostupná, zkusit API se zkrácenými timeouty
+        for attempt in range(2):  # Až 2 pokusy
             try:
                 api_url = downloader.BASE_URL
-                # Stáhnout data pro předchozí den i pro dnešek
-                request_data_today = downloader.get_request_data(self.ean, days=0)
-                request_data_prev = downloader.get_request_data(self.ean, days=-1)
+                request_data = downloader.get_request_data(self.ean)
 
                 _LOGGER.info(
-                    "🌐 CEZ HDO: Cache not found or expired, trying API (attempt %d/2) - URL: %s, EAN: %s",
+                    "🌐 CEZ HDO: Cache not found, trying API (attempt %d/2) - URL: %s, EAN: %s",
                     attempt + 1,
                     api_url,
                     self.ean,
                 )
 
-                response_today = requests.post(
+                response = requests.post(
                     api_url,
-                    json=request_data_today,
-                    timeout=10,
-                    headers={
-                        "Accept": "application/json, text/plain, */*",
-                        "Content-Type": "application/json",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                    },
-                )
-                response_prev = requests.post(
-                    api_url,
-                    json=request_data_prev,
+                    json=request_data,
                     timeout=10,
                     headers={
                         "Accept": "application/json, text/plain, */*",
@@ -179,47 +100,35 @@ class CezHdoBaseEntity(Entity):
                     },
                 )
 
-                _LOGGER.info(
-                    "CEZ HDO: HTTP Response status (today): %d",
-                    response_today.status_code,
-                )
-                _LOGGER.info(
-                    "CEZ HDO: HTTP Response status (prev): %d",
-                    response_prev.status_code,
-                )
+                _LOGGER.info("CEZ HDO: HTTP Response status: %d", response.status_code)
 
-                if (
-                    response_today.status_code == 200
-                    and response_prev.status_code == 200
-                ):
+                if response.status_code == 200:
                     try:
-                        content_today = response_today.content.decode("utf-8")
-                        content_prev = response_prev.content.decode("utf-8")
-                        json_today = json.loads(content_today)
-                        json_prev = json.loads(content_prev)
-
-                        # Sloučit signály z obou odpovědí
-                        signals_today = json_today.get("data", {}).get("signals", [])
-                        signals_prev = json_prev.get("data", {}).get("signals", [])
-                        merged_signals = signals_prev + signals_today
-                        merged_json = json_today
-                        if "data" not in merged_json:
-                            merged_json["data"] = {}
-                        merged_json["data"]["signals"] = merged_signals
-
-                        signals_count = len(merged_signals)
-                        _LOGGER.info(
-                            "✅ CEZ HDO: API success, merged signals: %d", signals_count
+                        content_str = response.content.decode("utf-8")
+                        _LOGGER.debug(
+                            "CEZ HDO: Response content length: %d bytes",
+                            len(content_str),
                         )
 
-                        # Uložit nová data do cache
+                        json_data = json.loads(content_str)
+
+                        # Check if we have signals data
+                        signals_count = len(
+                            json_data.get("data", {}).get("signals", [])
+                        )
+                        _LOGGER.info(
+                            "✅ CEZ HDO: API success, signals: %d", signals_count
+                        )
+
+                        # Vždy uloží data do cache pro budoucí použití (i když jsou prázdná)
                         for cache_path in cache_paths:
                             try:
                                 cache_dir = Path(cache_path).parent
                                 cache_dir.mkdir(parents=True, exist_ok=True)
+                                # Přidáme timestamp pro debugging
                                 cache_data = {
                                     "timestamp": datetime.now().isoformat(),
-                                    "data": merged_json,
+                                    "data": json_data,
                                 }
                                 with open(cache_path, "w", encoding="utf-8") as f:
                                     json.dump(
@@ -230,27 +139,35 @@ class CezHdoBaseEntity(Entity):
                                     cache_path,
                                     signals_count,
                                 )
+                                break
                             except Exception as cache_err:
                                 _LOGGER.warning(
-                                    "CEZ HDO: Failed to save cache: %s (%s)",
+                                    "CEZ HDO: Cache save failed for %s: %s",
                                     cache_path,
                                     cache_err,
                                 )
-                        self._response_data = merged_json
-                        self._last_update_success = True
-                        return
-                    except Exception as parse_err:
+
+                        if signals_count > 0:
+                            self._response_data = json_data
+                            self._last_update_success = True
+                            return
+                        else:
+                            _LOGGER.warning("CEZ HDO: API returned empty signals array")
+                    except (json.JSONDecodeError, UnicodeDecodeError) as parse_err:
                         _LOGGER.error(
-                            "CEZ HDO: Failed to parse/merge API response: %s", parse_err
+                            "CEZ HDO: Failed to parse API response: %s", parse_err
                         )
+                elif response.status_code == 502:
+                    _LOGGER.warning(
+                        "CEZ HDO: Server error 502 - retrying in 3 seconds..."
+                    )
+                    if attempt == 0:  # Pouze při prvním pokusu čekej
+                        time.sleep(3)
+                        continue
                 else:
                     _LOGGER.error(
-                        "CEZ HDO: API HTTP error: today=%d, prev=%d",
-                        response_today.status_code,
-                        response_prev.status_code,
+                        "CEZ HDO: API request failed - Status: %d", response.status_code
                     )
-            except Exception as e:
-                _LOGGER.error("CEZ HDO: API request failed: %s", e)
 
             except requests.RequestException as req_err:
                 _LOGGER.error(
@@ -284,8 +201,8 @@ class CezHdoBaseEntity(Entity):
         except Exception as e:
             _LOGGER.warning("CEZ HDO: Cache save failed: %s", str(e)[:50])
 
-    def _load_from_cache(self, cache_file: str, check_validity: bool = False) -> bool:
-        """Load data from cache file. Returns True if successful and valid."""
+    def _load_from_cache(self, cache_file: str) -> bool:
+        """Load data from cache file. Returns True if successful."""
         try:
             if not Path(cache_file).exists():
                 return False
@@ -295,30 +212,17 @@ class CezHdoBaseEntity(Entity):
 
             cache_data = json.loads(content)
 
-            # Nový formát s timestampem
+            # Podporovat nový formát s timestampem i starý
             if "data" in cache_data and "timestamp" in cache_data:
                 json_data = cache_data["data"]
                 timestamp = cache_data["timestamp"]
-                cache_time = datetime.fromisoformat(timestamp)
-                now = datetime.now()
-                age = now - cache_time
-                if check_validity and age > timedelta(days=1):
-                    _LOGGER.info(
-                        "CEZ HDO: Cache expired (%s, age: %s), ignoring.",
-                        cache_file,
-                        age,
-                    )
-                    return False
                 _LOGGER.info(
                     "CEZ HDO: Loaded cache from %s (timestamp: %s)",
                     cache_file,
                     timestamp,
                 )
             else:
-                # Starý formát - přímo data, vždy považovat za neplatné pokud je vyžadována validita
-                if check_validity:
-                    _LOGGER.info("CEZ HDO: Legacy cache format, ignoring for validity.")
-                    return False
+                # Starý formát - přímo data
                 json_data = cache_data
                 _LOGGER.info("CEZ HDO: Loaded legacy cache from %s", cache_file)
 
@@ -330,9 +234,7 @@ class CezHdoBaseEntity(Entity):
             _LOGGER.warning("CEZ HDO: Failed to load cache from %s: %s", cache_file, e)
             return False
 
-    def _get_hdo_data(
-        self,
-    ) -> tuple[bool, Any, Any, Any, bool, Any, Any, Any, Any, Any]:
+    def _get_hdo_data(self) -> tuple[bool, Any, Any, Any, bool, Any, Any, Any]:
         """Get HDO data from response."""
         if self._response_data is None or not self._last_update_success:
             _LOGGER.warning(
@@ -340,7 +242,7 @@ class CezHdoBaseEntity(Entity):
                 self._response_data is not None,
                 self._last_update_success,
             )
-            return False, None, None, None, False, None, None, None, None, None
+            return False, None, None, None, False, None, None, None
 
         try:
             # Pass signal parameter to isHdo if specified
@@ -354,4 +256,4 @@ class CezHdoBaseEntity(Entity):
             return result
         except (KeyError, TypeError) as err:
             _LOGGER.error("Error processing HDO data: %s", err)
-            return False, None, None, None, False, None, None, None, None, None
+            return False, None, None, None, False, None, None, None

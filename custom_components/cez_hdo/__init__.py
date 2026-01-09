@@ -172,22 +172,3 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
 
     except Exception as err:
         _LOGGER.error("Failed to setup ČEZ HDO frontend card: %s", err)
-
-
-def remove_cache_files():
-    """Smaže cache soubory při instalaci nové verze."""
-    cache_files = [
-        Path("/config/www/cez_hdo/cez_hdo.json"),
-        Path("/config/www/cez_hdo/cez_hdo_debug.json"),
-    ]
-    for file_path in cache_files:
-        try:
-            if file_path.exists():
-                file_path.unlink()
-                _LOGGER.info(f"CEZ HDO: Cache file removed: {file_path}")
-        except Exception as e:
-            _LOGGER.warning(f"CEZ HDO: Failed to remove cache file {file_path}: {e}")
-
-
-# Smazat cache při startu integrace
-remove_cache_files()
