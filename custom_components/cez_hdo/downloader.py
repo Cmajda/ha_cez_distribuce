@@ -271,6 +271,8 @@ def isHdo(
     time | None,
     time | None,
     timedelta | None,
+    time | None,
+    time | None,
 ]:
     """
     Determine HDO state for current timestamp.
@@ -343,7 +345,11 @@ def isHdo(
                     next_casy = next_signal.get("casy", "")
                     periods_next = parse_time_periods(next_casy)
                     if periods_next:
-                        next_low_period = {"start": periods_next[0][0], "end": periods_next[0][1], "index": 0}
+                        next_low_period = {
+                            "start": periods_next[0][0],
+                            "end": periods_next[0][1],
+                            "index": 0,
+                        }
 
         if current_low_period:
             # Jsme v NT intervalu
@@ -387,7 +393,9 @@ def isHdo(
                 high_start = cast(time, prev_low["end"])
             else:
                 high_start = None
-            high_duration = calculate_duration(checked_time, high_end) if high_end else None
+            high_duration = (
+                calculate_duration(checked_time, high_end) if high_end else None
+            )
             # low_start/low_end/low_duration nejsou relevantní, nastavíme None
             low_start = low_end = None
             low_duration = timedelta(0)

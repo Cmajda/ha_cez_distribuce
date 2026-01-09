@@ -99,9 +99,11 @@ class CezHdoBaseEntity(Entity):
                     if self._response_data is not None:
                         try:
                             result2 = self._get_hdo_data()
-                            (
-                                _lta, _ls, _le, _ld, _hta, _hs, _he, _hd, nls, nle
-                            ) = result2 if len(result2) == 10 else (*result2, None, None)
+                            (_lta, _ls, _le, _ld, _hta, _hs, _he, _hd, nls, nle) = (
+                                result2
+                                if len(result2) == 10
+                                else (*result2, None, None)
+                            )
                             if nls and nle:
                                 nt_intervals.append((nls, nle))
                         except Exception:
@@ -115,7 +117,9 @@ class CezHdoBaseEntity(Entity):
                                 dalsi_nt = (s, e)
                                 break
                         if dalsi_nt:
-                            attributes["vt_dalsi_konec"] = dalsi_nt[0].strftime("%H:%M:%S")
+                            attributes["vt_dalsi_konec"] = dalsi_nt[0].strftime(
+                                "%H:%M:%S"
+                            )
                         else:
                             attributes["vt_dalsi_konec"] = None
                     else:
@@ -175,10 +179,19 @@ class CezHdoBaseEntity(Entity):
                     },
                 )
 
-                _LOGGER.info("CEZ HDO: HTTP Response status (today): %d", response_today.status_code)
-                _LOGGER.info("CEZ HDO: HTTP Response status (prev): %d", response_prev.status_code)
+                _LOGGER.info(
+                    "CEZ HDO: HTTP Response status (today): %d",
+                    response_today.status_code,
+                )
+                _LOGGER.info(
+                    "CEZ HDO: HTTP Response status (prev): %d",
+                    response_prev.status_code,
+                )
 
-                if response_today.status_code == 200 and response_prev.status_code == 200:
+                if (
+                    response_today.status_code == 200
+                    and response_prev.status_code == 200
+                ):
                     try:
                         content_today = response_today.content.decode("utf-8")
                         content_prev = response_prev.content.decode("utf-8")
@@ -227,16 +240,17 @@ class CezHdoBaseEntity(Entity):
                         self._last_update_success = True
                         return
                     except Exception as parse_err:
-                        _LOGGER.error("CEZ HDO: Failed to parse/merge API response: %s", parse_err)
-                else:
-                    _LOGGER.error("CEZ HDO: API HTTP error: today=%d, prev=%d", response_today.status_code, response_prev.status_code)
-            except Exception as e:
-                _LOGGER.error("CEZ HDO: API request failed: %s", e)
-                        continue
+                        _LOGGER.error(
+                            "CEZ HDO: Failed to parse/merge API response: %s", parse_err
+                        )
                 else:
                     _LOGGER.error(
-                        "CEZ HDO: API request failed - Status: %d", response.status_code
+                        "CEZ HDO: API HTTP error: today=%d, prev=%d",
+                        response_today.status_code,
+                        response_prev.status_code,
                     )
+            except Exception as e:
+                _LOGGER.error("CEZ HDO: API request failed: %s", e)
 
             except requests.RequestException as req_err:
                 _LOGGER.error(
@@ -316,7 +330,9 @@ class CezHdoBaseEntity(Entity):
             _LOGGER.warning("CEZ HDO: Failed to load cache from %s: %s", cache_file, e)
             return False
 
-    def _get_hdo_data(self) -> tuple[bool, Any, Any, Any, bool, Any, Any, Any]:
+    def _get_hdo_data(
+        self,
+    ) -> tuple[bool, Any, Any, Any, bool, Any, Any, Any, Any, Any]:
         """Get HDO data from response."""
         if self._response_data is None or not self._last_update_success:
             _LOGGER.warning(
@@ -324,7 +340,7 @@ class CezHdoBaseEntity(Entity):
                 self._response_data is not None,
                 self._last_update_success,
             )
-            return False, None, None, None, False, None, None, None
+            return False, None, None, None, False, None, None, None, None, None
 
         try:
             # Pass signal parameter to isHdo if specified
@@ -338,4 +354,4 @@ class CezHdoBaseEntity(Entity):
             return result
         except (KeyError, TypeError) as err:
             _LOGGER.error("Error processing HDO data: %s", err)
-            return False, None, None, None, False, None, None, None
+            return False, None, None, None, False, None, None, None, None, None
