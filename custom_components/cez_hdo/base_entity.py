@@ -3,13 +3,27 @@ from __future__ import annotations
 import json
 import logging
 import time
+from pathlib import Path
+import requests
+from datetime import datetime
+
+_LOGGER = logging.getLogger(__name__)
+
+from . import downloader
+
+class CezHdoBaseEntity:
+    def __init__(self, ean: str, name: str, signal: str | None = None) -> None:
+        self.ean = ean
+        self.name = name
+        self.signal = signal
+        self._response_data = None
+        self._last_update_success = False
+
     def update(self) -> None:
         """Fetch new state data for the sensor with cache fallback."""
         cache_paths = [
             "/config/www/cez_hdo/cez_hdo.json",
             "/config/www/cez_hdo_debug.json",
-            "/mnt/ha-config/www/cez_hdo/cez_hdo.json",
-            "/mnt/ha-config/www/cez_hdo_debug.json",
         ]
 
         # Nejdříve zkusit načíst z cache
@@ -55,30 +69,37 @@ import time
 
                         json_data = json.loads(content_str)
 
-                        # Check if we have signals data
-                        signals_count = len(
-                            json_data.get("data", {}).get("signals", [])
-                        )
-                        _LOGGER.info(
-                            "✅ CEZ HDO: API success, signals: %d", signals_count
-                        )
+                        # Filtrování signálů pouze na dnešní a včerejší den
+                        today = datetime.now().strftime("%d.%m.%Y")
+                        yesterday = (datetime.now() - timedelta(days=1)).strftime("%d.%m.%Y")
+                        signals = json_data.get("data", {}).get("signals", [])
+                        filtered_signals = [s for s in signals if s.get("datum") in (today, yesterday)]
+                        if not any(s.get("datum") == today for s in filtered_signals):
+                            _LOGGER.error("CEZ HDO: API response does not contain today's schedule (%s), cache not updated!", today)
+                            return
+                        # Vytvořit novou strukturu s filtrovanými signály
+                        filtered_json_data = json_data.copy()
+                        if "data" in filtered_json_data:
+                            filtered_json_data["data"] = filtered_json_data["data"].copy()
+                            filtered_json_data["data"]["signals"] = filtered_signals
+                        signals_count = len(filtered_signals)
+                        _LOGGER.info("✅ CEZ HDO: API success, filtered signals: %d", signals_count)
 
-                        # Vždy uloží data do cache pro budoucí použití (i když jsou prázdná)
+                        # Uložit pouze filtrovaná data do cache
                         for cache_path in cache_paths:
                             try:
                                 cache_dir = Path(cache_path).parent
                                 cache_dir.mkdir(parents=True, exist_ok=True)
-                                # Přidáme timestamp pro debugging
                                 cache_data = {
                                     "timestamp": datetime.now().isoformat(),
-                                    "data": json_data,
+                                    "data": filtered_json_data,
                                 }
                                 with open(cache_path, "w", encoding="utf-8") as f:
                                     json.dump(
                                         cache_data, f, ensure_ascii=False, indent=2
                                     )
                                 _LOGGER.info(
-                                    "💾 CEZ HDO: Data saved to cache: %s (signals: %d, timestamp: %s)",
+                                    "💾 CEZ HDO: Data saved to cache: %s (filtered signals: %d, timestamp: %s)",
                                     cache_path,
                                     signals_count,
                                     cache_data["timestamp"],
@@ -91,7 +112,7 @@ import time
                                     cache_err,
                                 )
 
-                        self._response_data = json_data
+                        self._response_data = filtered_json_data
                         self._last_update_success = True
                         _LOGGER.info("CEZ HDO: DATA SOURCE = ONLINE (API)")
                         return
@@ -245,6 +266,7 @@ import time
                 self._last_update_success,
             )
             return False, None, None, None, False, None, None, None
+
 
         try:
             # Pass signal parameter to isHdo if specified
