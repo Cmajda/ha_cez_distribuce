@@ -9,8 +9,6 @@ from datetime import datetime
 
 _LOGGER = logging.getLogger(__name__)
 
-from . import downloader
-
 class CezHdoBaseEntity:
 
     def __init__(self, ean: str, name: str, signal: str | None = None) -> None:
@@ -26,6 +24,7 @@ class CezHdoBaseEntity:
     def update(self) -> None:
         """Aktualizuje cache: včerejší signály z cache (pokud nejsou v API), dnešní a dalších 6 dní z API."""
         from datetime import timedelta
+        from . import downloader
 
         today = datetime.now().strftime("%d.%m.%Y")
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%d.%m.%Y")
@@ -156,6 +155,7 @@ class CezHdoBaseEntity:
     def _get_hdo_data(self) -> tuple[bool, any, any, any, bool, any, any, any]:
         """Get HDO data from response. Pokud je třeba, aktualizuje data (max 1x za hodinu)."""
         from datetime import datetime, timedelta
+        from . import downloader
         now = datetime.now()
         # Pokud nikdy neproběhla aktualizace, nebo je to víc než hodinu, aktualizuj
         if not self._last_update_time or (now - self._last_update_time) > timedelta(hours=1):

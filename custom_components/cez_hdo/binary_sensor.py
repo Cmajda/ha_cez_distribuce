@@ -57,6 +57,30 @@ class CezHdoBinarySensor(CezHdoBaseEntity, BinarySensorEntity):
         """Return the device class of the sensor."""
         return None
 
+    def _get_signal(self, hdo_data):
+        """Vrátí signál: pokud není zadaný, vezme první dostupný z JSON."""
+        if self.signal:
+            _LOGGER.info(f"CEZ HDO: Používám signál z konfigurace: {self.signal}")
+            return self.signal
+        try:
+            cache_file = self.cache_file
+            import json
+            from pathlib import Path
+            if Path(cache_file).exists():
+                with open(cache_file, "r", encoding="utf-8") as f:
+                    cache_content = json.load(f)
+                signals = cache_content.get("data", {}).get("data", {}).get("signals", [])
+                if signals and signals[0].get("signal"):
+                    _LOGGER.info(f"CEZ HDO: První dostupný signál v cache: {signals[0]['signal']}")
+                    return signals[0]["signal"]
+                else:
+                    _LOGGER.warning(f"CEZ HDO: Pole 'signals' je prázdné nebo neobsahuje klíč 'signal'.")
+            else:
+                _LOGGER.warning(f"CEZ HDO: Cache file {cache_file} neexistuje.")
+        except Exception as e:
+            _LOGGER.warning(f"CEZ HDO: Chyba při získávání signálu z cache: {e}")
+        return None
+
 
 class LowTariffActive(CezHdoBinarySensor):
     """Binary sensor for low tariff active state."""
@@ -68,6 +92,10 @@ class LowTariffActive(CezHdoBinarySensor):
     def is_on(self) -> bool:
         """Return True if low tariff is active."""
         hdo_data = self._get_hdo_data()
+        signal = self._get_signal(hdo_data)
+        if signal is None:
+            _LOGGER.warning("CEZ HDO: Nenalezen žádný signál pro LowTariffActive, senzor bude unavailable.")
+            return None
         return hdo_data[0]  # low_tariff_active
 
 
@@ -81,4 +109,8 @@ class HighTariffActive(CezHdoBinarySensor):
     def is_on(self) -> bool:
         """Return True if high tariff is active."""
         hdo_data = self._get_hdo_data()
+        signal = self._get_signal(hdo_data)
+        if signal is None:
+            _LOGGER.warning("CEZ HDO: Nenalezen žádný signál pro HighTariffActive, senzor bude unavailable.")
+            return None
         return hdo_data[4]  # high_tariff_active
