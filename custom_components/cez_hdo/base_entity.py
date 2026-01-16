@@ -3,66 +3,8 @@ from __future__ import annotations
 import json
 import logging
 import time
-from datetime import timedelta, datetime
-from pathlib import Path
-from typing import Any
-
-import requests
-from homeassistant.helpers.entity import Entity
-from homeassistant.util import Throttle
-
-from . import downloader
-
-MIN_TIME_BETWEEN_SCANS = timedelta(seconds=3600)
-_LOGGER = logging.getLogger(__name__)
-
-DOMAIN = "cez_hdo"
-
-
-class CezHdoBaseEntity(Entity):
-    """Base class for CEZ HDO entities."""
-
-    def __init__(self, ean: str, name: str, signal: str | None = None) -> None:
-        """Initialize the sensor."""
-        self.ean = ean
-        self.signal = signal
-        self._name = name
-        self._response_data: dict[str, Any] | None = None
-        self._last_update_success = False
-        self.update()
-
-    @property
-    def name(self) -> str:
-        """Return the name of the sensor."""
-        return f"{DOMAIN}_{self._name}"
-
-    @property
-    def unique_id(self) -> str:
-        """Return the unique ID of the sensor."""
-        return f"{DOMAIN}_{self._name}"
-
-    @property
-    def should_poll(self) -> bool:
-        """Return True if entity has to be polled for state."""
-        return True
-
-    @property
-    def available(self) -> bool:
-        """Return True if entity is available."""
-        return self._last_update_success
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return the state attributes."""
-        attributes = {}
-        if self._response_data is not None:
-            attributes["response_json"] = self._response_data
-        return attributes
-
-    @Throttle(MIN_TIME_BETWEEN_SCANS)
     def update(self) -> None:
         """Fetch new state data for the sensor with cache fallback."""
-        # Pokusit se načíst z cache jako první priorita
         cache_paths = [
             "/config/www/cez_hdo/cez_hdo.json",
             "/config/www/cez_hdo_debug.json",
@@ -73,7 +15,8 @@ class CezHdoBaseEntity(Entity):
         # Nejdříve zkusit načíst z cache
         for cache_path in cache_paths:
             if self._load_from_cache(cache_path):
-                _LOGGER.info("CEZ HDO: Loaded from cache: %s", cache_path)
+                # _load_from_cache už loguje timestamp a cestu
+                _LOGGER.info("CEZ HDO: DATA SOURCE = CACHE (%s)", cache_path)
                 return
 
         # Pokud cache není dostupná, zkusit API se zkrácenými timeouty
@@ -99,6 +42,65 @@ class CezHdoBaseEntity(Entity):
                         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
                     },
                 )
+
+                _LOGGER.info("CEZ HDO: HTTP Response status: %d", response.status_code)
+
+                if response.status_code == 200:
+                    try:
+                        content_str = response.content.decode("utf-8")
+                        _LOGGER.debug(
+                            "CEZ HDO: Response content length: %d bytes",
+                            len(content_str),
+                        )
+
+                        json_data = json.loads(content_str)
+
+                        # Check if we have signals data
+                        signals_count = len(
+                            json_data.get("data", {}).get("signals", [])
+                        )
+                        _LOGGER.info(
+                            "✅ CEZ HDO: API success, signals: %d", signals_count
+                        )
+
+                        # Vždy uloží data do cache pro budoucí použití (i když jsou prázdná)
+                        for cache_path in cache_paths:
+                            try:
+                                cache_dir = Path(cache_path).parent
+                                cache_dir.mkdir(parents=True, exist_ok=True)
+                                # Přidáme timestamp pro debugging
+                                cache_data = {
+                                    "timestamp": datetime.now().isoformat(),
+                                    "data": json_data,
+                                }
+                                with open(cache_path, "w", encoding="utf-8") as f:
+                                    json.dump(
+                                        cache_data, f, ensure_ascii=False, indent=2
+                                    )
+                                _LOGGER.info(
+                                    "💾 CEZ HDO: Data saved to cache: %s (signals: %d, timestamp: %s)",
+                                    cache_path,
+                                    signals_count,
+                                    cache_data["timestamp"],
+                                )
+                                break
+                            except Exception as cache_err:
+                                _LOGGER.warning(
+                                    "CEZ HDO: Failed to save cache to %s: %s",
+                                    cache_path,
+                                    cache_err,
+                                )
+
+                        self._response_data = json_data
+                        self._last_update_success = True
+                        _LOGGER.info("CEZ HDO: DATA SOURCE = ONLINE (API)")
+                        return
+                    except Exception as e:
+                        _LOGGER.warning("CEZ HDO: Failed to parse API response: %s", e)
+                else:
+                    _LOGGER.warning("CEZ HDO: API request failed, status: %d", response.status_code)
+            except Exception as e:
+                _LOGGER.warning("CEZ HDO: API request exception: %s", e)
 
                 _LOGGER.info("CEZ HDO: HTTP Response status: %d", response.status_code)
 

@@ -154,8 +154,20 @@ def get_today_schedule(
     json_data: dict, preferred_signal: str | None = None
 ) -> list[tuple[time, time]]:
     """Get today's schedule from API response."""
-    if not json_data or "data" not in json_data or "signals" not in json_data["data"]:
-        _LOGGER.error("Invalid API response structure")
+
+    # Podpora více úrovní vnoření (pro kompatibilitu s různými API odpověďmi)
+    signals = None
+    if not json_data or "data" not in json_data:
+        _LOGGER.error("Invalid API response structure: missing 'data'")
+        return []
+    data_level = json_data["data"]
+    # Pokud je další úroveň 'data', použij ji
+    if isinstance(data_level, dict) and "data" in data_level:
+        data_level = data_level["data"]
+    if isinstance(data_level, dict) and "signals" in data_level:
+        signals = data_level["signals"]
+    if signals is None:
+        _LOGGER.error("Invalid API response structure: missing 'signals'")
         return []
 
     current_time = datetime.now(tz=CEZ_TIMEZONE)
@@ -163,7 +175,7 @@ def get_today_schedule(
 
     # Find all today's schedules
     today_signals = []
-    for signal in json_data["data"]["signals"]:
+    for signal in signals:
         if signal.get("datum") == today_date:
             today_signals.append(signal)
 
@@ -226,7 +238,12 @@ def isHdo(
     low_periods = get_today_schedule(json_data, preferred_signal)
 
     if not low_periods:
-        _LOGGER.error("No schedule data available")
+        # Přidat detailní logování pro diagnostiku
+        import json as _json
+        try:
+            _LOGGER.error("No schedule data available. Raw json_data: %s", _json.dumps(json_data, ensure_ascii=False, indent=2))
+        except Exception as log_err:
+            _LOGGER.error("No schedule data available. (Chyba při logování json_data: %s)", log_err)
         return False, None, None, None, False, None, None, None
 
     current_time = datetime.now(tz=CEZ_TIMEZONE)
