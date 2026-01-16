@@ -110,13 +110,6 @@ class CezHdoBaseEntity:
         # Pokud vše selže
         _LOGGER.warning("CEZ HDO: Both cache and API failed")
         self._last_update_success = False
-    def __init__(self, ean: str, name: str, signal: str | None = None) -> None:
-        self.ean = ean
-        self.name = name
-        self.signal = signal
-        self._response_data = None
-        self._last_update_success = False
-
     def _save_to_cache(self, cache_file: str, content: str) -> None:
         """Save content to cache file."""
         try:
