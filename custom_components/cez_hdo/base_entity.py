@@ -20,13 +20,16 @@ class CezHdoBaseEntity:
         self._response_data = None
         self._last_update_success = False
         self._last_update_time = None  # datetime poslední aktualizace
+        # Nastav výchozí cestu k cache (přizpůsob podle potřeby)
+        self.cache_file = "/config/www/cez_hdo/cez_hdo.json"
 
-    def update(self, cache_file: str) -> None:
+    def update(self) -> None:
         """Aktualizuje cache: včerejší signály z cache, dnešní z API, ukládá pouze tyto dny."""
         from datetime import timedelta
 
         today = datetime.now().strftime("%d.%m.%Y")
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%d.%m.%Y")
+        cache_file = self.cache_file
 
         # 1. Načti včerejší signály z cache (pokud existují)
         yesterday_signals = []
@@ -158,14 +161,14 @@ class CezHdoBaseEntity:
             _LOGGER.warning("CEZ HDO: Failed to load cache from %s: %s", cache_file, e)
             return False
 
-    def _get_hdo_data(self, cache_file: str) -> tuple[bool, any, any, any, bool, any, any, any]:
+    def _get_hdo_data(self) -> tuple[bool, any, any, any, bool, any, any, any]:
         """Get HDO data from response. Pokud je třeba, aktualizuje data (max 1x za hodinu)."""
         from datetime import datetime, timedelta
         now = datetime.now()
         # Pokud nikdy neproběhla aktualizace, nebo je to víc než hodinu, aktualizuj
         if not self._last_update_time or (now - self._last_update_time) > timedelta(hours=1):
             _LOGGER.info("CEZ HDO: Spouštím update() kvůli stáří dat nebo prvnímu dotazu.")
-            self.update(cache_file)
+            self.update()
         if self._response_data is None or not self._last_update_success:
             _LOGGER.warning(
                 "CEZ HDO: No data available for parsing (data=%s, success=%s)",
