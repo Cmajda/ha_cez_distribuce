@@ -169,12 +169,17 @@ class CezHdoBaseEntity:
             )
             return False, None, None, None, False, None, None, None
         try:
-            if self.signal:
-                result = downloader.isHdo(
-                    self._response_data, preferred_signal=self.signal
-                )
+            # Dynamicky zjistit signál (přes _get_signal, pokud existuje)
+            preferred_signal = getattr(self, '_get_signal', None)
+            if callable(preferred_signal):
+                signal = self._get_signal(self._response_data)
             else:
-                result = downloader.isHdo(self._response_data)
+                signal = self.signal
+            if signal:
+                result = downloader.isHdo(self._response_data, preferred_signal=signal)
+            else:
+                _LOGGER.warning("CEZ HDO: Není dostupný žádný signál pro parser, senzory budou unavailable.")
+                return False, None, None, None, False, None, None, None
             _LOGGER.info("CEZ HDO: Parser result: %s", result)
             return result
         except (KeyError, TypeError) as err:
