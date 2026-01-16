@@ -62,7 +62,6 @@ class LowTariffActive(CezHdoBinarySensor):
     """Binary sensor for low tariff active state."""
 
     def __init__(self, ean: str, signal: str | None = None) -> None:
-        """Initialize the sensor."""
         super().__init__(ean, "LowTariffActive", signal)
 
     @property
@@ -76,7 +75,6 @@ class HighTariffActive(CezHdoBinarySensor):
     """Binary sensor for high tariff active state."""
 
     def __init__(self, ean: str, signal: str | None = None) -> None:
-        """Initialize the sensor."""
         super().__init__(ean, "HighTariffActive", signal)
 
     @property

@@ -63,7 +63,6 @@ class LowTariffStart(CezHdoSensor):
     """Sensor for low tariff start time."""
 
     def __init__(self, ean: str, signal: str | None = None) -> None:
-        """Initialize the sensor."""
         super().__init__(ean, "LowTariffStart", signal)
 
     @property
@@ -77,7 +76,6 @@ class LowTariffEnd(CezHdoSensor):
     """Sensor for low tariff end time."""
 
     def __init__(self, ean: str, signal: str | None = None) -> None:
-        """Initialize the sensor."""
         super().__init__(ean, "LowTariffEnd", signal)
 
     @property
@@ -96,7 +94,6 @@ class LowTariffDuration(CezHdoSensor):
     """Sensor for low tariff duration."""
 
     def __init__(self, ean: str, signal: str | None = None) -> None:
-        """Initialize the sensor."""
         super().__init__(ean, "LowTariffDuration", signal)
 
     @property
@@ -118,7 +115,6 @@ class HighTariffStart(CezHdoSensor):
     """Sensor for high tariff start time."""
 
     def __init__(self, ean: str, signal: str | None = None) -> None:
-        """Initialize the sensor."""
         super().__init__(ean, "HighTariffStart", signal)
 
     @property
@@ -132,7 +128,6 @@ class HighTariffEnd(CezHdoSensor):
     """Sensor for high tariff end time."""
 
     def __init__(self, ean: str, signal: str | None = None) -> None:
-        """Initialize the sensor."""
         super().__init__(ean, "HighTariffEnd", signal)
 
     @property
@@ -151,7 +146,6 @@ class HighTariffDuration(CezHdoSensor):
     """Sensor for high tariff duration."""
 
     def __init__(self, ean: str, signal: str | None = None) -> None:
-        """Initialize the sensor."""
         super().__init__(ean, "HighTariffDuration", signal)
 
     @property
