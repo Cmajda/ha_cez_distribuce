@@ -24,7 +24,7 @@ class CezHdoBaseEntity:
         self.cache_file = "/config/www/cez_hdo/cez_hdo.json"
 
     def update(self) -> None:
-        """Aktualizuje cache: včerejší signály z cache, dnešní z API, ukládá pouze tyto dny."""
+        """Aktualizuje cache: včerejší signály z cache (pokud nejsou v API), dnešní a dalších 6 dní z API."""
         from datetime import timedelta
 
         today = datetime.now().strftime("%d.%m.%Y")
@@ -41,13 +41,14 @@ class CezHdoBaseEntity:
                 if isinstance(cache_data, dict) and "data" in cache_data:
                     cache_data = cache_data["data"]
                 cache_signals = cache_data.get("signals", [])
+                # Včerejší signály, které nejsou v API, přidáme později
                 yesterday_signals = [s for s in cache_signals if s.get("datum") == yesterday]
                 if yesterday_signals:
                     _LOGGER.info("CEZ HDO: Loaded yesterday's signals from cache (%s)", cache_file)
             except Exception as e:
                 _LOGGER.warning("CEZ HDO: Failed to read yesterday's signals from cache %s: %s", cache_file, e)
 
-        # 2. Získej dnešní signály z API
+        # 2. Získej signály z API (API obsahuje vždy 7 dní)
         api_url = downloader.BASE_URL
         request_data = downloader.get_request_data(self.ean)
         try:
@@ -73,13 +74,11 @@ class CezHdoBaseEntity:
                 content_str = response.content.decode("utf-8")
                 json_data = json.loads(content_str)
                 signals_api = json_data.get("data", {}).get("signals", [])
-                today_signals = [s for s in signals_api if s.get("datum") == today]
-                if not today_signals:
-                    _LOGGER.error("CEZ HDO: API response does not contain today's schedule (%s), cache not updated!", today)
-                    return
-
-                # 3. Výsledné signály: včerejšek z cache (pokud je) + dnešek z API
-                result_signals = yesterday_signals + today_signals
+                # Z API vezmi všechny signály (7 dní)
+                api_datums = {s.get("datum") for s in signals_api}
+                # Přidej včerejší signály z cache, pokud nejsou v API
+                extra_yesterday = [s for s in yesterday_signals if s.get("datum") not in api_datums]
+                result_signals = extra_yesterday + signals_api
 
                 # 4. Vytvořit novou strukturu s těmito signály
                 filtered_json_data = json_data.copy()
@@ -87,7 +86,7 @@ class CezHdoBaseEntity:
                     filtered_json_data["data"] = filtered_json_data["data"].copy()
                     filtered_json_data["data"]["signals"] = result_signals
                 signals_count = len(result_signals)
-                _LOGGER.info("✅ CEZ HDO: API success, signals for cache: %d (yesterday: %d, today: %d)", signals_count, len(yesterday_signals), len(today_signals))
+                _LOGGER.info("✅ CEZ HDO: API success, signals for cache: %d (yesterday extra: %d, api: %d)", signals_count, len(extra_yesterday), len(signals_api))
 
                 # 5. Uložit pouze tyto data do cache
                 cache_data = {
