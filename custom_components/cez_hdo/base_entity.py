@@ -12,6 +12,101 @@ _LOGGER = logging.getLogger(__name__)
 from . import downloader
 
 class CezHdoBaseEntity:
+
+    def __init__(self, ean: str, name: str, signal: str | None = None) -> None:
+        self.ean = ean
+        self.name = name
+        self.signal = signal
+        self._response_data = None
+        self._last_update_success = False
+        self._last_update_time = None  # datetime poslední aktualizace
+
+    def update(self, cache_file: str) -> None:
+        """Aktualizuje cache: včerejší signály z cache, dnešní z API, ukládá pouze tyto dny."""
+        from datetime import timedelta
+
+        today = datetime.now().strftime("%d.%m.%Y")
+        yesterday = (datetime.now() - timedelta(days=1)).strftime("%d.%m.%Y")
+
+        # 1. Načti včerejší signály z cache (pokud existují)
+        yesterday_signals = []
+        if Path(cache_file).exists():
+            try:
+                with open(cache_file, "r", encoding="utf-8") as f:
+                    cache_content = json.load(f)
+                cache_data = cache_content.get("data", cache_content)
+                if isinstance(cache_data, dict) and "data" in cache_data:
+                    cache_data = cache_data["data"]
+                cache_signals = cache_data.get("signals", [])
+                yesterday_signals = [s for s in cache_signals if s.get("datum") == yesterday]
+                if yesterday_signals:
+                    _LOGGER.info("CEZ HDO: Loaded yesterday's signals from cache (%s)", cache_file)
+            except Exception as e:
+                _LOGGER.warning("CEZ HDO: Failed to read yesterday's signals from cache %s: %s", cache_file, e)
+
+        # 2. Získej dnešní signály z API
+        api_url = downloader.BASE_URL
+        request_data = downloader.get_request_data(self.ean)
+        try:
+            response = requests.post(
+                api_url,
+                json=request_data,
+                timeout=10,
+                headers={
+                    "Accept": "application/json, text/plain, */*",
+                    "Content-Type": "application/json",
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                },
+            )
+            _LOGGER.info("CEZ HDO: API REQUEST URL: %s", api_url)
+            _LOGGER.info("CEZ HDO: API REQUEST PAYLOAD: %s", json.dumps(request_data, ensure_ascii=False))
+            _LOGGER.info("CEZ HDO: HTTP Response status: %d", response.status_code)
+            try:
+                _LOGGER.info("CEZ HDO: API RAW RESPONSE: %s", response.content.decode("utf-8"))
+            except Exception as log_err:
+                _LOGGER.warning("CEZ HDO: Chyba při logování API odpovědi: %s", log_err)
+
+            if response.status_code == 200:
+                content_str = response.content.decode("utf-8")
+                json_data = json.loads(content_str)
+                signals_api = json_data.get("data", {}).get("signals", [])
+                today_signals = [s for s in signals_api if s.get("datum") == today]
+                if not today_signals:
+                    _LOGGER.error("CEZ HDO: API response does not contain today's schedule (%s), cache not updated!", today)
+                    return
+
+                # 3. Výsledné signály: včerejšek z cache (pokud je) + dnešek z API
+                result_signals = yesterday_signals + today_signals
+
+                # 4. Vytvořit novou strukturu s těmito signály
+                filtered_json_data = json_data.copy()
+                if "data" in filtered_json_data:
+                    filtered_json_data["data"] = filtered_json_data["data"].copy()
+                    filtered_json_data["data"]["signals"] = result_signals
+                signals_count = len(result_signals)
+                _LOGGER.info("✅ CEZ HDO: API success, signals for cache: %d (yesterday: %d, today: %d)", signals_count, len(yesterday_signals), len(today_signals))
+
+                # 5. Uložit pouze tyto data do cache
+                cache_data = {
+                    "timestamp": datetime.now().isoformat(),
+                    "data": filtered_json_data,
+                }
+                with open(cache_file, "w", encoding="utf-8") as f:
+                    json.dump(cache_data, f, ensure_ascii=False, indent=2)
+                _LOGGER.info("💾 CEZ HDO: Data saved to cache: %s (signals: %d, timestamp: %s)", cache_file, signals_count, cache_data["timestamp"])
+
+                self._response_data = filtered_json_data
+                self._last_update_success = True
+                self._last_update_time = datetime.now()
+                _LOGGER.info("CEZ HDO: DATA SOURCE = ONLINE (API)")
+                return
+            else:
+                _LOGGER.warning("CEZ HDO: API request failed, status: %d", response.status_code)
+        except Exception as e:
+            _LOGGER.warning("CEZ HDO: API request exception: %s", e)
+        # Pokud vše selže
+        _LOGGER.warning("CEZ HDO: Both cache and API failed")
+        self._last_update_success = False
     def __init__(self, ean: str, name: str, signal: str | None = None) -> None:
         self.ean = ean
         self.name = name
@@ -22,11 +117,8 @@ class CezHdoBaseEntity:
     def _save_to_cache(self, cache_file: str, content: str) -> None:
         """Save content to cache file."""
         try:
-            # Zajistit že složka existuje
             cache_dir = Path(cache_file).parent
             cache_dir.mkdir(parents=True, exist_ok=True)
-
-            # Uložit soubor
             with open(cache_file, "w", encoding="utf-8") as f:
                 f.write(content)
             _LOGGER.debug("CEZ HDO: Data cached to %s", cache_file)
@@ -66,8 +158,14 @@ class CezHdoBaseEntity:
             _LOGGER.warning("CEZ HDO: Failed to load cache from %s: %s", cache_file, e)
             return False
 
-    def _get_hdo_data(self) -> tuple[bool, Any, Any, Any, bool, Any, Any, Any]:
-        """Get HDO data from response."""
+    def _get_hdo_data(self, cache_file: str) -> tuple[bool, any, any, any, bool, any, any, any]:
+        """Get HDO data from response. Pokud je třeba, aktualizuje data (max 1x za hodinu)."""
+        from datetime import datetime, timedelta
+        now = datetime.now()
+        # Pokud nikdy neproběhla aktualizace, nebo je to víc než hodinu, aktualizuj
+        if not self._last_update_time or (now - self._last_update_time) > timedelta(hours=1):
+            _LOGGER.info("CEZ HDO: Spouštím update() kvůli stáří dat nebo prvnímu dotazu.")
+            self.update(cache_file)
         if self._response_data is None or not self._last_update_success:
             _LOGGER.warning(
                 "CEZ HDO: No data available for parsing (data=%s, success=%s)",
@@ -75,8 +173,6 @@ class CezHdoBaseEntity:
                 self._last_update_success,
             )
             return False, None, None, None, False, None, None, None
-
-
         try:
             if self.signal:
                 result = downloader.isHdo(
