@@ -46,6 +46,7 @@ def setup_platform(
         HighTariffStart(ean, signal),
         HighTariffEnd(ean, signal),
         HighTariffDuration(ean, signal),
+        CezHdoRawData(ean, signal),  # Nová entita
     ]
     add_entities(entities, True)
 
@@ -161,3 +162,47 @@ class HighTariffDuration(CezHdoSensor):
         if duration is None:
             return None
         return downloader.format_duration(duration)
+
+
+class CezHdoRawData(CezHdoSensor):
+    """Sensor for raw HDO JSON data and timestamp."""
+    def __init__(self, ean: str, signal: str | None = None) -> None:
+        super().__init__(ean, "RawData", signal)
+        self._attr_name = "CEZ HDO Raw Data"
+        self._attr_unique_id = f"{ean}_raw_data"
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the timestamp from cache in format 'DD.MM.YYYY HH:mm'."""
+        hdo_data = self._get_hdo_data()
+        # Získat timestamp z cache
+        try:
+            cache_file = self.cache_file
+            import json
+            from pathlib import Path
+            if Path(cache_file).exists():
+                with open(cache_file, "r", encoding="utf-8") as f:
+                    cache_content = json.load(f)
+                timestamp = cache_content.get("timestamp")
+                if timestamp:
+                    from datetime import datetime
+                    dt = datetime.fromisoformat(timestamp)
+                    return dt.strftime("%d.%m.%Y %H:%M")
+        except Exception as e:
+            _LOGGER.warning("CEZ HDO RAW: Failed to get timestamp: %s", e)
+        return None
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return the full JSON data as attribute."""
+        try:
+            cache_file = self.cache_file
+            import json
+            from pathlib import Path
+            if Path(cache_file).exists():
+                with open(cache_file, "r", encoding="utf-8") as f:
+                    cache_content = json.load(f)
+                return {"raw_json": cache_content}
+        except Exception as e:
+            _LOGGER.warning("CEZ HDO RAW: Failed to get raw json: %s", e)
+        return {}
