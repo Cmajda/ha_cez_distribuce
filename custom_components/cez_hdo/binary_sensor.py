@@ -45,6 +45,28 @@ def setup_platform(
     add_entities(entities, False)
 
 
+async def async_setup_platform(
+    hass: HomeAssistant,
+    config: ConfigType,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None,
+) -> None:
+    """Set up the CEZ HDO binary sensor platform (async)."""
+
+    ean = config[CONF_EAN]
+    signal = config.get(CONF_SIGNAL)
+
+    from .registry_cleanup import async_cleanup_entity_registry_if_ean_changed
+
+    await async_cleanup_entity_registry_if_ean_changed(hass, ean)
+
+    entities = [
+        LowTariffActive(ean, signal),
+        HighTariffActive(ean, signal),
+    ]
+    async_add_entities(entities, False)
+
+
 class CezHdoBinarySensor(CezHdoBaseEntity, BinarySensorEntity):
     """Base class for CEZ HDO binary sensors."""
 

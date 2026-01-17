@@ -51,6 +51,38 @@ def setup_platform(
     add_entities(entities, False)
 
 
+async def async_setup_platform(
+    hass: HomeAssistant,
+    config: ConfigType,
+    async_add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None,
+) -> None:
+    """Set up the CEZ HDO sensor platform (async).
+
+    This integration is configured via YAML. When EAN changes, old entries in the
+    entity registry can keep occupying the previous entity_ids and HA will create
+    new ones with suffixes like "_2". We proactively remove stale entries.
+    """
+
+    ean = config[CONF_EAN]
+    signal = config.get(CONF_SIGNAL)
+
+    from .registry_cleanup import async_cleanup_entity_registry_if_ean_changed
+
+    await async_cleanup_entity_registry_if_ean_changed(hass, ean)
+
+    entities = [
+        LowTariffStart(ean, signal),
+        LowTariffEnd(ean, signal),
+        LowTariffDuration(ean, signal),
+        HighTariffStart(ean, signal),
+        HighTariffEnd(ean, signal),
+        HighTariffDuration(ean, signal),
+        CezHdoRawData(ean, signal),
+    ]
+    async_add_entities(entities, False)
+
+
 class CezHdoSensor(CezHdoBaseEntity, SensorEntity):
     """Base class for CEZ HDO sensors."""
 
