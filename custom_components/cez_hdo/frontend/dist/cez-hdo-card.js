@@ -204,22 +204,28 @@
         const wrap=document.createElement("div");
         wrap.className="entity-row";
 
-        // Robustní našeptávač bez závislosti na ha-entity-picker
+        const activateOnce=(()=>{
+          let activated=false;
+          return (el,input)=>{
+            if(activated) return;
+            activated=true;
+            el.style.display="";
+            input.style.display="none";
+          };
+        })();
+
+        // 1) Vždy-funkční našeptávač přes <datalist> (bez závislosti na HA komponentách)
         if(!this._datalistIds[key]){
-          this._datalistIds[key] = `cez-hdo-entities-${key}-${Math.random().toString(16).slice(2)}`;
+          this._datalistIds[key]=`cez-hdo-entities-${key}-${Math.random().toString(16).slice(2)}`;
         }
         const listId=this._datalistIds[key];
-
-        const labelEl=document.createElement("div");
-        labelEl.className="entity-label";
-        labelEl.textContent=label;
 
         const input=document.createElement("input");
         input.className="entity-input";
         input.type="text";
         input.value=current;
-        input.placeholder="Začni psát… (např. sensor.xxx)";
-        input.setAttribute("list", listId);
+        input.placeholder=label;
+        input.setAttribute("list",listId);
         input.addEventListener("input",(ev)=>this._setEntity(key,(ev.target.value||"").trim()));
 
         const datalist=document.createElement("datalist");
@@ -227,7 +233,7 @@
         const wanted=new Set(domains||[]);
         const states=this._hass?.states||{};
         for(const entityId of Object.keys(states)){
-          const domain = entityId.split(".")[0];
+          const domain=entityId.split(".")[0];
           if(wanted.size && !wanted.has(domain)) continue;
           const opt=document.createElement("option");
           opt.value=entityId;
@@ -236,9 +242,38 @@
           datalist.appendChild(opt);
         }
 
-        wrap.appendChild(labelEl);
+        // 2) Lepší UI: HA selector systém (nejčastěji dostupný ve všech verzích)
+        const selector=document.createElement("ha-selector");
+        selector.style.display="none";
+
+        // 3) Alternativa: ha-entity-picker (pokud je v HA dostupný)
+        const picker=document.createElement("ha-entity-picker");
+        picker.style.display="none";
+
         wrap.appendChild(input);
         wrap.appendChild(datalist);
+        wrap.appendChild(selector);
+        wrap.appendChild(picker);
+
+        customElements.whenDefined("ha-selector").then(()=>{
+          selector.hass=this._hass;
+          selector.label=label;
+          selector.selector={entity:(domains&&domains.length)?{domain:domains}:{}};
+          selector.value=(this._config.entities&&this._config.entities[key])||"";
+          selector.addEventListener("value-changed",(ev)=>this._setEntity(key,ev.detail.value));
+          activateOnce(selector,input);
+        }).catch(()=>{});
+
+        customElements.whenDefined("ha-entity-picker").then(()=>{
+          if(customElements.get("ha-selector")) return; // preferujeme ha-selector
+          picker.hass=this._hass;
+          picker.label=label;
+          picker.includeDomains=domains;
+          picker.value=(this._config.entities&&this._config.entities[key])||"";
+          picker.addEventListener("value-changed",(ev)=>this._setEntity(key,ev.detail.value));
+          activateOnce(picker,input);
+        }).catch(()=>{});
+
         return wrap;
       }
       _render(){
@@ -256,7 +291,7 @@
           <style>
             .wrap{display:flex;flex-direction:column;gap:12px;padding:4px 0;}
             .entity-row{display:flex;flex-direction:column;gap:6px;}
-            .entity-label{font-size:12px;opacity:.9;}
+            .entity-row ha-entity-picker,.entity-row ha-selector{display:block;}
             .entity-input{padding:10px 12px;border-radius:8px;border:1px solid var(--divider-color);background:var(--card-background-color, var(--ha-card-background));color:var(--primary-text-color);}
             .entity-input:focus{outline:none;border-color:var(--primary-color);}
             .hint{font-size:12px;opacity:.8;}

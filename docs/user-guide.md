@@ -103,15 +103,22 @@ Po instalaci integrace a restartu Home Assistant se karta:
 - ✅ **Automaticky zaregistruje** v systému bez manuální konfigurace
 - ✅ **Ihned k použití** - žádné další kroky nejsou potřeba
 
+Poznámka k prohlížeči (Ctrl+F5):
+
+- Pokud se občas po tvrdém refreshi zobrazí chyba typu **"Custom element doesn't exist: cez-hdo-card"**, znamená to, že se JS soubor karty nenačetl včas (nebo se nenačetl vůbec) a Lovelace tak nezná element `cez-hdo-card`.
+- Nejjednodušší a nejspolehlivější řešení je přidat kartu i jako Lovelace **Resource** (viz níže) — pak se načítá standardním mechanismem Lovelace a chování bývá stabilní.
+
 
 ### 🔧 Ruční přidání karty (pouze pokud automatická selže)
 
 Pokud by se karta z nějakého důvodu nezaregistrovala automaticky:
 
 1. **Přidejte zdroj do Lovelace:**
+
    - Jděte na **Nastavení** → **Dashboardy** → **Zdroje**
    - Klikněte **Přidat zdroj**
-   - URL: `/local/cez_hdo/cez-hdo-card.js`
+   - URL: `/cez_hdo/cez-hdo-card.js` (doporučeno)
+     - Alternativa: `/local/cez_hdo/cez-hdo-card.js`
    - Typ zdroje: **JavaScript Module**
    - Klikněte **Vytvořit**
 

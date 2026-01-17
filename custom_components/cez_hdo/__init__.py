@@ -1,6 +1,7 @@
 """ČEZ HDO integration for Home Assistant."""
 from __future__ import annotations
 
+import asyncio
 import logging
 import shutil
 from pathlib import Path
@@ -8,6 +9,7 @@ from pathlib import Path
 import voluptuous as vol
 
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import HomeAssistant
 from homeassistant.components.frontend import add_extra_js_url
 import homeassistant.helpers.config_validation as cv
@@ -20,6 +22,9 @@ DOMAIN = "cez_hdo"
 # Track if frontend is already registered to avoid duplicates
 _FRONTEND_REGISTERED = False
 
+# Prefer serving frontend directly from the integration folder.
+_FRONTEND_STATIC_REGISTERED = False
+
 # Configuration schema - integrace se konfiguruje pouze přes platformy
 CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXTRA)
 
@@ -28,13 +33,19 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
 
-    # Deploy and register frontend card automatically
-    await _ensure_frontend_card(hass)
+    # Deploy and register frontend card automatically.
+    # Do it after HA has started to avoid race conditions (HTTP/Lovelace readiness)
+    # which can surface as 404 and "Custom element doesn't exist" on hard refresh.
+    async def _on_started(event) -> None:  # noqa: ANN001
+        await _ensure_frontend_card(hass)
+
+    hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _on_started)
 
     # Register service to reload frontend card
     async def reload_frontend_card(call):
         """Service to reload frontend card."""
-        # Just copy the file, don't re-register
+        # Re-register static path (if needed) and refresh the file copy.
+        await _register_frontend_static_path(hass)
         await _deploy_frontend_file(hass)
         _LOGGER.info("🔄 ČEZ HDO frontend card reloaded (file updated only)")
 
@@ -150,12 +161,49 @@ async def _deploy_frontend_file(hass: HomeAssistant) -> None:
         _LOGGER.error("Failed to deploy ČEZ HDO frontend file: %s", err)
 
 
+async def _register_frontend_static_path(hass: HomeAssistant) -> bool:
+    """Register a static URL for the frontend card served from the integration directory.
+
+    This is more reliable than relying purely on /local (config/www) during hard refresh.
+    """
+    global _FRONTEND_STATIC_REGISTERED
+    if _FRONTEND_STATIC_REGISTERED:
+        return True
+
+    try:
+        integration_dir = Path(__file__).parent
+        frontend_file = integration_dir / "frontend" / "dist" / "cez-hdo-card.js"
+        if not frontend_file.exists():
+            _LOGGER.warning(
+                "ČEZ HDO frontend source file not found at %s (static path not registered)",
+                frontend_file,
+            )
+            return False
+
+        # HA HTTP component provides register_static_path on hass.http
+        hass.http.register_static_path(
+            "/cez_hdo/cez-hdo-card.js",
+            str(frontend_file),
+            cache_headers=False,
+        )
+        _FRONTEND_STATIC_REGISTERED = True
+        _LOGGER.info("✅ ČEZ HDO frontend static path registered at /cez_hdo/cez-hdo-card.js")
+        return True
+
+    except Exception as err:
+        _LOGGER.warning("Failed to register static path for ČEZ HDO frontend: %s", err)
+        return False
+
+
 async def _ensure_frontend_card(hass: HomeAssistant) -> None:
     """Ensure frontend card is available and registered."""
     global _FRONTEND_REGISTERED
 
     try:
-        # First deploy the file
+        # Prefer a static path directly from integration (no copy needed for runtime reliability).
+        static_ok = await _register_frontend_static_path(hass)
+
+        # Also deploy the file into /config/www as a fallback for users who reference /local.
         await _deploy_frontend_file(hass)
 
         # Register the frontend card only once
@@ -163,7 +211,10 @@ async def _ensure_frontend_card(hass: HomeAssistant) -> None:
             import time
 
             cache_buster = int(time.time())
-            frontend_url = f"/local/cez_hdo/cez-hdo-card.js?v={cache_buster}"
+            if static_ok:
+                frontend_url = f"/cez_hdo/cez-hdo-card.js?v={cache_buster}"
+            else:
+                frontend_url = f"/local/cez_hdo/cez-hdo-card.js?v={cache_buster}"
             add_extra_js_url(hass, frontend_url)
             _FRONTEND_REGISTERED = True
             _LOGGER.info("✅ ČEZ HDO frontend card registered at %s", frontend_url)
