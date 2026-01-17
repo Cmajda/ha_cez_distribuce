@@ -23,6 +23,12 @@ class CezHdoBaseEntity:
         # Nastav výchozí cestu k cache (přizpůsob podle potřeby)
         self.cache_file = "/config/www/cez_hdo/cez_hdo.json"
 
+    def _dbg(self) -> str:
+        entity_id = getattr(self, "entity_id", None)
+        if entity_id:
+            return f"{entity_id} (ean={self.ean}, name={self.name})"
+        return f"ean={self.ean}, name={self.name}"
+
     async def async_added_to_hass(self) -> None:
         """Home Assistant callback when entity is added.
 
@@ -31,6 +37,7 @@ class CezHdoBaseEntity:
         if getattr(self, "hass", None) is None:
             return
         # Load cache ASAP so initial state is not 'restored/unavailable'.
+        _LOGGER.debug("CEZ HDO: async_added_to_hass -> schedule cache load (%s)", self._dbg())
         self.hass.async_create_task(self._async_load_cache_in_executor())
 
     async def _async_load_cache_in_executor(self) -> None:
@@ -38,8 +45,16 @@ class CezHdoBaseEntity:
         if getattr(self, "hass", None) is None:
             return
         try:
+            _LOGGER.debug("CEZ HDO: cache load start (%s) file=%s", self._dbg(), self.cache_file)
             ok = await self.hass.async_add_executor_job(
                 lambda: self._load_from_cache(self.cache_file)
+            )
+            _LOGGER.debug(
+                "CEZ HDO: cache load done (%s) ok=%s last_update_time=%s has_data=%s",
+                self._dbg(),
+                ok,
+                self._last_update_time,
+                self._response_data is not None,
             )
             if ok and hasattr(self, "async_write_ha_state"):
                 self.async_write_ha_state()
@@ -56,7 +71,15 @@ class CezHdoBaseEntity:
         self._update_in_progress = True
         self._last_update_attempt_time = datetime.now()
         try:
+            _LOGGER.debug("CEZ HDO: update start (%s)", self._dbg())
             await self.hass.async_add_executor_job(self.update)
+            _LOGGER.debug(
+                "CEZ HDO: update done (%s) last_update_success=%s last_update_time=%s has_data=%s",
+                self._dbg(),
+                self._last_update_success,
+                self._last_update_time,
+                self._response_data is not None,
+            )
             if hasattr(self, "async_write_ha_state"):
                 self.async_write_ha_state()
         finally:
@@ -66,6 +89,8 @@ class CezHdoBaseEntity:
         """Aktualizuje cache: včerejší signály z cache (pokud nejsou v API), dnešní a dalších 6 dní z API."""
         from datetime import timedelta
         from . import downloader
+
+        _LOGGER.debug("CEZ HDO: update() called (%s)", self._dbg())
 
         today = datetime.now().strftime("%d.%m.%Y")
         yesterday = (datetime.now() - timedelta(days=1)).strftime("%d.%m.%Y")
@@ -233,7 +258,7 @@ class CezHdoBaseEntity:
                         self._load_from_cache(self.cache_file)
 
         if self._response_data is None:
-            _LOGGER.warning("CEZ HDO: No data available for parsing (cache+api failed)")
+            _LOGGER.debug("CEZ HDO: _get_hdo_data no response_data yet (%s)", self._dbg())
             return False, None, None, None, False, None, None, None
         try:
             preferred_signal = None
@@ -245,12 +270,18 @@ class CezHdoBaseEntity:
                     preferred_signal = get_signal(self._response_data)
 
             today = datetime.now().strftime("%d.%m.%Y")
-            _LOGGER.debug("CEZ HDO: _get_hdo_data preferred_signal=%s, datum=%s", preferred_signal, today)
+            _LOGGER.debug(
+                "CEZ HDO: _get_hdo_data (%s) preferred_signal=%s, datum=%s, last_update_time=%s",
+                self._dbg(),
+                preferred_signal,
+                today,
+                self._last_update_time,
+            )
 
             # Pokud preferred_signal není známý, nevadí: downloader.get_today_schedule
             # zvolí první dostupný signál pro dnešní den.
             result = downloader.isHdo(self._response_data, preferred_signal=preferred_signal)
-            _LOGGER.info("CEZ HDO: Parser result: %s", result)
+            _LOGGER.debug("CEZ HDO: Parser result (%s): %s", self._dbg(), result)
             return result
         except Exception as err:
             _LOGGER.error("Error processing HDO data: %s", err)

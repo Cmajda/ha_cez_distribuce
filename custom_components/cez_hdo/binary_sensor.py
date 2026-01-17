@@ -94,8 +94,13 @@ class LowTariffActive(CezHdoBinarySensor):
     @property
     def is_on(self) -> bool | None:
         """Return True if low tariff is active."""
-        hdo_data = self._get_hdo_data()
-        return hdo_data[0]  # low_tariff_active
+        try:
+            hdo_data = self._get_hdo_data()
+            _LOGGER.debug("CEZ HDO: %s is_on hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
+            return hdo_data[0]  # low_tariff_active
+        except Exception as err:
+            _LOGGER.error("CEZ HDO: %s LowTariffActive failed: %s", getattr(self, "entity_id", self.name), err)
+            return None
 
 
 class HighTariffActive(CezHdoBinarySensor):
@@ -107,5 +112,10 @@ class HighTariffActive(CezHdoBinarySensor):
     @property
     def is_on(self) -> bool | None:
         """Return True if high tariff is active."""
-        hdo_data = self._get_hdo_data()
-        return hdo_data[4]  # high_tariff_active
+        try:
+            hdo_data = self._get_hdo_data()
+            _LOGGER.debug("CEZ HDO: %s is_on hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
+            return hdo_data[4]  # high_tariff_active
+        except Exception as err:
+            _LOGGER.error("CEZ HDO: %s HighTariffActive failed: %s", getattr(self, "entity_id", self.name), err)
+            return None

@@ -95,11 +95,16 @@ class LowTariffStart(CezHdoSensor):
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        hdo_data = self._get_hdo_data()
-        value = hdo_data[1]  # low_tariff_start
-        if value is None:
+        try:
+            hdo_data = self._get_hdo_data()
+            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
+            value = hdo_data[1]  # low_tariff_start
+            if value is None:
+                return None
+            return value.strftime("%H:%M")
+        except Exception as err:
+            _LOGGER.error("CEZ HDO: %s LowTariffStart failed: %s", getattr(self, "entity_id", self.name), err)
             return None
-        return value.strftime("%H:%M")
 
 
 class LowTariffEnd(CezHdoSensor):
@@ -116,11 +121,16 @@ class LowTariffEnd(CezHdoSensor):
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        hdo_data = self._get_hdo_data()
-        value = hdo_data[2]  # low_tariff_end
-        if value is None:
+        try:
+            hdo_data = self._get_hdo_data()
+            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
+            value = hdo_data[2]  # low_tariff_end
+            if value is None:
+                return None
+            return value.strftime("%H:%M")
+        except Exception as err:
+            _LOGGER.error("CEZ HDO: %s LowTariffEnd failed: %s", getattr(self, "entity_id", self.name), err)
             return None
-        return value.strftime("%H:%M")
 
 
 class LowTariffDuration(CezHdoSensor):
@@ -137,11 +147,16 @@ class LowTariffDuration(CezHdoSensor):
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        hdo_data = self._get_hdo_data()
-        duration = hdo_data[3]  # low_tariff_duration
-        if duration is None:
+        try:
+            hdo_data = self._get_hdo_data()
+            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
+            duration = hdo_data[3]  # low_tariff_duration
+            if duration is None:
+                return None
+            return downloader.format_duration(duration)
+        except Exception as err:
+            _LOGGER.error("CEZ HDO: %s LowTariffDuration failed: %s", getattr(self, "entity_id", self.name), err)
             return None
-        return downloader.format_duration(duration)
 
 
 class HighTariffStart(CezHdoSensor):
@@ -153,11 +168,16 @@ class HighTariffStart(CezHdoSensor):
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        hdo_data = self._get_hdo_data()
-        value = hdo_data[5]  # high_tariff_start
-        if value is None:
+        try:
+            hdo_data = self._get_hdo_data()
+            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
+            value = hdo_data[5]  # high_tariff_start
+            if value is None:
+                return None
+            return value.strftime("%H:%M")
+        except Exception as err:
+            _LOGGER.error("CEZ HDO: %s HighTariffStart failed: %s", getattr(self, "entity_id", self.name), err)
             return None
-        return value.strftime("%H:%M")
 
 
 class HighTariffEnd(CezHdoSensor):
@@ -174,11 +194,16 @@ class HighTariffEnd(CezHdoSensor):
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        hdo_data = self._get_hdo_data()
-        value = hdo_data[6]  # high_tariff_end
-        if value is None:
+        try:
+            hdo_data = self._get_hdo_data()
+            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
+            value = hdo_data[6]  # high_tariff_end
+            if value is None:
+                return None
+            return value.strftime("%H:%M")
+        except Exception as err:
+            _LOGGER.error("CEZ HDO: %s HighTariffEnd failed: %s", getattr(self, "entity_id", self.name), err)
             return None
-        return value.strftime("%H:%M")
 
 
 class HighTariffDuration(CezHdoSensor):
@@ -195,11 +220,16 @@ class HighTariffDuration(CezHdoSensor):
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        hdo_data = self._get_hdo_data()
-        duration = hdo_data[7]  # high_tariff_duration
-        if duration is None:
+        try:
+            hdo_data = self._get_hdo_data()
+            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
+            duration = hdo_data[7]  # high_tariff_duration
+            if duration is None:
+                return None
+            return downloader.format_duration(duration)
+        except Exception as err:
+            _LOGGER.error("CEZ HDO: %s HighTariffDuration failed: %s", getattr(self, "entity_id", self.name), err)
             return None
-        return downloader.format_duration(duration)
 
 
 class CezHdoRawData(CezHdoSensor):
