@@ -89,6 +89,12 @@ MOUNT_POINT="${HA_CONFIG_DIR:-/mnt/ha-config}"
 TARGET_DIR="$MOUNT_POINT/custom_components/cez_hdo"
 WWW_TARGET="$MOUNT_POINT/www/cez_hdo"
 
+# Source directory (this repo)
+SRC_DIR="$PROJECT_DIR/custom_components/cez_hdo"
+
+# WWW source directory (this repo)
+WWW_SRC="$PROJECT_DIR/www/cez_hdo"
+
 # Function to setup CIFS mount
 setup_mount() {
     local ha_ip="$1"
@@ -179,12 +185,12 @@ if [ "$CLEAN_MODE" = "clean" ]; then
     fi
 
     # Remove frontend from www
-    if [ -f "$WWW_TARGET/cez-hdo-card.js" ]; then
-        echo -e "${YELLOW}🗑️  Removing frontend card...${NC}"
-        rm -f "$WWW_TARGET/cez-hdo-card.js"
-        echo -e "${GREEN}✅ Frontend card removed from $WWW_TARGET${NC}"
+    if [ -d "$WWW_TARGET" ]; then
+        echo -e "${YELLOW}🗑️  Removing www assets...${NC}"
+        rm -rf "$WWW_TARGET"
+        echo -e "${GREEN}✅ WWW assets removed from $WWW_TARGET${NC}"
     else
-        echo -e "${YELLOW}⚠️  Frontend card not found in $WWW_TARGET${NC}"
+        echo -e "${YELLOW}⚠️  WWW assets not found in $WWW_TARGET${NC}"
     fi
 
     # Clean Python cache
@@ -253,33 +259,37 @@ NC='\033[0m'
 
 # Step 1: Version checking
 echo -e "${BLUE}🔍 Step 1: Checking versions...${NC}"
-DEV_VERSION=$(grep '"version"' "$PROJECT_DIR/dev/cez_hdo/manifest.json" | sed 's/.*"version": "\([^"]*\)".*/\1/')
-PROD_VERSION=$(grep '"version"' "$PROJECT_DIR/custom_components/cez_hdo/manifest.json" | sed 's/.*"version": "\([^"]*\)".*/\1/' 2>/dev/null || echo "none")
+SRC_VERSION=$(grep '"version"' "$SRC_DIR/manifest.json" | sed 's/.*"version": "\([^"]*\)".*/\1/' 2>/dev/null || echo "unknown")
+INSTALLED_VERSION=$(grep '"version"' "$TARGET_DIR/manifest.json" | sed 's/.*"version": "\([^"]*\)".*/\1/' 2>/dev/null || echo "none")
 
-echo "📦 Dev version: $DEV_VERSION"
-echo "🏠 Production version: $PROD_VERSION"
+echo "📦 Source version: $SRC_VERSION"
+echo "🏠 Installed version: $INSTALLED_VERSION"
 
-if [ "$DEV_VERSION" != "$PROD_VERSION" ]; then
-    echo -e "${YELLOW}⚠️  Version mismatch detected, will update production${NC}"
+if [ "$SRC_VERSION" != "$INSTALLED_VERSION" ]; then
+    echo -e "${YELLOW}⚠️  Version differs, will deploy update${NC}"
 fi
 
 # Step 2: Build frontend
 echo -e "${BLUE}📦 Step 2: Building frontend...${NC}"
-cd "$PROJECT_DIR/dev/frontend"
+if [ -d "$PROJECT_DIR/dev/frontend" ]; then
+    cd "$PROJECT_DIR/dev/frontend"
 
-if command -v npm >/dev/null 2>&1; then
-    # Install dependencies if needed
-    if [ ! -d "node_modules" ]; then
-        echo "Installing npm dependencies..."
-        npm install
+    if command -v npm >/dev/null 2>&1; then
+        # Install dependencies if needed
+        if [ ! -d "node_modules" ]; then
+            echo "Installing npm dependencies..."
+            npm install
+        fi
+
+        # Build frontend
+        echo "Building production bundle..."
+        npm run build
+        echo -e "${GREEN}✅ Frontend build completed${NC}"
+    else
+        echo -e "${YELLOW}⚠️  npm not found, skipping frontend build${NC}"
     fi
-
-    # Build frontend
-    echo "Building production bundle..."
-    npm run build
-    echo -e "${GREEN}✅ Frontend build completed${NC}"
 else
-    echo -e "${YELLOW}⚠️  npm not found, skipping frontend build${NC}"
+    echo -e "${YELLOW}⚠️  dev/frontend not found, skipping frontend build${NC}"
 fi
 
 # Step 3: Clean existing installation
@@ -295,29 +305,39 @@ echo -e "${GREEN}✅ Cleanup completed${NC}"
 
 # Step 4: Deploy component files
 echo -e "${BLUE}📁 Step 4: Deploying component files...${NC}"
-mkdir -p "$TARGET_DIR/frontend/dist"
+if [ ! -d "$SRC_DIR" ]; then
+    echo -e "${RED}❌ Source directory not found: $SRC_DIR${NC}"
+    exit 1
+fi
 
-# Copy Python files from dev
-    cp "$PROJECT_DIR/dev/cez_hdo"/*.py "$TARGET_DIR/"
-    cp "$PROJECT_DIR/dev/cez_hdo/manifest.json" "$TARGET_DIR/"
+mkdir -p "$TARGET_DIR"
 
-    # Copy services.yaml if it exists
-    if [ -f "$PROJECT_DIR/dev/cez_hdo/services.yaml" ]; then
-        cp "$PROJECT_DIR/dev/cez_hdo/services.yaml" "$TARGET_DIR/"
-        echo -e "${GREEN}✅ services.yaml copied${NC}"
-    fi
+# Copy full integration from custom_components/cez_hdo
+cp -a "$SRC_DIR/." "$TARGET_DIR/"
+
+echo -e "${GREEN}✅ Component source copied from $SRC_DIR${NC}"
+
+# Copy www assets from repo www/cez_hdo -> HA config/www/cez_hdo
+if [ -d "$WWW_SRC" ]; then
+    mkdir -p "$WWW_TARGET"
+    cp -a "$WWW_SRC/." "$WWW_TARGET/"
+    echo -e "${GREEN}✅ WWW assets copied from $WWW_SRC${NC}"
+else
+    echo -e "${YELLOW}⚠️  WWW source directory not found: $WWW_SRC (skipping)${NC}"
+fi
 
 # Copy built frontend files
 if [ -f "$PROJECT_DIR/dev/frontend/dist/cez-hdo-card.js" ]; then
+    mkdir -p "$TARGET_DIR/frontend/dist"
     cp "$PROJECT_DIR/dev/frontend/dist"/* "$TARGET_DIR/frontend/dist/"
     echo -e "${GREEN}✅ Frontend files copied from dev build${NC}"
+
+    # Also deploy built card into config/www for non-HACS setups
+    mkdir -p "$WWW_TARGET"
+    cp "$PROJECT_DIR/dev/frontend/dist/cez-hdo-card.js" "$WWW_TARGET/cez-hdo-card.js"
+    echo -e "${GREEN}✅ Frontend card copied to $WWW_TARGET/cez-hdo-card.js${NC}"
 else
-    echo -e "${YELLOW}⚠️  Dev frontend build not found, checking production...${NC}"
-    # Fallback to production files
-    if [ -f "$PROJECT_DIR/custom_components/cez_hdo/frontend/dist/cez-hdo-card.js" ]; then
-        cp "$PROJECT_DIR/custom_components/cez_hdo/frontend/dist"/* "$TARGET_DIR/frontend/dist/"
-        echo -e "${YELLOW}⚠️  Using production frontend files${NC}"
-    fi
+    echo -e "${YELLOW}ℹ️  Dev frontend build not found, keeping frontend from source tree${NC}"
 fi
 
 echo -e "${GREEN}✅ Component files deployed${NC}"
