@@ -13,6 +13,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
 from .base_entity import CezHdoBaseEntity
+from . import downloader
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -66,12 +67,19 @@ class CezHdoBinarySensor(CezHdoBaseEntity, BinarySensorEntity):
             cache_file = self.cache_file
             import json
             from pathlib import Path
+            from datetime import datetime
             if Path(cache_file).exists():
                 with open(cache_file, "r", encoding="utf-8") as f:
                     cache_content = json.load(f)
                 signals = cache_content.get("data", {}).get("data", {}).get("signals", [])
+                today = datetime.now().strftime("%d.%m.%Y")
+                for s in signals:
+                    if downloader.normalize_datum(s.get("datum")) == today and s.get("signal"):
+                        _LOGGER.info(f"CEZ HDO: První signál pro dnešní den v cache: {s['signal']}")
+                        return s["signal"]
+                # fallback: první signál v poli
                 if signals and signals[0].get("signal"):
-                    _LOGGER.info(f"CEZ HDO: První dostupný signál v cache: {signals[0]['signal']}")
+                    _LOGGER.info(f"CEZ HDO: Fallback - první dostupný signál v cache: {signals[0]['signal']}")
                     return signals[0]["signal"]
                 else:
                     _LOGGER.warning(f"CEZ HDO: Pole 'signals' je prázdné nebo neobsahuje klíč 'signal'.")
@@ -89,7 +97,7 @@ class LowTariffActive(CezHdoBinarySensor):
         super().__init__(ean, "LowTariffActive", signal)
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         """Return True if low tariff is active."""
         hdo_data = self._get_hdo_data()
         signal = self._get_signal(hdo_data)
@@ -106,7 +114,7 @@ class HighTariffActive(CezHdoBinarySensor):
         super().__init__(ean, "HighTariffActive", signal)
 
     @property
-    def is_on(self) -> bool:
+    def is_on(self) -> bool | None:
         """Return True if high tariff is active."""
         hdo_data = self._get_hdo_data()
         signal = self._get_signal(hdo_data)

@@ -35,6 +35,33 @@ def get_request_data(ean: str) -> dict:
     return {"ean": ean}
 
 
+def normalize_datum(datum_str: str | None) -> str | None:
+    """Normalize various date formats to 'DD.MM.YYYY' used by CEZ HDO."""
+    if not datum_str:
+        return None
+    s = str(datum_str).strip()
+
+    # Common CEZ format, sometimes without leading zeros.
+    parts = [p.strip() for p in s.split(".")]
+    if len(parts) == 3 and all(p.isdigit() for p in parts):
+        day, month, year = parts
+        if len(year) == 2:
+            year = f"20{year}"
+        try:
+            return f"{int(day):02d}.{int(month):02d}.{int(year):04d}"
+        except ValueError:
+            pass
+
+    # Fallback: try a few known formats.
+    for fmt in ("%d.%m.%Y", "%d.%m.%y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(s, fmt).strftime("%d.%m.%Y")
+        except ValueError:
+            continue
+
+    return s
+
+
 def time_in_range(start: time, end: time, check_time: time) -> bool:
     """Check if time is in range, handling overnight periods."""
     if start <= end:
@@ -176,11 +203,19 @@ def get_today_schedule(
     # Find all today's schedules
     today_signals = []
     for signal in signals:
-        if signal.get("datum") == today_date:
+        if normalize_datum(signal.get("datum")) == today_date:
             today_signals.append(signal)
 
     if not today_signals:
-        _LOGGER.warning("No schedule found for today %s", today_date)
+        # Extra diagnostics: show which dates exist (normalized)
+        available_dates = sorted(
+            {normalize_datum(s.get("datum")) for s in signals if s.get("datum")},
+        )
+        _LOGGER.warning(
+            "No schedule found for today %s (available: %s)",
+            today_date,
+            ", ".join([d for d in available_dates if d]),
+        )
         return []
 
     # If preferred signal is specified, try to find it
