@@ -156,6 +156,8 @@ compact_mode: false
 - `sensor.cez_hdo_hightariffend` - Konec vysokého tarifu
 - `sensor.cez_hdo_hightariffduration` - Zbývající čas vysokého tarifu
 
+Poznámka: Friendly name entit je v češtině. Po aktualizaci integrace se může projevit až po restartu Home Assistantu (nebo po znovunačtení entit). Entity ID (např. `sensor.cez_hdo_hightariffduration`) zůstává stejné.
+
 ### Atributy
 
 Každý senzor obsahuje v atributech kompletní API odpověď s detailními informacemi o HDO rozpisech.

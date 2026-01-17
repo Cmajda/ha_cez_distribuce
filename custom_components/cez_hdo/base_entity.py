@@ -37,12 +37,68 @@ class CezHdoBaseEntity:
         # Nastav výchozí cestu k cache (přizpůsob podle potřeby)
         self.cache_file = "/config/www/cez_hdo/cez_hdo.json"
 
-        # Provide stable entity registry identifiers and names.
-        # This keeps entity_ids predictable (e.g. sensor.cez_hdo_lowtariffstart).
-        if not getattr(self, "_attr_name", None):
-            self._attr_name = f"cez_hdo_{name}"
+        # Provide stable entity registry identifiers and friendly names.
+        # - unique_id must be stable
+        # - suggested_object_id keeps entity_id stable and English
+        # - _attr_name is the user-facing friendly name (Czech)
+        entity_meta: dict[str, dict[str, str]] = {
+            "LowTariffActive": {
+                "object_id": "cez_hdo_lowtariffactive",
+                "friendly": "ČEZ HDO nízký tarif aktivní",
+            },
+            "HighTariffActive": {
+                "object_id": "cez_hdo_hightariffactive",
+                "friendly": "ČEZ HDO vysoký tarif aktivní",
+            },
+            "LowTariffStart": {
+                "object_id": "cez_hdo_lowtariffstart",
+                "friendly": "ČEZ HDO nízký tarif začátek",
+            },
+            "LowTariffEnd": {
+                "object_id": "cez_hdo_lowtariffend",
+                "friendly": "ČEZ HDO nízký tarif konec",
+            },
+            "LowTariffDuration": {
+                "object_id": "cez_hdo_lowtariffduration",
+                "friendly": "ČEZ HDO nízký tarif zbývá",
+            },
+            "HighTariffStart": {
+                "object_id": "cez_hdo_hightariffstart",
+                "friendly": "ČEZ HDO vysoký tarif začátek",
+            },
+            "HighTariffEnd": {
+                "object_id": "cez_hdo_hightariffend",
+                "friendly": "ČEZ HDO vysoký tarif konec",
+            },
+            "HighTariffDuration": {
+                "object_id": "cez_hdo_hightariffduration",
+                "friendly": "ČEZ HDO vysoký tarif zbývá",
+            },
+            "RawData": {
+                "object_id": "cez_hdo_raw_data",
+                "friendly": "ČEZ HDO surová data",
+            },
+        }
+
+        meta = entity_meta.get(name)
+
         if not getattr(self, "_attr_unique_id", None):
+            # Keep existing unique_id scheme to avoid breaking entity registry.
             self._attr_unique_id = f"{ean}_{name.lower()}"
+
+        if not getattr(self, "_attr_suggested_object_id", None):
+            if meta and meta.get("object_id"):
+                self._attr_suggested_object_id = meta["object_id"]
+            else:
+                # Fallback: keep the previous English-style ids.
+                self._attr_suggested_object_id = f"cez_hdo_{name.lower()}"
+
+        if not getattr(self, "_attr_name", None):
+            if meta and meta.get("friendly"):
+                self._attr_name = meta["friendly"]
+            else:
+                # Fallback for unexpected keys
+                self._attr_name = f"ČEZ HDO {name}"
 
     def _dbg(self) -> str:
         entity_id = getattr(self, "entity_id", None)

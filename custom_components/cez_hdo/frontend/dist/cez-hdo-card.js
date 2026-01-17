@@ -173,6 +173,7 @@
         super();
         this.attachShadow({mode:"open"});
         this._config={};
+        this._datalistIds={};
       }
       set hass(hass){
         this._hass=hass;
@@ -200,25 +201,44 @@
       }
       _entityPicker(label,key,domains){
         const current=(this._config.entities&&this._config.entities[key])||"";
-        const hasPicker=!!customElements.get("ha-entity-picker");
-        const el=document.createElement(hasPicker?"ha-entity-picker":"ha-textfield");
-
-        if(hasPicker){
-          el.label=label;
-          el.includeDomains=domains;
-          el.value=current;
-          el.hass=this._hass;
-          el.addEventListener("value-changed",(ev)=>this._setEntity(key,ev.detail.value));
-        }else{
-          el.label=label;
-          el.value=current;
-          el.placeholder="např. sensor.xxx nebo binary_sensor.xxx";
-          el.addEventListener("input",(ev)=>this._setEntity(key,(ev.target.value||"").trim()));
-        }
-
         const wrap=document.createElement("div");
         wrap.className="entity-row";
-        wrap.appendChild(el);
+
+        // Robustní našeptávač bez závislosti na ha-entity-picker
+        if(!this._datalistIds[key]){
+          this._datalistIds[key] = `cez-hdo-entities-${key}-${Math.random().toString(16).slice(2)}`;
+        }
+        const listId=this._datalistIds[key];
+
+        const labelEl=document.createElement("div");
+        labelEl.className="entity-label";
+        labelEl.textContent=label;
+
+        const input=document.createElement("input");
+        input.className="entity-input";
+        input.type="text";
+        input.value=current;
+        input.placeholder="Začni psát… (např. sensor.xxx)";
+        input.setAttribute("list", listId);
+        input.addEventListener("input",(ev)=>this._setEntity(key,(ev.target.value||"").trim()));
+
+        const datalist=document.createElement("datalist");
+        datalist.id=listId;
+        const wanted=new Set(domains||[]);
+        const states=this._hass?.states||{};
+        for(const entityId of Object.keys(states)){
+          const domain = entityId.split(".")[0];
+          if(wanted.size && !wanted.has(domain)) continue;
+          const opt=document.createElement("option");
+          opt.value=entityId;
+          const friendly=states[entityId]?.attributes?.friendly_name;
+          if(friendly) opt.label=friendly;
+          datalist.appendChild(opt);
+        }
+
+        wrap.appendChild(labelEl);
+        wrap.appendChild(input);
+        wrap.appendChild(datalist);
         return wrap;
       }
       _render(){
@@ -235,7 +255,10 @@
         this.shadowRoot.innerHTML=`
           <style>
             .wrap{display:flex;flex-direction:column;gap:12px;padding:4px 0;}
-            .entity-row ha-entity-picker,.entity-row ha-textfield{display:block;}
+            .entity-row{display:flex;flex-direction:column;gap:6px;}
+            .entity-label{font-size:12px;opacity:.9;}
+            .entity-input{padding:10px 12px;border-radius:8px;border:1px solid var(--divider-color);background:var(--card-background-color, var(--ha-card-background));color:var(--primary-text-color);}
+            .entity-input:focus{outline:none;border-color:var(--primary-color);}
             .hint{font-size:12px;opacity:.8;}
           </style>
           <div class="wrap"></div>
