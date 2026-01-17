@@ -2,7 +2,7 @@
 from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, time
-from typing import NamedTuple, cast
+from typing import NamedTuple
 
 try:
     # python 3.9+
@@ -35,6 +35,33 @@ def get_request_data(ean: str) -> dict:
     return {"ean": ean}
 
 
+def normalize_datum(datum_str: str | None) -> str | None:
+    """Normalize various date formats to 'DD.MM.YYYY' used by CEZ HDO."""
+    if not datum_str:
+        return None
+    s = str(datum_str).strip()
+
+    # Common CEZ format, sometimes without leading zeros.
+    parts = [p.strip() for p in s.split(".")]
+    if len(parts) == 3 and all(p.isdigit() for p in parts):
+        day, month, year = parts
+        if len(year) == 2:
+            year = f"20{year}"
+        try:
+            return f"{int(day):02d}.{int(month):02d}.{int(year):04d}"
+        except ValueError:
+            pass
+
+    # Fallback: try a few known formats.
+    for fmt in ("%d.%m.%Y", "%d.%m.%y", "%Y-%m-%d"):
+        try:
+            return datetime.strptime(s, fmt).strftime("%d.%m.%Y")
+        except ValueError:
+            continue
+
+    return s
+
+
 def time_in_range(start: time, end: time, check_time: time) -> bool:
     """Check if time is in range, handling overnight periods."""
     if start <= end:
@@ -57,16 +84,19 @@ def parse_time(time_str: str | None) -> time | None:
 
 
 def format_duration(duration: timedelta) -> str:
-    """Format timedelta to string without microseconds."""
+    """Format timedelta as HH:MM.
+
+    Used for NT/VT duration sensors to match the HH:MM style used by start/end
+    tariff sensors.
+    """
     if duration is None:
-        return "0:00:00"
+        return "00:00"
 
     total_seconds = int(duration.total_seconds())
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
-    seconds = total_seconds % 60
 
-    return f"{hours}:{minutes:02d}:{seconds:02d}"
+    return f"{hours:02d}:{minutes:02d}"
 
 
 def calculate_duration(from_time: time, to_time: time) -> timedelta:
@@ -81,51 +111,6 @@ def calculate_duration(from_time: time, to_time: time) -> timedelta:
 
     duration = to_datetime - from_datetime
     return duration
-
-
-def is_czech_holiday(date: datetime) -> bool:
-    """Check if date is Czech public holiday."""
-    year = date.year
-
-    # Fixed holidays
-    fixed_holidays = [
-        (1, 1),  # New Year's Day
-        (5, 1),  # Labor Day
-        (5, 8),  # Liberation Day
-        (7, 5),  # Saints Cyril and Methodius Day
-        (7, 6),  # Jan Hus Day
-        (9, 28),  # Czech Statehood Day
-        (10, 28),  # Independence Day
-        (11, 17),  # Freedom Day
-        (12, 24),  # Christmas Eve
-        (12, 25),  # Christmas Day
-        (12, 26),  # St. Stephen's Day
-    ]
-
-    for month, day in fixed_holidays:
-        if date.month == month and date.day == day:
-            return True
-
-    # Easter Monday (variable date)
-    # Simple calculation for Easter Monday
-    # For precise calculation, we'd need a proper Easter algorithm
-    # This is a simplified version for common years
-    easter_monday_dates = {
-        2024: (4, 1),  # April 1, 2024
-        2025: (4, 21),  # April 21, 2025
-        2026: (4, 6),  # April 6, 2026
-        2027: (3, 29),  # March 29, 2027
-        2028: (4, 17),  # April 17, 2028
-        2029: (4, 2),  # April 2, 2029
-        2030: (4, 22),  # April 22, 2030
-    }
-
-    if year in easter_monday_dates:
-        easter_month, easter_day = easter_monday_dates[year]
-        if date.month == easter_month and date.day == easter_day:
-            return True
-
-    return False
 
 
 def parse_time_periods(casy_string: str) -> list[tuple[time, time]]:
@@ -154,8 +139,20 @@ def get_today_schedule(
     json_data: dict, preferred_signal: str | None = None
 ) -> list[tuple[time, time]]:
     """Get today's schedule from API response."""
-    if not json_data or "data" not in json_data or "signals" not in json_data["data"]:
-        _LOGGER.error("Invalid API response structure")
+
+    # Podpora více úrovní vnoření (pro kompatibilitu s různými API odpověďmi)
+    signals = None
+    if not json_data or "data" not in json_data:
+        _LOGGER.error("Invalid API response structure: missing 'data'")
+        return []
+    data_level = json_data["data"]
+    # Pokud je další úroveň 'data', použij ji
+    if isinstance(data_level, dict) and "data" in data_level:
+        data_level = data_level["data"]
+    if isinstance(data_level, dict) and "signals" in data_level:
+        signals = data_level["signals"]
+    if signals is None:
+        _LOGGER.error("Invalid API response structure: missing 'signals'")
         return []
 
     current_time = datetime.now(tz=CEZ_TIMEZONE)
@@ -163,12 +160,21 @@ def get_today_schedule(
 
     # Find all today's schedules
     today_signals = []
-    for signal in json_data["data"]["signals"]:
-        if signal.get("datum") == today_date:
+    for signal in signals:
+        if normalize_datum(signal.get("datum")) == today_date:
             today_signals.append(signal)
 
     if not today_signals:
-        _LOGGER.warning("No schedule found for today %s", today_date)
+        # Extra diagnostics: show which dates exist (normalized)
+        available_dates_all = {
+            normalize_datum(s.get("datum")) for s in signals if s.get("datum")
+        }
+        available_dates = sorted([d for d in available_dates_all if d is not None])
+        _LOGGER.warning(
+            "No schedule found for today %s (available: %s)",
+            today_date,
+            ", ".join([d for d in available_dates if d]),
+        )
         return []
 
     # If preferred signal is specified, try to find it
@@ -198,9 +204,59 @@ def get_today_schedule(
     return parse_time_periods(casy)
 
 
+def _extract_signals(json_data: dict) -> list[dict]:
+    """Extract signals list from API response.
+
+    Supports both structures:
+    - {"data": {"signals": [...]}}
+    - {"data": {"data": {"signals": [...]}}}
+    """
+    if not json_data or "data" not in json_data:
+        return []
+
+    data_level = json_data.get("data")
+    if isinstance(data_level, dict) and "data" in data_level:
+        data_level = data_level.get("data")
+
+    if isinstance(data_level, dict):
+        signals = data_level.get("signals")
+        if isinstance(signals, list):
+            return signals
+    return []
+
+
+def get_schedule_for_date(
+    json_data: dict,
+    target_date: datetime,
+    preferred_signal: str | None = None,
+) -> list[tuple[time, time]]:
+    """Get schedule for a specific date from API response."""
+    signals = _extract_signals(json_data)
+    if not signals:
+        _LOGGER.error("Invalid API response structure: missing 'signals'")
+        return []
+
+    date_str = target_date.strftime("%d.%m.%Y")
+    day_signals = [s for s in signals if normalize_datum(s.get("datum")) == date_str]
+
+    if not day_signals:
+        return []
+
+    if preferred_signal:
+        for signal in day_signals:
+            if signal.get("signal") == preferred_signal:
+                casy = signal.get("casy", "")
+                return parse_time_periods(casy)
+
+    # Fallback: first available signal for that day
+    casy = day_signals[0].get("casy", "")
+    return parse_time_periods(casy)
+
+
 def isHdo(
     json_data: dict,
     preferred_signal: str | None = None,
+    now: datetime | None = None,
 ) -> tuple[
     bool,
     time | None,
@@ -222,15 +278,11 @@ def isHdo(
         Tuple with HDO data: (low_tariff_active, low_start, low_end, low_duration,
                              high_tariff_active, high_start, high_end, high_duration)
     """
-    # Get today's schedule with preferred signal
-    low_periods = get_today_schedule(json_data, preferred_signal)
-
-    if not low_periods:
-        _LOGGER.error("No schedule data available")
-        return False, None, None, None, False, None, None, None
-
-    current_time = datetime.now(tz=CEZ_TIMEZONE)
-    checked_time = current_time.time()
+    current_time = (
+        now.astimezone(CEZ_TIMEZONE)
+        if now is not None
+        else datetime.now(tz=CEZ_TIMEZONE)
+    )
 
     # Initialize return values
     low_tariff_active = False
@@ -241,40 +293,74 @@ def isHdo(
     high_duration = None
 
     try:
-        # Convert periods to the same format as before
-        periods_list = []
-        for i, (start_time, end_time) in enumerate(low_periods):
-            periods_list.append({"start": start_time, "end": end_time, "index": i})
+        # Build low-tariff intervals as datetimes across yesterday/today/tomorrow.
+        # This fixes edge cases like 17:00-24:00 + 00:00-06:00 (next day) which should be displayed as 17:00-06:00.
+        days = [
+            current_time.date() - timedelta(days=1),
+            current_time.date(),
+            current_time.date() + timedelta(days=1),
+        ]
 
-        _LOGGER.debug(
-            "🔍 Low tariff periods: %s",
-            [f"{p['start']}-{p['end']}" for p in periods_list],
-        )
+        low_intervals: list[tuple[datetime, datetime]] = []
+        for day in days:
+            day_dt = datetime.combine(day, time(0, 0), tzinfo=CEZ_TIMEZONE)
+            periods = get_schedule_for_date(json_data, day_dt, preferred_signal)
+            for start_t, end_t in periods:
+                start_dt = datetime.combine(day, start_t, tzinfo=CEZ_TIMEZONE)
+                end_dt = datetime.combine(day, end_t, tzinfo=CEZ_TIMEZONE)
+                if end_dt <= start_dt:
+                    end_dt += timedelta(days=1)
+                low_intervals.append((start_dt, end_dt))
 
-        # Check if we're currently in a low tariff period
-        current_low_period = None
-        for period in periods_list:
-            period_start = cast(time, period["start"])
-            period_end = cast(time, period["end"])
-            if time_in_range(period_start, period_end, checked_time):
-                current_low_period = period
+        if not low_intervals:
+            import json as _json
+
+            try:
+                _LOGGER.error(
+                    "No schedule data available for %s±1 day. Raw json_data: %s",
+                    current_time.strftime("%d.%m.%Y"),
+                    _json.dumps(json_data, ensure_ascii=False, indent=2),
+                )
+            except Exception as log_err:
+                _LOGGER.error(
+                    "No schedule data available. (Chyba při logování json_data: %s)",
+                    log_err,
+                )
+            return False, None, None, None, False, None, None, None
+
+        low_intervals.sort(key=lambda x: x[0])
+
+        # Merge overlapping/adjacent intervals (adjacent is important for midnight joins).
+        merged: list[tuple[datetime, datetime]] = []
+        for start_dt, end_dt in low_intervals:
+            if not merged:
+                merged.append((start_dt, end_dt))
+                continue
+            last_start, last_end = merged[-1]
+            if start_dt <= last_end:
+                merged[-1] = (last_start, max(last_end, end_dt))
+            else:
+                merged.append((start_dt, end_dt))
+
+        # Find current low interval, if any (end is treated as exclusive to avoid overlaps).
+        current_low: tuple[datetime, datetime] | None = None
+        for start_dt, end_dt in merged:
+            if start_dt <= current_time < end_dt:
+                current_low = (start_dt, end_dt)
                 break
 
-        if current_low_period:
-            # We're in LOW tariff period
+        if current_low is not None:
             low_tariff_active = True
-            low_start = cast(time, current_low_period["start"])
-            low_end = cast(time, current_low_period["end"])
-            low_duration = calculate_duration(checked_time, low_end)
+            low_start_dt, low_end_dt = current_low
+            low_start = low_start_dt.time()
+            low_end = low_end_dt.time()
+            low_duration = low_end_dt - current_time
 
-            # Find next high tariff (starts when current low ends)
-            high_start = cast(time, current_low_period["end"])
-
-            # Find next low period after current one
-            current_index = periods_list.index(current_low_period)
-            next_low_period = periods_list[(current_index + 1) % len(periods_list)]
-            high_end = cast(time, next_low_period["start"])
-            high_duration = timedelta(0)  # HIGH tariff is not active, so remaining = 0
+            # Next high tariff window is the gap until next low interval.
+            next_low = next((p for p in merged if p[0] >= low_end_dt), None)
+            high_start = low_end
+            high_end = next_low[0].time() if next_low is not None else None
+            high_duration = timedelta(0)
 
             _LOGGER.debug(
                 "✅ IN LOW TARIFF: %s-%s, remaining: %s",
@@ -283,37 +369,29 @@ def isHdo(
                 format_duration(low_duration),
             )
         else:
-            # We're in HIGH tariff period
             high_tariff_active = True
 
-            # Find which high tariff period we're in
+            next_low = next((p for p in merged if p[0] > current_time), None)
             prev_low = None
-            next_low = None
-
-            for i, period in enumerate(periods_list):
-                period_start = cast(time, period["start"])
-                if period_start > checked_time:
-                    next_low = period
-                    if i > 0:
-                        prev_low = periods_list[i - 1]
-                    else:
-                        # Current time is before first low period
-                        prev_low = periods_list[-1] if periods_list else None
+            for start_dt, end_dt in merged:
+                if end_dt <= current_time:
+                    prev_low = (start_dt, end_dt)
+                else:
                     break
 
-            # If no next_low found, it means we're after last period
-            if next_low is None and periods_list:
-                next_low = periods_list[0]  # First period of next day
-                prev_low = periods_list[-1]  # Last period of today
+            # Determine high interval boundaries.
+            if prev_low is not None:
+                high_start = prev_low[1].time()
+            else:
+                high_start = time(0, 0)
 
-            if prev_low and next_low:
-                high_start = cast(time, prev_low["end"])
-                high_end = cast(time, next_low["start"])
-                high_duration = calculate_duration(checked_time, high_end)
+            if next_low is not None:
+                high_end = next_low[0].time()
+                high_duration = next_low[0] - current_time
 
-                # Next low tariff info (for display purposes)
-                low_start = cast(time, next_low["start"])
-                low_end = cast(time, next_low["end"])
+                # Next low tariff info (for display)
+                low_start = next_low[0].time()
+                low_end = next_low[1].time()
                 low_duration = timedelta(0)
 
                 _LOGGER.debug(
@@ -324,7 +402,7 @@ def isHdo(
                     low_start,
                 )
             else:
-                _LOGGER.error("Could not determine high tariff period boundaries")
+                _LOGGER.error("Could not determine next low tariff period")
 
     except (KeyError, TypeError, ValueError) as err:
         _LOGGER.error("Error processing schedule data: %s", err)

@@ -173,3 +173,6 @@ test2.py
 *.backup
 *.orig
 *local*
+*package-lock.json
+*package.json
+RELEASE_NOTES_*.md
