@@ -177,6 +177,10 @@
       set hass(hass){
         this._hass=hass;
         this._render();
+        try{
+          customElements.whenDefined("ha-entity-picker").then(()=>this._render());
+          customElements.whenDefined("ha-combo-box").then(()=>this._render());
+        }catch(_e){}
       }
       setConfig(config){
         this._config=config||{};
@@ -215,17 +219,22 @@
             const domain=eid.split(".",1)[0];
             return !domains||domains.length===0||domains.includes(domain);
           });
-          const items=entityIds.map((eid)=>{
+          const sortedEntityIds=entityIds.map((eid)=>{
             const st=this._hass.states[eid];
             const fn=st&&st.attributes&&(st.attributes.friendly_name||st.attributes.name);
-            const labelText=fn?`${fn} (${eid})`:eid;
             const match=((eid||"")+" "+(fn||"")).toLowerCase().includes("cez_hdo");
-            return {value:eid,label:labelText,__p:match?0:1};
-          }).sort((a,b)=>a.__p-b.__p||a.label.localeCompare(b.label)||a.value.localeCompare(b.value)).map(({__p,...rest})=>rest);
+            return {eid,prio:match?0:1,label:(fn?`${fn} (${eid})`:eid)};
+          }).sort((a,b)=>a.prio-b.prio||a.label.localeCompare(b.label)||a.eid.localeCompare(b.eid)).map((x)=>x.eid);
+
           el.label=label;
-          el.items=items;
-          el.itemLabelPath="label";
-          el.itemValuePath="value";
+          el.items=sortedEntityIds;
+          el.renderer=(root,_owner,model)=>{
+            const eid=model&&model.item;
+            const st=eid&&this._hass.states&&this._hass.states[eid];
+            const fn=st&&st.attributes&&(st.attributes.friendly_name||st.attributes.name);
+            const text=fn?`${fn} (${eid})`:(eid||"");
+            if(root.textContent!==text) root.textContent=text;
+          };
           el.value=current;
           el.allowCustomValue=true;
           el.addEventListener("value-changed",(ev)=>this._setEntity(key,ev.detail.value));
