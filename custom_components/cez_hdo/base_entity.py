@@ -268,6 +268,8 @@ class CezHdoBaseEntity:
                     "timestamp": datetime.now().isoformat(),
                     "data": filtered_json_data,
                 }
+                # Clean installs may not have /config/www/cez_hdo yet.
+                Path(cache_file).parent.mkdir(parents=True, exist_ok=True)
                 with open(cache_file, "w", encoding="utf-8") as f:
                     json.dump(cache_data, f, ensure_ascii=False, indent=2)
                 _LOGGER.info(
