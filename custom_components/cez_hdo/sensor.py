@@ -101,10 +101,6 @@ class LowTariffStart(CezHdoSensor):
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
         hdo_data = self._get_hdo_data()
-        signal = self._get_signal(hdo_data)
-        if signal is None:
-            _LOGGER.warning("CEZ HDO: Nenalezen žádný signál pro LowTariffStart, senzor bude unavailable.")
-            return None
         value = hdo_data[1]  # low_tariff_start
         if value is None:
             return None
@@ -126,10 +122,6 @@ class LowTariffEnd(CezHdoSensor):
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
         hdo_data = self._get_hdo_data()
-        signal = self._get_signal(hdo_data)
-        if signal is None:
-            _LOGGER.warning("CEZ HDO: Nenalezen žádný signál pro LowTariffEnd, senzor bude unavailable.")
-            return None
         value = hdo_data[2]  # low_tariff_end
         if value is None:
             return None
@@ -151,7 +143,6 @@ class LowTariffDuration(CezHdoSensor):
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
         hdo_data = self._get_hdo_data()
-        signal = self._get_signal(hdo_data)
         duration = hdo_data[3]  # low_tariff_duration
         if duration is None:
             return None
@@ -168,10 +159,6 @@ class HighTariffStart(CezHdoSensor):
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
         hdo_data = self._get_hdo_data()
-        signal = self._get_signal(hdo_data)
-        if signal is None:
-            _LOGGER.warning("CEZ HDO: Nenalezen žádný signál pro HighTariffStart, senzor bude unavailable.")
-            return None
         value = hdo_data[5]  # high_tariff_start
         if value is None:
             return None
@@ -193,10 +180,6 @@ class HighTariffEnd(CezHdoSensor):
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
         hdo_data = self._get_hdo_data()
-        signal = self._get_signal(hdo_data)
-        if signal is None:
-            _LOGGER.warning("CEZ HDO: Nenalezen žádný signál pro HighTariffEnd, senzor bude unavailable.")
-            return None
         value = hdo_data[6]  # high_tariff_end
         if value is None:
             return None
@@ -218,7 +201,6 @@ class HighTariffDuration(CezHdoSensor):
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
         hdo_data = self._get_hdo_data()
-        signal = self._get_signal(hdo_data)
         duration = hdo_data[7]  # high_tariff_duration
         if duration is None:
             return None

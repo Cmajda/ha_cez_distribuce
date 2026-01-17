@@ -100,10 +100,6 @@ class LowTariffActive(CezHdoBinarySensor):
     def is_on(self) -> bool | None:
         """Return True if low tariff is active."""
         hdo_data = self._get_hdo_data()
-        signal = self._get_signal(hdo_data)
-        if signal is None:
-            _LOGGER.warning("CEZ HDO: Nenalezen žádný signál pro LowTariffActive, senzor bude unavailable.")
-            return None
         return hdo_data[0]  # low_tariff_active
 
 
@@ -117,8 +113,4 @@ class HighTariffActive(CezHdoBinarySensor):
     def is_on(self) -> bool | None:
         """Return True if high tariff is active."""
         hdo_data = self._get_hdo_data()
-        signal = self._get_signal(hdo_data)
-        if signal is None:
-            _LOGGER.warning("CEZ HDO: Nenalezen žádný signál pro HighTariffActive, senzor bude unavailable.")
-            return None
         return hdo_data[4]  # high_tariff_active

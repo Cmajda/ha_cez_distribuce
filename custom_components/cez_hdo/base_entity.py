@@ -187,20 +187,20 @@ class CezHdoBaseEntity:
             _LOGGER.warning("CEZ HDO: No data available for parsing (cache+api failed)")
             return False, None, None, None, False, None, None, None
         try:
-            preferred_signal = getattr(self, '_get_signal', None)
-            if callable(preferred_signal):
-                signal = self._get_signal(self._response_data)
+            preferred_signal = None
+            if self.signal:
+                preferred_signal = self.signal
             else:
-                signal = self.signal
+                get_signal = getattr(self, "_get_signal", None)
+                if callable(get_signal):
+                    preferred_signal = get_signal(self._response_data)
+
             today = datetime.now().strftime("%d.%m.%Y")
-            _LOGGER.info(f"CEZ HDO: _get_hdo_data hledá signál: {signal}, datum: {today}")
-            import json as _json
-            _LOGGER.info(f"CEZ HDO: _get_hdo_data - dostupná data: %s", _json.dumps(self._response_data, ensure_ascii=False)[:1000])
-            if signal:
-                result = downloader.isHdo(self._response_data, preferred_signal=signal)
-            else:
-                _LOGGER.warning("CEZ HDO: Není dostupný žádný signál pro parser, senzory budou unavailable.")
-                return False, None, None, None, False, None, None, None
+            _LOGGER.debug("CEZ HDO: _get_hdo_data preferred_signal=%s, datum=%s", preferred_signal, today)
+
+            # Pokud preferred_signal není známý, nevadí: downloader.get_today_schedule
+            # zvolí první dostupný signál pro dnešní den.
+            result = downloader.isHdo(self._response_data, preferred_signal=preferred_signal)
             _LOGGER.info("CEZ HDO: Parser result: %s", result)
             return result
         except (KeyError, TypeError) as err:
