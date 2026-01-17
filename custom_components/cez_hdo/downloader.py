@@ -84,16 +84,19 @@ def parse_time(time_str: str | None) -> time | None:
 
 
 def format_duration(duration: timedelta) -> str:
-    """Format timedelta to string without microseconds."""
+    """Format timedelta as HH:MM.
+
+    Used for NT/VT duration sensors to match the HH:MM style used by start/end
+    tariff sensors.
+    """
     if duration is None:
-        return "0:00:00"
+        return "00:00"
 
     total_seconds = int(duration.total_seconds())
     hours = total_seconds // 3600
     minutes = (total_seconds % 3600) // 60
-    seconds = total_seconds % 60
 
-    return f"{hours}:{minutes:02d}:{seconds:02d}"
+    return f"{hours:02d}:{minutes:02d}"
 
 
 def calculate_duration(from_time: time, to_time: time) -> timedelta:
@@ -108,51 +111,6 @@ def calculate_duration(from_time: time, to_time: time) -> timedelta:
 
     duration = to_datetime - from_datetime
     return duration
-
-
-def is_czech_holiday(date: datetime) -> bool:
-    """Check if date is Czech public holiday."""
-    year = date.year
-
-    # Fixed holidays
-    fixed_holidays = [
-        (1, 1),  # New Year's Day
-        (5, 1),  # Labor Day
-        (5, 8),  # Liberation Day
-        (7, 5),  # Saints Cyril and Methodius Day
-        (7, 6),  # Jan Hus Day
-        (9, 28),  # Czech Statehood Day
-        (10, 28),  # Independence Day
-        (11, 17),  # Freedom Day
-        (12, 24),  # Christmas Eve
-        (12, 25),  # Christmas Day
-        (12, 26),  # St. Stephen's Day
-    ]
-
-    for month, day in fixed_holidays:
-        if date.month == month and date.day == day:
-            return True
-
-    # Easter Monday (variable date)
-    # Simple calculation for Easter Monday
-    # For precise calculation, we'd need a proper Easter algorithm
-    # This is a simplified version for common years
-    easter_monday_dates = {
-        2024: (4, 1),  # April 1, 2024
-        2025: (4, 21),  # April 21, 2025
-        2026: (4, 6),  # April 6, 2026
-        2027: (3, 29),  # March 29, 2027
-        2028: (4, 17),  # April 17, 2028
-        2029: (4, 2),  # April 2, 2029
-        2030: (4, 22),  # April 22, 2030
-    }
-
-    if year in easter_monday_dates:
-        easter_month, easter_day = easter_monday_dates[year]
-        if date.month == easter_month and date.day == easter_day:
-            return True
-
-    return False
 
 
 def parse_time_periods(casy_string: str) -> list[tuple[time, time]]:
