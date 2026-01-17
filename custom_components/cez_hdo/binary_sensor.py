@@ -58,35 +58,30 @@ class CezHdoBinarySensor(CezHdoBaseEntity, BinarySensorEntity):
         """Return the device class of the sensor."""
         return None
 
-    def _get_signal(self, hdo_data):
-        """Vrátí signál: pokud není zadaný, vezme první dostupný z JSON."""
+    def _get_signal(self, hdo_json: dict | None):
+        """Vrátí signál pro dnešní den z již načtených dat (bez file I/O)."""
         if self.signal:
-            _LOGGER.info(f"CEZ HDO: Používám signál z konfigurace: {self.signal}")
             return self.signal
-        try:
-            cache_file = self.cache_file
-            import json
-            from pathlib import Path
-            from datetime import datetime
-            if Path(cache_file).exists():
-                with open(cache_file, "r", encoding="utf-8") as f:
-                    cache_content = json.load(f)
-                signals = cache_content.get("data", {}).get("data", {}).get("signals", [])
-                today = datetime.now().strftime("%d.%m.%Y")
-                for s in signals:
-                    if downloader.normalize_datum(s.get("datum")) == today and s.get("signal"):
-                        _LOGGER.info(f"CEZ HDO: První signál pro dnešní den v cache: {s['signal']}")
-                        return s["signal"]
-                # fallback: první signál v poli
-                if signals and signals[0].get("signal"):
-                    _LOGGER.info(f"CEZ HDO: Fallback - první dostupný signál v cache: {signals[0]['signal']}")
-                    return signals[0]["signal"]
-                else:
-                    _LOGGER.warning(f"CEZ HDO: Pole 'signals' je prázdné nebo neobsahuje klíč 'signal'.")
-            else:
-                _LOGGER.warning(f"CEZ HDO: Cache file {cache_file} neexistuje.")
-        except Exception as e:
-            _LOGGER.warning(f"CEZ HDO: Chyba při získávání signálu z cache: {e}")
+
+        if not hdo_json:
+            return None
+
+        data_level = hdo_json.get("data")
+        if isinstance(data_level, dict) and "data" in data_level:
+            data_level = data_level.get("data")
+        signals = []
+        if isinstance(data_level, dict):
+            signals = data_level.get("signals", []) or []
+
+        from datetime import datetime
+
+        today = datetime.now().strftime("%d.%m.%Y")
+        for s in signals:
+            if downloader.normalize_datum(s.get("datum")) == today and s.get("signal"):
+                return s["signal"]
+
+        if signals and signals[0].get("signal"):
+            return signals[0]["signal"]
         return None
 
 

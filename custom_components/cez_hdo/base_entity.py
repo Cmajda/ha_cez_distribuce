@@ -18,8 +18,24 @@ class CezHdoBaseEntity:
         self._response_data = None
         self._last_update_success = False
         self._last_update_time = None  # datetime poslední aktualizace
+        self._update_in_progress = False
+        self._last_update_attempt_time = None  # datetime posledního pokusu o update
         # Nastav výchozí cestu k cache (přizpůsob podle potřeby)
         self.cache_file = "/config/www/cez_hdo/cez_hdo.json"
+
+    async def _async_update_in_executor(self) -> None:
+        """Run blocking update() in HA executor without blocking event loop."""
+        if getattr(self, "hass", None) is None:
+            return
+        if self._update_in_progress:
+            return
+
+        self._update_in_progress = True
+        self._last_update_attempt_time = datetime.now()
+        try:
+            await self.hass.async_add_executor_job(self.update)
+        finally:
+            self._update_in_progress = False
 
     def update(self) -> None:
         """Aktualizuje cache: včerejší signály z cache (pokud nejsou v API), dnešní a dalších 6 dní z API."""
@@ -175,13 +191,22 @@ class CezHdoBaseEntity:
             self._load_from_cache(self.cache_file)
 
         now = datetime.now()
-        # 1) Pokud nikdy neproběhla aktualizace, nebo je to víc než hodinu, zkus update()
+        # 1) Pokud jsou data starší než hodinu, update naplánuj na pozadí.
         if not self._last_update_time or (now - self._last_update_time) > timedelta(hours=1):
-            _LOGGER.info("CEZ HDO: Spouštím update() kvůli stáří dat nebo prvnímu dotazu.")
-            self.update()
-            # Pokud update selhal, necháme data z cache (pokud existují)
-            if self._response_data is None:
-                self._load_from_cache(self.cache_file)
+            # Neplánuj update příliš často (např. při burstu zápisů stavů).
+            if (
+                self._last_update_attempt_time is None
+                or (now - self._last_update_attempt_time) > timedelta(minutes=5)
+            ):
+                _LOGGER.info("CEZ HDO: Plánuji update() na pozadí (data jsou stará/není update).")
+                if getattr(self, "hass", None) is not None:
+                    self.hass.async_create_task(self._async_update_in_executor())
+                else:
+                    # Fallback mimo HA context (např. testy)
+                    self._last_update_attempt_time = now
+                    self.update()
+                    if self._response_data is None:
+                        self._load_from_cache(self.cache_file)
 
         if self._response_data is None:
             _LOGGER.warning("CEZ HDO: No data available for parsing (cache+api failed)")
@@ -203,6 +228,6 @@ class CezHdoBaseEntity:
             result = downloader.isHdo(self._response_data, preferred_signal=preferred_signal)
             _LOGGER.info("CEZ HDO: Parser result: %s", result)
             return result
-        except (KeyError, TypeError) as err:
+        except Exception as err:
             _LOGGER.error("Error processing HDO data: %s", err)
             return False, None, None, None, False, None, None, None

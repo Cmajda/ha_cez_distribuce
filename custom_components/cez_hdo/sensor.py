@@ -59,35 +59,30 @@ class CezHdoSensor(CezHdoBaseEntity, SensorEntity):
         """Return the icon of the sensor."""
         return "mdi:home-clock"
 
-    def _get_signal(self, hdo_data):
-        """Vrátí signál: pokud není zadaný, vezme první dostupný z JSON."""
+    def _get_signal(self, hdo_json: dict | None):
+        """Vrátí signál pro dnešní den z již načtených dat (bez file I/O)."""
         if self.signal:
-            _LOGGER.info(f"CEZ HDO: Používám signál z konfigurace: {self.signal}")
             return self.signal
-        try:
-            cache_file = self.cache_file
-            import json
-            from pathlib import Path
-            from datetime import datetime
-            if Path(cache_file).exists():
-                with open(cache_file, "r", encoding="utf-8") as f:
-                    cache_content = json.load(f)
-                signals = cache_content.get("data", {}).get("data", {}).get("signals", [])
-                today = datetime.now().strftime("%d.%m.%Y")
-                for s in signals:
-                    if downloader.normalize_datum(s.get("datum")) == today and s.get("signal"):
-                        _LOGGER.info(f"CEZ HDO: První signál pro dnešní den v cache: {s['signal']}")
-                        return s["signal"]
-                # fallback: první signál v poli
-                if signals and signals[0].get("signal"):
-                    _LOGGER.info(f"CEZ HDO: Fallback - první dostupný signál v cache: {signals[0]['signal']}")
-                    return signals[0]["signal"]
-                else:
-                    _LOGGER.warning(f"CEZ HDO: Pole 'signals' je prázdné nebo neobsahuje klíč 'signal'.")
-            else:
-                _LOGGER.warning(f"CEZ HDO: Cache file {cache_file} neexistuje.")
-        except Exception as e:
-            _LOGGER.warning(f"CEZ HDO: Chyba při získávání signálu z cache: {e}")
+
+        if not hdo_json:
+            return None
+
+        data_level = hdo_json.get("data")
+        if isinstance(data_level, dict) and "data" in data_level:
+            data_level = data_level.get("data")
+        signals = []
+        if isinstance(data_level, dict):
+            signals = data_level.get("signals", []) or []
+
+        from datetime import datetime
+
+        today = datetime.now().strftime("%d.%m.%Y")
+        for s in signals:
+            if downloader.normalize_datum(s.get("datum")) == today and s.get("signal"):
+                return s["signal"]
+
+        if signals and signals[0].get("signal"):
+            return signals[0]["signal"]
         return None
 
 
@@ -217,35 +212,18 @@ class CezHdoRawData(CezHdoSensor):
     @property
     def native_value(self) -> str | None:
         """Return the timestamp from cache in format 'DD.MM.YYYY HH:mm'."""
-        hdo_data = self._get_hdo_data()
-        # Získat timestamp z cache
-        try:
-            cache_file = self.cache_file
-            import json
-            from pathlib import Path
-            if Path(cache_file).exists():
-                with open(cache_file, "r", encoding="utf-8") as f:
-                    cache_content = json.load(f)
-                timestamp = cache_content.get("timestamp")
-                if timestamp:
-                    from datetime import datetime
-                    dt = datetime.fromisoformat(timestamp)
-                    return dt.strftime("%d.%m.%Y %H:%M")
-        except Exception as e:
-            _LOGGER.warning("CEZ HDO RAW: Failed to get timestamp: %s", e)
+        # Ensure data is loaded / update scheduled
+        _ = self._get_hdo_data()
+        if self._last_update_time:
+            return self._last_update_time.strftime("%d.%m.%Y %H:%M")
         return None
 
     @property
     def extra_state_attributes(self) -> dict:
         """Return the full JSON data as attribute."""
-        try:
-            cache_file = self.cache_file
-            import json
-            from pathlib import Path
-            if Path(cache_file).exists():
-                with open(cache_file, "r", encoding="utf-8") as f:
-                    cache_content = json.load(f)
-                return {"raw_json": cache_content}
-        except Exception as e:
-            _LOGGER.warning("CEZ HDO RAW: Failed to get raw json: %s", e)
-        return {}
+        _ = self._get_hdo_data()
+        if self._response_data is None:
+            return {}
+        ts = self._last_update_time.isoformat() if self._last_update_time else None
+        # Structure matches cache file format: {timestamp, data}
+        return {"raw_json": {"timestamp": ts, "data": self._response_data}}
