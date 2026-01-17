@@ -154,16 +154,88 @@
 // --- Runtime patch: editor + entity konfigurace v UI (Lovelace) ---
 // Soubor je buildnutý/minifikovaný; patch děláme bezpečně až po registraci custom elementu.
 (function(){
-  const DEFAULT_ENTITIES={
-    low_tariff:"binary_sensor.cez_hdo_lowtariffactive",
-    high_tariff:"binary_sensor.cez_hdo_hightariffactive",
-    low_start:"sensor.cez_hdo_lowtariffstart",
-    low_end:"sensor.cez_hdo_lowtariffend",
-    low_duration:"sensor.cez_hdo_lowtariffduration",
-    high_start:"sensor.cez_hdo_hightariffstart",
-    high_end:"sensor.cez_hdo_hightariffend",
-    high_duration:"sensor.cez_hdo_hightariffduration"
+  // Výchozí entity podle aktuálních názvů integrace (CZ).
+  const DEFAULT_ENTITY_CANDIDATES={
+    low_tariff:[
+      "binary_sensor.cez_hdo_nizky_tarif_aktivni"
+    ],
+    high_tariff:[
+      "binary_sensor.cez_hdo_vysoky_tarif_aktivni"
+    ],
+    low_start:[
+      "sensor.cez_hdo_nizky_tarif_zacatek"
+    ],
+    low_end:[
+      "sensor.cez_hdo_nizky_tarif_konec"
+    ],
+    low_duration:[
+      "sensor.cez_hdo_nizky_tarif_zbyva"
+    ],
+    high_start:[
+      "sensor.cez_hdo_vysoky_tarif_zacatek"
+    ],
+    high_end:[
+      "sensor.cez_hdo_vysoky_tarif_konec"
+    ],
+    high_duration:[
+      "sensor.cez_hdo_vysoky_tarif_zbyva"
+    ]
   };
+
+  const DEFAULT_ENTITIES={
+    low_tariff:DEFAULT_ENTITY_CANDIDATES.low_tariff[0],
+    high_tariff:DEFAULT_ENTITY_CANDIDATES.high_tariff[0],
+    low_start:DEFAULT_ENTITY_CANDIDATES.low_start[0],
+    low_end:DEFAULT_ENTITY_CANDIDATES.low_end[0],
+    low_duration:DEFAULT_ENTITY_CANDIDATES.low_duration[0],
+    high_start:DEFAULT_ENTITY_CANDIDATES.high_start[0],
+    high_end:DEFAULT_ENTITY_CANDIDATES.high_end[0],
+    high_duration:DEFAULT_ENTITY_CANDIDATES.high_duration[0]
+  };
+
+  function resolveEntityIdSuffix(hass,entityId){
+    const states=hass.states||{};
+    if(states[entityId]) return entityId;
+    const parts=String(entityId).split(".");
+    if(parts.length!==2) return entityId;
+    const domain=parts[0];
+    const objectId=parts[1];
+    const prefix=`${domain}.${objectId}_`;
+    let best=null;
+    let bestNum=Number.POSITIVE_INFINITY;
+    for(const id of Object.keys(states)){
+      if(!id.startsWith(prefix)) continue;
+      const suffix=id.slice(prefix.length);
+      const num=parseInt(suffix,10);
+      if(Number.isFinite(num)&&num<bestNum){
+        bestNum=num;
+        best=id;
+      }
+    }
+    return best||entityId;
+  }
+
+  function resolveEntityId(hass,entityId){
+    if(!hass||!entityId) return entityId;
+    const states=hass.states||{};
+
+    // 1) Přesná shoda
+    if(states[entityId]) return entityId;
+
+    // 2) Sufix pro původní
+    const resolvedSelf=resolveEntityIdSuffix(hass,entityId);
+    return resolvedSelf;
+  }
+
+  function resolveDefaultForKey(hass,key){
+    if(!hass) return DEFAULT_ENTITIES[key];
+    const candidates=DEFAULT_ENTITY_CANDIDATES[key]||[DEFAULT_ENTITIES[key]];
+    for(const cand of candidates){
+      const resolved=resolveEntityIdSuffix(hass,cand);
+      if(hass.states&&hass.states[resolved]) return resolved;
+    }
+    return resolveEntityId(hass,DEFAULT_ENTITIES[key]);
+  }
 
   function ensureEditorDefined(){
     if(customElements.get("cez-hdo-card-editor")) return;
@@ -245,6 +317,18 @@
         wrap.appendChild(input);
         wrap.appendChild(datalist);
 
+        // Pokud je pole prázdné, ukaž jakou výchozí entitu karta použije (včetně _2/_3).
+        if(!current){
+          const resolved=resolveDefaultForKey(this._hass,key);
+          const note=document.createElement("div");
+          note.className="hint";
+          if(resolved){
+            const exists=!!(this._hass?.states&&this._hass.states[resolved]);
+            note.textContent=exists?`Použito: ${resolved}`:`Výchozí: ${resolved} (nenalezeno)`;
+          }
+          wrap.appendChild(note);
+        }
+
         customElements.whenDefined("ha-selector").then(()=>{
           const selector=document.createElement("ha-selector");
           selector.style.display="none";
@@ -274,7 +358,7 @@
           <style>
             .wrap{display:flex;flex-direction:column;gap:12px;padding:4px 0;}
             .entity-row{display:flex;flex-direction:column;gap:6px;}
-            .entity-row ha-entity-picker,.entity-row ha-selector{display:block;}
+            .entity-row ha-selector{display:block;}
             .entity-input{padding:10px 12px;border-radius:8px;border:1px solid var(--divider-color);background:var(--card-background-color, var(--ha-card-background));color:var(--primary-text-color);}
             .entity-input:focus{outline:none;border-color:var(--primary-color);}
             .hint{font-size:12px;opacity:.8;}
@@ -322,41 +406,62 @@
   }
 
   customElements.whenDefined("cez-hdo-card").then(()=>{
-    ensureEditorDefined();
-    const Card=customElements.get("cez-hdo-card");
-    if(!Card||Card.__cezHdoPatched) return;
-    Card.__cezHdoPatched=true;
+    const patchCard=()=>{
+      ensureEditorDefined();
+      const Card=customElements.get("cez-hdo-card");
+      if(!Card||Card.__cezHdoPatched) return;
+      Card.__cezHdoPatched=true;
 
-    // UI editor pro Lovelace
-    Card.getConfigElement=()=>document.createElement("cez-hdo-card-editor");
-    Card.getStubConfig=()=>({type:"custom:cez-hdo-card"});
-
-    // Normalizace konfigurace: mapování starých klíčů nt_/vt_ + doplnění defaultů
-    const originalSetConfig=Card.prototype.setConfig;
-    Card.prototype.setConfig=function(config){
-      const cfg=config||{};
-      const ent=(cfg.entities||{});
-      const mapped={
-        low_tariff:ent.low_tariff||ent.nt_binary||ent.nt_active||ent.low_tariff_active,
-        high_tariff:ent.high_tariff||ent.vt_binary||ent.vt_active||ent.high_tariff_active,
-        low_start:ent.low_start||ent.nt_start,
-        low_end:ent.low_end||ent.nt_end,
-        low_duration:ent.low_duration||ent.nt_remaining,
-        high_start:ent.high_start||ent.vt_start,
-        high_end:ent.high_end||ent.vt_end,
-        high_duration:ent.high_duration||ent.vt_remaining
-      };
-      const entities={...DEFAULT_ENTITIES};
-      for(const k of Object.keys(mapped)) if(mapped[k]) entities[k]=mapped[k];
-      const normalized={
+      // UI editor pro Lovelace
+      Card.getConfigElement=()=>document.createElement("cez-hdo-card-editor");
+      // Při první instalaci rovnou předvyplň defaulty (uživatel může smazat → použijí se defaulty znovu).
+      Card.getStubConfig=()=>({
+        type:"custom:cez-hdo-card",
         title:"ČEZ HDO Status",
         show_times:true,
         show_duration:true,
         compact_mode:false,
-        ...cfg,
-        entities
+        entities:{...DEFAULT_ENTITIES}
+      });
+
+      // Normalizace konfigurace: mapování starých klíčů nt_/vt_ + doplnění defaultů
+      const originalSetConfig=Card.prototype.setConfig;
+      const originalGetEntityState=Card.prototype.getEntityState;
+
+      Card.prototype.getEntityState=function(entityId){
+        const resolved=resolveEntityId(this.hass,entityId);
+        return originalGetEntityState.call(this,resolved);
       };
-      return originalSetConfig.call(this,normalized);
+
+      Card.prototype.setConfig=function(config){
+        const cfg=config||{};
+        const ent=(cfg.entities||{});
+        const mapped={
+          low_tariff:ent.low_tariff||ent.nt_binary||ent.nt_active||ent.low_tariff_active,
+          high_tariff:ent.high_tariff||ent.vt_binary||ent.vt_active||ent.high_tariff_active,
+          low_start:ent.low_start||ent.nt_start,
+          low_end:ent.low_end||ent.nt_end,
+          low_duration:ent.low_duration||ent.nt_remaining,
+          high_start:ent.high_start||ent.vt_start,
+          high_end:ent.high_end||ent.vt_end,
+          high_duration:ent.high_duration||ent.vt_remaining
+        };
+        const entities={...DEFAULT_ENTITIES};
+        for(const k of Object.keys(mapped)) if(mapped[k]) entities[k]=mapped[k];
+        const normalized={
+          title:"ČEZ HDO Status",
+          show_times:true,
+          show_duration:true,
+          compact_mode:false,
+          ...cfg,
+          entities
+        };
+        return originalSetConfig.call(this,normalized);
+      };
     };
+
+    // Patchni okamžitě, ať stihneme i první setConfig při přidání karty.
+    patchCard();
+    customElements.whenDefined("cez-hdo-card").then(patchCard);
   });
 })();
