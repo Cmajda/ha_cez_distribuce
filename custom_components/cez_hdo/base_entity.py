@@ -23,6 +23,29 @@ class CezHdoBaseEntity:
         # Nastav výchozí cestu k cache (přizpůsob podle potřeby)
         self.cache_file = "/config/www/cez_hdo/cez_hdo.json"
 
+    async def async_added_to_hass(self) -> None:
+        """Home Assistant callback when entity is added.
+
+        Make sure cache is loaded without blocking the event loop.
+        """
+        if getattr(self, "hass", None) is None:
+            return
+        # Load cache ASAP so initial state is not 'restored/unavailable'.
+        self.hass.async_create_task(self._async_load_cache_in_executor())
+
+    async def _async_load_cache_in_executor(self) -> None:
+        """Load cache file in executor and refresh entity state."""
+        if getattr(self, "hass", None) is None:
+            return
+        try:
+            ok = await self.hass.async_add_executor_job(
+                lambda: self._load_from_cache(self.cache_file)
+            )
+            if ok and hasattr(self, "async_write_ha_state"):
+                self.async_write_ha_state()
+        except Exception as err:
+            _LOGGER.debug("CEZ HDO: async cache load failed: %s", err)
+
     async def _async_update_in_executor(self) -> None:
         """Run blocking update() in HA executor without blocking event loop."""
         if getattr(self, "hass", None) is None:
@@ -34,6 +57,8 @@ class CezHdoBaseEntity:
         self._last_update_attempt_time = datetime.now()
         try:
             await self.hass.async_add_executor_job(self.update)
+            if hasattr(self, "async_write_ha_state"):
+                self.async_write_ha_state()
         finally:
             self._update_in_progress = False
 
@@ -186,9 +211,8 @@ class CezHdoBaseEntity:
         from datetime import datetime, timedelta
         from . import downloader
 
-        # 0) Preferuj existující cache (umožní fungovat i bez API)
-        if self._response_data is None:
-            self._load_from_cache(self.cache_file)
+        # 0) Pokud ještě nemáme data, cache se načítá asynchronně v async_added_to_hass().
+        # Tady v event loopu už žádné file I/O neděláme.
 
         now = datetime.now()
         # 1) Pokud jsou data starší než hodinu, update naplánuj na pozadí.
