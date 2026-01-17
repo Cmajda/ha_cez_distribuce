@@ -1,7 +1,7 @@
 """Platform for sensor integration."""
 from __future__ import annotations
 import logging
-from datetime import time
+from typing import Any
 import voluptuous as vol
 
 from homeassistant.components.sensor import (
@@ -102,7 +102,7 @@ class CezHdoSensor(CezHdoBaseEntity, SensorEntity):
         data_level = hdo_json.get("data")
         if isinstance(data_level, dict) and "data" in data_level:
             data_level = data_level.get("data")
-        signals = []
+        signals: list[dict[str, Any]] = []
         if isinstance(data_level, dict):
             signals = data_level.get("signals", []) or []
 
@@ -134,7 +134,11 @@ class LowTariffStart(CezHdoSensor):
                 return None
             return value.strftime("%H:%M")
         except Exception as err:
-            _LOGGER.error("CEZ HDO: %s LowTariffStart failed: %s", getattr(self, "entity_id", self.name), err)
+            _LOGGER.error(
+                "CEZ HDO: %s LowTariffStart failed: %s",
+                getattr(self, "entity_id", self.name),
+                err,
+            )
             return None
 
 
@@ -159,7 +163,11 @@ class LowTariffEnd(CezHdoSensor):
                 return None
             return value.strftime("%H:%M")
         except Exception as err:
-            _LOGGER.error("CEZ HDO: %s LowTariffEnd failed: %s", getattr(self, "entity_id", self.name), err)
+            _LOGGER.error(
+                "CEZ HDO: %s LowTariffEnd failed: %s",
+                getattr(self, "entity_id", self.name),
+                err,
+            )
             return None
 
 
@@ -184,7 +192,11 @@ class LowTariffDuration(CezHdoSensor):
                 return None
             return downloader.format_duration(duration)
         except Exception as err:
-            _LOGGER.error("CEZ HDO: %s LowTariffDuration failed: %s", getattr(self, "entity_id", self.name), err)
+            _LOGGER.error(
+                "CEZ HDO: %s LowTariffDuration failed: %s",
+                getattr(self, "entity_id", self.name),
+                err,
+            )
             return None
 
 
@@ -204,7 +216,11 @@ class HighTariffStart(CezHdoSensor):
                 return None
             return value.strftime("%H:%M")
         except Exception as err:
-            _LOGGER.error("CEZ HDO: %s HighTariffStart failed: %s", getattr(self, "entity_id", self.name), err)
+            _LOGGER.error(
+                "CEZ HDO: %s HighTariffStart failed: %s",
+                getattr(self, "entity_id", self.name),
+                err,
+            )
             return None
 
 
@@ -229,7 +245,11 @@ class HighTariffEnd(CezHdoSensor):
                 return None
             return value.strftime("%H:%M")
         except Exception as err:
-            _LOGGER.error("CEZ HDO: %s HighTariffEnd failed: %s", getattr(self, "entity_id", self.name), err)
+            _LOGGER.error(
+                "CEZ HDO: %s HighTariffEnd failed: %s",
+                getattr(self, "entity_id", self.name),
+                err,
+            )
             return None
 
 
@@ -254,12 +274,17 @@ class HighTariffDuration(CezHdoSensor):
                 return None
             return downloader.format_duration(duration)
         except Exception as err:
-            _LOGGER.error("CEZ HDO: %s HighTariffDuration failed: %s", getattr(self, "entity_id", self.name), err)
+            _LOGGER.error(
+                "CEZ HDO: %s HighTariffDuration failed: %s",
+                getattr(self, "entity_id", self.name),
+                err,
+            )
             return None
 
 
 class CezHdoRawData(CezHdoSensor):
     """Sensor for raw HDO JSON data and timestamp."""
+
     def __init__(self, ean: str, signal: str | None = None) -> None:
         super().__init__(ean, "RawData", signal)
         self._attr_name = "CEZ HDO Raw Data"

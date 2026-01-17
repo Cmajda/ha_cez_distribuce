@@ -1,6 +1,7 @@
 """Platform for binary sensor integration."""
 from __future__ import annotations
 import logging
+from typing import Any
 import voluptuous as vol
 
 from homeassistant.components.binary_sensor import (
@@ -91,7 +92,7 @@ class CezHdoBinarySensor(CezHdoBaseEntity, BinarySensorEntity):
         data_level = hdo_json.get("data")
         if isinstance(data_level, dict) and "data" in data_level:
             data_level = data_level.get("data")
-        signals = []
+        signals: list[dict[str, Any]] = []
         if isinstance(data_level, dict):
             signals = data_level.get("signals", []) or []
 
@@ -120,7 +121,11 @@ class LowTariffActive(CezHdoBinarySensor):
             hdo_data = self._get_hdo_data()
             return hdo_data[0]  # low_tariff_active
         except Exception as err:
-            _LOGGER.error("CEZ HDO: %s LowTariffActive failed: %s", getattr(self, "entity_id", self.name), err)
+            _LOGGER.error(
+                "CEZ HDO: %s LowTariffActive failed: %s",
+                getattr(self, "entity_id", self.name),
+                err,
+            )
             return None
 
 
@@ -137,5 +142,9 @@ class HighTariffActive(CezHdoBinarySensor):
             hdo_data = self._get_hdo_data()
             return hdo_data[4]  # high_tariff_active
         except Exception as err:
-            _LOGGER.error("CEZ HDO: %s HighTariffActive failed: %s", getattr(self, "entity_id", self.name), err)
+            _LOGGER.error(
+                "CEZ HDO: %s HighTariffActive failed: %s",
+                getattr(self, "entity_id", self.name),
+                err,
+            )
             return None

@@ -2,7 +2,7 @@
 from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, time
-from typing import NamedTuple, cast
+from typing import NamedTuple
 
 try:
     # python 3.9+
@@ -166,9 +166,10 @@ def get_today_schedule(
 
     if not today_signals:
         # Extra diagnostics: show which dates exist (normalized)
-        available_dates = sorted(
-            {normalize_datum(s.get("datum")) for s in signals if s.get("datum")},
-        )
+        available_dates_all = {
+            normalize_datum(s.get("datum")) for s in signals if s.get("datum")
+        }
+        available_dates = sorted([d for d in available_dates_all if d is not None])
         _LOGGER.warning(
             "No schedule found for today %s (available: %s)",
             today_date,
@@ -277,7 +278,11 @@ def isHdo(
         Tuple with HDO data: (low_tariff_active, low_start, low_end, low_duration,
                              high_tariff_active, high_start, high_end, high_duration)
     """
-    current_time = now.astimezone(CEZ_TIMEZONE) if now is not None else datetime.now(tz=CEZ_TIMEZONE)
+    current_time = (
+        now.astimezone(CEZ_TIMEZONE)
+        if now is not None
+        else datetime.now(tz=CEZ_TIMEZONE)
+    )
 
     # Initialize return values
     low_tariff_active = False
@@ -309,6 +314,7 @@ def isHdo(
 
         if not low_intervals:
             import json as _json
+
             try:
                 _LOGGER.error(
                     "No schedule data available for %s±1 day. Raw json_data: %s",
