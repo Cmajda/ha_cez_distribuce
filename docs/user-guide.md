@@ -1,205 +1,107 @@
-# ČEZ HDO - Uživatelská dokumentace
+# ČEZ HDO – Uživatelská dokumentace
 
-## 📑 Obsah
+Tato stránka je kompletní návod pro běžného uživatele: instalace, konfigurace, vytvořené entity, Lovelace karta a řešení problémů.
 
-- [📑 Obsah](#-obsah)
-- [🚀 Instalace](#-instalace)
-  - [Automatická instalace přes HACS](#automatická-instalace-přes-hacs)
-  - [Manuální instalace](#manuální-instalace)
-- [⚙️ Konfigurace](#️-konfigurace)
-  - [Základní konfigurace](#základní-konfigurace)
-  - [EAN číslo - jak ho najít](#ean-číslo---jak-ho-najít)
-  - [Zjištění dostupných signálů](#zjištění-dostupných-signálů)
-- [🎨 Lovelace karta](#-lovelace-karta)
-  - [✨ Automatická instalace karty](#-automatická-instalace-karty)
-  - [🔧 Ruční přidání karty (pouze pokud automatická selže)](#-ruční-přidání-karty-pouze-pokud-automatická-selže)
-  - [Konfigurace karty](#konfigurace-karty)
-- [📊 Entity a senzory](#-entity-a-senzory)
-  - [Binary Sensors](#binary-sensors)
-  - [Sensors](#sensors)
-  - [Atributy](#atributy)
-- [🔍 Debug a řešení problémů](#-debug-a-řešení-problémů)
-  - [Debug logování](#debug-logování)
-  - [Řešení problémů](#řešení-problémů)
-  - [Debug logy obsahují](#debug-logy-obsahují)
+## Instalace
 
-## 🚀 Instalace
+### Instalace přes HACS (doporučeno)
 
-### Automatická instalace přes HACS
-
-Klikněte na tlačítko níže pro automatické otevření HACS:
+1. Otevřete HACS → Integrations
+1. Přidejte repozitář jako Custom repository (Integration):
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-### Manuální instalace
+1. Nainstalujte integraci „ČEZ HDO“
+1. Restart Home Assistant
 
-1. Otevřete HACS v Home Assistant
-2. Jděte na **Integrations**
-3. Klikněte na **⋮** → **Custom repositories**
-4. Přidejte URL: `https://github.com/Cmajda/ha_cez_distribuce`
-5. Kategorie: **Integration**
-6. Klikněte **Add**
-7. Najděte **"ČEZ HDO"** a nainstalujte
+Poznámka: po instalaci/aktualizaci a restartu HA může být potřeba jednou udělat `Ctrl+F5`, aby se Lovelace karta objevila v seznamu karet.
 
-## ⚙️ Konfigurace
+## Konfigurace (`configuration.yaml`)
 
-### Základní konfigurace
-
-Přidejte do `configuration.yaml`:
+Přidejte do `configuration.yaml` přesně tento blok (EAN je povinný):
 
 ```yaml
-# ČEZ HDO integrace
 sensor:
   - platform: cez_hdo
-    ean: "VAŠE_EAN_ČÍSLO"  # Váš EAN kód odběrného místa
-    signal: "HDO1"  # Volitelně - konkrétní signál (jinak se vybere automaticky)
-    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
+    ean: "Váš EAN"
 
 binary_sensor:
   - platform: cez_hdo
-    ean: "VAŠE_EAN_ČÍSLO"  # Váš EAN kód odběrného místa
-    signal: "HDO1"  # Volitelně - konkrétní signál (jinak se vybere automaticky)
-    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
+    ean: "Váš EAN"
 ```
 
-**Chování bez specifikace signálu:**
+Pak restartujte Home Assistant.
 
-- Integrace automaticky použije **nejpravděpodobnější signál** z dostupných pro daný EAN
-- Pro většinu uživatelů je automatický výběr dostatečný
-- Můžete použít službu `cez_hdo.list_signals` pro zjištění dostupných signálů
+### Kde najít EAN
 
-### EAN číslo - jak ho najít
+EAN je identifikátor odběrného místa a najdete ho typicky:
 
-EAN číslo (13 nebo 18 číslic) najdete na:
+- na faktuře / vyúčtování
+- v portálu dodavatele/distributora
 
-- **Faktuře od ČEZ Distribuce** - obvykle v záhlaví nebo v detailech odběrného místa
-- **Smlouvě o připojení** - jako identifikace odběrného místa
-- **Aplikaci ČEZ** - v detailech odběrného místa
-- **Zákaznickém portálu ČEZ** - v sekci odběrná místa
+## Vytvářené entity a jejich význam
 
-**Formát EAN:** `123456789101112113` (18 číslic) nebo `1234567891456` (13 číslic)
+Integrace vytváří tyto entity (výchozí názvy):
 
-### Zjištění dostupných signálů
+### Binary sensors
 
-Pro zjištění všech dostupných HDO signálů pro váš EAN použijte službu:
-
-```yaml
-service: cez_hdo.list_signals
-data:
-  ean: "VAŠE_EAN_ČÍSLO"
-```
-
-Služba vrátí seznam všech dostupných signálů s jejich názvy a časovými rozpisy.
-
-## 🎨 Lovelace karta
-
-### ✨ Automatická instalace karty
-
-🎯 **Karta se instaluje a registruje úplně automaticky!**
-
-Po instalaci integrace a restartu Home Assistant se karta:
-
-- ✅ **Automaticky zkopíruje** do `/config/www/cez_hdo/`
-- ✅ **Automaticky zaregistruje** v systému bez manuální konfigurace
-- ✅ **Ihned k použití** - žádné další kroky nejsou potřeba
-
-Poznámka k prohlížeči (Ctrl+F5):
-
-- Pokud se občas po tvrdém refreshi zobrazí chyba typu **"Custom element doesn't exist: cez-hdo-card"**, znamená to, že se JS soubor karty nenačetl včas (nebo se nenačetl vůbec) a Lovelace tak nezná element `cez-hdo-card`.
-- Nejjednodušší a nejspolehlivější řešení je přidat kartu i jako Lovelace **Resource** (viz níže) — pak se načítá standardním mechanismem Lovelace a chování bývá stabilní.
-
-
-### 🔧 Ruční přidání karty (pouze pokud automatická selže)
-
-Pokud by se karta z nějakého důvodu nezaregistrovala automaticky:
-
-1. **Přidejte zdroj do Lovelace:**
-
-   - Jděte na **Nastavení** → **Dashboardy** → **Zdroje**
-   - Klikněte **Přidat zdroj**
-   - URL: `/cez_hdo/cez-hdo-card.js` (doporučeno)
-     - Alternativa: `/local/cez_hdo/cez-hdo-card.js`
-   - Typ zdroje: **JavaScript Module**
-   - Klikněte **Vytvořit**
-
-2. **Restartujte Home Assistant**
-
-### Konfigurace karty
-
-Kartu jde konfigurovat buď ručně v YAML, nebo ve vizuálním editoru Lovelace (UI) – tam si můžete pohodlně vybrat entity přes entity picker.
-
-Přidejte do dashboardu:
-
-```yaml
-type: custom:cez-hdo-card
-entities:
-  low_tariff: binary_sensor.cez_hdo_lowtariffactive
-  high_tariff: binary_sensor.cez_hdo_hightariffactive
-  low_start: sensor.cez_hdo_lowtariffstart
-  low_end: sensor.cez_hdo_lowtariffend
-  low_duration: sensor.cez_hdo_lowtariffduration
-  high_start: sensor.cez_hdo_hightariffstart
-  high_end: sensor.cez_hdo_hightariffend
-  high_duration: sensor.cez_hdo_hightariffduration
-title: "ČEZ HDO Status"
-show_times: true
-show_duration: true
-compact_mode: false
-```
-
-## 📊 Entity a senzory
-
-### Binary Sensors
-
-- `binary_sensor.cez_hdo_lowtariffactive` - Je aktivní nízký tarif?
-- `binary_sensor.cez_hdo_hightariffactive` - Je aktivní vysoký tarif?
+- `binary_sensor.cez_hdo_nizky_tarif_aktivni` – nízký tarif je aktivní (`on/off`)
+- `binary_sensor.cez_hdo_vysoky_tarif_aktivni` – vysoký tarif je aktivní (`on/off`)
 
 ### Sensors
 
-- `sensor.cez_hdo_lowtariffstart` - Začátek nízkého tarifu
-- `sensor.cez_hdo_lowtariffend` - Konec nízkého tarifu
-- `sensor.cez_hdo_lowtariffduration` - Zbývající čas nízkého tarifu
-- `sensor.cez_hdo_hightariffstart` - Začátek vysokého tarifu
-- `sensor.cez_hdo_hightariffend` - Konec vysokého tarifu
-- `sensor.cez_hdo_hightariffduration` - Zbývající čas vysokého tarifu
+- `sensor.cez_hdo_nizky_tarif_zacatek` – čas začátku nízkého tarifu (např. `01:10`)
+- `sensor.cez_hdo_nizky_tarif_konec` – čas konce nízkého tarifu (např. `08:30`)
+- `sensor.cez_hdo_nizky_tarif_zbyva` – zbývající čas do změny tarifu
+- `sensor.cez_hdo_vysoky_tarif_zacatek` – čas začátku vysokého tarifu
+- `sensor.cez_hdo_vysoky_tarif_konec` – čas konce vysokého tarifu
+- `sensor.cez_hdo_vysoky_tarif_zbyva` – zbývající čas do změny tarifu
+- `sensor.cez_hdo_surova_data` – surová data / timestamp (diagnostika)
 
-Poznámka: Friendly name entit je v češtině. Po aktualizaci integrace se může projevit až po restartu Home Assistantu (nebo po znovunačtení entit). Entity ID (např. `sensor.cez_hdo_hightariffduration`) zůstává stejné.
+## Lovelace karta
 
-### Atributy
+### Přidání karty
 
-Každý senzor obsahuje v atributech kompletní API odpověď s detailními informacemi o HDO rozpisech.
-
-## 🔍 Debug a řešení problémů
-
-### Debug logování
-
-Pro detailní logování přidejte do `configuration.yaml`:
+V Lovelace přidejte kartu typu:
 
 ```yaml
-logger:
-  default: error
-  logs:
-    custom_components.cez_hdo.downloader: debug
+type: custom:cez-hdo-card
 ```
 
-### Řešení problémů
+### Nastavení entit v UI
 
-1. **Zkontrolujte EAN číslo** - musí být ve formátu 13 nebo 18 číslic
-2. **Otestujte dostupné signály** - použijte službu `cez_hdo.list_signals`
-3. **Zkontrolujte logy** - Developer Tools → Logs
-4. **Restartujte HA** po změnách konfigurace
-5. **Vyčistěte cache** prohlížeče (Ctrl+F5) pro Lovelace kartu
+- Karta má UI editor a nabízí výběr entit.
+- Tip: když necháte nějaké pole prázdné, karta použije výchozí entity (pokud existují).
 
-### Debug logy obsahují
+### Ruční registrace zdroje (jen pokud se karta nenačítá)
 
-- 📡 Volání ČEZ API s EAN parametrem
-- 🔍 Seznam všech dostupných signálů pro EAN
-- 🎯 Automatický výběr nejvhodnějšího signálu
-- 🗓️ Zpracování časových období HDO
-- ✅ Aktuální stav (nízký/vysoký tarif) se zbývajícím časem
+Pokud se karta v seznamu karet nezobrazuje ani po `Ctrl+F5`:
 
-**Zobrazení debug logů:**
+1. Nastavení → Dashboardy → Zdroje
+1. Přidat zdroj
+1. URL: `/cez_hdo/cez-hdo-card.js`
+1. Typ: JavaScript Module
+1. Restart Home Assistant
 
-1. **Developer Tools** → **Logs**
-2. **Klikněte na "Zobrazit nezpracované logy"**
-3. **Filtrujte:** `custom_components.cez_hdo`
+## Co dělat, když komponenta nefunguje
+
+Pokud se po instalaci/aktualizaci něco rozbije (karta nejde přidat, nejde načíst JS, nebo jsou chyby v konzoli), postupujte takto:
+
+1. Vynutit refresh: `Ctrl+F5`
+1. Odinstalovat doplněk
+1. Pokud existuje složka `www/cez_hdo`, smažte ji
+1. Znovu nainstalovat doplněk
+1. Restart Home Assistant
+
+## Diagnostika (když chcete poslat logy)
+
+Nejrychlejší kontrola pro kartu:
+
+- Otevřete v prohlížeči `http://IP_HA:8123/cez_hdo/cez-hdo-card.js`
+  - pokud vrací `200`, zdroj existuje
+  - pokud vrací `404`, karta se nenačte
+
+Pro integraci:
+
+- Nastavení → Systém → Protokoly (Logs)
+- hledejte záznamy `custom_components.cez_hdo`
