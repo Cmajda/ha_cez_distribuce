@@ -22,11 +22,7 @@ class CezHdoBaseEntity:
         self.hass: HomeAssistant | None = None
 
         self.ean = ean
-        # Do NOT assign to `self.name`.
-        # Home Assistant entities expose `name` as a property backed by `_attr_name`.
-        # If we set an instance attribute called `name`, it shadows the property and breaks
-        # friendly_name generation in UI.
-        self._cez_hdo_entity_key = name
+        self.name = name
         self.signal = signal
         self._response_data: dict[str, Any] | None = None
         self._last_update_success = False
@@ -43,32 +39,16 @@ class CezHdoBaseEntity:
 
         # Provide stable entity registry identifiers and names.
         # This keeps entity_ids predictable (e.g. sensor.cez_hdo_lowtariffstart).
-        if not getattr(self, "_attr_suggested_object_id", None):
-            # Keep entity_id stable and English-like regardless of displayed (localized) name.
-            self._attr_suggested_object_id = f"cez_hdo_{name.lower()}"
-
         if not getattr(self, "_attr_name", None):
-            # Friendly (display) names in Czech.
-            friendly_map = {
-                "LowTariffActive": "ČEZ HDO nízký tarif aktivní",
-                "HighTariffActive": "ČEZ HDO vysoký tarif aktivní",
-                "LowTariffStart": "ČEZ HDO nízký tarif začátek",
-                "LowTariffEnd": "ČEZ HDO nízký tarif konec",
-                "LowTariffDuration": "ČEZ HDO nízký tarif zbývá",
-                "HighTariffStart": "ČEZ HDO vysoký tarif začátek",
-                "HighTariffEnd": "ČEZ HDO vysoký tarif konec",
-                "HighTariffDuration": "ČEZ HDO vysoký tarif zbývá",
-                "RawData": "ČEZ HDO surová data",
-            }
-            self._attr_name = friendly_map.get(name, f"ČEZ HDO {name}")
+            self._attr_name = f"cez_hdo_{name}"
         if not getattr(self, "_attr_unique_id", None):
             self._attr_unique_id = f"{ean}_{name.lower()}"
 
     def _dbg(self) -> str:
         entity_id = getattr(self, "entity_id", None)
         if entity_id:
-            return f"{entity_id} (ean={self.ean}, key={self._cez_hdo_entity_key})"
-        return f"ean={self.ean}, key={self._cez_hdo_entity_key}"
+            return f"{entity_id} (ean={self.ean}, name={self.name})"
+        return f"ean={self.ean}, name={self.name}"
 
     async def async_added_to_hass(self) -> None:
         """Home Assistant callback when entity is added.
