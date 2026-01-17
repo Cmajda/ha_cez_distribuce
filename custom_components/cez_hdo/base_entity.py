@@ -23,6 +23,13 @@ class CezHdoBaseEntity:
         # Nastav výchozí cestu k cache (přizpůsob podle potřeby)
         self.cache_file = "/config/www/cez_hdo/cez_hdo.json"
 
+        # Provide stable entity registry identifiers and names.
+        # This keeps entity_ids predictable (e.g. sensor.cez_hdo_lowtariffstart).
+        if not getattr(self, "_attr_name", None):
+            self._attr_name = f"cez_hdo_{name}"
+        if not getattr(self, "_attr_unique_id", None):
+            self._attr_unique_id = f"{ean}_{name.lower()}"
+
     def _dbg(self) -> str:
         entity_id = getattr(self, "entity_id", None)
         if entity_id:

@@ -48,7 +48,7 @@ def setup_platform(
         HighTariffDuration(ean, signal),
         CezHdoRawData(ean, signal),  # Nová entita
     ]
-    add_entities(entities, True)
+    add_entities(entities, False)
 
 
 class CezHdoSensor(CezHdoBaseEntity, SensorEntity):

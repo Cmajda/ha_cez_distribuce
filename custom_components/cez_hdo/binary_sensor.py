@@ -42,7 +42,7 @@ def setup_platform(
         LowTariffActive(ean, signal),
         HighTariffActive(ean, signal),
     ]
-    add_entities(entities, True)
+    add_entities(entities, False)
 
 
 class CezHdoBinarySensor(CezHdoBaseEntity, BinarySensorEntity):
