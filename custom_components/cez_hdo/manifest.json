@@ -1,14 +1,21 @@
 {
         "domain": "cez_hdo",
         "name": "ČEZ HDO",
-        "codeowners": ["@cmajda"],
+        "after_dependencies": [
+                "http"
+        ],
+        "codeowners": [
+                "@cmajda"
+        ],
         "config_flow": false,
         "dependencies": [],
-        "after_dependencies": ["http"],
         "documentation": "https://github.com/Cmajda/ha_cez_distribuce",
         "iot_class": "cloud_polling",
         "issue_tracker": "https://github.com/Cmajda/ha_cez_distribuce/issues",
         "quality_scale": "silver",
-        "requirements": ["requests", "lxml"],
+        "requirements": [
+                "requests",
+                "lxml"
+        ],
         "version": "2.0.8"
 }
