@@ -4,11 +4,11 @@
 # Builds frontend and deploys to local dev Home Assistant
 #
 # Usage:
-#   ./deploy-dev.sh                                    # Deploy to default /mnt/ha-config
-#   ./deploy-dev.sh clean                              # Remove integration from HA
-#   ./deploy-dev.sh 192.168.1.233 password           # Deploy to specific IP with password
-#   ./deploy-dev.sh clean 192.168.1.233 password     # Clean with specific IP and password
-#   HA_CONFIG_DIR=/path/to/ha ./deploy-dev.sh         # Custom HA config path
+#   ./deploy.sh                                    # Deploy to default /mnt/ha-config
+#   ./deploy.sh clean                              # Remove integration from HA
+#   ./deploy.sh 192.168.1.233 password           # Deploy to specific IP with password
+#   ./deploy.sh clean 192.168.1.233 password     # Clean with specific IP and password
+#   HA_CONFIG_DIR=/path/to/ha ./deploy.sh         # Custom HA config path
 #
 # Environment variables:
 #   HA_CONFIG_DIR - Path to Home Assistant configuration directory
@@ -18,9 +18,9 @@
 #   HA_USERNAME   - Username for CIFS mount (default: current user)
 #
 # Examples:
-#   ./deploy-dev.sh 192.168.1.233 mypassword
-#   HA_USERNAME=homeassistant ./deploy-dev.sh 192.168.1.10 secret123
-#   ./deploy-dev.sh clean 192.168.1.233 mypassword
+#   ./deploy.sh 192.168.1.xxx mypassword
+#   HA_USERNAME=homeassistant ./deploy.sh 192.168.1.xxx secret123
+#   ./deploy.sh clean 192.168.1.xxx mypassword
 
 # Show help if requested
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
@@ -51,15 +51,15 @@ fi
 # Builds frontend and deploys to local dev Home Assistant
 #
 # Usage:
-#   ./deploy-dev.sh                                    # Deploy to default /mnt/ha-config
-#   ./deploy-dev.sh clean                              # Remove integration from HA
-#   ./deploy-dev.sh 192.168.1.233 password           # Deploy to specific IP with password
-#   HA_CONFIG_DIR=/path/to/ha ./deploy-dev.sh         # Custom HA config path
+#   ./deploy.sh                                    # Deploy to default /mnt/ha-config
+#   ./deploy.sh clean                              # Remove integration from HA
+#   ./deploy.sh 192.168.1.xxx password           # Deploy to specific IP with password
+#   HA_CONFIG_DIR=/path/to/ha ./deploy.sh         # Custom HA config path
 #
 # Environment variables:
 #   HA_CONFIG_DIR - Path to Home Assistant configuration directory
 #                   Default: /mnt/ha-config
-#   HA_IP         - IP address of Home Assistant (e.g., 192.168.1.233)
+#   HA_IP         - IP address of Home Assistant (e.g., 192.168.1.xxx)
 #   HA_PASSWORD   - Password for CIFS mount
 #   HA_USERNAME   - Username for CIFS mount (default: current user)
 
@@ -93,7 +93,7 @@ WWW_TARGET="$MOUNT_POINT/www/cez_hdo"
 SRC_DIR="$PROJECT_DIR/custom_components/cez_hdo"
 
 # WWW source directory (this repo)
-WWW_SRC="$PROJECT_DIR/www/cez_hdo"
+FRONTEND_DIST_SRC="$PROJECT_DIR/custom_components/cez_hdo/frontend/dist"
 
 # Function to setup CIFS mount
 setup_mount() {
@@ -300,7 +300,6 @@ find "$MOUNT_POINT/custom_components" -name "*.pyc" -delete 2>/dev/null || true
 
 # Create necessary directories
 mkdir -p "$(dirname "$TARGET_DIR")"
-mkdir -p "$WWW_TARGET"
 echo -e "${GREEN}✅ Cleanup completed${NC}"
 
 # Step 4: Deploy component files
@@ -317,27 +316,29 @@ cp -a "$SRC_DIR/." "$TARGET_DIR/"
 
 echo -e "${GREEN}✅ Component source copied from $SRC_DIR${NC}"
 
-# Copy www assets from repo www/cez_hdo -> HA config/www/cez_hdo
-if [ -d "$WWW_SRC" ]; then
-    mkdir -p "$WWW_TARGET"
-    cp -a "$WWW_SRC/." "$WWW_TARGET/"
-    echo -e "${GREEN}✅ WWW assets copied from $WWW_SRC${NC}"
-else
-    echo -e "${YELLOW}⚠️  WWW source directory not found: $WWW_SRC (skipping)${NC}"
-fi
-
-# Copy built frontend files
+# Copy built frontend files (dev build) into integration tree
 if [ -f "$PROJECT_DIR/dev/frontend/dist/cez-hdo-card.js" ]; then
     mkdir -p "$TARGET_DIR/frontend/dist"
     cp "$PROJECT_DIR/dev/frontend/dist"/* "$TARGET_DIR/frontend/dist/"
     echo -e "${GREEN}✅ Frontend files copied from dev build${NC}"
-
-    # Also deploy built card into config/www for non-HACS setups
-    mkdir -p "$WWW_TARGET"
-    cp "$PROJECT_DIR/dev/frontend/dist/cez-hdo-card.js" "$WWW_TARGET/cez-hdo-card.js"
-    echo -e "${GREEN}✅ Frontend card copied to $WWW_TARGET/cez-hdo-card.js${NC}"
 else
     echo -e "${YELLOW}ℹ️  Dev frontend build not found, keeping frontend from source tree${NC}"
+fi
+
+# Deploy frontend card into config/www (only *.js; create folder only if missing)
+WWW_CARD_SRC_DIR=""
+if [ -d "$PROJECT_DIR/dev/frontend/dist" ] && compgen -G "$PROJECT_DIR/dev/frontend/dist/*.js" > /dev/null; then
+    WWW_CARD_SRC_DIR="$PROJECT_DIR/dev/frontend/dist"
+elif [ -d "$FRONTEND_DIST_SRC" ] && compgen -G "$FRONTEND_DIST_SRC/*.js" > /dev/null; then
+    WWW_CARD_SRC_DIR="$FRONTEND_DIST_SRC"
+fi
+
+if [ -n "$WWW_CARD_SRC_DIR" ]; then
+    mkdir -p "$WWW_TARGET"
+    cp -f "$WWW_CARD_SRC_DIR"/*.js "$WWW_TARGET/"
+    echo -e "${GREEN}✅ Frontend card JS copied to $WWW_TARGET from $WWW_CARD_SRC_DIR${NC}"
+else
+    echo -e "${YELLOW}⚠️  No frontend JS found to copy into $WWW_TARGET (skipping)${NC}"
 fi
 
 echo -e "${GREEN}✅ Component files deployed${NC}"
@@ -346,7 +347,7 @@ echo -e "${GREEN}✅ Component files deployed${NC}"
 echo -e "${BLUE}🌐 Step 5: HACS Frontend Integration...${NC}"
 echo -e "${GREEN}✅ Frontend will be served automatically by HACS from:${NC}"
 echo -e "${GREEN}   /hacsfiles/integrations/cez_hdo/cez-hdo-card.js${NC}"
-echo -e "${YELLOW}ℹ️  No manual www deployment needed - HACS handles frontend${NC}"
+echo -e "${YELLOW}ℹ️  Kopírování do /config/www/cez_hdo je jen pro lokální/dev scénáře${NC}"
 
 # Step 6: Verification
 echo -e "${BLUE}🔍 Step 6: Verification...${NC}"

@@ -98,9 +98,11 @@ Služba vrátí seznam všech dostupných signálů s jejich názvy a časovými
 🎯 **Karta se instaluje a registruje úplně automaticky!**
 
 Po instalaci integrace a restartu Home Assistant se karta:
+
 - ✅ **Automaticky zkopíruje** do `/config/www/cez_hdo/`
 - ✅ **Automaticky zaregistruje** v systému bez manuální konfigurace
 - ✅ **Ihned k použití** - žádné další kroky nejsou potřeba
+
 
 ### 🔧 Ruční přidání karty (pouze pokud automatická selže)
 
@@ -117,19 +119,21 @@ Pokud by se karta z nějakého důvodu nezaregistrovala automaticky:
 
 ### Konfigurace karty
 
+Kartu jde konfigurovat buď ručně v YAML, nebo ve vizuálním editoru Lovelace (UI) – tam si můžete pohodlně vybrat entity přes entity picker.
+
 Přidejte do dashboardu:
 
 ```yaml
 type: custom:cez-hdo-card
 entities:
-  nt_binary: binary_sensor.cez_hdo_nt_active
-  vt_binary: binary_sensor.cez_hdo_vt_active
-  nt_start: sensor.cez_hdo_nt_start
-  nt_end: sensor.cez_hdo_nt_end
-  vt_start: sensor.cez_hdo_vt_start
-  vt_end: sensor.cez_hdo_vt_end
-  nt_remaining: sensor.cez_hdo_nt_remaining
-  vt_remaining: sensor.cez_hdo_vt_remaining
+  low_tariff: binary_sensor.cez_hdo_lowtariffactive
+  high_tariff: binary_sensor.cez_hdo_hightariffactive
+  low_start: sensor.cez_hdo_lowtariffstart
+  low_end: sensor.cez_hdo_lowtariffend
+  low_duration: sensor.cez_hdo_lowtariffduration
+  high_start: sensor.cez_hdo_hightariffstart
+  high_end: sensor.cez_hdo_hightariffend
+  high_duration: sensor.cez_hdo_hightariffduration
 title: "ČEZ HDO Status"
 show_times: true
 show_duration: true
