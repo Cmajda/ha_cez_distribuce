@@ -201,34 +201,13 @@
       _entityPicker(label,key,domains){
         const current=(this._config.entities&&this._config.entities[key])||"";
         const hasPicker=!!customElements.get("ha-entity-picker");
-        const hasCombo=!!customElements.get("ha-combo-box");
-        const el=document.createElement(hasPicker?"ha-entity-picker":hasCombo?"ha-combo-box":"ha-textfield");
+        const el=document.createElement(hasPicker?"ha-entity-picker":"ha-textfield");
 
         if(hasPicker){
           el.label=label;
           el.includeDomains=domains;
           el.value=current;
           el.hass=this._hass;
-          el.addEventListener("value-changed",(ev)=>this._setEntity(key,ev.detail.value));
-        }else if(hasCombo){
-          const entityIds=Object.keys(this._hass.states||{}).filter((eid)=>{
-            const domain=eid.split(".",1)[0];
-            return !domains||domains.length===0||domains.includes(domain);
-          });
-          const items=entityIds.map((eid)=>{
-            const st=this._hass.states[eid];
-            const fn=st&&st.attributes&&(st.attributes.friendly_name||st.attributes.name);
-            const labelText=fn?`${fn} (${eid})`:eid;
-            const match=((eid||"")+" "+(fn||"")).toLowerCase().includes("cez_hdo");
-            return {value:eid,label:labelText,__p:match?0:1};
-          }).sort((a,b)=>a.__p-b.__p||a.label.localeCompare(b.label)||a.value.localeCompare(b.value)).map(({__p,...rest})=>rest);
-          el.label=label;
-          el.items=items;
-          // Vaadin combo-box: zobraz label, hodnotou je value
-          el.itemLabelPath="label";
-          el.itemValuePath="value";
-          el.value=current;
-          el.allowCustomValue=true;
           el.addEventListener("value-changed",(ev)=>this._setEntity(key,ev.detail.value));
         }else{
           el.label=label;
