@@ -188,6 +188,7 @@
       _setOption(key,value){
         this._config={...this._config,[key]:value};
         this._emitConfigChanged();
+        this._render();
       }
       _setEntity(key,value){
         const entities={...(this._config.entities||{})};
@@ -195,15 +196,30 @@
         else entities[key]=value;
         this._config={...this._config,entities};
         this._emitConfigChanged();
+        this._render();
       }
       _entityPicker(label,key,domains){
-        const picker=document.createElement("ha-entity-picker");
-        picker.hass=this._hass;
-        picker.label=label;
-        picker.includeDomains=domains;
-        picker.value=(this._config.entities&&this._config.entities[key])||"";
-        picker.addEventListener("value-changed",(ev)=>this._setEntity(key,ev.detail.value));
-        return picker;
+        const current=(this._config.entities&&this._config.entities[key])||"";
+        const hasPicker=!!customElements.get("ha-entity-picker");
+        const el=document.createElement(hasPicker?"ha-entity-picker":"ha-textfield");
+
+        if(hasPicker){
+          el.label=label;
+          el.includeDomains=domains;
+          el.value=current;
+          el.hass=this._hass;
+          el.addEventListener("value-changed",(ev)=>this._setEntity(key,ev.detail.value));
+        }else{
+          el.label=label;
+          el.value=current;
+          el.placeholder="např. sensor.xxx nebo binary_sensor.xxx";
+          el.addEventListener("input",(ev)=>this._setEntity(key,(ev.target.value||"").trim()));
+        }
+
+        const wrap=document.createElement("div");
+        wrap.className="entity-row";
+        wrap.appendChild(el);
+        return wrap;
       }
       _render(){
         if(!this.shadowRoot||!this._hass){
@@ -219,6 +235,7 @@
         this.shadowRoot.innerHTML=`
           <style>
             .wrap{display:flex;flex-direction:column;gap:12px;padding:4px 0;}
+            .entity-row ha-entity-picker,.entity-row ha-textfield{display:block;}
             .hint{font-size:12px;opacity:.8;}
           </style>
           <div class="wrap"></div>
