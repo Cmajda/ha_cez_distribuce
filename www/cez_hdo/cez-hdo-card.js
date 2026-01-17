@@ -224,6 +224,7 @@
           }).sort((a,b)=>a.__p-b.__p||a.label.localeCompare(b.label)||a.value.localeCompare(b.value)).map(({__p,...rest})=>rest);
           el.label=label;
           el.items=items;
+          // Vaadin combo-box: zobraz label, hodnotou je value
           el.itemLabelPath="label";
           el.itemValuePath="value";
           el.value=current;
