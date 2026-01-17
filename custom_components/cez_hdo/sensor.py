@@ -97,7 +97,6 @@ class LowTariffStart(CezHdoSensor):
         """Return the state of the sensor."""
         try:
             hdo_data = self._get_hdo_data()
-            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
             value = hdo_data[1]  # low_tariff_start
             if value is None:
                 return None
@@ -123,7 +122,6 @@ class LowTariffEnd(CezHdoSensor):
         """Return the state of the sensor."""
         try:
             hdo_data = self._get_hdo_data()
-            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
             value = hdo_data[2]  # low_tariff_end
             if value is None:
                 return None
@@ -149,7 +147,6 @@ class LowTariffDuration(CezHdoSensor):
         """Return the state of the sensor."""
         try:
             hdo_data = self._get_hdo_data()
-            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
             duration = hdo_data[3]  # low_tariff_duration
             if duration is None:
                 return None
@@ -170,7 +167,6 @@ class HighTariffStart(CezHdoSensor):
         """Return the state of the sensor."""
         try:
             hdo_data = self._get_hdo_data()
-            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
             value = hdo_data[5]  # high_tariff_start
             if value is None:
                 return None
@@ -196,7 +192,6 @@ class HighTariffEnd(CezHdoSensor):
         """Return the state of the sensor."""
         try:
             hdo_data = self._get_hdo_data()
-            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
             value = hdo_data[6]  # high_tariff_end
             if value is None:
                 return None
@@ -222,7 +217,6 @@ class HighTariffDuration(CezHdoSensor):
         """Return the state of the sensor."""
         try:
             hdo_data = self._get_hdo_data()
-            _LOGGER.debug("CEZ HDO: %s native_value hdo_data=%s", getattr(self, "entity_id", self.name), hdo_data)
             duration = hdo_data[7]  # high_tariff_duration
             if duration is None:
                 return None

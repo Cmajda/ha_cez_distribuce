@@ -20,6 +20,7 @@ class CezHdoBaseEntity:
         self._last_update_time = None  # datetime poslední aktualizace
         self._update_in_progress = False
         self._last_update_attempt_time = None  # datetime posledního pokusu o update
+        self._last_parser_log_time = None  # datetime posledního debug logu výsledku parseru
         # Nastav výchozí cestu k cache (přizpůsob podle potřeby)
         self.cache_file = "/config/www/cez_hdo/cez_hdo.json"
 
@@ -288,7 +289,15 @@ class CezHdoBaseEntity:
             # Pokud preferred_signal není známý, nevadí: downloader.get_today_schedule
             # zvolí první dostupný signál pro dnešní den.
             result = downloader.isHdo(self._response_data, preferred_signal=preferred_signal)
-            _LOGGER.debug("CEZ HDO: Parser result (%s): %s", self._dbg(), result)
+            # Nezahlcovat log – tuple se může vyhodnocovat často (pro více entit).
+            if _LOGGER.isEnabledFor(logging.DEBUG):
+                now_dt = datetime.now()
+                if (
+                    self._last_parser_log_time is None
+                    or (now_dt - self._last_parser_log_time).total_seconds() > 600
+                ):
+                    self._last_parser_log_time = now_dt
+                    _LOGGER.debug("CEZ HDO: Parser result (%s): %s", self._dbg(), result)
             return result
         except Exception as err:
             _LOGGER.error("Error processing HDO data: %s", err)
