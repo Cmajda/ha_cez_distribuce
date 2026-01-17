@@ -1,7 +1,6 @@
 """ČEZ HDO integration for Home Assistant."""
 from __future__ import annotations
 
-import asyncio
 import logging
 import shutil
 from pathlib import Path
@@ -12,6 +11,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
 from homeassistant.core import HomeAssistant
 from homeassistant.components.frontend import add_extra_js_url
+
 try:
     # Prefer official helper; available on older HA versions where hass.http.register_static_path is missing.
     from homeassistant.components.http import async_register_static_path  # type: ignore
@@ -202,7 +202,9 @@ async def _register_frontend_static_path(hass: HomeAssistant) -> bool:
             hass.http.app.router.add_static(url_path, str(dist_dir), show_index=False)
 
         _FRONTEND_STATIC_REGISTERED = True
-        _LOGGER.info("✅ ČEZ HDO frontend static path registered at /cez_hdo/cez-hdo-card.js")
+        _LOGGER.info(
+            "✅ ČEZ HDO frontend static path registered at /cez_hdo/cez-hdo-card.js"
+        )
         return True
 
     except Exception as err:
