@@ -149,4 +149,319 @@
       grid-template-columns: 1fr 1fr;
       gap: 8px;
     }
-  `,dt([ct({attribute:!1})],pt.prototype,"hass",void 0),dt([ct({state:!0,attribute:!1})],pt.prototype,"config",void 0),customElements.get("cez-hdo-card")||customElements.define("cez-hdo-card",pt),window.customCards=window.customCards||[],window.customCards.push({type:"cez-hdo-card",name:"ČEZ HDO Card",description:"Custom card for ČEZ HDO integration",preview:!0}),console.info("ČEZ HDO Card v2.0.7 loaded successfully")})();
+  `,dt([ct({attribute:!1})],pt.prototype,"hass",void 0),dt([ct({state:!0,attribute:!1})],pt.prototype,"config",void 0),customElements.get("cez-hdo-card")||customElements.define("cez-hdo-card",pt),window.customCards=window.customCards||[],window.customCards.push({type:"cez-hdo-card",name:"ČEZ HDO Card",description:"Custom card for ČEZ HDO integration",preview:!0}),console.info("ČEZ HDO Card v2.0.8 loaded successfully")})();
+
+// --- Runtime patch: editor + entity konfigurace v UI (Lovelace) ---
+// Soubor je buildnutý/minifikovaný; patch děláme bezpečně až po registraci custom elementu.
+(function(){
+  // Výchozí entity podle aktuálních názvů integrace (CZ).
+  const DEFAULT_ENTITY_CANDIDATES={
+    low_tariff:[
+      "binary_sensor.cez_hdo_nizky_tarif_aktivni"
+    ],
+    high_tariff:[
+      "binary_sensor.cez_hdo_vysoky_tarif_aktivni"
+    ],
+    low_start:[
+      "sensor.cez_hdo_nizky_tarif_zacatek"
+    ],
+    low_end:[
+      "sensor.cez_hdo_nizky_tarif_konec"
+    ],
+    low_duration:[
+      "sensor.cez_hdo_nizky_tarif_zbyva"
+    ],
+    high_start:[
+      "sensor.cez_hdo_vysoky_tarif_zacatek"
+    ],
+    high_end:[
+      "sensor.cez_hdo_vysoky_tarif_konec"
+    ],
+    high_duration:[
+      "sensor.cez_hdo_vysoky_tarif_zbyva"
+    ]
+  };
+
+  const DEFAULT_ENTITIES={
+    low_tariff:DEFAULT_ENTITY_CANDIDATES.low_tariff[0],
+    high_tariff:DEFAULT_ENTITY_CANDIDATES.high_tariff[0],
+    low_start:DEFAULT_ENTITY_CANDIDATES.low_start[0],
+    low_end:DEFAULT_ENTITY_CANDIDATES.low_end[0],
+    low_duration:DEFAULT_ENTITY_CANDIDATES.low_duration[0],
+    high_start:DEFAULT_ENTITY_CANDIDATES.high_start[0],
+    high_end:DEFAULT_ENTITY_CANDIDATES.high_end[0],
+    high_duration:DEFAULT_ENTITY_CANDIDATES.high_duration[0]
+  };
+
+  function resolveEntityIdSuffix(hass,entityId){
+    const states=hass.states||{};
+    if(states[entityId]) return entityId;
+    const parts=String(entityId).split(".");
+    if(parts.length!==2) return entityId;
+    const domain=parts[0];
+    const objectId=parts[1];
+    const prefix=`${domain}.${objectId}_`;
+    let best=null;
+    let bestNum=Number.POSITIVE_INFINITY;
+    for(const id of Object.keys(states)){
+      if(!id.startsWith(prefix)) continue;
+      const suffix=id.slice(prefix.length);
+      const num=parseInt(suffix,10);
+      if(Number.isFinite(num)&&num<bestNum){
+        bestNum=num;
+        best=id;
+      }
+    }
+    return best||entityId;
+  }
+
+  function resolveEntityId(hass,entityId){
+    if(!hass||!entityId) return entityId;
+    const states=hass.states||{};
+
+    // 1) Přesná shoda
+    if(states[entityId]) return entityId;
+
+    // 2) Sufix pro původní
+    const resolvedSelf=resolveEntityIdSuffix(hass,entityId);
+    return resolvedSelf;
+  }
+
+  function resolveDefaultForKey(hass,key){
+    if(!hass) return DEFAULT_ENTITIES[key];
+    const candidates=DEFAULT_ENTITY_CANDIDATES[key]||[DEFAULT_ENTITIES[key]];
+    for(const cand of candidates){
+      const resolved=resolveEntityIdSuffix(hass,cand);
+      if(hass.states&&hass.states[resolved]) return resolved;
+    }
+    return resolveEntityId(hass,DEFAULT_ENTITIES[key]);
+  }
+
+  function ensureEditorDefined(){
+    if(customElements.get("cez-hdo-card-editor")) return;
+
+    class CezHdoCardEditor extends HTMLElement{
+      constructor(){
+        super();
+        this.attachShadow({mode:"open"});
+        this._config={};
+        this._datalistIds={};
+      }
+      set hass(hass){
+        this._hass=hass;
+        this._render();
+      }
+      setConfig(config){
+        this._config=config||{};
+        this._render();
+      }
+      _emitConfigChanged(){
+        this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:this._config},bubbles:true,composed:true}));
+      }
+      _setOption(key,value){
+        this._config={...this._config,[key]:value};
+        this._emitConfigChanged();
+        this._render();
+      }
+      _setEntity(key,value){
+        const entities={...(this._config.entities||{})};
+        if(!value) delete entities[key];
+        else entities[key]=value;
+        this._config={...this._config,entities};
+        this._emitConfigChanged();
+        this._render();
+      }
+      _entityPicker(label,key,domains){
+        const current=(this._config.entities&&this._config.entities[key])||"";
+        const wrap=document.createElement("div");
+        wrap.className="entity-row";
+
+        const activateOnce=(()=>{
+          let activated=false;
+          return (el,input)=>{
+            if(activated) return;
+            activated=true;
+            el.style.display="";
+            input.style.display="none";
+          };
+        })();
+
+        // 1) Vždy-funkční našeptávač přes <datalist> (bez závislosti na HA komponentách)
+        if(!this._datalistIds[key]){
+          this._datalistIds[key]=`cez-hdo-entities-${key}-${Math.random().toString(16).slice(2)}`;
+        }
+        const listId=this._datalistIds[key];
+
+        const input=document.createElement("input");
+        input.className="entity-input";
+        input.type="text";
+        input.value=current;
+        input.placeholder=label;
+        input.setAttribute("list",listId);
+        input.addEventListener("input",(ev)=>this._setEntity(key,(ev.target.value||"").trim()));
+
+        const datalist=document.createElement("datalist");
+        datalist.id=listId;
+        const wanted=new Set(domains||[]);
+        const states=this._hass?.states||{};
+        for(const entityId of Object.keys(states)){
+          const domain=entityId.split(".")[0];
+          if(wanted.size && !wanted.has(domain)) continue;
+          const opt=document.createElement("option");
+          opt.value=entityId;
+          const friendly=states[entityId]?.attributes?.friendly_name;
+          if(friendly) opt.label=friendly;
+          datalist.appendChild(opt);
+        }
+
+        wrap.appendChild(input);
+        wrap.appendChild(datalist);
+
+        // Pokud je pole prázdné, ukaž jakou výchozí entitu karta použije (včetně _2/_3).
+        if(!current){
+          const resolved=resolveDefaultForKey(this._hass,key);
+          const note=document.createElement("div");
+          note.className="hint";
+          if(resolved){
+            const exists=!!(this._hass?.states&&this._hass.states[resolved]);
+            note.textContent=exists?`Použito: ${resolved}`:`Výchozí: ${resolved} (nenalezeno)`;
+          }
+          wrap.appendChild(note);
+        }
+
+        customElements.whenDefined("ha-selector").then(()=>{
+          const selector=document.createElement("ha-selector");
+          selector.style.display="none";
+          selector.hass=this._hass;
+          selector.label=label;
+          selector.selector={entity:(domains&&domains.length)?{domain:domains}:{}};
+          selector.value=(this._config.entities&&this._config.entities[key])||"";
+          selector.addEventListener("value-changed",(ev)=>this._setEntity(key,ev.detail.value));
+          wrap.appendChild(selector);
+          activateOnce(selector,input);
+        }).catch(()=>{});
+
+        return wrap;
+      }
+      _render(){
+        if(!this.shadowRoot||!this._hass){
+          if(this.shadowRoot) this.shadowRoot.innerHTML="";
+          return;
+        }
+
+        const title=this._config.title??"";
+        const show_times=this._config.show_times!==false;
+        const show_duration=this._config.show_duration!==false;
+        const compact_mode=this._config.compact_mode===true;
+
+        this.shadowRoot.innerHTML=`
+          <style>
+            .wrap{display:flex;flex-direction:column;gap:12px;padding:4px 0;}
+            .entity-row{display:flex;flex-direction:column;gap:6px;}
+            .entity-row ha-selector{display:block;}
+            .entity-input{padding:10px 12px;border-radius:8px;border:1px solid var(--divider-color);background:var(--card-background-color, var(--ha-card-background));color:var(--primary-text-color);}
+            .entity-input:focus{outline:none;border-color:var(--primary-color);}
+            .hint{font-size:12px;opacity:.8;}
+          </style>
+          <div class="wrap"></div>
+        `;
+
+        const wrap=this.shadowRoot.querySelector(".wrap");
+        const titleField=document.createElement("ha-textfield");
+        titleField.label="Titulek";
+        titleField.value=title;
+        titleField.addEventListener("input",(ev)=>this._setOption("title",ev.target.value));
+        wrap.appendChild(titleField);
+
+        const mkToggle=(label,key,checked)=>{
+          const form=document.createElement("ha-formfield");
+          form.label=label;
+          const sw=document.createElement("ha-switch");
+          sw.checked=checked;
+          sw.addEventListener("change",()=>this._setOption(key,sw.checked));
+          form.appendChild(sw);
+          return form;
+        };
+        wrap.appendChild(mkToggle("Zobrazit časy (začátek/konec)","show_times",show_times));
+        wrap.appendChild(mkToggle("Zobrazit zbývající čas","show_duration",show_duration));
+        wrap.appendChild(mkToggle("Kompaktní režim","compact_mode",compact_mode));
+
+        wrap.appendChild(this._entityPicker("NT aktivní (binary_sensor)","low_tariff",["binary_sensor"]));
+        wrap.appendChild(this._entityPicker("VT aktivní (binary_sensor)","high_tariff",["binary_sensor"]));
+        wrap.appendChild(this._entityPicker("NT začátek (sensor)","low_start",["sensor"]));
+        wrap.appendChild(this._entityPicker("NT konec (sensor)","low_end",["sensor"]));
+        wrap.appendChild(this._entityPicker("NT zbývá (sensor)","low_duration",["sensor"]));
+        wrap.appendChild(this._entityPicker("VT začátek (sensor)","high_start",["sensor"]));
+        wrap.appendChild(this._entityPicker("VT konec (sensor)","high_end",["sensor"]));
+        wrap.appendChild(this._entityPicker("VT zbývá (sensor)","high_duration",["sensor"]));
+
+        const hint=document.createElement("div");
+        hint.className="hint";
+        hint.textContent="Tip: Když necháš nějaké pole prázdné, karta použije výchozí entity (pokud existují).";
+        wrap.appendChild(hint);
+      }
+    }
+
+    customElements.define("cez-hdo-card-editor",CezHdoCardEditor);
+  }
+
+  customElements.whenDefined("cez-hdo-card").then(()=>{
+    const patchCard=()=>{
+      ensureEditorDefined();
+      const Card=customElements.get("cez-hdo-card");
+      if(!Card||Card.__cezHdoPatched) return;
+      Card.__cezHdoPatched=true;
+
+      // UI editor pro Lovelace
+      Card.getConfigElement=()=>document.createElement("cez-hdo-card-editor");
+      // Při první instalaci rovnou předvyplň defaulty (uživatel může smazat → použijí se defaulty znovu).
+      Card.getStubConfig=()=>({
+        type:"custom:cez-hdo-card",
+        title:"ČEZ HDO Status",
+        show_times:true,
+        show_duration:true,
+        compact_mode:false,
+        entities:{...DEFAULT_ENTITIES}
+      });
+
+      // Normalizace konfigurace: mapování starých klíčů nt_/vt_ + doplnění defaultů
+      const originalSetConfig=Card.prototype.setConfig;
+      const originalGetEntityState=Card.prototype.getEntityState;
+
+      Card.prototype.getEntityState=function(entityId){
+        const resolved=resolveEntityId(this.hass,entityId);
+        return originalGetEntityState.call(this,resolved);
+      };
+
+      Card.prototype.setConfig=function(config){
+        const cfg=config||{};
+        const ent=(cfg.entities||{});
+        const mapped={
+          low_tariff:ent.low_tariff||ent.nt_binary||ent.nt_active||ent.low_tariff_active,
+          high_tariff:ent.high_tariff||ent.vt_binary||ent.vt_active||ent.high_tariff_active,
+          low_start:ent.low_start||ent.nt_start,
+          low_end:ent.low_end||ent.nt_end,
+          low_duration:ent.low_duration||ent.nt_remaining,
+          high_start:ent.high_start||ent.vt_start,
+          high_end:ent.high_end||ent.vt_end,
+          high_duration:ent.high_duration||ent.vt_remaining
+        };
+        const entities={...DEFAULT_ENTITIES};
+        for(const k of Object.keys(mapped)) if(mapped[k]) entities[k]=mapped[k];
+        const normalized={
+          title:"ČEZ HDO Status",
+          show_times:true,
+          show_duration:true,
+          compact_mode:false,
+          ...cfg,
+          entities
+        };
+        return originalSetConfig.call(this,normalized);
+      };
+    };
+
+    // Patchni okamžitě, ať stihneme i první setConfig při přidání karty.
+    patchCard();
+    customElements.whenDefined("cez-hdo-card").then(patchCard);
+  });
+})();

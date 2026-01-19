@@ -176,3 +176,4 @@ test2.py
 *package-lock.json
 *package.json
 RELEASE_NOTES_*.md
+__*

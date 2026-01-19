@@ -287,7 +287,8 @@ class CezHdoRawData(CezHdoSensor):
 
     def __init__(self, ean: str, signal: str | None = None) -> None:
         super().__init__(ean, "RawData", signal)
-        self._attr_name = "CEZ HDO Raw Data"
+        # Keep a stable unique_id (historical behavior), but let base_entity
+        # provide friendly name + suggested object_id.
         self._attr_unique_id = f"{ean}_raw_data"
 
     @property
