@@ -2,7 +2,8 @@
         "domain": "cez_hdo",
         "name": "ČEZ HDO",
         "after_dependencies": [
-                "http"
+                "http",
+                "lovelace"
         ],
         "codeowners": [
                 "@cmajda"
@@ -15,7 +16,8 @@
         "quality_scale": "silver",
         "requirements": [
                 "requests",
-                "lxml"
+                "lxml",
+                "packaging"
         ],
         "version": "2.0.8"
 }
