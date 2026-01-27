@@ -1,50 +1,43 @@
-# Release notes – ČEZ HDO (Home Assistant + Lovelace karta)
+# Release Notes – ČEZ HDO v2.0.9
 
-## Hlavní změny
+## 🚀 Nová funkce: Automatická registrace Lovelace karty
 
-- Opraveno spolehlivé načítání Lovelace karty po čisté instalaci i po hard refresh (řešení 404 na `/local/...` a „Custom element doesn’t exist“) – karta je primárně servírovaná z integrace a zároveň existuje fallback kopie do `www`.
-- Zlepšena kompatibilita napříč verzemi Home Assistant (registrace statické cesty bez spoléhání na neexistující `register_static_path`).
-- Opraven pád editoru karty způsobený `ha-entity-picker` (`Cannot read properties of undefined (reading 'localize')`) – editor je nově stabilní bez této závislosti.
-- Přidán „zero-config“ režim: když uživatel nevyplní entity v konfiguraci karty, použijí se výchozí entity.
-- Výchozí entity jsou nastavené na reálné české `entity_id` (např. `sensor.cez_hdo_nizky_tarif_*`); anglická kompatibilita defaultů byla odstraněna.
+Kompletně přepracovaný systém registrace frontend karty. Karta se nyní automaticky registruje do Lovelace resources bez nutnosti ruční konfigurace.
 
-## Backend / integrace
+## ✨ Hlavní změny
 
-- Stabilní servírování frontend bundle pro kartu z integrace + fallback kopie do `www` pro `/local/...`.
-- Cache/úložiště: vytvoření parent adresáře před zápisem cache, aby čisté instalace nepadaly.
+### Nový registrační systém frontend karty
 
-Dotčené soubory:
+- **Automatická registrace** – karta se zaregistruje automaticky při startu Home Assistant
+- **Storage mód** – plná podpora Lovelace v režimu storage (UI mód)
+- **Verzování** – automatická aktualizace verze karty při upgrade integrace
+- **Čistá odregistrace** – při odebrání integrace se karta automaticky odstraní z resources
 
-- `custom_components/cez_hdo/__init__.py`
-- `custom_components/cez_hdo/base_entity.py`
+### Backend / integrace
 
-## Frontend / karta
+- Nová třída `CezHdoCardRegistration` pro správu registrace karty
+- Registrace statické cesty pomocí `StaticPathConfig` (modernější API)
+- Přidána závislost na `lovelace` v `after_dependencies`
+- Přidána závislost `packaging` pro správné parsování verze Home Assistant
 
-- Editor karty přepracován: místo `ha-entity-picker` používá stabilní `input + datalist` (našeptávání z `hass.states`) + volitelný upgrade přes `ha-selector`, když je dostupný.
-- `getStubConfig()` vrací předvyplněné výchozí entity pro rychlé přidání karty.
-- Zachováno inteligentní dohledání variant `entity_id` se suffixy `_2`, `_3` (např. po úpravách v Entity Registry).
+### Dotčené soubory
 
-Dotčené soubory:
+- `custom_components/cez_hdo/__init__.py` – přepracovaná inicializace
+- `custom_components/cez_hdo/frontend/__init__.py` – **nový soubor** s registrační třídou
+- `custom_components/cez_hdo/manifest.json` – aktualizované závislosti
 
-- `custom_components/cez_hdo/frontend/dist/cez-hdo-card.js`
-- `www/cez_hdo/cez-hdo-card.js`
+## 📋 Poznámky k upgradu
 
-## Dokumentace
+1. Po aktualizaci restartujte Home Assistant
+2. Karta se automaticky zaregistruje do Lovelace resources
+3. Po restartu může být potřeba `Ctrl+F5` pro vyčištění cache prohlížeče
 
-- Kompletní přepsání uživatelské dokumentace + troubleshooting (včetně doporučeného postupu `Ctrl+F5`, reinstalace, smazání `www/cez_hdo`, restart HA).
-- Doplněno, že jde o HACS (Custom repository) + odkaz na instalaci HACS.
-- Přidány obrázky karty a editoru do README.
-- Vývojářská dokumentace rozšířena o požadavky (Samba share), env proměnné a příklady deploy.
+## 🔧 Technické detaily
 
-Dotčené soubory:
+Karta je dostupná na URL: `/cez_hdo_card/cez-hdo-card.js`
 
-- `README.md`
-- `docs/user-guide.md`
-- `docs/service-guide.md`
-- `docs/upgrade-guide.md`
-- `docs/developer-guide.md`
+Lovelace resource je automaticky přidán ve formátu:
 
-## Poznámky k upgradu
-
-- Po instalaci/aktualizaci karty může být jednorázově potřeba `Ctrl+F5` kvůli cache/service workeru – je popsané v dokumentaci.
-- Pokud uživatel nic nevyplní v konfiguraci karty, použijí se výchozí české entity (pokud existují v systému).
+```yaml
+/cez_hdo_card/cez-hdo-card.js?v=1.0.0
+```
