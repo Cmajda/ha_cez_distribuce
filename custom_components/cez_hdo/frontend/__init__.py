@@ -20,7 +20,7 @@ CEZ_HDO_CARDS = [
     {
         'name': 'CEZ HDO Card',
         'filename': 'cez-hdo-card.js',
-        'version': '1.0.0'
+        'version': '2.0.9'
     }
 ]
 
