@@ -46,6 +46,7 @@ def setup_platform(
         HighTariffStart(ean, signal),
         HighTariffEnd(ean, signal),
         HighTariffDuration(ean, signal),
+        CurrentPrice(ean, signal),
         CezHdoRawData(ean, signal),  # Nová entita
     ]
     add_entities(entities, False)
@@ -78,6 +79,7 @@ async def async_setup_platform(
         HighTariffStart(ean, signal),
         HighTariffEnd(ean, signal),
         HighTariffDuration(ean, signal),
+        CurrentPrice(ean, signal),
         CezHdoRawData(ean, signal),
     ]
     async_add_entities(entities, False)
@@ -280,6 +282,76 @@ class HighTariffDuration(CezHdoSensor):
                 err,
             )
             return None
+
+
+class CurrentPrice(CezHdoSensor):
+    """Sensor for current electricity price based on active tariff."""
+
+    def __init__(self, ean: str, signal: str | None = None) -> None:
+        super().__init__(ean, "CurrentPrice", signal)
+
+    @property
+    def _low_tariff_price(self) -> float:
+        """Get low tariff price from hass.data."""
+        if self.hass and "cez_hdo" in self.hass.data:
+            return self.hass.data["cez_hdo"].get("low_tariff_price", 0.0)
+        return 0.0
+
+    @property
+    def _high_tariff_price(self) -> float:
+        """Get high tariff price from hass.data."""
+        if self.hass and "cez_hdo" in self.hass.data:
+            return self.hass.data["cez_hdo"].get("high_tariff_price", 0.0)
+        return 0.0
+
+    @property
+    def icon(self) -> str:
+        """Return the icon of the sensor."""
+        return "mdi:currency-usd"
+
+    @property
+    def native_unit_of_measurement(self) -> str:
+        """Return the unit of measurement."""
+        return "Kč/kWh"
+
+    @property
+    def device_class(self) -> str:
+        """Return the device class."""
+        return "monetary"
+
+    @property
+    def native_value(self) -> float | None:
+        """Return the current price based on active tariff."""
+        try:
+            hdo_data = self._get_hdo_data()
+            is_low_tariff = hdo_data[0]  # low_tariff_active
+            is_high_tariff = hdo_data[4]  # high_tariff_active
+
+            if is_low_tariff:
+                return self._low_tariff_price
+            elif is_high_tariff:
+                return self._high_tariff_price
+            else:
+                # Pokud není aktivní ani jeden tarif, vrátíme vysoký tarif jako výchozí
+                return self._high_tariff_price
+        except Exception as err:
+            _LOGGER.error(
+                "CEZ HDO: %s CurrentPrice failed: %s",
+                getattr(self, "entity_id", self.name),
+                err,
+            )
+            return None
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return additional attributes."""
+        hdo_data = self._get_hdo_data()
+        is_low_tariff = hdo_data[0] if hdo_data else False
+        return {
+            "low_tariff_price": self._low_tariff_price,
+            "high_tariff_price": self._high_tariff_price,
+            "active_tariff": "low" if is_low_tariff else "high",
+        }
 
 
 class CezHdoRawData(CezHdoSensor):

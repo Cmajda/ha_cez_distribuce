@@ -1,3 +1,59 @@
+# Release Notes – ČEZ HDO v2.1.0
+
+## 🚀 Nová funkce: Aktuální cena elektřiny
+
+Přidán nový senzor **aktuální cena** (`sensor.cez_hdo_aktualni_cena`), který zobrazuje cenu elektřiny podle aktivního tarifu.
+
+## ✨ Hlavní změny
+
+### Nový senzor aktuální ceny
+
+- **sensor.cez_hdo_aktualni_cena** – zobrazuje aktuální cenu v Kč/kWh
+- Automaticky přepíná mezi cenou nízkého a vysokého tarifu podle aktivního HDO
+- Atributy: `low_tariff_price`, `high_tariff_price`, `active_tariff`
+- Ikona: 💵 (mdi:currency-usd)
+
+### Nová služba `cez_hdo.set_prices`
+
+- Nastaví ceny pro nízký a vysoký tarif
+- Parametry:
+  - `low_tariff_price` – cena za kWh v nízkém tarifu (NT)
+  - `high_tariff_price` – cena za kWh ve vysokém tarifu (VT)
+
+### Aktualizovaná Lovelace karta
+
+- **Nové pole v editoru**: Cena NT a Cena VT
+- **Zobrazení aktuální ceny**: Karta nyní zobrazuje aktuální cenu s barevným pozadím
+- Nový přepínač "Zobrazit aktuální cenu" v editoru karty
+
+## 📋 Použití
+
+### Nastavení cen přes službu
+
+```yaml
+service: cez_hdo.set_prices
+data:
+  low_tariff_price: 2.50
+  high_tariff_price: 4.50
+```
+
+### Konfigurace karty
+
+V editoru karty zadejte:
+- **Cena NT (Kč/kWh)**: např. 2.50
+- **Cena VT (Kč/kWh)**: např. 4.50
+- Zaškrtněte **Zobrazit aktuální cenu**
+
+## 🔧 Dotčené soubory
+
+- `custom_components/cez_hdo/sensor.py` – nový CurrentPrice senzor
+- `custom_components/cez_hdo/base_entity.py` – metadata pro CurrentPrice
+- `custom_components/cez_hdo/__init__.py` – služba set_prices
+- `custom_components/cez_hdo/services.yaml` – definice služby
+- `custom_components/cez_hdo/frontend/dist/cez-hdo-card.js` – aktualizovaná karta
+
+---
+
 # Release Notes – ČEZ HDO v2.0.9
 
 ## 🚀 Nová funkce: Automatická registrace Lovelace karty

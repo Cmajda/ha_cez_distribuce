@@ -101,6 +101,45 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         ),
     )
 
+    # Register service to set tariff prices
+    async def set_prices(call):
+        """Service to set tariff prices for CurrentPrice sensor."""
+        low_price = call.data.get("low_tariff_price", 0.0)
+        high_price = call.data.get("high_tariff_price", 0.0)
+
+        # Store prices in hass.data for sensors to access
+        if DOMAIN not in hass.data:
+            hass.data[DOMAIN] = {}
+        hass.data[DOMAIN]["low_tariff_price"] = low_price
+        hass.data[DOMAIN]["high_tariff_price"] = high_price
+
+        # Find all CurrentPrice sensors and trigger update
+        from homeassistant.helpers import entity_registry as er
+        registry = er.async_get(hass)
+
+        for entity in registry.entities.values():
+            if entity.platform == DOMAIN and "currentprice" in entity.entity_id.lower():
+                # Trigger state update for the entity
+                hass.bus.async_fire("homeassistant_update_entity", {"entity_id": entity.entity_id})
+
+        _LOGGER.info(
+            "💰 ČEZ HDO ceny nastaveny: NT=%.2f Kč/kWh, VT=%.2f Kč/kWh",
+            low_price,
+            high_price,
+        )
+
+    hass.services.async_register(
+        DOMAIN,
+        "set_prices",
+        set_prices,
+        schema=vol.Schema(
+            {
+                vol.Required("low_tariff_price"): vol.Coerce(float),
+                vol.Required("high_tariff_price"): vol.Coerce(float),
+            }
+        ),
+    )
+
     # Register frontend card during setup
     cards = CezHdoCardRegistration(hass)
     await cards.async_register()
