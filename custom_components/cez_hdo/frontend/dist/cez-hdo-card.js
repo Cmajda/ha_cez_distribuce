@@ -543,18 +543,18 @@
           ...cfg,
           entities
         };
-        
+
         // Zkontroluj, zda se ceny změnily
         const newLow=normalized.low_tariff_price||0;
         const newHigh=normalized.high_tariff_price||0;
         const pricesChanged=(this._prevLowPrice!==newLow||this._prevHighPrice!==newHigh);
-        
+
         // Uložíme aktuální ceny pro příští porovnání
         this._prevLowPrice=newLow;
         this._prevHighPrice=newHigh;
-        
+
         const result=originalSetConfig.call(this,normalized);
-        
+
         // Synchronizuj ceny se senzorem pouze pokud se změnily a máme hass
         if(pricesChanged&&(newLow>0||newHigh>0)){
           // Počkáme na hass pokud není k dispozici

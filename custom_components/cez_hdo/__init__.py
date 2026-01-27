@@ -122,14 +122,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
         # Force update all CurrentPrice sensors by searching entity registry
         from homeassistant.helpers import entity_registry as er
+
         registry = er.async_get(hass)
-        
+
         for entity in registry.entities.values():
             # Match by platform and entity_id pattern
             if entity.platform == DOMAIN and (
-                "currentprice" in entity.entity_id.lower() or
-                "aktualni_cena" in entity.entity_id.lower() or
-                "current_price" in entity.entity_id.lower()
+                "currentprice" in entity.entity_id.lower()
+                or "aktualni_cena" in entity.entity_id.lower()
+                or "current_price" in entity.entity_id.lower()
             ):
                 _LOGGER.debug("Triggering update for entity: %s", entity.entity_id)
                 try:
@@ -140,7 +141,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                         blocking=False,
                     )
                 except Exception as err:
-                    _LOGGER.warning("Failed to update entity %s: %s", entity.entity_id, err)
+                    _LOGGER.warning(
+                        "Failed to update entity %s: %s", entity.entity_id, err
+                    )
 
     hass.services.async_register(
         DOMAIN,
