@@ -177,3 +177,6 @@ test2.py
 *package.json
 RELEASE_NOTES_*.md
 __*
+
+# Example/reference code
+SOURCE_EXAMPLE/
