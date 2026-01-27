@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import logging
+import json
+import os
 
 import voluptuous as vol
 
@@ -15,14 +17,64 @@ from .frontend import CezHdoCardRegistration
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "cez_hdo"
+PRICES_STORAGE_DIR = "/config/www/cez_hdo"
+PRICES_STORAGE_FILE = "cez_hdo_prices.json"
 
 # Configuration schema - integrace se konfiguruje pouze přes platformy
 CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXTRA)
 
 
+def _get_prices_file_path(hass: HomeAssistant) -> str:
+    """Get path to prices storage file."""
+    return os.path.join(PRICES_STORAGE_DIR, PRICES_STORAGE_FILE)
+
+
+def _load_prices(hass: HomeAssistant) -> dict:
+    """Load prices from persistent storage."""
+    file_path = _get_prices_file_path(hass)
+    try:
+        if os.path.exists(file_path):
+            with open(file_path, "r") as f:
+                data = json.load(f)
+                _LOGGER.debug("Loaded prices from storage: %s", data)
+                return data
+    except Exception as err:
+        _LOGGER.warning("Failed to load prices from storage: %s", err)
+    return {"low_tariff_price": 0.0, "high_tariff_price": 0.0}
+
+
+def _save_prices(hass: HomeAssistant, low_price: float, high_price: float) -> None:
+    """Save prices to persistent storage."""
+    file_path = _get_prices_file_path(hass)
+    try:
+        # Ensure directory exists
+        os.makedirs(PRICES_STORAGE_DIR, exist_ok=True)
+        with open(file_path, "w") as f:
+            json.dump(
+                {"low_tariff_price": low_price, "high_tariff_price": high_price}, f
+            )
+        _LOGGER.debug(
+            "Saved prices to storage: NT=%.2f, VT=%.2f", low_price, high_price
+        )
+    except Exception as err:
+        _LOGGER.warning("Failed to save prices to storage: %s", err)
+
+
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
+
+    # Load prices from persistent storage at startup
+    prices = await hass.async_add_executor_job(_load_prices, hass)
+    hass.data[DOMAIN] = {
+        "low_tariff_price": prices.get("low_tariff_price", 0.0),
+        "high_tariff_price": prices.get("high_tariff_price", 0.0),
+    }
+    _LOGGER.info(
+        "💰 ČEZ HDO ceny načteny: NT=%.2f Kč/kWh, VT=%.2f Kč/kWh",
+        hass.data[DOMAIN]["low_tariff_price"],
+        hass.data[DOMAIN]["high_tariff_price"],
+    )
 
     # Register service to reload frontend card
     async def reload_frontend_card(call):
@@ -97,6 +149,65 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         schema=vol.Schema(
             {
                 vol.Required("ean"): cv.string,
+            }
+        ),
+    )
+
+    # Register service to set tariff prices
+    async def set_prices(call):
+        """Service to set tariff prices for CurrentPrice sensor."""
+        low_price = call.data.get("low_tariff_price", 0.0)
+        high_price = call.data.get("high_tariff_price", 0.0)
+
+        # Store prices in hass.data for sensors to access
+        if DOMAIN not in hass.data:
+            hass.data[DOMAIN] = {}
+        hass.data[DOMAIN]["low_tariff_price"] = low_price
+        hass.data[DOMAIN]["high_tariff_price"] = high_price
+
+        # Save prices to persistent storage
+        await hass.async_add_executor_job(_save_prices, hass, low_price, high_price)
+
+        _LOGGER.info(
+            "💰 ČEZ HDO ceny nastaveny: NT=%.2f Kč/kWh, VT=%.2f Kč/kWh",
+            low_price,
+            high_price,
+        )
+        _LOGGER.debug("hass.data[%s] = %s", DOMAIN, hass.data.get(DOMAIN))
+
+        # Force update all CurrentPrice sensors by searching entity registry
+        from homeassistant.helpers import entity_registry as er
+
+        registry = er.async_get(hass)
+
+        for entity in registry.entities.values():
+            # Match by platform and entity_id pattern
+            if entity.platform == DOMAIN and (
+                "currentprice" in entity.entity_id.lower()
+                or "aktualni_cena" in entity.entity_id.lower()
+                or "current_price" in entity.entity_id.lower()
+            ):
+                _LOGGER.debug("Triggering update for entity: %s", entity.entity_id)
+                try:
+                    await hass.services.async_call(
+                        "homeassistant",
+                        "update_entity",
+                        {"entity_id": entity.entity_id},
+                        blocking=False,
+                    )
+                except Exception as err:
+                    _LOGGER.warning(
+                        "Failed to update entity %s: %s", entity.entity_id, err
+                    )
+
+    hass.services.async_register(
+        DOMAIN,
+        "set_prices",
+        set_prices,
+        schema=vol.Schema(
+            {
+                vol.Required("low_tariff_price"): vol.Coerce(float),
+                vol.Required("high_tariff_price"): vol.Coerce(float),
             }
         ),
     )

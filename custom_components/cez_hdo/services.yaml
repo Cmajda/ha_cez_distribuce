@@ -14,3 +14,32 @@ list_signals:
 reload_frontend_card:
   name: Obnovit frontend kartu
   description: Aktualizuje frontend kartu ČEZ HDO (užitečné při vývoji)
+
+set_prices:
+  name: Nastavit ceny tarifů
+  description: Nastaví ceny za kWh pro nízký a vysoký tarif, které se použijí v senzoru aktuální ceny
+  fields:
+    low_tariff_price:
+      name: Cena nízkého tarifu
+      description: Cena za kWh v nízkém tarifu (NT)
+      required: true
+      example: 2.50
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 0.01
+          unit_of_measurement: "Kč/kWh"
+          mode: box
+    high_tariff_price:
+      name: Cena vysokého tarifu
+      description: Cena za kWh ve vysokém tarifu (VT)
+      required: true
+      example: 4.50
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 0.01
+          unit_of_measurement: "Kč/kWh"
+          mode: box

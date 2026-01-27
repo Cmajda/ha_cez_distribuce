@@ -56,6 +56,7 @@ Integrace vytváří tyto entity (výchozí názvy):
 - `sensor.cez_hdo_vysoky_tarif_zacatek` – čas začátku vysokého tarifu
 - `sensor.cez_hdo_vysoky_tarif_konec` – čas konce vysokého tarifu
 - `sensor.cez_hdo_vysoky_tarif_zbyva` – zbývající čas do změny tarifu
+- `sensor.cez_hdo_aktualni_cena` – aktuální cena elektřiny v Kč/kWh (podle aktivního tarifu)
 - `sensor.cez_hdo_surova_data` – surová data / timestamp (diagnostika)
 
 ## Lovelace karta
@@ -82,6 +83,46 @@ Pokud se karta v seznamu karet nezobrazuje ani po `Ctrl+F5`:
 1. URL: `/cez_hdo/cez-hdo-card.js`
 1. Typ: JavaScript Module
 1. Restart Home Assistant
+
+## Nastavení cen tarifů
+
+### Nastavení v Lovelace kartě
+
+V editoru karty najdete pole pro zadání cen:
+
+- **Cena NT (Kč/kWh)** – cena za kWh v nízkém tarifu
+- **Cena VT (Kč/kWh)** – cena za kWh ve vysokém tarifu
+
+Po zadání cen a uložení karty se automaticky aktualizuje senzor `sensor.cez_hdo_aktualni_cena`.
+
+### Nastavení přes službu
+
+Ceny lze nastavit i přes službu:
+
+```yaml
+service: cez_hdo.set_prices
+data:
+  low_tariff_price: 2.50
+  high_tariff_price: 4.50
+```
+
+### Zobrazení cen v kartě
+
+V editoru karty jsou dva přepínače:
+
+- **Zobrazit aktuální cenu** – zobrazí velký box s aktuální cenou
+- **Zobrazit ceny u tarifů** – zobrazí cenu přímo v boxu NT/VT
+
+## Použití v Energy Dashboard
+
+Senzor `sensor.cez_hdo_aktualni_cena` lze použít jako zdroj ceny elektřiny v Energy kartě Home Assistantu.
+
+1. Nastavení → Dashboardy → Energy
+2. V sekci "Electricity grid" klikněte na "Add consumption"
+3. Vyberte měřič spotřeby
+4. V poli "Use an entity tracking the total costs" nebo "Use an entity with current price" vyberte `sensor.cez_hdo_aktualni_cena`
+
+Senzor automaticky přepíná mezi cenou NT a VT podle aktivního tarifu.
 
 ## Co dělat, když komponenta nefunguje
 

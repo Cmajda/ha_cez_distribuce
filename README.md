@@ -39,6 +39,12 @@ binary_sensor:
 
 ![Konfigurace karty (editor)](entity_card_edit.png)
 
+### Použití v Energy Dashboard
+
+Senzor `sensor.cez_hdo_aktualni_cena` lze použít jako zdroj ceny elektřiny v Energy kartě Home Assistantu:
+
+![Nastavení Energy karty](integration_energy_ha.png)
+
 ## Vytvářené entity (výchozí názvy)
 
 Binary sensories:
@@ -54,6 +60,7 @@ Senzory:
 - `sensor.cez_hdo_vysoky_tarif_zacatek` – čas začátku VT
 - `sensor.cez_hdo_vysoky_tarif_konec` – čas konce VT
 - `sensor.cez_hdo_vysoky_tarif_zbyva` – zbývající čas do změny tarifu
+- `sensor.cez_hdo_aktualni_cena` – aktuální cena elektřiny v Kč/kWh (lze použít v Energy Dashboard)
 - `sensor.cez_hdo_surova_data` – surová data / timestamp (diagnostika)
 
 ## Když to nefunguje (doporučený postup)
@@ -65,6 +72,7 @@ Pokud se karta nezobrazuje, hlásí chybu, nebo integrace po instalaci “nejede
 3. Pokud existuje složka `www/cez_hdo`, smažte ji
 4. Znovu nainstalovat doplněk
 5. Restart Home Assistant
+6. Vynutit refresh: `Ctrl+F5`
 
 ## Dokumentace
 
