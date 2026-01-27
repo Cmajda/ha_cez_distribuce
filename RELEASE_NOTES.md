@@ -2,7 +2,7 @@
 
 ## 🚀 Nová funkce: Automatická registrace Lovelace karty
 
-Kompletně přepracovaný systém registrace frontend karty. Karta se nyní automaticky registruje do Lovelace resources bez nutnosti ruční konfigurace.
+Kompletně přepracovaný systém registrace frontend karty. Karta se nyní automaticky registruje do Lovelace resources bez nutnosti ruční konfigurace. Ve zdrojích se zobrazí jako ***/cez_hdo_card/cez-hdo-card.js?v=x.x.x*** kde x.x.x je verze doplnku
 
 ## ✨ Hlavní změny
 
