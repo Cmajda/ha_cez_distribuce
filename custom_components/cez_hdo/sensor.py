@@ -287,6 +287,8 @@ class HighTariffDuration(CezHdoSensor):
 class CurrentPrice(CezHdoSensor):
     """Sensor for current electricity price based on active tariff."""
 
+    _attr_should_poll = True
+
     def __init__(self, ean: str, signal: str | None = None) -> None:
         super().__init__(ean, "CurrentPrice", signal)
 

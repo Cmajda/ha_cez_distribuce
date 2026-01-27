@@ -113,20 +113,34 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         hass.data[DOMAIN]["low_tariff_price"] = low_price
         hass.data[DOMAIN]["high_tariff_price"] = high_price
 
-        # Find all CurrentPrice sensors and trigger update
-        from homeassistant.helpers import entity_registry as er
-        registry = er.async_get(hass)
-
-        for entity in registry.entities.values():
-            if entity.platform == DOMAIN and "currentprice" in entity.entity_id.lower():
-                # Trigger state update for the entity
-                hass.bus.async_fire("homeassistant_update_entity", {"entity_id": entity.entity_id})
-
         _LOGGER.info(
             "💰 ČEZ HDO ceny nastaveny: NT=%.2f Kč/kWh, VT=%.2f Kč/kWh",
             low_price,
             high_price,
         )
+        _LOGGER.debug("hass.data[%s] = %s", DOMAIN, hass.data.get(DOMAIN))
+
+        # Force update all CurrentPrice sensors by searching entity registry
+        from homeassistant.helpers import entity_registry as er
+        registry = er.async_get(hass)
+        
+        for entity in registry.entities.values():
+            # Match by platform and entity_id pattern
+            if entity.platform == DOMAIN and (
+                "currentprice" in entity.entity_id.lower() or
+                "aktualni_cena" in entity.entity_id.lower() or
+                "current_price" in entity.entity_id.lower()
+            ):
+                _LOGGER.debug("Triggering update for entity: %s", entity.entity_id)
+                try:
+                    await hass.services.async_call(
+                        "homeassistant",
+                        "update_entity",
+                        {"entity_id": entity.entity_id},
+                        blocking=False,
+                    )
+                except Exception as err:
+                    _LOGGER.warning("Failed to update entity %s: %s", entity.entity_id, err)
 
     hass.services.async_register(
         DOMAIN,

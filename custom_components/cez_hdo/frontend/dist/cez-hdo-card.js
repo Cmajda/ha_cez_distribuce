@@ -315,11 +315,14 @@
       }
       _callSetPricesService(){
         // Volá službu set_prices pro synchronizaci cen se senzorem
-        if(this._hass&&this._config.low_tariff_price!==undefined&&this._config.high_tariff_price!==undefined){
+        if(this._hass){
+          const lowPrice=this._config.low_tariff_price||0;
+          const highPrice=this._config.high_tariff_price||0;
+          console.log("CezHdoCard: Calling set_prices service with NT="+lowPrice+", VT="+highPrice);
           this._hass.callService("cez_hdo","set_prices",{
-            low_tariff_price:this._config.low_tariff_price||0,
-            high_tariff_price:this._config.high_tariff_price||0
-          }).catch(err=>console.warn("Failed to call set_prices service:",err));
+            low_tariff_price:lowPrice,
+            high_tariff_price:highPrice
+          }).then(()=>console.log("CezHdoCard: set_prices service called successfully")).catch(err=>console.warn("CezHdoCard: Failed to call set_prices service:",err));
         }
       }
       _setOption(key,value){
