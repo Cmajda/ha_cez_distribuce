@@ -300,11 +300,6 @@
       }
       set hass(hass){
         this._hass=hass;
-        // Při prvním nastavení hass synchronizuj ceny
-        if(hass&&this._config&&(this._config.low_tariff_price||this._config.high_tariff_price)){
-          this._callSetPricesService();
-        }
-        this._render();
       }
       setConfig(config){
         this._config=config||{};
@@ -313,26 +308,22 @@
       _emitConfigChanged(){
         this.dispatchEvent(new CustomEvent("config-changed",{detail:{config:this._config},bubbles:true,composed:true}));
       }
-      _callSetPricesService(){
-        // Volá službu set_prices pro synchronizaci cen se senzorem
-        if(this._hass){
-          const lowPrice=this._config.low_tariff_price||0;
-          const highPrice=this._config.high_tariff_price||0;
-          console.log("CezHdoCard: Calling set_prices service with NT="+lowPrice+", VT="+highPrice);
-          this._hass.callService("cez_hdo","set_prices",{
-            low_tariff_price:lowPrice,
-            high_tariff_price:highPrice
-          }).then(()=>console.log("CezHdoCard: set_prices service called successfully")).catch(err=>console.warn("CezHdoCard: Failed to call set_prices service:",err));
-        }
+      _setPriceOption(key,value){
+        // Pro cenová pole: pouze uloží hodnotu, neemituje změnu (ta se emituje při blur)
+        this._config={...this._config,[key]:value};
       }
-      _setOption(key,value){
+      _emitPriceChange(key,value){
+        // Emituje změnu ceny - volá se při opuštění pole (blur/change)
         this._config={...this._config,[key]:value};
         this._emitConfigChanged();
-        // Při změně ceny automaticky volej službu
-        if(key==="low_tariff_price"||key==="high_tariff_price"){
-          this._callSetPricesService();
+      }
+      _setOption(key,value,skipRender=false){
+        this._config={...this._config,[key]:value};
+        this._emitConfigChanged();
+        // Při změně cenových polí nepřekresluj (zachovej focus)
+        if(!skipRender){
+          this._render();
         }
-        this._render();
       }
       _setEntity(key,value){
         const entities={...(this._config.entities||{})};
@@ -457,13 +448,14 @@
         wrap.appendChild(mkToggle("Zobrazit zbývající čas","show_duration",show_duration));
         wrap.appendChild(mkToggle("Kompaktní režim","compact_mode",compact_mode));
 
-        // Cenová pole
+        // Cenová pole - input pouze lokálně ukládá, change/blur emituje změnu
         const lowPriceField=document.createElement("ha-textfield");
         lowPriceField.label="Cena NT (Kč/kWh)";
         lowPriceField.type="number";
         lowPriceField.step="0.01";
         lowPriceField.value=this._config.low_tariff_price||"";
-        lowPriceField.addEventListener("input",(ev)=>this._setOption("low_tariff_price",parseFloat(ev.target.value)||0));
+        lowPriceField.addEventListener("input",(ev)=>this._setPriceOption("low_tariff_price",parseFloat(ev.target.value)||0));
+        lowPriceField.addEventListener("change",(ev)=>this._emitPriceChange("low_tariff_price",parseFloat(ev.target.value)||0));
         wrap.appendChild(lowPriceField);
 
         const highPriceField=document.createElement("ha-textfield");
@@ -471,7 +463,8 @@
         highPriceField.type="number";
         highPriceField.step="0.01";
         highPriceField.value=this._config.high_tariff_price||"";
-        highPriceField.addEventListener("input",(ev)=>this._setOption("high_tariff_price",parseFloat(ev.target.value)||0));
+        highPriceField.addEventListener("input",(ev)=>this._setPriceOption("high_tariff_price",parseFloat(ev.target.value)||0));
+        highPriceField.addEventListener("change",(ev)=>this._emitPriceChange("high_tariff_price",parseFloat(ev.target.value)||0));
         wrap.appendChild(highPriceField);
 
         wrap.appendChild(mkToggle("Zobrazit aktuální cenu","show_price",this._config.show_price!==false));
@@ -523,6 +516,10 @@
         return originalGetEntityState.call(this,resolved);
       };
 
+      // Uložíme předchozí ceny pro detekci změn
+      Card.prototype._prevLowPrice=undefined;
+      Card.prototype._prevHighPrice=undefined;
+
       Card.prototype.setConfig=function(config){
         const cfg=config||{};
         const ent=(cfg.entities||{});
@@ -546,13 +543,33 @@
           ...cfg,
           entities
         };
+        
+        // Zkontroluj, zda se ceny změnily
+        const newLow=normalized.low_tariff_price||0;
+        const newHigh=normalized.high_tariff_price||0;
+        const pricesChanged=(this._prevLowPrice!==newLow||this._prevHighPrice!==newHigh);
+        
+        // Uložíme aktuální ceny pro příští porovnání
+        this._prevLowPrice=newLow;
+        this._prevHighPrice=newHigh;
+        
         const result=originalSetConfig.call(this,normalized);
-        // Synchronizuj ceny se senzorem při načtení karty
-        if(this.hass&&(normalized.low_tariff_price||normalized.high_tariff_price)){
-          this.hass.callService("cez_hdo","set_prices",{
-            low_tariff_price:normalized.low_tariff_price||0,
-            high_tariff_price:normalized.high_tariff_price||0
-          }).catch(err=>console.warn("CezHdoCard: Failed to sync prices:",err));
+        
+        // Synchronizuj ceny se senzorem pouze pokud se změnily a máme hass
+        if(pricesChanged&&(newLow>0||newHigh>0)){
+          // Počkáme na hass pokud není k dispozici
+          const syncPrices=()=>{
+            if(!this.hass){
+              setTimeout(syncPrices,100);
+              return;
+            }
+            console.log("CezHdoCard: Calling set_prices with NT="+newLow+", VT="+newHigh);
+            this.hass.callService("cez_hdo","set_prices",{
+              low_tariff_price:newLow,
+              high_tariff_price:newHigh
+            }).then(()=>console.log("CezHdoCard: set_prices called successfully")).catch(err=>console.warn("CezHdoCard: Failed to sync prices:",err));
+          };
+          syncPrices();
         }
         return result;
       };
