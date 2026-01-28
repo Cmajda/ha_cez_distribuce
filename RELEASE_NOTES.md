@@ -1,3 +1,62 @@
+# Release Notes – ČEZ HDO v2.2.0
+
+## 🚀 Nové funkce
+
+### HDO Rozvrh – senzor a vizualizace
+
+Přidán nový senzor **HDO Rozvrh** (`sensor.cez_hdo_rozvrh`) s kompletním 7denním rozvrhem přepínání tarifů a jeho vizualizací přímo v Lovelace kartě.
+
+- **sensor.cez_hdo_rozvrh** – obsahuje strukturovaná data rozvrhu v atributu `schedule`
+- Vizuální timeline graf s barevnými bloky pro NT (zelená) a VT (oranžová)
+- Časová osa 0:00 - 24:00 pro každý den
+- Legenda s možností zobrazení cen tarifů
+- Tooltip s přesnými časy při najetí myší
+
+### Nové přepínače v editoru karty
+
+- **Zobrazit titulek** – skryje/zobrazí nadpis karty
+- **Zobrazit stavy tarifů** – skryje/zobrazí boxy s NT/VT stavem
+- **Zobrazit HDO rozvrh** – zapne vizualizaci 7denního rozvrhu
+- **Zobrazit ceny v legendě rozvrhu** – přidá ceny za NT/VT k legendě grafu
+
+## ✨ Vylepšení
+
+### Opravy v rozvrhu
+
+- Správné zpracování času 24:00 (půlnoc)
+- Opravena duplicita aktuálního dne (problém s UTC vs lokálním časem)
+- Zajištěno plné pokrytí dne – žádné šedé mezery
+
+### Vylepšení editoru karty
+
+- Opraveno psaní titulku bez scrollování
+- Reorganizované pořadí přepínačů pro lepší UX
+- Zmenšená mezera mezi titulkem a obsahem karty
+
+## 🔧 Technické změny
+
+### Nový senzor HdoSchedule
+
+- Třída `HdoSchedule` v `sensor.py`
+- Funkce `generate_schedule_for_graph()` v `downloader.py`
+- Formát dat: `[{start, end, tariff, value}, ...]`
+
+### Dotčené soubory
+
+- `custom_components/cez_hdo/downloader.py` – nová funkce pro generování rozvrhu
+- `custom_components/cez_hdo/sensor.py` – nový HdoSchedule senzor
+- `custom_components/cez_hdo/base_entity.py` – metadata pro HdoSchedule
+- `custom_components/cez_hdo/frontend/dist/cez-hdo-card.js` – vizualizace rozvrhu, nové přepínače
+
+## 📋 Poznámky k upgradu
+
+1. Po aktualizaci restartujte Home Assistant
+2. V editoru karty zapněte "Zobrazit HDO rozvrh"
+3. Pro zobrazení cen v legendě nastavte ceny tarifů a zapněte "Zobrazit ceny v legendě rozvrhu"
+4. Vyčistěte cache prohlížeče (Ctrl+F5)
+
+---
+
 # Release Notes – ČEZ HDO v2.1.0
 
 ## 🚀 Nové funkce
