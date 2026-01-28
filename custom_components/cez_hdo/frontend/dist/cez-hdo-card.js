@@ -72,10 +72,14 @@
     const schedule=scheduleState.attributes.schedule;
     const days={};
 
-    // Seskupit podle dnů
+    // Seskupit podle dnů - použít lokální datum (ne UTC)
     schedule.forEach(item=>{
       const start=new Date(item.start);
-      const dayKey=start.toISOString().split("T")[0];
+      // Použít lokální datum místo UTC (toISOString vrací UTC)
+      const year=start.getFullYear();
+      const month=String(start.getMonth()+1).padStart(2,"0");
+      const day=String(start.getDate()).padStart(2,"0");
+      const dayKey=`${year}-${month}-${day}`;
       const dayLabel=start.toLocaleDateString("cs-CZ",{weekday:"short",day:"2-digit",month:"2-digit"});
       if(!days[dayKey]) days[dayKey]={label:dayLabel,items:[]};
       days[dayKey].items.push(item);

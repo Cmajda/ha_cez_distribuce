@@ -444,25 +444,42 @@ def generate_schedule_for_graph(
         nt_periods = get_schedule_for_date(json_data, day_dt, preferred_signal)
 
         if not nt_periods:
+            # No data for this day - add full day as VT
+            day_start_dt = datetime.combine(target_date, time(0, 0), tzinfo=CEZ_TIMEZONE)
+            day_end_dt = datetime.combine(target_date, time(23, 59, 59), tzinfo=CEZ_TIMEZONE)
+            schedule.append({
+                "start": day_start_dt.isoformat(),
+                "end": day_end_dt.isoformat(),
+                "tariff": "VT",
+                "value": 0,
+            })
             continue
 
         # Sort periods by start time
         nt_periods_sorted = sorted(nt_periods, key=lambda x: x[0])
 
         # Build full day schedule (NT and VT intervals)
-        day_start = time(0, 0)
-        day_end = time(23, 59, 59)
+        # Use minutes from midnight for easier comparison
+        def time_to_minutes(t: time) -> int:
+            return t.hour * 60 + t.minute
+        
+        current_minute = 0  # Start of day (00:00)
+        end_of_day = 24 * 60  # End of day (24:00 = 1440 minutes)
 
-        current_pos = day_start
         for nt_start, nt_end in nt_periods_sorted:
-            # Handle 24:00 as 00:00 (end of day)
-            if nt_end == time(0, 0):
-                nt_end = time(23, 59, 59)
-
-            # VT period before NT
-            if current_pos < nt_start:
-                vt_start_dt = datetime.combine(target_date, current_pos, tzinfo=CEZ_TIMEZONE)
-                vt_end_dt = datetime.combine(target_date, nt_start, tzinfo=CEZ_TIMEZONE)
+            nt_start_min = time_to_minutes(nt_start)
+            nt_end_min = time_to_minutes(nt_end)
+            
+            # Handle 00:00 as end time = 24:00 (end of day)
+            if nt_end_min == 0 and nt_start_min > 0:
+                nt_end_min = end_of_day
+            
+            # VT period before this NT (if there's a gap)
+            if current_minute < nt_start_min:
+                vt_start_h, vt_start_m = divmod(current_minute, 60)
+                vt_end_h, vt_end_m = divmod(nt_start_min, 60)
+                vt_start_dt = datetime.combine(target_date, time(vt_start_h, vt_start_m), tzinfo=CEZ_TIMEZONE)
+                vt_end_dt = datetime.combine(target_date, time(vt_end_h, vt_end_m), tzinfo=CEZ_TIMEZONE)
                 schedule.append({
                     "start": vt_start_dt.isoformat(),
                     "end": vt_end_dt.isoformat(),
@@ -472,7 +489,12 @@ def generate_schedule_for_graph(
 
             # NT period
             nt_start_dt = datetime.combine(target_date, nt_start, tzinfo=CEZ_TIMEZONE)
-            nt_end_dt = datetime.combine(target_date, nt_end, tzinfo=CEZ_TIMEZONE)
+            # Handle end time - if it's 24:00 (represented as 00:00), use 23:59:59
+            if nt_end_min == end_of_day:
+                nt_end_dt = datetime.combine(target_date, time(23, 59, 59), tzinfo=CEZ_TIMEZONE)
+            else:
+                nt_end_dt = datetime.combine(target_date, nt_end, tzinfo=CEZ_TIMEZONE)
+            
             schedule.append({
                 "start": nt_start_dt.isoformat(),
                 "end": nt_end_dt.isoformat(),
@@ -480,12 +502,13 @@ def generate_schedule_for_graph(
                 "value": 1,
             })
 
-            current_pos = nt_end
+            current_minute = nt_end_min
 
-        # VT period after last NT until end of day
-        if current_pos < day_end:
-            vt_start_dt = datetime.combine(target_date, current_pos, tzinfo=CEZ_TIMEZONE)
-            vt_end_dt = datetime.combine(target_date, day_end, tzinfo=CEZ_TIMEZONE)
+        # VT period after last NT until end of day (if needed)
+        if current_minute < end_of_day:
+            vt_start_h, vt_start_m = divmod(current_minute, 60)
+            vt_start_dt = datetime.combine(target_date, time(vt_start_h, vt_start_m), tzinfo=CEZ_TIMEZONE)
+            vt_end_dt = datetime.combine(target_date, time(23, 59, 59), tzinfo=CEZ_TIMEZONE)
             schedule.append({
                 "start": vt_start_dt.isoformat(),
                 "end": vt_end_dt.isoformat(),
