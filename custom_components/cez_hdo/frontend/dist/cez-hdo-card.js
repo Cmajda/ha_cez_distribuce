@@ -87,13 +87,17 @@
 
     const sortedDays=Object.keys(days).sort();
 
+    const ntPrice=this.config.low_tariff_price||0;
+    const vtPrice=this.config.high_tariff_price||0;
+    const showSchedulePrices=this.config.show_schedule_prices===true&&(ntPrice>0||vtPrice>0);
+
     return I`
       <div class="schedule-container">
         <div class="schedule-header">
           <span class="schedule-title">HDO rozvrh</span>
           <div class="schedule-legend">
-            <span class="legend-item nt"><span class="legend-color"></span>NT</span>
-            <span class="legend-item vt"><span class="legend-color"></span>VT</span>
+            <span class="legend-item nt"><span class="legend-color"></span>NT${showSchedulePrices?I` <span class="legend-price">${ntPrice} Kč</span>`:""}</span>
+            <span class="legend-item vt"><span class="legend-color"></span>VT${showSchedulePrices?I` <span class="legend-price">${vtPrice} Kč</span>`:""}</span>
           </div>
         </div>
         <div class="schedule-time-axis">
@@ -327,6 +331,11 @@
 
     .legend-item.vt .legend-color {
       background: var(--high-tariff-color, #FF5722);
+    }
+
+    .legend-price {
+      font-weight: 500;
+      opacity: 0.8;
     }
 
     .schedule-time-axis {
@@ -662,11 +671,12 @@
         };
         wrap.appendChild(mkToggle("Zobrazit titulek","show_title",this._config.show_title!==false));
         wrap.appendChild(mkToggle("Zobrazit stavy tarifů","show_tariff_status",this._config.show_tariff_status!==false));
+        wrap.appendChild(mkToggle("Zobrazit ceny u tarifů","show_tariff_prices",this._config.show_tariff_prices===true));
         wrap.appendChild(mkToggle("Zobrazit časy (začátek/konec)","show_times",show_times));
         wrap.appendChild(mkToggle("Zobrazit zbývající čas","show_duration",show_duration));
         wrap.appendChild(mkToggle("Zobrazit aktuální cenu","show_price",this._config.show_price!==false));
-        wrap.appendChild(mkToggle("Zobrazit ceny u tarifů","show_tariff_prices",this._config.show_tariff_prices===true));
         wrap.appendChild(mkToggle("Zobrazit HDO rozvrh","show_schedule",this._config.show_schedule===true));
+        wrap.appendChild(mkToggle("Zobrazit ceny v legendě rozvrhu","show_schedule_prices",this._config.show_schedule_prices===true));
         wrap.appendChild(mkToggle("Kompaktní režim","compact_mode",compact_mode));
 
         // Cenová pole - input pouze lokálně ukládá, change/blur emituje změnu
