@@ -402,6 +402,7 @@ class HdoSchedule(CezHdoSensor):
     def native_value(self) -> str | None:
         """Return today's date as state value."""
         from datetime import datetime
+
         return datetime.now().strftime("%d.%m.%Y")
 
     @property
@@ -413,11 +414,15 @@ class HdoSchedule(CezHdoSensor):
 
         hdo_json = self._response_data
         signal = self._get_signal(hdo_json)
-        schedule = downloader.generate_schedule_for_graph(hdo_json, signal, days_ahead=7)
+        schedule = downloader.generate_schedule_for_graph(
+            hdo_json, signal, days_ahead=7
+        )
 
         return {
             "schedule": schedule,
             "days": 7,
             "signal": signal,
-            "last_update": self._last_update_time.isoformat() if self._last_update_time else None,
+            "last_update": self._last_update_time.isoformat()
+            if self._last_update_time
+            else None,
         }
