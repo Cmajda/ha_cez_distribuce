@@ -39,6 +39,14 @@ binary_sensor:
 
 ![Konfigurace karty (editor)](entity_card_edit.png)
 
+### HDO rozvrh
+
+Karta obsahuje vizualizaci 7denního HDO rozvrhu s barevnými bloky pro nízký (zelená) a vysoký (oranžová) tarif:
+
+![HDO rozvrh](graph.png)
+
+V editoru karty zapněte přepínač "Zobrazit HDO rozvrh" pro aktivaci vizualizace.
+
 ### Použití v Energy Dashboard
 
 Senzor `sensor.cez_hdo_aktualni_cena` lze použít jako zdroj ceny elektřiny v Energy kartě Home Assistantu:
@@ -61,7 +69,7 @@ Senzory:
 - `sensor.cez_hdo_vysoky_tarif_konec` – čas konce VT
 - `sensor.cez_hdo_vysoky_tarif_zbyva` – zbývající čas do změny tarifu
 - `sensor.cez_hdo_aktualni_cena` – aktuální cena elektřiny v Kč/kWh (lze použít v Energy Dashboard)
-- `sensor.cez_hdo_schedule` – rozvrh HDO pro graf (ApexCharts kompatibilní)
+- `sensor.cez_hdo_rozvrh` – 7denní rozvrh HDO pro vizualizaci v kartě
 - `sensor.cez_hdo_surova_data` – surová data / timestamp (diagnostika)
 
 ## Když to nefunguje (doporučený postup)

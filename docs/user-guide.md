@@ -57,7 +57,7 @@ Integrace vytváří tyto entity (výchozí názvy):
 - `sensor.cez_hdo_vysoky_tarif_konec` – čas konce vysokého tarifu
 - `sensor.cez_hdo_vysoky_tarif_zbyva` – zbývající čas do změny tarifu
 - `sensor.cez_hdo_aktualni_cena` – aktuální cena elektřiny v Kč/kWh (podle aktivního tarifu)
-- `sensor.cez_hdo_schedule` – rozvrh HDO pro graf (ApexCharts kompatibilní)
+- `sensor.cez_hdo_rozvrh` – 7denní rozvrh HDO pro vizualizaci v kartě
 - `sensor.cez_hdo_surova_data` – surová data / timestamp (diagnostika)
 
 ## Lovelace karta
@@ -125,46 +125,29 @@ Senzor `sensor.cez_hdo_aktualni_cena` lze použít jako zdroj ceny elektřiny v 
 
 Senzor automaticky přepíná mezi cenou NT a VT podle aktivního tarifu.
 
-## HDO rozvrh pro graf (ApexCharts)
+## HDO rozvrh – vizualizace v kartě
 
-Senzor `sensor.cez_hdo_schedule` poskytuje data pro zobrazení HDO rozvrhu v grafu.
+Lovelace karta obsahuje integrovanou vizualizaci 7denního HDO rozvrhu:
 
-### Příklad konfigurace ApexCharts
+![HDO rozvrh](../graph.png)
 
-Pro zobrazení HDO rozvrhu nainstalujte [ApexCharts Card](https://github.com/RomRider/apexcharts-card) přes HACS a použijte tuto konfiguraci:
+### Aktivace rozvrhu
 
-```yaml
-type: custom:apexcharts-card
-header:
-  show: true
-  title: HDO rozvrh
-graph_span: 7d
-span:
-  start: day
-yaxis:
-  - id: tariff
-    min: 0
-    max: 1
-    apex_config:
-      labels:
-        formatter: |
-          EVAL:function(val) { return val === 1 ? 'NT' : 'VT'; }
-series:
-  - entity: sensor.cez_hdo_schedule
-    data_generator: |
-      return entity.attributes.schedule.map(item => {
-        return [new Date(item.start).getTime(), item.value];
-      });
-    type: area
-    name: Tarif
-    color: green
-    stroke_width: 0
-    opacity: 0.5
-```
+1. Otevřete editor karty
+2. Zapněte přepínač "Zobrazit HDO rozvrh"
+3. Volitelně zapněte "Zobrazit ceny v legendě rozvrhu" pro zobrazení cen NT/VT
 
-### Formát dat
+### Popis vizualizace
 
-Senzor poskytuje v atributu `schedule` seznam intervalů:
+- **Zelené bloky** – nízký tarif (NT)
+- **Oranžové bloky** – vysoký tarif (VT)
+- **Časová osa** – 0:00 až 24:00 pro každý den
+- **Legenda** – s volitelným zobrazením cen
+- **Tooltip** – při najetí myší zobrazí přesné časy intervalu
+
+### Formát dat senzoru
+
+Senzor `sensor.cez_hdo_rozvrh` poskytuje v atributu `schedule` seznam intervalů:
 
 ```json
 [
@@ -175,6 +158,20 @@ Senzor poskytuje v atributu `schedule` seznam intervalů:
 
 - `tariff`: "NT" (nízký tarif) nebo "VT" (vysoký tarif)
 - `value`: 1 pro NT, 0 pro VT
+
+## Přehled přepínačů v editoru karty
+
+| Přepínač                        | Popis                                 |
+| ------------------------------- | ------------------------------------- |
+| Zobrazit titulek                | Zobrazí/skryje nadpis karty           |
+| Zobrazit stavy tarifů           | Zobrazí/skryje boxy s NT/VT stavem    |
+| Zobrazit ceny u tarifů          | Zobrazí cenu přímo v boxu NT/VT       |
+| Zobrazit časy (začátek/konec)   | Zobrazí časy začátku a konce tarifů   |
+| Zobrazit zbývající čas          | Zobrazí zbývající čas do změny tarifu |
+| Zobrazit aktuální cenu          | Zobrazí velký box s aktuální cenou    |
+| Zobrazit HDO rozvrh             | Zobrazí 7denní vizualizaci rozvrhu    |
+| Zobrazit ceny v legendě rozvrhu | Přidá ceny NT/VT k legendě grafu      |
+| Kompaktní režim                 | Zmenší kartu                          |
 
 ## Co dělat, když komponenta nefunguje
 
