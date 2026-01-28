@@ -1,3 +1,27 @@
+Commons Clause License Condition v1.0
+
+The Software is provided to you by the Licensor under the License, as
+defined below, subject to the following condition.
+
+Without limiting other conditions in the License, the grant of rights
+under the License will not include, and the License does not grant to
+you, the right to Sell the Software.
+
+For purposes of the foregoing, "Sell" means practicing any or all of
+the rights granted to you under the License to provide to third parties,
+for a fee or other consideration (including without limitation fees for
+hosting or consulting/support services related to the Software), a
+product or service whose value derives, entirely or substantially, from
+the functionality of the Software.
+
+Any commercial use of the Software requires prior written approval from
+the Licensor.
+
+For commercial licensing inquiries, please contact:
+https://github.com/Cmajda/ha_cez_distribuce/issues
+
+================================================================================
+
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -199,3 +223,45 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+================================================================================
+
+This software is licensed under "Apache License 2.0 with Commons Clause".
+See the Commons Clause condition at the top of this file.
+
+Copyright 2024-2026 Cmajda
+
+================================================================================
+                           ČESKÁ VERZE / CZECH VERSION
+================================================================================
+
+Licenční podmínka Commons Clause v1.0
+
+Software je vám poskytován Poskytovatelem licence za níže uvedených podmínek
+s následujícím omezením.
+
+Bez omezení ostatních podmínek Licence, udělení práv podle Licence nezahrnuje
+a Licence vám neuděluje právo Prodávat Software.
+
+Pro účely výše uvedeného „Prodávat" znamená uplatňovat jakákoli nebo všechna
+práva udělená vám na základě Licence k poskytování třetím stranám za úplatu
+nebo jinou protihodnotu (včetně, ale nejen, poplatků za hosting nebo
+konzultační/podpůrné služby související se Softwarem) produkt nebo službu,
+jejíž hodnota zcela nebo podstatně vychází z funkcionality Softwaru.
+
+Jakékoli komerční použití Softwaru vyžaduje předchozí písemný souhlas
+Poskytovatele licence.
+
+Pro dotazy ohledně komerční licence kontaktujte:
+https://github.com/Cmajda/ha_cez_distribuce/issues
+
+---
+
+Tento software je licencován pod „Apache License 2.0 s Commons Clause".
+Viz podmínka Commons Clause na začátku tohoto souboru.
+
+Anglická verze licence je právně závazná. Tato česká verze je pouze
+informativní překlad pro lepší pochopení podmínek.
+
+Copyright 2024-2026 Cmajda
+
