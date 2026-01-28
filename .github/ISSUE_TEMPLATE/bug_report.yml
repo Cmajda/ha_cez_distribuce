@@ -1,0 +1,86 @@
+name: 🐛 Bug Report
+description: Nahlásit chybu nebo neočekávané chování
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Děkujeme za nahlášení chyby! Vyplňte prosím co nejvíce informací.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Popis problému
+      description: Jasný a stručný popis chyby
+      placeholder: Co se stalo?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Kroky k reprodukci
+      description: Jak lze chybu zopakovat?
+      placeholder: |
+        1. Otevřete '...'
+        2. Klikněte na '...'
+        3. Zobrazí se chyba
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Očekávané chování
+      description: Co jste očekávali, že se stane?
+      placeholder: Mělo by se zobrazit...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Verze integrace
+      description: Jakou verzi ČEZ HDO používáte?
+      placeholder: "např. 2.2.0"
+    validations:
+      required: true
+
+  - type: input
+    id: ha_version
+    attributes:
+      label: Verze Home Assistant
+      description: Jakou verzi Home Assistant používáte?
+      placeholder: "např. 2025.1.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Typ instalace Home Assistant
+      options:
+        - Home Assistant OS
+        - Home Assistant Container
+        - Home Assistant Supervised
+        - Home Assistant Core
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logy
+      description: |
+        Přidejte relevantní logy z Home Assistant.
+        Nastavení → Systém → Logy → hledat "cez_hdo"
+      render: shell
+      placeholder: |
+        2025-01-28 12:00:00 ERROR (MainThread) [custom_components.cez_hdo] ...
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Další informace
+      description: Screenshoty, konfigurace, nebo cokoliv dalšího

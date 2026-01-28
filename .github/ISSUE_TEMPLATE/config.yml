@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Dokumentace
+    url: https://github.com/Cmajda/ha_cez_distribuce/tree/main/docs
+    about: Před vytvořením issue zkontrolujte dokumentaci
+  - name: 💬 Diskuze
+    url: https://github.com/Cmajda/ha_cez_distribuce/discussions
+    about: Pro obecné dotazy a diskuze použijte GitHub Discussions

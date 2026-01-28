@@ -1,0 +1,46 @@
+name: ❓ Dotaz
+description: Položit otázku ohledně nastavení nebo použití
+title: "[Dotaz]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Máte dotaz? Rádi vám pomůžeme!
+
+        **Tip:** Nejdříve zkontrolujte [dokumentaci](https://github.com/Cmajda/ha_cez_distribuce/tree/main/docs).
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Váš dotaz
+      description: Co byste rádi věděli?
+      placeholder: Jak nastavím...?
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: Co jste již zkoušeli?
+      description: Popište, co jste již vyzkoušeli nebo kde jste hledali odpověď
+      placeholder: |
+        - Hledal jsem v dokumentaci
+        - Zkoušel jsem nastavit...
+
+  - type: input
+    id: version
+    attributes:
+      label: Verze integrace
+      description: Jakou verzi ČEZ HDO používáte?
+      placeholder: "např. 2.2.0"
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Konfigurace
+      description: Pokud se dotaz týká konfigurace, přiložte relevantní části. Obsah configuration.yaml
+      render: yaml
+      placeholder: |
+        type: custom:cez-hdo-card
+        entity: sensor.cez_hdo_aktualni_tarif

@@ -1,0 +1,53 @@
+name: 💡 Feature Request
+description: Navrhnout novou funkci nebo vylepšení
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Máte nápad na vylepšení? Skvělé! Popište ho prosím co nejpodrobněji.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Jaký problém řešíte?
+      description: Popište problém nebo situaci, kterou chcete vyřešit
+      placeholder: Chtěl bych mít možnost...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Navrhované řešení
+      description: Jak by měla nová funkce fungovat?
+      placeholder: |
+        Bylo by skvělé, kdyby...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Zvažované alternativy
+      description: Existují jiné způsoby, jak problém vyřešit?
+      placeholder: Zkoušel jsem...
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priorita
+      description: Jak moc je pro vás tato funkce důležitá?
+      options:
+        - Nízká – bylo by to fajn
+        - Střední – hodně by mi to pomohlo
+        - Vysoká – bez toho to nemůžu používat
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Další informace
+      description: Screenshoty, mockupy, příklady z jiných projektů...
