@@ -417,3 +417,80 @@ def isHdo(
         high_end,
         high_duration,
     )
+
+
+def generate_schedule_for_graph(
+    json_data: dict,
+    preferred_signal: str | None = None,
+    days_ahead: int = 7,
+) -> list[dict]:
+    """Generate schedule data suitable for ApexCharts timeline graph.
+
+    Returns list of time intervals with tariff info:
+    [
+        {"start": "2026-01-27T00:00:00", "end": "2026-01-27T07:15:00", "tariff": "NT", "value": 1},
+        {"start": "2026-01-27T07:15:00", "end": "2026-01-27T08:15:00", "tariff": "VT", "value": 0},
+        ...
+    ]
+    """
+    schedule: list[dict] = []
+    current_time = datetime.now(tz=CEZ_TIMEZONE)
+
+    for day_offset in range(days_ahead):
+        target_date = current_time.date() + timedelta(days=day_offset)
+        day_dt = datetime.combine(target_date, time(0, 0), tzinfo=CEZ_TIMEZONE)
+
+        # Get NT periods for this day
+        nt_periods = get_schedule_for_date(json_data, day_dt, preferred_signal)
+
+        if not nt_periods:
+            continue
+
+        # Sort periods by start time
+        nt_periods_sorted = sorted(nt_periods, key=lambda x: x[0])
+
+        # Build full day schedule (NT and VT intervals)
+        day_start = time(0, 0)
+        day_end = time(23, 59, 59)
+
+        current_pos = day_start
+        for nt_start, nt_end in nt_periods_sorted:
+            # Handle 24:00 as 00:00 (end of day)
+            if nt_end == time(0, 0):
+                nt_end = time(23, 59, 59)
+
+            # VT period before NT
+            if current_pos < nt_start:
+                vt_start_dt = datetime.combine(target_date, current_pos, tzinfo=CEZ_TIMEZONE)
+                vt_end_dt = datetime.combine(target_date, nt_start, tzinfo=CEZ_TIMEZONE)
+                schedule.append({
+                    "start": vt_start_dt.isoformat(),
+                    "end": vt_end_dt.isoformat(),
+                    "tariff": "VT",
+                    "value": 0,
+                })
+
+            # NT period
+            nt_start_dt = datetime.combine(target_date, nt_start, tzinfo=CEZ_TIMEZONE)
+            nt_end_dt = datetime.combine(target_date, nt_end, tzinfo=CEZ_TIMEZONE)
+            schedule.append({
+                "start": nt_start_dt.isoformat(),
+                "end": nt_end_dt.isoformat(),
+                "tariff": "NT",
+                "value": 1,
+            })
+
+            current_pos = nt_end
+
+        # VT period after last NT until end of day
+        if current_pos < day_end:
+            vt_start_dt = datetime.combine(target_date, current_pos, tzinfo=CEZ_TIMEZONE)
+            vt_end_dt = datetime.combine(target_date, day_end, tzinfo=CEZ_TIMEZONE)
+            schedule.append({
+                "start": vt_start_dt.isoformat(),
+                "end": vt_end_dt.isoformat(),
+                "tariff": "VT",
+                "value": 0,
+            })
+
+    return schedule

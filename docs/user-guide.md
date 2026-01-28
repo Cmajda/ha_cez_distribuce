@@ -57,6 +57,7 @@ Integrace vytváří tyto entity (výchozí názvy):
 - `sensor.cez_hdo_vysoky_tarif_konec` – čas konce vysokého tarifu
 - `sensor.cez_hdo_vysoky_tarif_zbyva` – zbývající čas do změny tarifu
 - `sensor.cez_hdo_aktualni_cena` – aktuální cena elektřiny v Kč/kWh (podle aktivního tarifu)
+- `sensor.cez_hdo_schedule` – rozvrh HDO pro graf (ApexCharts kompatibilní)
 - `sensor.cez_hdo_surova_data` – surová data / timestamp (diagnostika)
 
 ## Lovelace karta
@@ -123,6 +124,57 @@ Senzor `sensor.cez_hdo_aktualni_cena` lze použít jako zdroj ceny elektřiny v 
 4. V poli "Use an entity tracking the total costs" nebo "Use an entity with current price" vyberte `sensor.cez_hdo_aktualni_cena`
 
 Senzor automaticky přepíná mezi cenou NT a VT podle aktivního tarifu.
+
+## HDO rozvrh pro graf (ApexCharts)
+
+Senzor `sensor.cez_hdo_schedule` poskytuje data pro zobrazení HDO rozvrhu v grafu.
+
+### Příklad konfigurace ApexCharts
+
+Pro zobrazení HDO rozvrhu nainstalujte [ApexCharts Card](https://github.com/RomRider/apexcharts-card) přes HACS a použijte tuto konfiguraci:
+
+```yaml
+type: custom:apexcharts-card
+header:
+  show: true
+  title: HDO rozvrh
+graph_span: 7d
+span:
+  start: day
+yaxis:
+  - id: tariff
+    min: 0
+    max: 1
+    apex_config:
+      labels:
+        formatter: |
+          EVAL:function(val) { return val === 1 ? 'NT' : 'VT'; }
+series:
+  - entity: sensor.cez_hdo_schedule
+    data_generator: |
+      return entity.attributes.schedule.map(item => {
+        return [new Date(item.start).getTime(), item.value];
+      });
+    type: area
+    name: Tarif
+    color: green
+    stroke_width: 0
+    opacity: 0.5
+```
+
+### Formát dat
+
+Senzor poskytuje v atributu `schedule` seznam intervalů:
+
+```json
+[
+  {"start": "2026-01-27T00:00:00", "end": "2026-01-27T07:15:00", "tariff": "NT", "value": 1},
+  {"start": "2026-01-27T07:15:00", "end": "2026-01-27T08:15:00", "tariff": "VT", "value": 0}
+]
+```
+
+- `tariff`: "NT" (nízký tarif) nebo "VT" (vysoký tarif)
+- `value`: 1 pro NT, 0 pro VT
 
 ## Co dělat, když komponenta nefunguje
 

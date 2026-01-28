@@ -78,6 +78,10 @@ class CezHdoBaseEntity:
                 "object_id": "cez_hdo_currentprice",
                 "friendly": "ČEZ HDO aktuální cena",
             },
+            "HdoSchedule": {
+                "object_id": "cez_hdo_schedule",
+                "friendly": "ČEZ HDO rozvrh",
+            },
             "RawData": {
                 "object_id": "cez_hdo_raw_data",
                 "friendly": "ČEZ HDO surová data",

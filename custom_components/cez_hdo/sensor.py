@@ -47,7 +47,8 @@ def setup_platform(
         HighTariffEnd(ean, signal),
         HighTariffDuration(ean, signal),
         CurrentPrice(ean, signal),
-        CezHdoRawData(ean, signal),  # Nová entita
+        HdoSchedule(ean, signal),
+        CezHdoRawData(ean, signal),
     ]
     add_entities(entities, False)
 
@@ -80,6 +81,7 @@ async def async_setup_platform(
         HighTariffEnd(ean, signal),
         HighTariffDuration(ean, signal),
         CurrentPrice(ean, signal),
+        HdoSchedule(ean, signal),
         CezHdoRawData(ean, signal),
     ]
     async_add_entities(entities, False)
@@ -383,3 +385,39 @@ class CezHdoRawData(CezHdoSensor):
         ts = self._last_update_time.isoformat() if self._last_update_time else None
         # Structure matches cache file format: {timestamp, data}
         return {"raw_json": {"timestamp": ts, "data": self._response_data}}
+
+
+class HdoSchedule(CezHdoSensor):
+    """Sensor providing HDO schedule data for graphs (ApexCharts compatible)."""
+
+    def __init__(self, ean: str, signal: str | None = None) -> None:
+        super().__init__(ean, "HdoSchedule", signal)
+
+    @property
+    def icon(self) -> str:
+        """Return the icon of the sensor."""
+        return "mdi:chart-timeline-variant"
+
+    @property
+    def native_value(self) -> str | None:
+        """Return today's date as state value."""
+        from datetime import datetime
+        return datetime.now().strftime("%d.%m.%Y")
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return schedule data suitable for ApexCharts timeline graph."""
+        _ = self._get_hdo_data()
+        if self._response_data is None:
+            return {"schedule": [], "days": 0}
+
+        hdo_json = self._response_data
+        signal = self._get_signal(hdo_json)
+        schedule = downloader.generate_schedule_for_graph(hdo_json, signal, days_ahead=7)
+
+        return {
+            "schedule": schedule,
+            "days": 7,
+            "signal": signal,
+            "last_update": self._last_update_time.isoformat() if self._last_update_time else None,
+        }

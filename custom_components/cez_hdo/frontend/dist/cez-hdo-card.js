@@ -58,8 +58,74 @@
             </div>
           </div>
         `:""}
+
+        ${this._renderSchedule()}
       </ha-card>
-    `}}pt.styles=((t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,s,i)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(s)+t[i+1],t[0]);return new o(i,t,s)})`
+    `}
+
+  _renderSchedule(){
+    if(!this.config.show_schedule) return I``;
+    const scheduleEntity=this.config.entities?.schedule||"sensor.cez_hdo_rozvrh";
+    const scheduleState=this.hass.states[scheduleEntity];
+    if(!scheduleState||!scheduleState.attributes.schedule) return I`<div class="schedule-error">Rozvrh není k dispozici</div>`;
+
+    const schedule=scheduleState.attributes.schedule;
+    const days={};
+
+    // Seskupit podle dnů
+    schedule.forEach(item=>{
+      const start=new Date(item.start);
+      const dayKey=start.toISOString().split("T")[0];
+      const dayLabel=start.toLocaleDateString("cs-CZ",{weekday:"short",day:"2-digit",month:"2-digit"});
+      if(!days[dayKey]) days[dayKey]={label:dayLabel,items:[]};
+      days[dayKey].items.push(item);
+    });
+
+    const sortedDays=Object.keys(days).sort();
+
+    return I`
+      <div class="schedule-container">
+        <div class="schedule-header">
+          <span class="schedule-title">HDO rozvrh</span>
+          <div class="schedule-legend">
+            <span class="legend-item nt"><span class="legend-color"></span>NT</span>
+            <span class="legend-item vt"><span class="legend-color"></span>VT</span>
+          </div>
+        </div>
+        <div class="schedule-time-axis">
+          <span>0:00</span><span>6:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+        </div>
+        ${sortedDays.map(dayKey=>{
+          const day=days[dayKey];
+          return I`
+            <div class="schedule-row">
+              <div class="schedule-day-label">${day.label}</div>
+              <div class="schedule-bar">
+                ${day.items.map(item=>{
+                  const start=new Date(item.start);
+                  const end=new Date(item.end);
+                  const startHour=start.getHours()+start.getMinutes()/60;
+                  let endHour=end.getHours()+end.getMinutes()/60;
+                  if(endHour===0) endHour=24;
+                  const left=(startHour/24)*100;
+                  const width=((endHour-startHour)/24)*100;
+                  const startStr=start.toLocaleTimeString("cs-CZ",{hour:"2-digit",minute:"2-digit"});
+                  const endStr=end.toLocaleTimeString("cs-CZ",{hour:"2-digit",minute:"2-digit"});
+                  return I`
+                    <div class="schedule-block ${item.tariff.toLowerCase()}"
+                         style="left:${left}%;width:${width}%"
+                         title="${startStr}-${endStr}">
+                      ${width>8?I`<span class="block-time">${startStr}-${endStr}</span>`:""}
+                    </div>
+                  `;
+                })}
+              </div>
+            </div>
+          `;
+        })}
+      </div>
+    `;
+  }}pt.styles=((t,...e)=>{const i=1===t.length?t[0]:e.reduce((e,s,i)=>e+(t=>{if(!0===t._$cssResult$)return t.cssText;if("number"==typeof t)return t;throw Error("Value passed to 'css' function must be a 'css' function result: "+t+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(s)+t[i+1],t[0]);return new o(i,t,s)})`
     :host {
       display: block;
     }
@@ -211,6 +277,136 @@
     .compact .price-value {
       font-size: 18px;
     }
+
+    /* Schedule styles */
+    .schedule-container {
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--secondary-background-color, rgba(0,0,0,0.05));
+      border-radius: 8px;
+    }
+
+    .schedule-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .schedule-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--primary-text-color);
+    }
+
+    .schedule-legend {
+      display: flex;
+      gap: 12px;
+      font-size: 11px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+    }
+
+    .legend-item.nt .legend-color {
+      background: var(--low-tariff-color, #4CAF50);
+    }
+
+    .legend-item.vt .legend-color {
+      background: var(--high-tariff-color, #FF5722);
+    }
+
+    .schedule-time-axis {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--secondary-text-color);
+      margin-bottom: 4px;
+      padding-left: 60px;
+    }
+
+    .schedule-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .schedule-day-label {
+      width: 55px;
+      font-size: 11px;
+      color: var(--primary-text-color);
+      flex-shrink: 0;
+    }
+
+    .schedule-bar {
+      flex: 1;
+      height: 24px;
+      background: var(--divider-color, #e0e0e0);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .schedule-block {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+      transition: opacity 0.2s;
+    }
+
+    .schedule-block.nt {
+      background: var(--low-tariff-color, #4CAF50);
+    }
+
+    .schedule-block.vt {
+      background: var(--high-tariff-color, #FF5722);
+    }
+
+    .schedule-block:hover {
+      opacity: 0.85;
+    }
+
+    .block-time {
+      font-size: 9px;
+      color: white;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 2px;
+    }
+
+    .schedule-error {
+      padding: 12px;
+      text-align: center;
+      color: var(--secondary-text-color);
+      font-size: 12px;
+    }
+
+    .compact .schedule-container {
+      margin-top: 8px;
+      padding: 8px;
+    }
+
+    .compact .schedule-bar {
+      height: 18px;
+    }
+
+    .compact .block-time {
+      display: none;
+    }
   `,dt([ct({attribute:!1})],pt.prototype,"hass",void 0),dt([ct({state:!0,attribute:!1})],pt.prototype,"config",void 0),customElements.get("cez-hdo-card")||customElements.define("cez-hdo-card",pt),window.customCards=window.customCards||[],window.customCards.push({type:"cez-hdo-card",name:"ČEZ HDO Card",description:"Custom card for ČEZ HDO integration",preview:!0}),console.info("ČEZ HDO Card v2.1.0 loaded successfully")})();
 
 // --- Runtime patch: editor + entity konfigurace v UI (Lovelace) ---
@@ -241,6 +437,9 @@
     ],
     high_duration:[
       "sensor.cez_hdo_vysoky_tarif_zbyva"
+    ],
+    schedule:[
+      "sensor.cez_hdo_rozvrh"
     ]
   };
 
@@ -252,7 +451,8 @@
     low_duration:DEFAULT_ENTITY_CANDIDATES.low_duration[0],
     high_start:DEFAULT_ENTITY_CANDIDATES.high_start[0],
     high_end:DEFAULT_ENTITY_CANDIDATES.high_end[0],
-    high_duration:DEFAULT_ENTITY_CANDIDATES.high_duration[0]
+    high_duration:DEFAULT_ENTITY_CANDIDATES.high_duration[0],
+    schedule:DEFAULT_ENTITY_CANDIDATES.schedule[0]
   };
 
   function resolveEntityIdSuffix(hass,entityId){
@@ -459,6 +659,7 @@
         wrap.appendChild(mkToggle("Zobrazit zbývající čas","show_duration",show_duration));
         wrap.appendChild(mkToggle("Zobrazit aktuální cenu","show_price",this._config.show_price!==false));
         wrap.appendChild(mkToggle("Zobrazit ceny u tarifů","show_tariff_prices",this._config.show_tariff_prices===true));
+        wrap.appendChild(mkToggle("Zobrazit HDO rozvrh","show_schedule",this._config.show_schedule===true));
         wrap.appendChild(mkToggle("Kompaktní režim","compact_mode",compact_mode));
 
         // Cenová pole - input pouze lokálně ukládá, change/blur emituje změnu
@@ -488,6 +689,7 @@
         wrap.appendChild(this._entityPicker("VT začátek (sensor)","high_start",["sensor"]));
         wrap.appendChild(this._entityPicker("VT konec (sensor)","high_end",["sensor"]));
         wrap.appendChild(this._entityPicker("VT zbývá (sensor)","high_duration",["sensor"]));
+        wrap.appendChild(this._entityPicker("HDO rozvrh (sensor)","schedule",["sensor"]));
 
         const hint=document.createElement("div");
         hint.className="hint";
