@@ -8,21 +8,23 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Builds frontend and deploys to local dev Home Assistant"
     echo "#----------------------------------------------------------#"
     echo "Usage:"
-    echo "  ./deploy.sh [EAN] [IP] [PASSWORD]              -- Deploy with parameters"
-    echo "  ./deploy.sh                                    -- Deploy using environment variables"
-    echo "  ./deploy.sh clean [IP] [PASSWORD]              -- Remove integration from HA"
+    echo "  ./deploy.sh [IP] [PASSWORD]                   -- Deploy with parameters"
+    echo "  ./deploy.sh                                   -- Deploy using environment variables"
+    echo "  ./deploy.sh clean [IP] [PASSWORD]             -- Remove integration from HA"
     echo "#----------------------------------------------------------#"
     echo "Environment variables (used if parameters not provided):"
-    echo "  EAN           - EAN number (18 digits)"
     echo "  HA_IP         - IP address of Home Assistant"
     echo "  HA_PASSWORD   - Password for CIFS mount"
     echo "  HA_USERNAME   - Username for CIFS mount (default: current user)"
     echo "  HA_CONFIG_DIR - Path to Home Assistant configuration directory"
     echo "                  Default: /mnt/ha-config"
     echo "#----------------------------------------------------------#"
+    echo "Note: EAN is no longer required - use Config Flow in HA UI"
+    echo "      (Settings → Devices & Services → Add Integration → ČEZ HDO)"
+    echo "#----------------------------------------------------------#"
     echo "Examples:"
-    echo "  EAN=123458786461864646 HA_IP=192.168.1.1 HA_PASSWORD=pass ./deploy.sh"
-    echo "  ./deploy.sh 123458786461864646 192.168.1.1 mypassword"
+    echo "  HA_IP=192.168.1.1 HA_PASSWORD=pass ./deploy.sh"
+    echo "  ./deploy.sh 192.168.1.1 mypassword"
     echo "  ./deploy.sh clean 192.168.1.1 mypassword"
     exit 0
 fi
@@ -44,26 +46,18 @@ if [ "$1" = "clean" ]; then
     HA_IP="${2:-$HA_IP}"
     HA_PASSWORD="${3:-$HA_PASSWORD}"
 else
-    # For deploy mode: [EAN] [IP] [PASSWORD]
+    # For deploy mode: [IP] [PASSWORD]
     # Parameters override environment variables
     if [ -n "$1" ]; then
-        EAN="$1"
+        HA_IP="$1"
     fi
     if [ -n "$2" ]; then
-        HA_IP="$2"
-    fi
-    if [ -n "$3" ]; then
-        HA_PASSWORD="$3"
+        HA_PASSWORD="$2"
     fi
 fi
 
-# Validate required variables for deploy mode
-if [ "$CLEAN_MODE" != "clean" ] && [ -z "$EAN" ]; then
-    echo "❌ EAN not provided. Set EAN environment variable or pass as first argument."
-    echo "   Example: EAN=123458786461864646 ./deploy.sh"
-    echo "   Example: ./deploy.sh 123458786461864646"
-    exit 1
-fi
+# Validate required variables for deploy mode - EAN is optional now (config flow is used)
+# EAN is only needed for legacy YAML configuration
 
 # Default mount point
 MOUNT_POINT="${HA_CONFIG_DIR:-/mnt/ha-config}"
@@ -306,41 +300,18 @@ else
     exit 1
 fi
 
-# Step 6: Configuration setup
-echo -e "${BLUE}⚙️ Step 6: Checking configuration...${NC}"
+# Step 6: Configuration check (info only - config flow is used now)
+echo -e "${BLUE}⚙️ Step 6: Configuration check...${NC}"
 CONFIG_FILE="$MOUNT_POINT/configuration.yaml"
 
 if [ -f "$CONFIG_FILE" ]; then
-    # Check if ČEZ HDO configuration already exists
+    # Check if old YAML configuration exists
     if grep -q "platform: cez_hdo" "$CONFIG_FILE"; then
-        echo -e "${YELLOW}⚠️  ČEZ HDO configuration already exists in configuration.yaml${NC}"
+        echo -e "${YELLOW}⚠️  Legacy YAML configuration found in configuration.yaml${NC}"
+        echo -e "${YELLOW}   You can remove it and use Config Flow instead (Settings → Devices & Services → Add Integration)${NC}"
     else
-        echo -e "${BLUE}📝 Adding ČEZ HDO configuration to configuration.yaml...${NC}"
-
-        # Backup configuration file
-        cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
-        echo -e "${GREEN}✅ Configuration backup created${NC}"
-
-        # Add configuration
-        if [ -n "$EAN" ]; then
-            cat >> "$CONFIG_FILE" << EOF
-
-# ČEZ HDO integrace
-sensor:
-  - platform: cez_hdo
-    ean: "$EAN"
-
-binary_sensor:
-  - platform: cez_hdo
-    ean: "$EAN"
-EOF
-        else
-            echo -e "${RED}❌ EAN not set. Set EAN environment variable or add to variables_local.ini${NC}"
-            exit 1
-        fi
-
-        echo -e "${GREEN}✅ ČEZ HDO configuration added to configuration.yaml${NC}"
-        echo -e "${YELLOW}📝 Note: Update code and region parameters as needed${NC}"
+        echo -e "${GREEN}✅ No legacy YAML configuration found${NC}"
+        echo -e "${BLUE}   Add integration via: Settings → Devices & Services → Add Integration → ČEZ HDO${NC}"
     fi
 else
     echo -e "${YELLOW}⚠️  configuration.yaml not found at $CONFIG_FILE${NC}"
@@ -349,8 +320,8 @@ fi
 echo ""
 echo -e "${GREEN}✨ ČEZ HDO deployment completed!${NC}"
 echo -e "${YELLOW}📋 Next steps:${NC}"
-echo "   1. Update code and region in configuration.yaml if needed"
-echo "   2. Restart Home Assistant"
-echo "   3. Check logs for any errors"
-echo "   4. Verify entities are working"
+echo "   1. Restart Home Assistant"
+echo "   2. Add integration: Settings → Devices & Services → Add Integration → ČEZ HDO"
+echo "   3. Enter your EAN number in the config flow"
+echo "   4. Check logs for any errors"
 echo "   5. Test Lovelace card functionality"

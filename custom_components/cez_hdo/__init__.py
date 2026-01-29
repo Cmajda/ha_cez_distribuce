@@ -123,11 +123,22 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         low_price = call.data.get("low_tariff_price", 0.0)
         high_price = call.data.get("high_tariff_price", 0.0)
 
-        # If coordinator exists, use it
+        coordinators_updated = 0
+        
+        # Check YAML coordinator (stored under DATA_COORDINATOR key)
         coordinator = hass.data[DOMAIN].get(DATA_COORDINATOR)
         if coordinator:
             await coordinator.async_set_prices(low_price, high_price)
-        else:
+            coordinators_updated += 1
+        
+        # Check config entry coordinators (stored under entry_id keys)
+        for key, value in hass.data[DOMAIN].items():
+            if isinstance(value, dict) and DATA_COORDINATOR in value:
+                entry_coordinator = value[DATA_COORDINATOR]
+                await entry_coordinator.async_set_prices(low_price, high_price)
+                coordinators_updated += 1
+
+        if coordinators_updated == 0:
             # Fallback for when coordinator not yet initialized
             # Store in hass.data for sensors to access
             hass.data[DOMAIN]["low_tariff_price"] = low_price
@@ -137,12 +148,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 low_price,
                 high_price,
             )
-
-        _LOGGER.debug(
-            "CEZ HDO: Prices set: NT=%.2f, VT=%.2f",
-            low_price,
-            high_price,
-        )
+        else:
+            _LOGGER.debug(
+                "CEZ HDO: Prices set on %d coordinator(s): NT=%.2f, VT=%.2f",
+                coordinators_updated,
+                low_price,
+                high_price,
+            )
 
     hass.services.async_register(
         DOMAIN,
@@ -163,25 +175,62 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
+# Platforms to set up from config entry
+PLATFORMS = ["sensor", "binary_sensor"]
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up ČEZ HDO from a config entry."""
-    _LOGGER.debug("async_setup_entry Start")
+    _LOGGER.debug("async_setup_entry Start for %s", entry.entry_id)
 
     # Register frontend card
     cards = CezHdoCardRegistration(hass)
     await cards.async_register()
 
-    _LOGGER.debug("async_setup_entry Complete")
+    # Get config data
+    ean = entry.data.get("ean")
+    signal = entry.data.get("signal")
+
+    if not ean:
+        _LOGGER.error("No EAN in config entry")
+        return False
+
+    # Create coordinator
+    from .coordinator import CezHdoCoordinator
+    
+    coordinator = CezHdoCoordinator(hass, ean, signal)
+    await coordinator.async_initialize()
+
+    # Store coordinator in hass.data
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry.entry_id] = {
+        DATA_COORDINATOR: coordinator,
+        "ean": ean,
+        "signal": signal,
+    }
+
+    # Forward setup to platforms
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    _LOGGER.debug("async_setup_entry Complete for %s", entry.entry_id)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    _LOGGER.debug("async_unload_entry")
+    _LOGGER.debug("async_unload_entry for %s", entry.entry_id)
 
-    # Unregister frontend card
-    cards = CezHdoCardRegistration(hass)
-    await cards.async_unregister()
+    # Unload platforms
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
-    _LOGGER.debug("async_unload_entry Done")
-    return True
+    if unload_ok:
+        # Remove coordinator from hass.data
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+
+    # Unregister frontend card if no more entries
+    if not hass.data[DOMAIN]:
+        cards = CezHdoCardRegistration(hass)
+        await cards.async_unregister()
+
+    _LOGGER.debug("async_unload_entry Done for %s", entry.entry_id)
+    return unload_ok

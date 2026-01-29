@@ -1,0 +1,45 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "ČEZ HDO Setup",
+                "description": "Enter your EAN number from ČEZ Distribuce invoice.",
+                "data": {
+                    "ean": "EAN Number"
+                },
+                "data_description": {
+                    "ean": "18-digit EAN number from your electricity invoice"
+                }
+            },
+            "signal": {
+                "title": "Select HDO Signal",
+                "description": "Multiple HDO signals were found for your location. Please select one.",
+                "data": {
+                    "signal": "HDO Signal"
+                },
+                "data_description": {
+                    "signal": "HDO signal code for your tariff switching times"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Failed to connect to ČEZ API. Please check your internet connection.",
+            "invalid_ean": "Invalid EAN number. No HDO data found for this EAN.",
+            "unknown": "Unexpected error occurred."
+        },
+        "abort": {
+            "already_configured": "This EAN is already configured."
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "ČEZ HDO Options",
+                "description": "Configure ČEZ HDO integration options.",
+                "data": {
+                    "signal": "HDO Signal"
+                }
+            }
+        }
+    }
+}

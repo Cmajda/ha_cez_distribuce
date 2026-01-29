@@ -1,0 +1,45 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Nastavení ČEZ HDO",
+                "description": "Zadejte číslo EAN z faktury od ČEZ Distribuce.",
+                "data": {
+                    "ean": "Číslo EAN"
+                },
+                "data_description": {
+                    "ean": "18místné číslo EAN z vaší faktury za elektřinu"
+                }
+            },
+            "signal": {
+                "title": "Výběr HDO signálu",
+                "description": "Pro vaši lokalitu bylo nalezeno více HDO signálů. Vyberte prosím jeden.",
+                "data": {
+                    "signal": "HDO signál"
+                },
+                "data_description": {
+                    "signal": "Kód HDO signálu pro časy přepínání tarifů"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Nepodařilo se připojit k API ČEZ. Zkontrolujte připojení k internetu.",
+            "invalid_ean": "Neplatné číslo EAN. Pro toto EAN nebyla nalezena žádná HDO data.",
+            "unknown": "Došlo k neočekávané chybě."
+        },
+        "abort": {
+            "already_configured": "Toto EAN je již nakonfigurováno."
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Možnosti ČEZ HDO",
+                "description": "Nakonfigurujte možnosti integrace ČEZ HDO.",
+                "data": {
+                    "signal": "HDO signál"
+                }
+            }
+        }
+    }
+}
