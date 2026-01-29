@@ -19,8 +19,9 @@ from . import downloader
 
 _LOGGER = logging.getLogger(__name__)
 
-# Update interval - HDO data changes rarely, 1 hour is reasonable
-UPDATE_INTERVAL = timedelta(hours=1)
+# Update interval - HDO data changes rarely
+# TODO: Change to 1 hour for production, 10 minutes for testing
+UPDATE_INTERVAL = timedelta(minutes=10)
 
 # Cache directory and file - will be set using hass.config.path()
 CACHE_SUBDIR = "www/cez_hdo"
