@@ -34,8 +34,9 @@ class CezHdoBaseEntity:
         self._last_parser_log_time: datetime | None = (
             None  # datetime posledního debug logu výsledku parseru
         )
-        # Nastav výchozí cestu k cache (přizpůsob podle potřeby)
-        self.cache_file = "/config/www/cez_hdo/cez_hdo.json"
+        # Data directory path - will be updated when hass is available
+        # Default path for fallback, actual path set via hass.config.path()
+        self.cache_file = "/config/custom_components/cez_hdo/data/cache.json"
 
         # Provide stable entity registry identifiers and friendly names.
         # - unique_id must be stable
@@ -262,7 +263,7 @@ class CezHdoBaseEntity:
                     "timestamp": datetime.now().isoformat(),
                     "data": filtered_json_data,
                 }
-                # Clean installs may not have /config/www/cez_hdo yet.
+                # Clean installs may not have data directory yet.
                 Path(cache_file).parent.mkdir(parents=True, exist_ok=True)
                 with open(cache_file, "w", encoding="utf-8") as f:
                     json.dump(cache_data, f, ensure_ascii=False, indent=2)

@@ -25,8 +25,8 @@ CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXT
 
 
 def get_cache_dir(hass: HomeAssistant) -> Path:
-    """Get path to cache directory using hass.config.path()."""
-    return Path(hass.config.path("www", "cez_hdo"))
+    """Get path to data directory using hass.config.path()."""
+    return Path(hass.config.path("custom_components", "cez_hdo", "data"))
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -36,7 +36,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     # Initialize domain data storage
     hass.data.setdefault(DOMAIN, {})
 
-    # Ensure cache directory exists (for fresh HA installations without www folder)
+    # Ensure data directory exists
     cache_dir = get_cache_dir(hass)
     await hass.async_add_executor_job(lambda: cache_dir.mkdir(parents=True, exist_ok=True))
 

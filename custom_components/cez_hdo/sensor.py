@@ -13,6 +13,7 @@ from homeassistant.components.sensor import (
 from homeassistant.config_entries import ConfigEntry
 import homeassistant.helpers.config_validation as cv
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -200,6 +201,15 @@ class CezHdoSensor(CoordinatorEntity[CezHdoCoordinator], SensorEntity):
             self._attr_unique_id = f"{ean}_{name.lower()}"
         self._attr_suggested_object_id = meta.get("object_id", f"cez_hdo_{name.lower()}")
         self._attr_name = meta.get("friendly", f"ČEZ HDO {name}")
+        
+        # Device info - group all entities under one device
+        self._attr_device_info = DeviceInfo(
+            identifiers={(DOMAIN, ean)},
+            name=f"ČEZ HDO {ean[-6:]}",
+            manufacturer="Cmajda",
+            model="HDO",
+            configuration_url="https://github.com/Cmajda/ha_cez_distribuce?tab=readme-ov-file#%EF%B8%8F%C4%8Dez-hdo-home-assistant-%EF%B8%8F",
+        )
 
     @property
     def icon(self) -> str:

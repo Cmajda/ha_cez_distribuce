@@ -23,10 +23,10 @@ _LOGGER = logging.getLogger(__name__)
 # TODO: Change to 1 hour for production, 10 minutes for testing
 UPDATE_INTERVAL = timedelta(minutes=10)
 
-# Cache directory and file - will be set using hass.config.path()
-CACHE_SUBDIR = "www/cez_hdo"
-CACHE_FILENAME = "cez_hdo.json"
-PRICES_FILENAME = "cez_hdo_prices.json"
+# Cache directory and file - stored in custom_components/cez_hdo/data/
+CACHE_SUBDIR = "custom_components/cez_hdo/data"
+CACHE_FILENAME = "cache.json"
+PRICES_FILENAME = "prices.json"
 
 
 class CezHdoData:

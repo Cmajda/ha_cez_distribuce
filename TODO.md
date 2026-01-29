@@ -10,11 +10,12 @@
 - [x] **Oprava set_prices služby** - Funguje i pro config entries
 - [x] **Senzor "zbývá"** - Zobrazuje "00:00" místo unknown
 - [x] **Deploy skript** - Nepřidává YAML, používá Config Flow
+- [x] **Device registry** - Seskupit všechny entity pod jedno "zařízení" v HA
+- [x] **Data storage** - Přesunuto z `www/cez_hdo/` do `custom_components/cez_hdo/data/`
 
 ## 🔮 Možné další kroky
 
 - [ ] **Options Flow** - Možnost upravit nastavení po přidání integrace (změna signálu, atd.)
-- [ ] **Device registry** - Seskupit všechny entity pod jedno "zařízení" v HA
 - [ ] **Diagnostika** - Přidat `diagnostics.py` pro debug export
 - [ ] **Rekonfigurace** - Možnost změnit EAN bez smazání integrace
 - [ ] **Unit testy** - Pokrytí kódu testy
