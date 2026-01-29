@@ -16,16 +16,11 @@
 #   HA_IP         - IP address of Home Assistant (e.g., 192.168.1.233)
 #   HA_PASSWORD   - Password for CIFS mount
 #   HA_USERNAME   - Username for CIFS mount (default: current user)
-#   DEPLOY_WWW    - If set to 1, also copy card JS into /config/www/cez_hdo
-#                   Default: 0 (card is served from integration at /cez_hdo/cez-hdo-card.js)
 #
 # Examples:
 #   ./deploy.sh 192.168.1.xxx mypassword
 #   HA_USERNAME=homeassistant ./deploy.sh 192.168.1.xxx secret123
 #   ./deploy.sh clean 192.168.1.xxx mypassword
-
-# Optional behavior
-DEPLOY_WWW="${DEPLOY_WWW:-0}"
 
 # Show help if requested
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
@@ -43,7 +38,6 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  HA_IP         - Home Assistant IP address"
     echo "  HA_PASSWORD   - Password for CIFS mount"
     echo "  HA_USERNAME   - Username for CIFS mount (default: current user)"
-    echo "  DEPLOY_WWW    - Also copy card JS into /config/www/cez_hdo (default: 0)"
     echo ""
     echo "Examples:"
     echo "  $0 192.168.1.233 mypassword"
@@ -93,13 +87,9 @@ MOUNT_POINT="${HA_CONFIG_DIR:-/mnt/ha-config}"
 
 # Target directories
 TARGET_DIR="$MOUNT_POINT/custom_components/cez_hdo"
-WWW_TARGET="$MOUNT_POINT/www/cez_hdo"
 
 # Source directory (this repo)
 SRC_DIR="$PROJECT_DIR/custom_components/cez_hdo"
-
-# WWW source directory (this repo)
-FRONTEND_DIST_SRC="$PROJECT_DIR/custom_components/cez_hdo/frontend/dist"
 
 # Function to setup CIFS mount
 setup_mount() {
@@ -169,7 +159,6 @@ if [ "$CLEAN_MODE" = "clean" ]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
     TARGET_DIR="$MOUNT_POINT/custom_components/cez_hdo"
-    WWW_TARGET="$MOUNT_POINT/www/cez_hdo"
 
     # Colors
     GREEN='\033[0;32m'
@@ -178,7 +167,6 @@ if [ "$CLEAN_MODE" = "clean" ]; then
     NC='\033[0m'
 
     echo "🎯 Target directory: $TARGET_DIR"
-    echo "🌐 WWW directory: $WWW_TARGET"
     echo ""
 
     # Remove component
@@ -188,15 +176,6 @@ if [ "$CLEAN_MODE" = "clean" ]; then
         echo -e "${GREEN}✅ Component removed from $TARGET_DIR${NC}"
     else
         echo -e "${YELLOW}⚠️  Component not found in $TARGET_DIR${NC}"
-    fi
-
-    # Remove frontend from www
-    if [ -d "$WWW_TARGET" ]; then
-        echo -e "${YELLOW}🗑️  Removing www assets...${NC}"
-        rm -rf "$WWW_TARGET"
-        echo -e "${GREEN}✅ WWW assets removed from $WWW_TARGET${NC}"
-    else
-        echo -e "${YELLOW}⚠️  WWW assets not found in $WWW_TARGET${NC}"
     fi
 
     # Clean Python cache
@@ -251,9 +230,7 @@ fi
 
 echo "📁 Project directory: $PROJECT_DIR"
 echo "🎯 Target directory: $TARGET_DIR"
-echo "🌐 WWW directory: $WWW_TARGET"
-echo "🧩 Card URL (preferred): /cez_hdo/cez-hdo-card.js"
-echo "🧩 DEPLOY_WWW: $DEPLOY_WWW"
+echo "🧩 Card URL: /cez_hdo_card/cez-hdo-card.js"
 echo ""
 
 # You can override HA_CONFIG_DIR by setting environment variable:
@@ -333,53 +310,22 @@ else
     echo -e "${YELLOW}ℹ️  Dev frontend build not found, keeping frontend from source tree${NC}"
 fi
 
-# Deploy frontend card into config/www (optional; not needed for /cez_hdo/cez-hdo-card.js)
-if [ "$DEPLOY_WWW" = "1" ]; then
-    WWW_CARD_SRC_DIR=""
-    if [ -d "$PROJECT_DIR/dev/frontend/dist" ] && compgen -G "$PROJECT_DIR/dev/frontend/dist/*.js" > /dev/null; then
-        WWW_CARD_SRC_DIR="$PROJECT_DIR/dev/frontend/dist"
-    elif [ -d "$FRONTEND_DIST_SRC" ] && compgen -G "$FRONTEND_DIST_SRC/*.js" > /dev/null; then
-        WWW_CARD_SRC_DIR="$FRONTEND_DIST_SRC"
-    fi
-
-    if [ -n "$WWW_CARD_SRC_DIR" ]; then
-        mkdir -p "$WWW_TARGET"
-        cp -f "$WWW_CARD_SRC_DIR"/*.js "$WWW_TARGET/"
-        echo -e "${GREEN}✅ Frontend card JS copied to $WWW_TARGET from $WWW_CARD_SRC_DIR${NC}"
-    else
-        echo -e "${YELLOW}⚠️  No frontend JS found to copy into $WWW_TARGET (skipping)${NC}"
-    fi
-else
-    echo -e "${YELLOW}ℹ️  Skipping /config/www/cez_hdo copy (set DEPLOY_WWW=1 to enable)${NC}"
-fi
-
 echo -e "${GREEN}✅ Component files deployed${NC}"
 
-# Step 5: Frontend URL
-echo -e "${BLUE}🌐 Step 5: Frontend URL...${NC}"
-echo -e "${GREEN}✅ Frontend is served by the integration at:${NC}"
-echo -e "${GREEN}   /cez_hdo/cez-hdo-card.js${NC}"
-echo -e "${YELLOW}ℹ️  /local/cez_hdo/cez-hdo-card.js is a fallback (copied to config/www)${NC}"
-
-# Step 6: Verification
+# Step 5: Verification
 echo -e "${BLUE}🔍 Step 6: Verification...${NC}"
 if [ -d "$TARGET_DIR" ] && [ -f "$TARGET_DIR/__init__.py" ]; then
     echo -e "${GREEN}✅ Component installed successfully${NC}"
 
     echo "📂 Files installed:"
     ls -la "$TARGET_DIR" | head -10
-
-    if [ -f "$WWW_TARGET/cez-hdo-card.js" ]; then
-        echo -e "\n🌐 Frontend file:"
-        ls -la "$WWW_TARGET/cez-hdo-card.js"
-    fi
 else
     echo -e "${RED}❌ Installation failed!${NC}"
     exit 1
 fi
 
-# Step 7: Configuration setup
-echo -e "${BLUE}⚙️ Step 7: Checking configuration...${NC}"
+# Step 6: Configuration setup
+echo -e "${BLUE}⚙️ Step 6: Checking configuration...${NC}"
 CONFIG_FILE="$MOUNT_POINT/configuration.yaml"
 
 if [ -f "$CONFIG_FILE" ]; then

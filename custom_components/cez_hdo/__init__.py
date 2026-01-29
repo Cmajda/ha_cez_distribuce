@@ -64,14 +64,19 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
 
+    # Ensure cache directory exists (for fresh HA installations without www folder)
+    await hass.async_add_executor_job(
+        lambda: os.makedirs(PRICES_STORAGE_DIR, exist_ok=True)
+    )
+
     # Load prices from persistent storage at startup
     prices = await hass.async_add_executor_job(_load_prices, hass)
     hass.data[DOMAIN] = {
         "low_tariff_price": prices.get("low_tariff_price", 0.0),
         "high_tariff_price": prices.get("high_tariff_price", 0.0),
     }
-    _LOGGER.info(
-        "💰 ČEZ HDO ceny načteny: NT=%.2f Kč/kWh, VT=%.2f Kč/kWh",
+    _LOGGER.debug(
+        "CEZ HDO: Prices loaded from storage: NT=%.2f, VT=%.2f",
         hass.data[DOMAIN]["low_tariff_price"],
         hass.data[DOMAIN]["high_tariff_price"],
     )
@@ -81,7 +86,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         """Service to reload frontend card."""
         cards = CezHdoCardRegistration(hass)
         await cards.async_register()
-        _LOGGER.info("🔄 ČEZ HDO frontend card reloaded")
+        _LOGGER.debug("CEZ HDO: Frontend card reloaded")
 
     # Register service to list available signals
     async def list_signals(call):
@@ -131,15 +136,15 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                 # Log results - simplified
                 signal_names = list(signal_groups.keys())
-                _LOGGER.warning(
-                    f"📡 Nalezené signály pro EAN {ean}: {', '.join(signal_names)}"
+                _LOGGER.debug(
+                    "CEZ HDO: Found signals: %s", ", ".join(signal_names)
                 )
 
             else:
-                _LOGGER.error(f"Failed to fetch signals: HTTP {response.status_code}")
+                _LOGGER.error("CEZ HDO: Failed to fetch signals, HTTP status: %s", response.status_code)
 
         except Exception as e:
-            _LOGGER.error(f"Error fetching signals for EAN {ean}: {e}")
+            _LOGGER.error("CEZ HDO: Error fetching signals: %s", e)
 
     hass.services.async_register(DOMAIN, "reload_frontend_card", reload_frontend_card)
     hass.services.async_register(
@@ -168,8 +173,8 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         # Save prices to persistent storage
         await hass.async_add_executor_job(_save_prices, hass, low_price, high_price)
 
-        _LOGGER.info(
-            "💰 ČEZ HDO ceny nastaveny: NT=%.2f Kč/kWh, VT=%.2f Kč/kWh",
+        _LOGGER.debug(
+            "CEZ HDO: Prices set: NT=%.2f, VT=%.2f",
             low_price,
             high_price,
         )
