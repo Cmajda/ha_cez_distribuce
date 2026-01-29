@@ -1,7 +1,9 @@
 """Platform for sensor integration."""
 from __future__ import annotations
+
 import logging
 from typing import Any
+
 import voluptuous as vol
 
 from homeassistant.components.sensor import (
@@ -12,8 +14,10 @@ import homeassistant.helpers.config_validation as cv
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .base_entity import CezHdoBaseEntity
+from . import DOMAIN, DATA_COORDINATOR
+from .coordinator import CezHdoCoordinator, CezHdoData
 from . import downloader
 
 _LOGGER = logging.getLogger(__name__)
@@ -28,29 +32,45 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-
-def setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    """Set up the CEZ HDO sensor platform."""
-    ean = config[CONF_EAN]
-    signal = config.get(CONF_SIGNAL)
-
-    entities = [
-        LowTariffStart(ean, signal),
-        LowTariffEnd(ean, signal),
-        LowTariffDuration(ean, signal),
-        HighTariffStart(ean, signal),
-        HighTariffEnd(ean, signal),
-        HighTariffDuration(ean, signal),
-        CurrentPrice(ean, signal),
-        HdoSchedule(ean, signal),
-        CezHdoRawData(ean, signal),
-    ]
-    add_entities(entities, False)
+# Entity metadata for stable IDs and friendly names
+ENTITY_META = {
+    "LowTariffStart": {
+        "object_id": "cez_hdo_lowtariffstart",
+        "friendly": "ČEZ HDO nízký tarif začátek",
+    },
+    "LowTariffEnd": {
+        "object_id": "cez_hdo_lowtariffend",
+        "friendly": "ČEZ HDO nízký tarif konec",
+    },
+    "LowTariffDuration": {
+        "object_id": "cez_hdo_lowtariffduration",
+        "friendly": "ČEZ HDO nízký tarif zbývá",
+    },
+    "HighTariffStart": {
+        "object_id": "cez_hdo_hightariffstart",
+        "friendly": "ČEZ HDO vysoký tarif začátek",
+    },
+    "HighTariffEnd": {
+        "object_id": "cez_hdo_hightariffend",
+        "friendly": "ČEZ HDO vysoký tarif konec",
+    },
+    "HighTariffDuration": {
+        "object_id": "cez_hdo_hightariffduration",
+        "friendly": "ČEZ HDO vysoký tarif zbývá",
+    },
+    "CurrentPrice": {
+        "object_id": "cez_hdo_currentprice",
+        "friendly": "ČEZ HDO aktuální cena",
+    },
+    "HdoSchedule": {
+        "object_id": "cez_hdo_schedule",
+        "friendly": "ČEZ HDO rozvrh",
+    },
+    "RawData": {
+        "object_id": "cez_hdo_raw_data",
+        "friendly": "ČEZ HDO surová data",
+    },
+}
 
 
 async def async_setup_platform(
@@ -59,370 +79,279 @@ async def async_setup_platform(
     async_add_entities: AddEntitiesCallback,
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
-    """Set up the CEZ HDO sensor platform (async).
-
-    This integration is configured via YAML. When EAN changes, old entries in the
-    entity registry can keep occupying the previous entity_ids and HA will create
-    new ones with suffixes like "_2". We proactively remove stale entries.
-    """
-
+    """Set up the CEZ HDO sensor platform (async)."""
     ean = config[CONF_EAN]
     signal = config.get(CONF_SIGNAL)
 
+    # Clean up old entities if EAN changed
     from .registry_cleanup import async_cleanup_entity_registry_if_ean_changed
-
     await async_cleanup_entity_registry_if_ean_changed(hass, ean)
 
+    # Create or get coordinator
+    coordinator = await _async_get_coordinator(hass, ean, signal)
+
+    # Create entities
     entities = [
-        LowTariffStart(ean, signal),
-        LowTariffEnd(ean, signal),
-        LowTariffDuration(ean, signal),
-        HighTariffStart(ean, signal),
-        HighTariffEnd(ean, signal),
-        HighTariffDuration(ean, signal),
-        CurrentPrice(ean, signal),
-        HdoSchedule(ean, signal),
-        CezHdoRawData(ean, signal),
+        LowTariffStart(coordinator, ean),
+        LowTariffEnd(coordinator, ean),
+        LowTariffDuration(coordinator, ean),
+        HighTariffStart(coordinator, ean),
+        HighTariffEnd(coordinator, ean),
+        HighTariffDuration(coordinator, ean),
+        CurrentPrice(coordinator, ean),
+        HdoSchedule(coordinator, ean),
+        CezHdoRawData(coordinator, ean),
     ]
     async_add_entities(entities, False)
 
 
-class CezHdoSensor(CezHdoBaseEntity, SensorEntity):
-    """Base class for CEZ HDO sensors."""
+def setup_platform(
+    hass: HomeAssistant,
+    config: ConfigType,
+    add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None,
+) -> None:
+    """Set up the CEZ HDO sensor platform (sync - deprecated)."""
+    _LOGGER.warning(
+        "Synchronous setup_platform is deprecated. "
+        "Use async_setup_platform instead."
+    )
+
+
+async def _async_get_coordinator(
+    hass: HomeAssistant, ean: str, signal: str | None
+) -> CezHdoCoordinator:
+    """Get or create coordinator instance."""
+    # Check if coordinator already exists
+    if DOMAIN in hass.data and DATA_COORDINATOR in hass.data[DOMAIN]:
+        coordinator = hass.data[DOMAIN][DATA_COORDINATOR]
+        _LOGGER.debug("Using existing coordinator")
+        return coordinator
+
+    # Create new coordinator
+    coordinator = CezHdoCoordinator(hass, ean, signal)
+    
+    # Initialize - this loads cache and triggers first refresh
+    # Use async_initialize() for YAML platforms (not async_config_entry_first_refresh)
+    await coordinator.async_initialize()
+    
+    # Store in hass.data
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][DATA_COORDINATOR] = coordinator
+    
+    _LOGGER.debug("Created new coordinator for EAN: %s", ean)
+    return coordinator
+
+
+class CezHdoSensor(CoordinatorEntity[CezHdoCoordinator], SensorEntity):
+    """Base class for CEZ HDO sensors using CoordinatorEntity."""
+
+    def __init__(
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        name: str,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self.ean = ean
+        self._name = name
+        
+        # Set entity metadata
+        meta = ENTITY_META.get(name, {})
+        self._attr_unique_id = f"{ean}_{name.lower()}"
+        self._attr_suggested_object_id = meta.get("object_id", f"cez_hdo_{name.lower()}")
+        self._attr_name = meta.get("friendly", f"ČEZ HDO {name}")
 
     @property
     def icon(self) -> str:
         """Return the icon of the sensor."""
         return "mdi:home-clock"
 
-    def _get_signal(self, hdo_json: dict | None):
-        """Vrátí signál pro dnešní den z již načtených dat (bez file I/O)."""
-        if self.signal:
-            return self.signal
-
-        if not hdo_json:
-            return None
-
-        data_level = hdo_json.get("data")
-        if isinstance(data_level, dict) and "data" in data_level:
-            data_level = data_level.get("data")
-        signals: list[dict[str, Any]] = []
-        if isinstance(data_level, dict):
-            signals = data_level.get("signals", []) or []
-
-        from datetime import datetime
-
-        today = datetime.now().strftime("%d.%m.%Y")
-        for s in signals:
-            if downloader.normalize_datum(s.get("datum")) == today and s.get("signal"):
-                return s["signal"]
-
-        if signals and signals[0].get("signal"):
-            return signals[0]["signal"]
-        return None
+    @property
+    def data(self) -> CezHdoData:
+        """Get coordinator data."""
+        return self.coordinator.data
 
 
 class LowTariffStart(CezHdoSensor):
     """Sensor for low tariff start time."""
 
-    def __init__(self, ean: str, signal: str | None = None) -> None:
-        super().__init__(ean, "LowTariffStart", signal)
+    def __init__(self, coordinator: CezHdoCoordinator, ean: str) -> None:
+        super().__init__(coordinator, ean, "LowTariffStart")
 
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        try:
-            hdo_data = self._get_hdo_data()
-            value = hdo_data[1]  # low_tariff_start
-            if value is None:
-                return None
-            return value.strftime("%H:%M")
-        except Exception as err:
-            _LOGGER.error(
-                "CEZ HDO: %s LowTariffStart failed: %s",
-                getattr(self, "entity_id", self.name),
-                err,
-            )
-            return None
+        if self.data.low_tariff_start:
+            return self.data.low_tariff_start.strftime("%H:%M")
+        return None
 
 
 class LowTariffEnd(CezHdoSensor):
     """Sensor for low tariff end time."""
 
-    def __init__(self, ean: str, signal: str | None = None) -> None:
-        super().__init__(ean, "LowTariffEnd", signal)
+    def __init__(self, coordinator: CezHdoCoordinator, ean: str) -> None:
+        super().__init__(coordinator, ean, "LowTariffEnd")
 
     @property
     def icon(self) -> str:
-        """Return the icon of the sensor."""
         return "mdi:home-clock-outline"
 
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        try:
-            hdo_data = self._get_hdo_data()
-            value = hdo_data[2]  # low_tariff_end
-            if value is None:
-                return None
-            return value.strftime("%H:%M")
-        except Exception as err:
-            _LOGGER.error(
-                "CEZ HDO: %s LowTariffEnd failed: %s",
-                getattr(self, "entity_id", self.name),
-                err,
-            )
-            return None
+        if self.data.low_tariff_end:
+            return self.data.low_tariff_end.strftime("%H:%M")
+        return None
 
 
 class LowTariffDuration(CezHdoSensor):
     """Sensor for low tariff duration."""
 
-    def __init__(self, ean: str, signal: str | None = None) -> None:
-        super().__init__(ean, "LowTariffDuration", signal)
+    def __init__(self, coordinator: CezHdoCoordinator, ean: str) -> None:
+        super().__init__(coordinator, ean, "LowTariffDuration")
 
     @property
     def icon(self) -> str:
-        """Return the icon of the sensor."""
         return "mdi:timer"
 
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        try:
-            hdo_data = self._get_hdo_data()
-            duration = hdo_data[3]  # low_tariff_duration
-            if duration is None:
-                return None
-            return downloader.format_duration(duration)
-        except Exception as err:
-            _LOGGER.error(
-                "CEZ HDO: %s LowTariffDuration failed: %s",
-                getattr(self, "entity_id", self.name),
-                err,
-            )
-            return None
+        if self.data.low_tariff_duration:
+            return downloader.format_duration(self.data.low_tariff_duration)
+        return None
 
 
 class HighTariffStart(CezHdoSensor):
     """Sensor for high tariff start time."""
 
-    def __init__(self, ean: str, signal: str | None = None) -> None:
-        super().__init__(ean, "HighTariffStart", signal)
+    def __init__(self, coordinator: CezHdoCoordinator, ean: str) -> None:
+        super().__init__(coordinator, ean, "HighTariffStart")
 
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        try:
-            hdo_data = self._get_hdo_data()
-            value = hdo_data[5]  # high_tariff_start
-            if value is None:
-                return None
-            return value.strftime("%H:%M")
-        except Exception as err:
-            _LOGGER.error(
-                "CEZ HDO: %s HighTariffStart failed: %s",
-                getattr(self, "entity_id", self.name),
-                err,
-            )
-            return None
+        if self.data.high_tariff_start:
+            return self.data.high_tariff_start.strftime("%H:%M")
+        return None
 
 
 class HighTariffEnd(CezHdoSensor):
     """Sensor for high tariff end time."""
 
-    def __init__(self, ean: str, signal: str | None = None) -> None:
-        super().__init__(ean, "HighTariffEnd", signal)
+    def __init__(self, coordinator: CezHdoCoordinator, ean: str) -> None:
+        super().__init__(coordinator, ean, "HighTariffEnd")
 
     @property
     def icon(self) -> str:
-        """Return the icon of the sensor."""
         return "mdi:home-clock-outline"
 
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        try:
-            hdo_data = self._get_hdo_data()
-            value = hdo_data[6]  # high_tariff_end
-            if value is None:
-                return None
-            return value.strftime("%H:%M")
-        except Exception as err:
-            _LOGGER.error(
-                "CEZ HDO: %s HighTariffEnd failed: %s",
-                getattr(self, "entity_id", self.name),
-                err,
-            )
-            return None
+        if self.data.high_tariff_end:
+            return self.data.high_tariff_end.strftime("%H:%M")
+        return None
 
 
 class HighTariffDuration(CezHdoSensor):
     """Sensor for high tariff duration."""
 
-    def __init__(self, ean: str, signal: str | None = None) -> None:
-        super().__init__(ean, "HighTariffDuration", signal)
+    def __init__(self, coordinator: CezHdoCoordinator, ean: str) -> None:
+        super().__init__(coordinator, ean, "HighTariffDuration")
 
     @property
     def icon(self) -> str:
-        """Return the icon of the sensor."""
         return "mdi:timer"
 
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        try:
-            hdo_data = self._get_hdo_data()
-            duration = hdo_data[7]  # high_tariff_duration
-            if duration is None:
-                return None
-            return downloader.format_duration(duration)
-        except Exception as err:
-            _LOGGER.error(
-                "CEZ HDO: %s HighTariffDuration failed: %s",
-                getattr(self, "entity_id", self.name),
-                err,
-            )
-            return None
+        if self.data.high_tariff_duration:
+            return downloader.format_duration(self.data.high_tariff_duration)
+        return None
 
 
 class CurrentPrice(CezHdoSensor):
     """Sensor for current electricity price based on active tariff."""
 
-    _attr_should_poll = True
-
-    def __init__(self, ean: str, signal: str | None = None) -> None:
-        super().__init__(ean, "CurrentPrice", signal)
-
-    @property
-    def _low_tariff_price(self) -> float:
-        """Get low tariff price from hass.data."""
-        if self.hass and "cez_hdo" in self.hass.data:
-            return self.hass.data["cez_hdo"].get("low_tariff_price", 0.0)
-        return 0.0
-
-    @property
-    def _high_tariff_price(self) -> float:
-        """Get high tariff price from hass.data."""
-        if self.hass and "cez_hdo" in self.hass.data:
-            return self.hass.data["cez_hdo"].get("high_tariff_price", 0.0)
-        return 0.0
+    def __init__(self, coordinator: CezHdoCoordinator, ean: str) -> None:
+        super().__init__(coordinator, ean, "CurrentPrice")
 
     @property
     def icon(self) -> str:
-        """Return the icon of the sensor."""
         return "mdi:currency-usd"
 
     @property
     def native_unit_of_measurement(self) -> str:
-        """Return the unit of measurement."""
         return "Kč/kWh"
 
     @property
     def device_class(self) -> str:
-        """Return the device class."""
         return "monetary"
 
     @property
     def native_value(self) -> float | None:
         """Return the current price based on active tariff."""
-        try:
-            hdo_data = self._get_hdo_data()
-            is_low_tariff = hdo_data[0]  # low_tariff_active
-            is_high_tariff = hdo_data[4]  # high_tariff_active
-
-            if is_low_tariff:
-                return self._low_tariff_price
-            elif is_high_tariff:
-                return self._high_tariff_price
-            else:
-                # Pokud není aktivní ani jeden tarif, vrátíme vysoký tarif jako výchozí
-                return self._high_tariff_price
-        except Exception as err:
-            _LOGGER.error(
-                "CEZ HDO: %s CurrentPrice failed: %s",
-                getattr(self, "entity_id", self.name),
-                err,
-            )
-            return None
+        return self.coordinator.current_price
 
     @property
     def extra_state_attributes(self) -> dict:
         """Return additional attributes."""
-        hdo_data = self._get_hdo_data()
-        is_low_tariff = hdo_data[0] if hdo_data else False
         return {
-            "low_tariff_price": self._low_tariff_price,
-            "high_tariff_price": self._high_tariff_price,
-            "active_tariff": "low" if is_low_tariff else "high",
+            "low_tariff_price": self.data.low_tariff_price,
+            "high_tariff_price": self.data.high_tariff_price,
+            "active_tariff": "low" if self.data.low_tariff_active else "high",
         }
 
 
 class CezHdoRawData(CezHdoSensor):
     """Sensor for raw HDO JSON data and timestamp."""
 
-    def __init__(self, ean: str, signal: str | None = None) -> None:
-        super().__init__(ean, "RawData", signal)
-        # Keep a stable unique_id (historical behavior), but let base_entity
-        # provide friendly name + suggested object_id.
+    def __init__(self, coordinator: CezHdoCoordinator, ean: str) -> None:
+        super().__init__(coordinator, ean, "RawData")
         self._attr_unique_id = f"{ean}_raw_data"
 
     @property
     def native_value(self) -> str | None:
         """Return the timestamp from cache in format 'DD.MM.YYYY HH:mm'."""
-        # Ensure data is loaded / update scheduled
-        _ = self._get_hdo_data()
-        if self._last_update_time:
-            return self._last_update_time.strftime("%d.%m.%Y %H:%M")
+        if self.data.last_update:
+            return self.data.last_update.strftime("%d.%m.%Y %H:%M")
         return None
 
     @property
     def extra_state_attributes(self) -> dict:
         """Return the full JSON data as attribute."""
-        _ = self._get_hdo_data()
-        if self._response_data is None:
+        if self.data.raw_data is None:
             return {}
-        ts = self._last_update_time.isoformat() if self._last_update_time else None
-        # Structure matches cache file format: {timestamp, data}
-        return {"raw_json": {"timestamp": ts, "data": self._response_data}}
+        ts = self.data.last_update.isoformat() if self.data.last_update else None
+        return {"raw_json": {"timestamp": ts, "data": self.data.raw_data}}
 
 
 class HdoSchedule(CezHdoSensor):
     """Sensor providing HDO schedule data for graphs (ApexCharts compatible)."""
 
-    def __init__(self, ean: str, signal: str | None = None) -> None:
-        super().__init__(ean, "HdoSchedule", signal)
+    def __init__(self, coordinator: CezHdoCoordinator, ean: str) -> None:
+        super().__init__(coordinator, ean, "HdoSchedule")
 
     @property
     def icon(self) -> str:
-        """Return the icon of the sensor."""
         return "mdi:chart-timeline-variant"
 
     @property
     def native_value(self) -> str | None:
         """Return today's date as state value."""
         from datetime import datetime
-
         return datetime.now().strftime("%d.%m.%Y")
 
     @property
     def extra_state_attributes(self) -> dict:
         """Return schedule data suitable for ApexCharts timeline graph."""
-        _ = self._get_hdo_data()
-        if self._response_data is None:
-            return {"schedule": [], "days": 0}
-
-        hdo_json = self._response_data
-        signal = self._get_signal(hdo_json)
-        schedule = downloader.generate_schedule_for_graph(
-            hdo_json, signal, days_ahead=7
-        )
-
         return {
-            "schedule": schedule,
+            "schedule": self.data.schedule,
             "days": 7,
-            "signal": signal,
-            "last_update": self._last_update_time.isoformat()
-            if self._last_update_time
-            else None,
+            "signal": self.coordinator.signal,
+            "last_update": self.data.last_update.isoformat() if self.data.last_update else None,
         }

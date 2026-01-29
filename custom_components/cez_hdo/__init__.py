@@ -2,8 +2,7 @@
 from __future__ import annotations
 
 import logging
-import json
-import os
+from pathlib import Path
 
 import voluptuous as vol
 
@@ -17,69 +16,29 @@ from .frontend import CezHdoCardRegistration
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "cez_hdo"
-PRICES_STORAGE_DIR = "/config/www/cez_hdo"
-PRICES_STORAGE_FILE = "cez_hdo_prices.json"
+
+# Keys for hass.data[DOMAIN]
+DATA_COORDINATOR = "coordinator"
 
 # Configuration schema - integrace se konfiguruje pouze přes platformy
 CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXTRA)
 
 
-def _get_prices_file_path(hass: HomeAssistant) -> str:
-    """Get path to prices storage file."""
-    return os.path.join(PRICES_STORAGE_DIR, PRICES_STORAGE_FILE)
-
-
-def _load_prices(hass: HomeAssistant) -> dict:
-    """Load prices from persistent storage."""
-    file_path = _get_prices_file_path(hass)
-    try:
-        if os.path.exists(file_path):
-            with open(file_path, "r") as f:
-                data = json.load(f)
-                _LOGGER.debug("Loaded prices from storage: %s", data)
-                return data
-    except Exception as err:
-        _LOGGER.warning("Failed to load prices from storage: %s", err)
-    return {"low_tariff_price": 0.0, "high_tariff_price": 0.0}
-
-
-def _save_prices(hass: HomeAssistant, low_price: float, high_price: float) -> None:
-    """Save prices to persistent storage."""
-    file_path = _get_prices_file_path(hass)
-    try:
-        # Ensure directory exists
-        os.makedirs(PRICES_STORAGE_DIR, exist_ok=True)
-        with open(file_path, "w") as f:
-            json.dump(
-                {"low_tariff_price": low_price, "high_tariff_price": high_price}, f
-            )
-        _LOGGER.debug(
-            "Saved prices to storage: NT=%.2f, VT=%.2f", low_price, high_price
-        )
-    except Exception as err:
-        _LOGGER.warning("Failed to save prices to storage: %s", err)
+def get_cache_dir(hass: HomeAssistant) -> Path:
+    """Get path to cache directory using hass.config.path()."""
+    return Path(hass.config.path("www", "cez_hdo"))
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
 
-    # Ensure cache directory exists (for fresh HA installations without www folder)
-    await hass.async_add_executor_job(
-        lambda: os.makedirs(PRICES_STORAGE_DIR, exist_ok=True)
-    )
+    # Initialize domain data storage
+    hass.data.setdefault(DOMAIN, {})
 
-    # Load prices from persistent storage at startup
-    prices = await hass.async_add_executor_job(_load_prices, hass)
-    hass.data[DOMAIN] = {
-        "low_tariff_price": prices.get("low_tariff_price", 0.0),
-        "high_tariff_price": prices.get("high_tariff_price", 0.0),
-    }
-    _LOGGER.debug(
-        "CEZ HDO: Prices loaded from storage: NT=%.2f, VT=%.2f",
-        hass.data[DOMAIN]["low_tariff_price"],
-        hass.data[DOMAIN]["high_tariff_price"],
-    )
+    # Ensure cache directory exists (for fresh HA installations without www folder)
+    cache_dir = get_cache_dir(hass)
+    await hass.async_add_executor_job(lambda: cache_dir.mkdir(parents=True, exist_ok=True))
 
     # Register service to reload frontend card
     async def reload_frontend_card(call):
@@ -164,46 +123,26 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         low_price = call.data.get("low_tariff_price", 0.0)
         high_price = call.data.get("high_tariff_price", 0.0)
 
-        # Store prices in hass.data for sensors to access
-        if DOMAIN not in hass.data:
-            hass.data[DOMAIN] = {}
-        hass.data[DOMAIN]["low_tariff_price"] = low_price
-        hass.data[DOMAIN]["high_tariff_price"] = high_price
-
-        # Save prices to persistent storage
-        await hass.async_add_executor_job(_save_prices, hass, low_price, high_price)
+        # If coordinator exists, use it
+        coordinator = hass.data[DOMAIN].get(DATA_COORDINATOR)
+        if coordinator:
+            await coordinator.async_set_prices(low_price, high_price)
+        else:
+            # Fallback for when coordinator not yet initialized
+            # Store in hass.data for sensors to access
+            hass.data[DOMAIN]["low_tariff_price"] = low_price
+            hass.data[DOMAIN]["high_tariff_price"] = high_price
+            _LOGGER.debug(
+                "CEZ HDO: Prices stored (no coordinator): NT=%.2f, VT=%.2f",
+                low_price,
+                high_price,
+            )
 
         _LOGGER.debug(
             "CEZ HDO: Prices set: NT=%.2f, VT=%.2f",
             low_price,
             high_price,
         )
-        _LOGGER.debug("hass.data[%s] = %s", DOMAIN, hass.data.get(DOMAIN))
-
-        # Force update all CurrentPrice sensors by searching entity registry
-        from homeassistant.helpers import entity_registry as er
-
-        registry = er.async_get(hass)
-
-        for entity in registry.entities.values():
-            # Match by platform and entity_id pattern
-            if entity.platform == DOMAIN and (
-                "currentprice" in entity.entity_id.lower()
-                or "aktualni_cena" in entity.entity_id.lower()
-                or "current_price" in entity.entity_id.lower()
-            ):
-                _LOGGER.debug("Triggering update for entity: %s", entity.entity_id)
-                try:
-                    await hass.services.async_call(
-                        "homeassistant",
-                        "update_entity",
-                        {"entity_id": entity.entity_id},
-                        blocking=False,
-                    )
-                except Exception as err:
-                    _LOGGER.warning(
-                        "Failed to update entity %s: %s", entity.entity_id, err
-                    )
 
     hass.services.async_register(
         DOMAIN,
