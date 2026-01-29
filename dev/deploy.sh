@@ -1,86 +1,69 @@
 #!/bin/bash
 
 # ČEZ HDO Development Deploy Script
-# Builds frontend and deploys to local dev Home Assistant
-#
-# Usage:
-#   ./deploy.sh                                    # Deploy to default /mnt/ha-config
-#   ./deploy.sh clean                              # Remove integration from HA
-#   ./deploy.sh 192.168.1.233 password           # Deploy to specific IP with password
-#   ./deploy.sh clean 192.168.1.233 password     # Clean with specific IP and password
-#   HA_CONFIG_DIR=/path/to/ha ./deploy.sh         # Custom HA config path
-#
-# Environment variables:
-#   HA_CONFIG_DIR - Path to Home Assistant configuration directory
-#                   Default: /mnt/ha-config
-#   HA_IP         - IP address of Home Assistant (e.g., 192.168.1.233)
-#   HA_PASSWORD   - Password for CIFS mount
-#   HA_USERNAME   - Username for CIFS mount (default: current user)
-#
-# Examples:
-#   ./deploy.sh 192.168.1.xxx mypassword
-#   HA_USERNAME=homeassistant ./deploy.sh 192.168.1.xxx secret123
-#   ./deploy.sh clean 192.168.1.xxx mypassword
 
 # Show help if requested
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "ČEZ HDO Development Deploy Script"
-    echo "================================="
-    echo ""
+    echo "Builds frontend and deploys to local dev Home Assistant"
+    echo "#----------------------------------------------------------#"
     echo "Usage:"
-    echo "  $0                                    # Deploy to default /mnt/ha-config"
-    echo "  $0 clean                              # Remove integration from HA"
-    echo "  $0 IP PASSWORD                        # Deploy to specific IP with password"
-    echo "  $0 clean IP PASSWORD                  # Clean with specific IP and password"
-    echo ""
-    echo "Environment variables:"
-    echo "  HA_CONFIG_DIR - Custom mount point (default: /mnt/ha-config)"
-    echo "  HA_IP         - Home Assistant IP address"
+    echo "  ./deploy.sh [EAN] [IP] [PASSWORD]              -- Deploy with parameters"
+    echo "  ./deploy.sh                                    -- Deploy using environment variables"
+    echo "  ./deploy.sh clean [IP] [PASSWORD]              -- Remove integration from HA"
+    echo "#----------------------------------------------------------#"
+    echo "Environment variables (used if parameters not provided):"
+    echo "  EAN           - EAN number (18 digits)"
+    echo "  HA_IP         - IP address of Home Assistant"
     echo "  HA_PASSWORD   - Password for CIFS mount"
     echo "  HA_USERNAME   - Username for CIFS mount (default: current user)"
-    echo ""
+    echo "  HA_CONFIG_DIR - Path to Home Assistant configuration directory"
+    echo "                  Default: /mnt/ha-config"
+    echo "#----------------------------------------------------------#"
     echo "Examples:"
-    echo "  $0 192.168.1.233 mypassword"
-    echo "  HA_USERNAME=homeassistant $0 192.168.1.10 secret123"
-    echo "  $0 clean 192.168.1.233 mypassword"
-    echo ""
+    echo "  EAN=123458786461864646 HA_IP=192.168.1.1 HA_PASSWORD=pass ./deploy.sh"
+    echo "  ./deploy.sh 123458786461864646 192.168.1.1 mypassword"
+    echo "  ./deploy.sh clean 192.168.1.1 mypassword"
     exit 0
 fi
 
-# ČEZ HDO Development Deploy Script
-# Builds frontend and deploys to local dev Home Assistant
-#
-# Usage:
-#   ./deploy.sh                                    # Deploy to default /mnt/ha-config
-#   ./deploy.sh clean                              # Remove integration from HA
-#   ./deploy.sh 192.168.1.xxx password           # Deploy to specific IP with password
-#   HA_CONFIG_DIR=/path/to/ha ./deploy.sh         # Custom HA config path
-#
-# Environment variables:
-#   HA_CONFIG_DIR - Path to Home Assistant configuration directory
-#                   Default: /mnt/ha-config
-#   HA_IP         - IP address of Home Assistant (e.g., 192.168.1.xxx)
-#   HA_PASSWORD   - Password for CIFS mount
-#   HA_USERNAME   - Username for CIFS mount (default: current user)
-
 set -e
-
-# Parse command line arguments
-HA_IP="${1:-${HA_IP}}"
-HA_PASSWORD="${2:-${HA_PASSWORD}}"
-CLEAN_MODE=""
-
-# Check if first argument is "clean"
-if [ "$1" = "clean" ]; then
-    CLEAN_MODE="clean"
-    HA_IP="${2:-${HA_IP}}"
-    HA_PASSWORD="${3:-${HA_PASSWORD}}"
-fi
 
 # Configuration
 # Auto-detect project directory (parent of dev folder)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Parse command line arguments
+CLEAN_MODE=""
+
+# Check if first argument is "clean"
+if [ "$1" = "clean" ]; then
+    CLEAN_MODE="clean"
+    # For clean mode: clean [IP] [PASSWORD]
+    HA_IP="${2:-$HA_IP}"
+    HA_PASSWORD="${3:-$HA_PASSWORD}"
+else
+    # For deploy mode: [EAN] [IP] [PASSWORD]
+    # Parameters override environment variables
+    if [ -n "$1" ]; then
+        EAN="$1"
+    fi
+    if [ -n "$2" ]; then
+        HA_IP="$2"
+    fi
+    if [ -n "$3" ]; then
+        HA_PASSWORD="$3"
+    fi
+fi
+
+# Validate required variables for deploy mode
+if [ "$CLEAN_MODE" != "clean" ] && [ -z "$EAN" ]; then
+    echo "❌ EAN not provided. Set EAN environment variable or pass as first argument."
+    echo "   Example: EAN=123458786461864646 ./deploy.sh"
+    echo "   Example: ./deploy.sh 123458786461864646"
+    exit 1
+fi
 
 # Default mount point
 MOUNT_POINT="${HA_CONFIG_DIR:-/mnt/ha-config}"
@@ -256,8 +239,11 @@ fi
 
 # Step 2: Build frontend
 echo -e "${BLUE}📦 Step 2: Building frontend...${NC}"
-if [ -d "$PROJECT_DIR/dev/frontend" ]; then
-    cd "$PROJECT_DIR/dev/frontend"
+FRONTEND_DEV_DIR="$PROJECT_DIR/dev/frontend"
+FRONTEND_COMPONENT_DIR="$SRC_DIR/frontend/dist"
+
+if [ -d "$FRONTEND_DEV_DIR" ]; then
+    cd "$FRONTEND_DEV_DIR"
 
     if command -v npm >/dev/null 2>&1; then
         # Install dependencies if needed
@@ -266,10 +252,17 @@ if [ -d "$PROJECT_DIR/dev/frontend" ]; then
             npm install
         fi
 
-        # Build frontend
-        echo "Building production bundle..."
-        npm run build
+        # Build frontend (production = no console.log)
+        echo "Building production bundle (console.log removed)..."
+        npm run build:prod
         echo -e "${GREEN}✅ Frontend build completed${NC}"
+
+        # Copy built files to component source directory
+        if [ -f "$FRONTEND_DEV_DIR/dist/cez-hdo-card.js" ]; then
+            mkdir -p "$FRONTEND_COMPONENT_DIR"
+            cp "$FRONTEND_DEV_DIR/dist"/* "$FRONTEND_COMPONENT_DIR/"
+            echo -e "${GREEN}✅ Frontend copied to component source: $FRONTEND_COMPONENT_DIR${NC}"
+        fi
     else
         echo -e "${YELLOW}⚠️  npm not found, skipping frontend build${NC}"
     fi
@@ -299,18 +292,7 @@ mkdir -p "$TARGET_DIR"
 # Copy full integration from custom_components/cez_hdo
 cp -a "$SRC_DIR/." "$TARGET_DIR/"
 
-echo -e "${GREEN}✅ Component source copied from $SRC_DIR${NC}"
-
-# Copy built frontend files (dev build) into integration tree
-if [ -f "$PROJECT_DIR/dev/frontend/dist/cez-hdo-card.js" ]; then
-    mkdir -p "$TARGET_DIR/frontend/dist"
-    cp "$PROJECT_DIR/dev/frontend/dist"/* "$TARGET_DIR/frontend/dist/"
-    echo -e "${GREEN}✅ Frontend files copied from dev build${NC}"
-else
-    echo -e "${YELLOW}ℹ️  Dev frontend build not found, keeping frontend from source tree${NC}"
-fi
-
-echo -e "${GREEN}✅ Component files deployed${NC}"
+echo -e "${GREEN}✅ Component deployed (includes built frontend)${NC}"
 
 # Step 5: Verification
 echo -e "${BLUE}🔍 Step 6: Verification...${NC}"
@@ -340,21 +322,22 @@ if [ -f "$CONFIG_FILE" ]; then
         echo -e "${GREEN}✅ Configuration backup created${NC}"
 
         # Add configuration
-        cat >> "$CONFIG_FILE" << 'EOF'
+        if [ -n "$EAN" ]; then
+            cat >> "$CONFIG_FILE" << EOF
 
 # ČEZ HDO integrace
 sensor:
   - platform: cez_hdo
-    code: "405"  # Váš distribuční kód
-    region: stred # Váš region
-    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
+    ean: "$EAN"
 
 binary_sensor:
   - platform: cez_hdo
-    code: "405"  # Váš distribuční kód
-    region: stred # Váš region
-    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
+    ean: "$EAN"
 EOF
+        else
+            echo -e "${RED}❌ EAN not set. Set EAN environment variable or add to variables_local.ini${NC}"
+            exit 1
+        fi
 
         echo -e "${GREEN}✅ ČEZ HDO configuration added to configuration.yaml${NC}"
         echo -e "${YELLOW}📝 Note: Update code and region parameters as needed${NC}"
