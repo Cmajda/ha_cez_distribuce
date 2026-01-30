@@ -3,8 +3,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![Release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases)
 [![Validate](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/validate.yaml/badge.svg)](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/validate.yaml)
-
-<a href="https://www.buymeacoffee.com/cmajda"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a beer 🍺&emoji=🍺&slug=cmajda&button_colour=40DCA5&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
+<a href="https://www.buymeacoffee.com/cmajda"><img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=40DCA5&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
 
 Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif) z API ČEZ Distribuce a vytváří entity + Lovelace kartu.
 
