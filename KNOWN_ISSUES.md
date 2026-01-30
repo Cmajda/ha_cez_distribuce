@@ -32,12 +32,18 @@ je uvedeno že zaregistrována je.
 
 ---
 
-### 3. Nelze změnit ceny VT/NT po nastavení
+### ~~3. Nelze změnit ceny VT/NT po nastavení~~ ✅
 
-**Stav:** 🔴 Otevřený
+**Stav:** ✅ Není bug
 
 **Popis:** Po počátečním nastavení integrace nejde změnit ceny VT/NT.
 Options flow nefunguje nebo není dostupný.
+
+**Řešení:** Postup pro změnu cen:
+Settings → Devices & Services → ČEZ HDO → Configure (ozubené kolo) →
+proklikat kroky → poslední krok je nastavení cen.
+
+Dokumentováno v [user-guide.md](docs/user-guide.md#-nastavení-cen).
 
 **Nahlásil:** @pokornyIt
 
@@ -94,6 +100,7 @@ způsobovat problémy v některých systémech.
 
 - **Issue #1:** Senzory se neaktualizují v reálném čase
 - **Issue #2:** UI karta není zaregistrována (nutný refresh prohlížeče)
+- **Issue #3:** Nelze změnit ceny VT/NT (dokumentováno v user-guide.md)
 - **Issue #6:** Debug log obsahuje emoji ikonu
 
 ---
