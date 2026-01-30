@@ -13,6 +13,7 @@ from homeassistant.exceptions import HomeAssistantError
 import homeassistant.helpers.config_validation as cv
 
 from . import downloader
+from .const import mask_ean
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -68,7 +69,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             set(s.get("signal", "") for s in signals if s.get("signal"))
         )
 
-        _LOGGER.debug("EAN %s validated, found signals: %s", ean, available_signals)
+        _LOGGER.debug("EAN %s validated, found signals: %s", mask_ean(ean), available_signals)
 
         return {
             "title": f"ČEZ HDO ({ean[-6:]})",

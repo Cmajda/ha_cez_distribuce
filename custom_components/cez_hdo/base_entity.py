@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any
 import requests
 from datetime import datetime
 
+from .const import mask_ean
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -112,8 +114,8 @@ class CezHdoBaseEntity:
     def _dbg(self) -> str:
         entity_id = getattr(self, "entity_id", None)
         if entity_id:
-            return f"{entity_id} (ean={self.ean}, name={self.name})"
-        return f"ean={self.ean}, name={self.name}"
+            return f"{entity_id} (ean={mask_ean(self.ean)}, name={self.name})"
+        return f"ean={mask_ean(self.ean)}, name={self.name}"
 
     async def async_added_to_hass(self) -> None:
         """Home Assistant callback when entity is added.

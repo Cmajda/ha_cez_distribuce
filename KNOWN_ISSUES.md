@@ -49,12 +49,16 @@ Dokumentováno v [user-guide.md](docs/user-guide.md#-nastavení-cen).
 
 ---
 
-### 4. EAN v logu - citlivá hodnota
+### ~~4. EAN v logu - citlivá hodnota~~ ✅
 
-**Stav:** 🔴 Otevřený
+**Stav:** ✅ Vyřešeno
 
 **Popis:** EAN kód se zobrazuje v logu v plném znění. Pokud je to citlivá
 hodnota, měl by být maskován (např. `859182400600xxxxx`).
+
+**Řešení:** Přidány helper funkce `mask_ean()` a `ean_suffix()` v `const.py`.
+EAN je nyní maskován v logu jako `***...XXXXXX` (zobrazeno posledních 6 číslic).
+Názvy cache/price souborů používají pouze suffix EAN (posledních 6 číslic).
 
 **Nahlásil:** @pokornyIt
 
@@ -101,6 +105,7 @@ způsobovat problémy v některých systémech.
 - **Issue #1:** Senzory se neaktualizují v reálném čase
 - **Issue #2:** UI karta není zaregistrována (nutný refresh prohlížeče)
 - **Issue #3:** Nelze změnit ceny VT/NT (dokumentováno v user-guide.md)
+- **Issue #4:** EAN v logu - maskován na posledních 6 číslic
 - **Issue #6:** Debug log obsahuje emoji ikonu
 
 ---

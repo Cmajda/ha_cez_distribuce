@@ -17,6 +17,7 @@ from homeassistant.helpers.update_coordinator import (
 )
 
 from . import downloader
+from .const import ean_suffix, mask_ean
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -79,17 +80,18 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self._state_update_unsub: callable | None = None
 
         # Use hass.config.path() for proper path resolution
-        # Cache files are per-EAN to support multiple instances
+        # Cache files use EAN suffix (last 6 digits) to support multiple instances
         self._cache_dir = Path(hass.config.path(CACHE_SUBDIR))
-        self._cache_file = self._cache_dir / f"cache_{ean}.json"
-        self._prices_file = self._cache_dir / f"prices_{ean}.json"
+        ean_short = ean_suffix(ean)
+        self._cache_file = self._cache_dir / f"cache_{ean_short}.json"
+        self._prices_file = self._cache_dir / f"prices_{ean_short}.json"
 
         # Initialize data container
         self.data = CezHdoData()
 
         _LOGGER.debug(
             "CezHdoCoordinator initialized: ean=%s, signal=%s, cache=%s",
-            self.ean,
+            mask_ean(self.ean),
             self.signal,
             self._cache_file,
         )

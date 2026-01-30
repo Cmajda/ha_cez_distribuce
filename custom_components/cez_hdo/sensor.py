@@ -20,6 +20,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import DOMAIN, DATA_COORDINATOR
 from .coordinator import CezHdoCoordinator, CezHdoData
 from . import downloader
+from .const import mask_ean
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -171,7 +172,7 @@ async def _async_get_coordinator(
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][DATA_COORDINATOR] = coordinator
 
-    _LOGGER.debug("Created new coordinator for EAN: %s", ean)
+    _LOGGER.debug("Created new coordinator for EAN: %s", mask_ean(ean))
     return coordinator
 
 
