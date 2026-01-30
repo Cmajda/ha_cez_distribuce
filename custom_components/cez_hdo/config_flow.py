@@ -23,6 +23,10 @@ CONF_EAN = "ean"
 CONF_SIGNAL = "signal"
 
 
+CONF_LOW_TARIFF_PRICE = "low_tariff_price"
+CONF_HIGH_TARIFF_PRICE = "high_tariff_price"
+
+
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
     """Validate the user input allows us to connect.
 
@@ -84,6 +88,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self) -> None:
         """Initialize the config flow."""
         self._ean: str | None = None
+        self._signal: str | None = None
         self._available_signals: list[str] = []
 
     async def async_step_user(
@@ -102,19 +107,8 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(self._ean)
                 self._abort_if_unique_id_configured()
                 
-                # If we have multiple signals, ask user to choose
-                if len(self._available_signals) > 1:
-                    return await self.async_step_signal()
-                
-                # Single signal or no signal - create entry
-                signal = self._available_signals[0] if self._available_signals else None
-                return self.async_create_entry(
-                    title=info["title"],
-                    data={
-                        CONF_EAN: self._ean,
-                        CONF_SIGNAL: signal,
-                    },
-                )
+                # Always proceed to signal selection
+                return await self.async_step_signal()
                 
             except CannotConnect:
                 errors["base"] = "cannot_connect"
@@ -142,27 +136,63 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     ) -> FlowResult:
         """Handle signal selection step."""
         if user_input is not None:
-            return self.async_create_entry(
-                title=f"ČEZ HDO ({self._ean[-6:]})",
-                data={
-                    CONF_EAN: self._ean,
-                    CONF_SIGNAL: user_input.get(CONF_SIGNAL),
-                },
-            )
+            self._signal = user_input.get(CONF_SIGNAL)
+            # Proceed to prices step
+            return await self.async_step_prices()
 
         # Build signal options
         signal_options = {s: s for s in self._available_signals}
+        
+        # Set default to first signal
+        default_signal = self._available_signals[0] if self._available_signals else None
 
         return self.async_show_form(
             step_id="signal",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_SIGNAL): vol.In(signal_options),
+                    vol.Required(CONF_SIGNAL, default=default_signal): vol.In(signal_options),
                 }
             ),
             description_placeholders={
                 "signal_help": "Vyberte HDO signál pro vaši lokalitu",
             },
+        )
+
+    async def async_step_prices(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle prices configuration step."""
+        if user_input is not None:
+            low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
+            high_price = user_input.get(CONF_HIGH_TARIFF_PRICE, 0.0)
+            
+            # Create the config entry
+            result = self.async_create_entry(
+                title=f"ČEZ HDO ({self._ean[-6:]})",
+                data={
+                    CONF_EAN: self._ean,
+                    CONF_SIGNAL: self._signal,
+                },
+            )
+            
+            # Store prices in options (will be loaded by coordinator)
+            # We can't set prices directly here because coordinator doesn't exist yet
+            # Prices will be stored in hass.data and loaded after setup
+            self.hass.data.setdefault("cez_hdo_initial_prices", {})[self._ean] = {
+                "low_tariff_price": low_price,
+                "high_tariff_price": high_price,
+            }
+            
+            return result
+
+        return self.async_show_form(
+            step_id="prices",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(CONF_LOW_TARIFF_PRICE, default=0.0): vol.Coerce(float),
+                    vol.Optional(CONF_HIGH_TARIFF_PRICE, default=0.0): vol.Coerce(float),
+                }
+            ),
         )
 
     @staticmethod
@@ -179,26 +209,149 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         """Initialize options flow."""
-        self.config_entry = config_entry
+        self._config_entry = config_entry
+        self._ean: str | None = None
+        self._signal: str | None = None
+        self._available_signals: list[str] = []
+
+    @property
+    def config_entry(self) -> config_entries.ConfigEntry:
+        """Return the config entry."""
+        return self._config_entry
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-        """Manage the options."""
-        if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+        """Handle the initial options step - EAN input."""
+        errors: dict[str, str] = {}
 
-        # Get current signal
-        current_signal = self.config_entry.data.get(CONF_SIGNAL, "")
+        # Get current EAN as default
+        current_ean = self._config_entry.data.get(CONF_EAN, "")
+
+        if user_input is not None:
+            ean = user_input.get(CONF_EAN, "")
+            
+            # Try to validate EAN and get signals
+            try:
+                info = await validate_input(self.hass, {CONF_EAN: ean})
+                self._ean = ean
+                self._available_signals = info.get("available_signals", [])
+                
+                # Proceed to signal selection
+                return await self.async_step_signal()
+                
+            except CannotConnect:
+                errors["base"] = "cannot_connect"
+            except InvalidEan:
+                errors["base"] = "invalid_ean"
+            except Exception:
+                _LOGGER.exception("Unexpected exception in options flow")
+                errors["base"] = "unknown"
 
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(
                 {
-                    vol.Optional(CONF_SIGNAL, default=current_signal): cv.string,
+                    vol.Required(CONF_EAN, default=current_ean): cv.string,
+                }
+            ),
+            errors=errors,
+        )
+
+    async def async_step_signal(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle signal selection step in options."""
+        if user_input is not None:
+            self._signal = user_input.get(CONF_SIGNAL)
+            # Proceed to prices step
+            return await self.async_step_prices()
+
+        # Get current signal as default (if same EAN)
+        current_signal = self._config_entry.data.get(CONF_SIGNAL, "")
+        if self._ean != self._config_entry.data.get(CONF_EAN):
+            # EAN changed, use first signal as default
+            current_signal = self._available_signals[0] if self._available_signals else ""
+
+        # Build signal options
+        signal_options = {s: s for s in self._available_signals}
+
+        return self.async_show_form(
+            step_id="signal",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_SIGNAL, default=current_signal): vol.In(signal_options),
                 }
             ),
         )
+
+    async def async_step_prices(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle prices configuration step."""
+        if user_input is not None:
+            low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
+            high_price = user_input.get(CONF_HIGH_TARIFF_PRICE, 0.0)
+            
+            # Update config entry data
+            new_data = {
+                CONF_EAN: self._ean,
+                CONF_SIGNAL: self._signal,
+            }
+            
+            # Update unique_id if EAN changed
+            old_ean = self._config_entry.data.get(CONF_EAN)
+            if self._ean != old_ean:
+                # Update title and unique_id
+                self.hass.config_entries.async_update_entry(
+                    self._config_entry,
+                    title=f"ČEZ HDO ({self._ean[-6:]})",
+                    data=new_data,
+                    unique_id=self._ean,
+                )
+            else:
+                # Just update data
+                self.hass.config_entries.async_update_entry(
+                    self._config_entry,
+                    data=new_data,
+                )
+            
+            # Save prices to coordinator
+            await self._save_prices(low_price, high_price)
+            
+            # Return empty options - all config is in data
+            return self.async_create_entry(title="", data={})
+
+        # Get current prices from coordinator
+        current_low_price = 0.0
+        current_high_price = 0.0
+        
+        from . import DOMAIN, DATA_COORDINATOR
+        entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
+        coordinator = entry_data.get(DATA_COORDINATOR)
+        if coordinator and coordinator.data:
+            current_low_price = coordinator.data.low_tariff_price
+            current_high_price = coordinator.data.high_tariff_price
+
+        return self.async_show_form(
+            step_id="prices",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(CONF_LOW_TARIFF_PRICE, default=current_low_price): vol.Coerce(float),
+                    vol.Optional(CONF_HIGH_TARIFF_PRICE, default=current_high_price): vol.Coerce(float),
+                }
+            ),
+        )
+
+    async def _save_prices(self, low_price: float, high_price: float) -> None:
+        """Save prices to coordinator."""
+        from . import DOMAIN, DATA_COORDINATOR
+        
+        entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
+        coordinator = entry_data.get(DATA_COORDINATOR)
+        
+        if coordinator:
+            await coordinator.async_set_prices(low_price, high_price)
 
 
 class CannotConnect(HomeAssistantError):

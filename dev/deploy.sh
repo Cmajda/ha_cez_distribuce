@@ -264,9 +264,20 @@ else
     echo -e "${YELLOW}⚠️  dev/frontend not found, skipping frontend build${NC}"
 fi
 
-# Step 3: Clean existing installation
+# Step 3: Clean existing installation (preserve data directory)
 echo -e "${BLUE}🧹 Step 3: Cleaning existing installation...${NC}"
-rm -rf "$TARGET_DIR"
+
+# Preserve data directory if it exists
+DATA_DIR="$TARGET_DIR/data"
+TEMP_DATA_DIR="/tmp/cez_hdo_data_backup"
+if [ -d "$DATA_DIR" ]; then
+    echo "📦 Preserving data directory..."
+    rm -rf "$TEMP_DATA_DIR" 2>/dev/null || true
+    cp -a "$DATA_DIR" "$TEMP_DATA_DIR" 2>/dev/null || true
+fi
+
+# Remove all files except data directory
+find "$TARGET_DIR" -mindepth 1 -maxdepth 1 ! -name 'data' -exec rm -rf {} + 2>/dev/null || true
 find "$MOUNT_POINT/custom_components" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
 find "$MOUNT_POINT/custom_components" -name "*.pyc" -delete 2>/dev/null || true
 

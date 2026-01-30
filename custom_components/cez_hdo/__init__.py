@@ -201,6 +201,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = CezHdoCoordinator(hass, ean, signal)
     await coordinator.async_initialize()
 
+    # Check for initial prices from config flow
+    initial_prices = hass.data.get("cez_hdo_initial_prices", {}).pop(ean, None)
+    if initial_prices:
+        await coordinator.async_set_prices(
+            initial_prices.get("low_tariff_price", 0.0),
+            initial_prices.get("high_tariff_price", 0.0),
+        )
+        _LOGGER.debug("Set initial prices from config flow: %s", initial_prices)
+
     # Store coordinator in hass.data
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {

@@ -12,12 +12,12 @@
 - [x] **Deploy skript** - Nepřidává YAML, používá Config Flow
 - [x] **Device registry** - Seskupit všechny entity pod jedno "zařízení" v HA
 - [x] **Data storage** - Přesunuto z `www/cez_hdo/` do `custom_components/cez_hdo/data/`
+- [x] **Diagnostika** - Přidat `diagnostics.py` pro debug export
+- [x] **Options Flow** - Možnost upravit nastavení po přidání integrace (změna EAN, signálu)
 
 ## 🔮 Možné další kroky
 
-- [ ] **Options Flow** - Možnost upravit nastavení po přidání integrace (změna signálu, atd.)
-- [ ] **Diagnostika** - Přidat `diagnostics.py` pro debug export
-- [ ] **Rekonfigurace** - Možnost změnit EAN bez smazání integrace
 - [ ] **Unit testy** - Pokrytí kódu testy
 - [ ] **Update interval** - Změnit z 10 minut na 1 hodinu pro produkci
 - [ ] **HACS** - Připravit pro publikaci do HACS
+- [ ] **Aktualizovat dokumentaci** - README.md, user-guide.md, RELEASE_NOTES.md pro v3.0.0
