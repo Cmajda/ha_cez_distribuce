@@ -22,6 +22,7 @@ DOMAIN = "cez_hdo"
 # Configuration keys
 CONF_EAN = "ean"
 CONF_SIGNAL = "signal"
+CONF_ENTITY_SUFFIX = "entity_suffix"
 
 
 CONF_LOW_TARIFF_PRICE = "low_tariff_price"
@@ -92,6 +93,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
         """Initialize the config flow."""
         self._ean: str | None = None
         self._signal: str | None = None
+        self._entity_suffix: str | None = None
         self._available_signals: list[str] = []
 
     async def async_step_user(
@@ -140,8 +142,8 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
         """Handle signal selection step."""
         if user_input is not None:
             self._signal = user_input.get(CONF_SIGNAL)
-            # Proceed to prices step
-            return await self.async_step_prices()
+            # Proceed to entity suffix step
+            return await self.async_step_entity_suffix()
 
         # Build signal options
         signal_options = {s: s for s in self._available_signals}
@@ -166,6 +168,32 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             },
         )
 
+    async def async_step_entity_suffix(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
+        """Handle entity suffix configuration step."""
+        if user_input is not None:
+            self._entity_suffix = user_input.get(CONF_ENTITY_SUFFIX, "")
+            # Proceed to prices step
+            return await self.async_step_prices()
+
+        # Generate default suffix from EAN and signal
+        ean_suffix = self._ean[-4:] if self._ean else "0000"
+        signal_safe = self._signal.lower().replace("|", "_") if self._signal else "signal"
+        default_suffix = f"{ean_suffix}_{signal_safe}"
+
+        return self.async_show_form(
+            step_id="entity_suffix",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_ENTITY_SUFFIX, default=default_suffix): cv.string,
+                }
+            ),
+            description_placeholders={
+                "example_entity": default_suffix,
+            },
+        )
+
     async def async_step_prices(
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
@@ -184,6 +212,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                 data={
                     CONF_EAN: self._ean,
                     CONF_SIGNAL: self._signal,
+                    CONF_ENTITY_SUFFIX: self._entity_suffix,
                 },
             )
 

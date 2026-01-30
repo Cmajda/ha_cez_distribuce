@@ -54,7 +54,20 @@ interface ScheduleItem {
   tariff: string;
 }
 
-// Default entity mappings
+// Entity prefixes for dynamic discovery (new format: cez_hdo_{type}_{ean4}_{signal})
+const ENTITY_PREFIXES: Record<keyof EntityConfig, { domain: string; prefix: string }> = {
+  low_tariff: { domain: 'binary_sensor', prefix: 'cez_hdo_lowtariffactive_' },
+  high_tariff: { domain: 'binary_sensor', prefix: 'cez_hdo_hightariffactive_' },
+  low_start: { domain: 'sensor', prefix: 'cez_hdo_lowtariffstart_' },
+  low_end: { domain: 'sensor', prefix: 'cez_hdo_lowtariffend_' },
+  low_duration: { domain: 'sensor', prefix: 'cez_hdo_lowtariffduration_' },
+  high_start: { domain: 'sensor', prefix: 'cez_hdo_hightariffstart_' },
+  high_end: { domain: 'sensor', prefix: 'cez_hdo_hightariffend_' },
+  high_duration: { domain: 'sensor', prefix: 'cez_hdo_hightariffduration_' },
+  schedule: { domain: 'sensor', prefix: 'cez_hdo_schedule_' },
+};
+
+// Legacy default entity mappings (for backwards compatibility)
 const DEFAULT_ENTITIES: Required<EntityConfig> = {
   low_tariff: 'binary_sensor.cez_hdo_nizky_tarif_aktivni',
   high_tariff: 'binary_sensor.cez_hdo_vysoky_tarif_aktivni',
@@ -90,7 +103,7 @@ export class CezHdoCard extends LitElement {
   setConfig(config: CardConfig): void {
     if (!config.entities) {
       config = {
-        entities: { ...DEFAULT_ENTITIES },
+        entities: {},
         title: 'ČEZ HDO Status',
         show_times: true,
         show_duration: true,
@@ -99,6 +112,44 @@ export class CezHdoCard extends LitElement {
       };
     }
     this.config = config;
+  }
+
+  /**
+   * Find all entities matching prefix (for counting devices)
+   */
+  private findAllEntitiesByPrefix(key: keyof EntityConfig): string[] {
+    if (!this.hass?.states) return [];
+    const prefixConfig = ENTITY_PREFIXES[key];
+    if (!prefixConfig) return [];
+    
+    const fullPrefix = `${prefixConfig.domain}.${prefixConfig.prefix}`;
+    return Object.keys(this.hass.states).filter(id => id.startsWith(fullPrefix));
+  }
+
+  /**
+   * Resolve entity ID - check config first, then dynamic discovery (only if single device)
+   */
+  private resolveEntity(key: keyof EntityConfig): string | undefined {
+    // 1. Check if explicitly configured
+    const configured = this.config.entities?.[key];
+    if (configured && this.hass?.states[configured]) {
+      return configured;
+    }
+    
+    // 2. Try dynamic discovery - only auto-select if exactly one device
+    const allMatches = this.findAllEntitiesByPrefix(key);
+    if (allMatches.length === 1) {
+      return allMatches[0];
+    }
+    
+    // 3. Fall back to legacy default (for backwards compatibility)
+    const legacy = DEFAULT_ENTITIES[key];
+    if (legacy && this.hass?.states[legacy]) {
+      return legacy;
+    }
+    
+    // Multiple devices or none found - return undefined
+    return undefined;
   }
 
   private getEntityState(entityId: string | undefined): string {
@@ -115,8 +166,8 @@ export class CezHdoCard extends LitElement {
    * Get tariff prices from schedule sensor attributes
    */
   private getPricesFromSensor(): { low: number; high: number } {
-    const scheduleEntity = this.config.entities?.schedule || DEFAULT_ENTITIES.schedule;
-    const scheduleState = this.hass?.states[scheduleEntity];
+    const scheduleEntity = this.resolveEntity('schedule');
+    const scheduleState = scheduleEntity ? this.hass?.states[scheduleEntity] : undefined;
 
     if (scheduleState?.attributes) {
       const low = scheduleState.attributes.low_tariff_price;
@@ -134,19 +185,27 @@ export class CezHdoCard extends LitElement {
       return html`<ha-card>Loading...</ha-card>`;
     }
 
-    const { entities } = this.config;
-    if (!entities) {
-      return html`<ha-card>No entities configured</ha-card>`;
-    }
+    // Resolve entities dynamically
+    const resolvedEntities = {
+      low_tariff: this.resolveEntity('low_tariff'),
+      high_tariff: this.resolveEntity('high_tariff'),
+      low_start: this.resolveEntity('low_start'),
+      low_end: this.resolveEntity('low_end'),
+      low_duration: this.resolveEntity('low_duration'),
+      high_start: this.resolveEntity('high_start'),
+      high_end: this.resolveEntity('high_end'),
+      high_duration: this.resolveEntity('high_duration'),
+      schedule: this.resolveEntity('schedule'),
+    };
 
-    const lowTariffActive = this.isEntityOn(entities.low_tariff);
-    const highTariffActive = this.isEntityOn(entities.high_tariff);
-    const lowStart = this.getEntityState(entities.low_start);
-    const lowEnd = this.getEntityState(entities.low_end);
-    const lowDuration = this.getEntityState(entities.low_duration);
-    const highStart = this.getEntityState(entities.high_start);
-    const highEnd = this.getEntityState(entities.high_end);
-    const highDuration = this.getEntityState(entities.high_duration);
+    const lowTariffActive = this.isEntityOn(resolvedEntities.low_tariff);
+    const highTariffActive = this.isEntityOn(resolvedEntities.high_tariff);
+    const lowStart = this.getEntityState(resolvedEntities.low_start);
+    const lowEnd = this.getEntityState(resolvedEntities.low_end);
+    const lowDuration = this.getEntityState(resolvedEntities.low_duration);
+    const highStart = this.getEntityState(resolvedEntities.high_start);
+    const highEnd = this.getEntityState(resolvedEntities.high_end);
+    const highDuration = this.getEntityState(resolvedEntities.high_duration);
 
     const title = this.config.title || 'ČEZ HDO';
     const showTimes = this.config.show_times !== false;
@@ -234,8 +293,8 @@ export class CezHdoCard extends LitElement {
   private _renderSchedule() {
     if (!this.config.show_schedule) return html``;
 
-    const scheduleEntity = this.config.entities?.schedule || 'sensor.cez_hdo_rozvrh';
-    const scheduleState = this.hass.states[scheduleEntity];
+    const scheduleEntity = this.resolveEntity('schedule');
+    const scheduleState = scheduleEntity ? this.hass.states[scheduleEntity] : undefined;
 
     if (!scheduleState || !scheduleState.attributes.schedule) {
       return html`<div class="schedule-error">Rozvrh není k dispozici</div>`;

@@ -5,30 +5,39 @@
  * Uses ha-selector for entity selection (HA native component).
  */
 
-// Default entity candidates
-const DEFAULT_ENTITY_CANDIDATES: Record<string, string[]> = {
-  low_tariff: ['binary_sensor.cez_hdo_nizky_tarif_aktivni'],
-  high_tariff: ['binary_sensor.cez_hdo_vysoky_tarif_aktivni'],
-  low_start: ['sensor.cez_hdo_nizky_tarif_zacatek'],
-  low_end: ['sensor.cez_hdo_nizky_tarif_konec'],
-  low_duration: ['sensor.cez_hdo_nizky_tarif_zbyva'],
-  high_start: ['sensor.cez_hdo_vysoky_tarif_zacatek'],
-  high_end: ['sensor.cez_hdo_vysoky_tarif_konec'],
-  high_duration: ['sensor.cez_hdo_vysoky_tarif_zbyva'],
-  schedule: ['sensor.cez_hdo_rozvrh'],
+// Entity prefixes for dynamic discovery (new format: cez_hdo_{type}_{ean4}_{signal})
+const ENTITY_PREFIXES: Record<string, { domain: string; prefix: string }> = {
+  low_tariff: { domain: 'binary_sensor', prefix: 'cez_hdo_lowtariffactive_' },
+  high_tariff: { domain: 'binary_sensor', prefix: 'cez_hdo_hightariffactive_' },
+  low_start: { domain: 'sensor', prefix: 'cez_hdo_lowtariffstart_' },
+  low_end: { domain: 'sensor', prefix: 'cez_hdo_lowtariffend_' },
+  low_duration: { domain: 'sensor', prefix: 'cez_hdo_lowtariffduration_' },
+  high_start: { domain: 'sensor', prefix: 'cez_hdo_hightariffstart_' },
+  high_end: { domain: 'sensor', prefix: 'cez_hdo_hightariffend_' },
+  high_duration: { domain: 'sensor', prefix: 'cez_hdo_hightariffduration_' },
+  schedule: { domain: 'sensor', prefix: 'cez_hdo_schedule_' },
 };
 
-const DEFAULT_ENTITIES: Record<string, string> = {
-  low_tariff: DEFAULT_ENTITY_CANDIDATES.low_tariff[0],
-  high_tariff: DEFAULT_ENTITY_CANDIDATES.high_tariff[0],
-  low_start: DEFAULT_ENTITY_CANDIDATES.low_start[0],
-  low_end: DEFAULT_ENTITY_CANDIDATES.low_end[0],
-  low_duration: DEFAULT_ENTITY_CANDIDATES.low_duration[0],
-  high_start: DEFAULT_ENTITY_CANDIDATES.high_start[0],
-  high_end: DEFAULT_ENTITY_CANDIDATES.high_end[0],
-  high_duration: DEFAULT_ENTITY_CANDIDATES.high_duration[0],
-  schedule: DEFAULT_ENTITY_CANDIDATES.schedule[0],
-};
+// Find all entities matching prefix (for multiple integrations)
+function findAllEntitiesByPrefix(hass: HomeAssistant | undefined, key: string): string[] {
+  if (!hass?.states) return [];
+  const config = ENTITY_PREFIXES[key];
+  if (!config) return [];
+  
+  const fullPrefix = `${config.domain}.${config.prefix}`;
+  return Object.keys(hass.states).filter(id => id.startsWith(fullPrefix));
+}
+
+// Resolve entity - only auto-fill if exactly one device exists
+function resolveDefaultForKey(hass: HomeAssistant | undefined, key: string): string | null {
+  const allMatches = findAllEntitiesByPrefix(hass, key);
+  // Only auto-fill if exactly one entity found (single device)
+  if (allMatches.length === 1) {
+    return allMatches[0];
+  }
+  // Multiple devices or none - don't auto-fill
+  return null;
+}
 
 interface HomeAssistant {
   states: Record<string, { attributes?: { friendly_name?: string } }>;
@@ -47,15 +56,6 @@ interface CardConfig {
   show_schedule_prices?: boolean;
   compact_mode?: boolean;
   entities?: Record<string, string>;
-}
-
-function resolveDefaultForKey(hass: HomeAssistant | undefined, key: string): string {
-  if (!hass) return DEFAULT_ENTITIES[key];
-  const candidates = DEFAULT_ENTITY_CANDIDATES[key] || [DEFAULT_ENTITIES[key]];
-  for (const cand of candidates) {
-    if (hass.states && hass.states[cand]) return cand;
-  }
-  return DEFAULT_ENTITIES[key];
 }
 
 export class CezHdoCardEditor extends HTMLElement {
@@ -114,7 +114,14 @@ export class CezHdoCardEditor extends HTMLElement {
   }
 
   private _entityPicker(label: string, key: string, domains: string[]): HTMLElement {
-    const current = (this._config.entities && this._config.entities[key]) || '';
+    // Get configured value or dynamically resolve
+    let current = (this._config.entities && this._config.entities[key]) || '';
+    const resolved = resolveDefaultForKey(this._hass, key);
+    const allMatches = findAllEntitiesByPrefix(this._hass, key);
+    
+    // If not explicitly configured, use dynamically found entity
+    const displayValue = current || resolved || '';
+    
     const wrap = document.createElement('div');
     wrap.className = 'entity-row';
 
@@ -123,21 +130,30 @@ export class CezHdoCardEditor extends HTMLElement {
     selector.hass = this._hass;
     selector.label = label;
     selector.selector = { entity: domains && domains.length ? { domain: domains } : {} };
-    selector.value = current;
+    selector.value = displayValue;
     selector.addEventListener('value-changed', (ev: CustomEvent) => {
       this._setEntity(key, ev.detail.value);
     });
     wrap.appendChild(selector);
 
-    // Show default entity hint if field is empty
-    if (!current) {
-      const resolved = resolveDefaultForKey(this._hass, key);
+    // Show hint about auto-detected entity or need for selection
+    if (!current && resolved) {
+      // Single device - auto-filled
       const note = document.createElement('div');
       note.className = 'hint';
-      if (resolved) {
-        const exists = !!(this._hass?.states && this._hass.states[resolved]);
-        note.textContent = exists ? `Použito: ${resolved}` : `Výchozí: ${resolved} (nenalezeno)`;
-      }
+      note.textContent = 'Auto-detekováno';
+      wrap.appendChild(note);
+    } else if (!current && !resolved && allMatches.length > 1) {
+      // Multiple devices - user must select
+      const note = document.createElement('div');
+      note.className = 'hint hint-warning';
+      note.textContent = `Nalezeno ${allMatches.length} zařízení - vyberte entitu`;
+      wrap.appendChild(note);
+    } else if (!current && !resolved && allMatches.length === 0) {
+      // No devices found
+      const note = document.createElement('div');
+      note.className = 'hint';
+      note.textContent = 'Žádná ČEZ HDO entita nenalezena';
       wrap.appendChild(note);
     }
 
@@ -174,6 +190,10 @@ export class CezHdoCardEditor extends HTMLElement {
         .hint {
           font-size: 12px;
           opacity: 0.8;
+        }
+        .hint-warning {
+          color: var(--warning-color, #ff9800);
+          font-weight: 500;
         }
       </style>
       <div class="wrap"></div>

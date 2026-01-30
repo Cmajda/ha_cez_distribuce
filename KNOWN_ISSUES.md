@@ -66,14 +66,20 @@ Názvy cache/price souborů používají pouze suffix EAN (posledních 6 čísli
 
 ## Priorita 2 - Střední
 
-### 5. Více signálů pro jeden EAN - neintuitvní názvy entit
+### ~~5. Více signálů pro jeden EAN - neintuitvní názvy entit~~ ✅
 
-**Stav:** 🟡 Otevřený
+**Stav:** ✅ Vyřešeno
 
 **Popis:** Pokud EAN má více signálů:
 
 1. Jaké jméno bude mít device při přidání více signálů?
 2. Názvy entit jsou neintuitvní (např. `binary_sensor.cez_hdo_nizky_tarif_aktivni_1`)
+
+**Řešení:** Každý signál nyní vytváří vlastní device s názvem obsahujícím signál.
+
+- Device: `ČEZ HDO 967606 (a1b4dp04)`
+- Device ID zahrnuje signál: `{ean}_{signal}`
+- Entity jsou seskupeny pod správný device podle signálu
 
 **Nahlásil:** @pokornyIt
 
@@ -106,6 +112,7 @@ způsobovat problémy v některých systémech.
 - **Issue #2:** UI karta není zaregistrována (nutný refresh prohlížeče)
 - **Issue #3:** Nelze změnit ceny VT/NT (dokumentováno v user-guide.md)
 - **Issue #4:** EAN v logu - maskován na posledních 6 číslic
+- **Issue #5:** Více signálů pro EAN - device obsahuje název signálu
 - **Issue #6:** Debug log obsahuje emoji ikonu
 
 ---

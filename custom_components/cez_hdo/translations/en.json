@@ -21,6 +21,16 @@
                     "signal": "HDO signal code for your tariff switching times"
                 }
             },
+            "entity_suffix": {
+                "title": "Entity ID Suffix",
+                "description": "Enter a suffix that will be used in entity names.\n\n**Example with default suffix:**\n`sensor.cez_hdo_lowtariffstart_{example_entity}`\n\n**Example with custom suffix** (e.g. `cottage`):\n`sensor.cez_hdo_lowtariffstart_cottage`\n\nYou can change the suffix to better distinguish multiple devices.",
+                "data": {
+                    "entity_suffix": "Entity Suffix"
+                },
+                "data_description": {
+                    "entity_suffix": "Suffix added to all entity IDs (you can enter custom text, e.g. cottage, apartment, house)"
+                }
+            },
             "prices": {
                 "title": "Tariff Prices Setup",
                 "description": "Set prices for low (NT) and high (VT) tariff. Prices are used for cost calculations in the card.",

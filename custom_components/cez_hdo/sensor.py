@@ -20,7 +20,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import DOMAIN, DATA_COORDINATOR
 from .coordinator import CezHdoCoordinator, CezHdoData
 from . import downloader
-from .const import mask_ean
+from .const import mask_ean, ean_short, sanitize_signal
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -85,6 +85,8 @@ async def async_setup_entry(
     entry_data = hass.data[DOMAIN].get(entry.entry_id, {})
     coordinator = entry_data.get(DATA_COORDINATOR)
     ean = entry_data.get("ean")
+    signal = entry_data.get("signal")
+    entity_suffix = entry_data.get("entity_suffix")
 
     if not coordinator or not ean:
         _LOGGER.error("Coordinator or EAN not found for entry %s", entry.entry_id)
@@ -93,15 +95,15 @@ async def async_setup_entry(
     # Create entities with entry_id for unique identification
     entry_id = entry.entry_id
     entities = [
-        LowTariffStart(coordinator, ean, entry_id),
-        LowTariffEnd(coordinator, ean, entry_id),
-        LowTariffDuration(coordinator, ean, entry_id),
-        HighTariffStart(coordinator, ean, entry_id),
-        HighTariffEnd(coordinator, ean, entry_id),
-        HighTariffDuration(coordinator, ean, entry_id),
-        CurrentPrice(coordinator, ean, entry_id),
-        HdoSchedule(coordinator, ean, entry_id),
-        CezHdoRawData(coordinator, ean, entry_id),
+        LowTariffStart(coordinator, ean, entry_id, signal, entity_suffix),
+        LowTariffEnd(coordinator, ean, entry_id, signal, entity_suffix),
+        LowTariffDuration(coordinator, ean, entry_id, signal, entity_suffix),
+        HighTariffStart(coordinator, ean, entry_id, signal, entity_suffix),
+        HighTariffEnd(coordinator, ean, entry_id, signal, entity_suffix),
+        HighTariffDuration(coordinator, ean, entry_id, signal, entity_suffix),
+        CurrentPrice(coordinator, ean, entry_id, signal, entity_suffix),
+        HdoSchedule(coordinator, ean, entry_id, signal, entity_suffix),
+        CezHdoRawData(coordinator, ean, entry_id, signal, entity_suffix),
     ]
     async_add_entities(entities)
 
@@ -185,12 +187,16 @@ class CezHdoSensor(CoordinatorEntity[CezHdoCoordinator], SensorEntity):
         ean: str,
         name: str,
         entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
         self.ean = ean
         self._name = name
         self._entry_id = entry_id
+        self._signal = signal
+        self._entity_suffix = entity_suffix
 
         # Set entity metadata
         meta = ENTITY_META.get(name, {})
@@ -199,15 +205,35 @@ class CezHdoSensor(CoordinatorEntity[CezHdoCoordinator], SensorEntity):
             self._attr_unique_id = f"{entry_id}_{ean}_{name.lower()}"
         else:
             self._attr_unique_id = f"{ean}_{name.lower()}"
-        self._attr_suggested_object_id = meta.get(
-            "object_id", f"cez_hdo_{name.lower()}"
-        )
+        
+        # Build object_id using entity_suffix from config or auto-generate
+        base_object_id = meta.get("object_id", f"cez_hdo_{name.lower()}")
+        if entity_suffix:
+            # Use user-defined suffix
+            self._object_id = f"{base_object_id}_{entity_suffix}"
+        else:
+            # Auto-generate suffix from EAN and signal (fallback for YAML config)
+            ean4 = ean_short(ean)
+            signal_safe = sanitize_signal(signal) if signal else ""
+            if signal_safe:
+                self._object_id = f"{base_object_id}_{ean4}_{signal_safe}"
+            else:
+                self._object_id = f"{base_object_id}_{ean4}" if ean4 else base_object_id
+        self.entity_id = f"sensor.{self._object_id}"
         self._attr_name = meta.get("friendly", f"ČEZ HDO {name}")
 
-        # Device info - group all entities under one device
+        # Device info - group all entities under one device per EAN+signal combination
+        # This ensures each signal for same EAN has its own device
+        if signal:
+            device_id = f"{ean}_{signal}"
+            device_name = f"ČEZ HDO ({signal})"
+        else:
+            device_id = ean
+            device_name = f"ČEZ HDO ({ean[-6:]})"
+
         self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, ean)},
-            name=f"ČEZ HDO {ean[-6:]}",
+            identifiers={(DOMAIN, device_id)},
+            name=device_name,
             manufacturer="Cmajda",
             model="HDO",
             configuration_url="https://github.com/Cmajda/ha_cez_distribuce?tab=readme-ov-file#%EF%B8%8F%C4%8Dez-hdo-home-assistant-%EF%B8%8F",
@@ -228,9 +254,9 @@ class LowTariffStart(CezHdoSensor):
     """Sensor for low tariff start time."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
     ) -> None:
-        super().__init__(coordinator, ean, "LowTariffStart", entry_id)
+        super().__init__(coordinator, ean, "LowTariffStart", entry_id, signal, entity_suffix)
 
     @property
     def native_value(self) -> str | None:
@@ -244,9 +270,9 @@ class LowTariffEnd(CezHdoSensor):
     """Sensor for low tariff end time."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
     ) -> None:
-        super().__init__(coordinator, ean, "LowTariffEnd", entry_id)
+        super().__init__(coordinator, ean, "LowTariffEnd", entry_id, signal, entity_suffix)
 
     @property
     def icon(self) -> str:
@@ -264,9 +290,9 @@ class LowTariffDuration(CezHdoSensor):
     """Sensor for low tariff duration."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
     ) -> None:
-        super().__init__(coordinator, ean, "LowTariffDuration", entry_id)
+        super().__init__(coordinator, ean, "LowTariffDuration", entry_id, signal, entity_suffix)
 
     @property
     def icon(self) -> str:
@@ -288,9 +314,9 @@ class HighTariffStart(CezHdoSensor):
     """Sensor for high tariff start time."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
     ) -> None:
-        super().__init__(coordinator, ean, "HighTariffStart", entry_id)
+        super().__init__(coordinator, ean, "HighTariffStart", entry_id, signal, entity_suffix)
 
     @property
     def native_value(self) -> str | None:
@@ -304,9 +330,9 @@ class HighTariffEnd(CezHdoSensor):
     """Sensor for high tariff end time."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
     ) -> None:
-        super().__init__(coordinator, ean, "HighTariffEnd", entry_id)
+        super().__init__(coordinator, ean, "HighTariffEnd", entry_id, signal, entity_suffix)
 
     @property
     def icon(self) -> str:
@@ -324,9 +350,9 @@ class HighTariffDuration(CezHdoSensor):
     """Sensor for high tariff duration."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
     ) -> None:
-        super().__init__(coordinator, ean, "HighTariffDuration", entry_id)
+        super().__init__(coordinator, ean, "HighTariffDuration", entry_id, signal, entity_suffix)
 
     @property
     def icon(self) -> str:
@@ -348,9 +374,9 @@ class CurrentPrice(CezHdoSensor):
     """Sensor for current electricity price based on active tariff."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
     ) -> None:
-        super().__init__(coordinator, ean, "CurrentPrice", entry_id)
+        super().__init__(coordinator, ean, "CurrentPrice", entry_id, signal, entity_suffix)
 
     @property
     def icon(self) -> str:
@@ -383,9 +409,9 @@ class CezHdoRawData(CezHdoSensor):
     """Sensor for raw HDO JSON data and timestamp."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
     ) -> None:
-        super().__init__(coordinator, ean, "RawData", entry_id)
+        super().__init__(coordinator, ean, "RawData", entry_id, signal, entity_suffix)
 
     @property
     def native_value(self) -> str | None:
@@ -407,9 +433,9 @@ class HdoSchedule(CezHdoSensor):
     """Sensor providing HDO schedule data for graphs (ApexCharts compatible)."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
     ) -> None:
-        super().__init__(coordinator, ean, "HdoSchedule", entry_id)
+        super().__init__(coordinator, ean, "HdoSchedule", entry_id, signal, entity_suffix)
 
     @property
     def icon(self) -> str:

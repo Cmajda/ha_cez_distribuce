@@ -193,6 +193,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Get config data
     ean = entry.data.get("ean")
     signal = entry.data.get("signal")
+    entity_suffix = entry.data.get("entity_suffix")
 
     if not ean:
         _LOGGER.error("No EAN in config entry")
@@ -219,6 +220,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         DATA_COORDINATOR: coordinator,
         "ean": ean,
         "signal": signal,
+        "entity_suffix": entity_suffix,
     }
 
     # Forward setup to platforms

@@ -21,6 +21,16 @@
                     "signal": "Kód HDO signálu pro časy přepínání tarifů"
                 }
             },
+            "entity_suffix": {
+                "title": "Přípona entity ID",
+                "description": "Zadejte příponu, která bude použita v názvu entit.\n\n**Příklad s výchozí příponou:**\n`sensor.cez_hdo_lowtariffstart_{example_entity}`\n\n**Příklad s vlastní příponou** (např. `chalupa`):\n`sensor.cez_hdo_lowtariffstart_chalupa`\n\nPříponu můžete změnit pro lepší rozlišení více zařízení.",
+                "data": {
+                    "entity_suffix": "Přípona entity"
+                },
+                "data_description": {
+                    "entity_suffix": "Přípona přidaná ke všem entity ID (můžete zadat vlastní text, např. chalupa, byt, dum)"
+                }
+            },
             "prices": {
                 "title": "Nastavení cen tarifů",
                 "description": "Nastavte ceny pro nízký (NT) a vysoký (VT) tarif. Ceny se používají pro výpočet nákladů v kartě.",
