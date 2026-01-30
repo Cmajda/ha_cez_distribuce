@@ -1,13 +1,24 @@
 # ⚡️ČEZ HDO (Home Assistant) ⚡️
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
-[![Release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases)
+[![Release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?label=stable&logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases/latest)
+[![Pre-release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?include_prereleases&label=pre-release&logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases)
 [![Validate](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/validate.yaml/badge.svg)](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/validate.yaml)
-<a href="https://www.buymeacoffee.com/cmajda"><img src="https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=40DCA5&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00" /></a>
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
+[![GitHub Issues](https://img.shields.io/github/issues/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/issues)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/Cmajda)](https://github.com/sponsors/Cmajda)
+[![License](https://img.shields.io/badge/License-Apache%202.0%20%2B%20Commons%20Clause-blue)](./LICENSE)
 
-Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif) z API ČEZ Distribuce a vytváří entity + Lovelace kartu.
+Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif)
+z API ČEZ Distribuce a vytváří entity + Lovelace kartu.
 
-> ⚠️ **Neoficiální integrace** – Tento projekt není oficiálním produktem společnosti ČEZ Distribuce a.s. Jedná se o komunitní projekt vytvořený pro potřeby uživatelů Home Assistantu. Autor nemá žádnou vazbu na ČEZ.
+> ⚠️ **Neoficiální integrace** – Tento projekt není oficiálním produktem
+> společnosti ČEZ Distribuce a.s. Jedná se o komunitní projekt vytvořený
+> pro potřeby uživatelů Home Assistantu. Autor nemá žádnou vazbu na ČEZ.
+
+Pokud mě chcete podpořit můžete zde
+
+[![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=FF813F&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/cmajda)
 
 ## 🚀 Rychlý start
 
@@ -29,7 +40,8 @@ Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif) z API
 
 V Lovelace přidejte kartu **ČEZ HDO Card** (nebo `custom:cez-hdo-card`).
 
-> **Poznámka:** Po instalaci může být potřeba stisknout `Ctrl+F5` pro vyčištění cache.
+> **Poznámka:** Po instalaci může být potřeba stisknout `Ctrl+F5`
+> pro vyčištění cache.
 
 ## 🎴 Lovelace karta
 
@@ -45,7 +57,8 @@ Karta má vizuální editor s možnostmi zobrazení:
 
 ### Nastavení cen
 
-Ceny se nastavují v **integraci** (Settings → Devices & Services → ČEZ HDO → Configure), ne v kartě.
+Ceny se nastavují v **integraci**
+(Settings → Devices & Services → ČEZ HDO → Configure), ne v kartě.
 
 ### Energy Dashboard
 
@@ -106,4 +119,4 @@ Viz [RELEASE_NOTES.md](RELEASE_NOTES.md)
 
 ## 📄 Licence
 
-MIT | Podpora: [GitHub Issues](https://github.com/Cmajda/ha_cez_distribuce/issues)
+Apache 2.0 + Commons Clause (nekomerční použití) | Podpora: [GitHub Issues](https://github.com/Cmajda/ha_cez_distribuce/issues)
