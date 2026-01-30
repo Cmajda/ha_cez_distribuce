@@ -363,7 +363,7 @@ def isHdo(
             high_duration = timedelta(0)
 
             _LOGGER.debug(
-                "✅ IN LOW TARIFF: %s-%s, remaining: %s",
+                "[NT] IN LOW TARIFF: %s-%s, remaining: %s",
                 low_start,
                 low_end,
                 format_duration(low_duration),
@@ -395,7 +395,7 @@ def isHdo(
                 low_duration = timedelta(0)
 
                 _LOGGER.debug(
-                    "🔴 IN HIGH TARIFF: %s-%s, remaining: %s, next low: %s",
+                    "[VT] IN HIGH TARIFF: %s-%s, remaining: %s, next low: %s",
                     high_start,
                     high_end,
                     format_duration(high_duration),

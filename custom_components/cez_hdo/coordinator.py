@@ -9,7 +9,8 @@ from typing import Any
 
 import requests
 
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
@@ -19,8 +20,11 @@ from . import downloader
 
 _LOGGER = logging.getLogger(__name__)
 
-# Update interval - HDO data changes rarely (once per day typically)
-UPDATE_INTERVAL = timedelta(hours=1)
+# Update interval for API data - HDO data changes rarely (once per day typically)
+API_UPDATE_INTERVAL = timedelta(hours=1)
+
+# Update interval for state recalculation - needs to be frequent for countdown
+STATE_UPDATE_INTERVAL = timedelta(seconds=5)
 
 # Cache directory and file - stored in custom_components/cez_hdo/data/
 CACHE_SUBDIR = "custom_components/cez_hdo/data"
@@ -68,10 +72,11 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             hass,
             _LOGGER,
             name="ČEZ HDO",
-            update_interval=UPDATE_INTERVAL,
+            update_interval=API_UPDATE_INTERVAL,
         )
         self.ean = ean
         self.signal = signal
+        self._state_update_unsub: callable | None = None
 
         # Use hass.config.path() for proper path resolution
         # Cache files are per-EAN to support multiple instances
@@ -108,6 +113,44 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
         # Then do the actual refresh (doesn't raise ConfigEntryError)
         await self.async_refresh()
+
+        # Start periodic state recalculation (every 5 seconds)
+        self._start_state_updates()
+
+    def _start_state_updates(self) -> None:
+        """Start periodic state recalculation."""
+        if self._state_update_unsub is not None:
+            return  # Already started
+
+        self._state_update_unsub = async_track_time_interval(
+            self.hass,
+            self._async_recalculate_state,
+            STATE_UPDATE_INTERVAL,
+        )
+        _LOGGER.debug("CezHdoCoordinator: Started state updates every %s", STATE_UPDATE_INTERVAL)
+
+    def stop_state_updates(self) -> None:
+        """Stop periodic state recalculation."""
+        if self._state_update_unsub is not None:
+            self._state_update_unsub()
+            self._state_update_unsub = None
+            _LOGGER.debug("CezHdoCoordinator: Stopped state updates")
+
+    @callback
+    def _async_recalculate_state(self, _now: datetime | None = None) -> None:
+        """Recalculate current state based on cached data.
+
+        This is called every 5 seconds to update countdown timers
+        and active tariff states without fetching from API.
+        """
+        if self.data.raw_data is None:
+            return  # No data to recalculate from
+
+        # Re-parse data with current time
+        self._parse_data(self.data.raw_data)
+
+        # Notify all listeners that data has changed
+        self.async_set_updated_data(self.data)
 
     def _ensure_cache_dir(self) -> None:
         """Ensure cache directory exists."""

@@ -1,0 +1,105 @@
+# 🐛 Známé problémy (v3.0.0-RC.1)
+
+Tento soubor obsahuje seznam známých problémů a jejich stav řešení.
+
+## Priorita 1 - Kritické
+
+### ~~1. Senzory se neaktualizují v reálném čase~~ ✅
+
+**Stav:** ✅ Vyřešeno
+
+**Popis:** Stav senzorů času a binárních senzorů aktivních tarifů se mění
+pouze při restartu Home Assistant. Refresh dat musí být častější
+(ideálně 1-2 sec pro countdown), odděleně od stahování dat z API.
+
+**Řešení:** Přidán samostatný interval pro přepočet stavu (5 sekund),
+nezávislý na stahování dat z API (1 hodina).
+
+**Nahlásili:** @micjon, @pokornyIt
+
+---
+
+### ~~2. UI karta není zaregistrována~~ ✅
+
+**Stav:** ✅ Není bug
+
+**Popis:** Frontend karta není zaregistrována v Lovelace, ačkoliv v logu
+je uvedeno že zaregistrována je.
+
+**Řešení:** Nutný refresh prohlížeče (Ctrl+F5 nebo Cmd+Shift+R) po restartu HA.
+
+**Nahlásil:** @pokornyIt
+
+---
+
+### 3. Nelze změnit ceny VT/NT po nastavení
+
+**Stav:** 🔴 Otevřený
+
+**Popis:** Po počátečním nastavení integrace nejde změnit ceny VT/NT.
+Options flow nefunguje nebo není dostupný.
+
+**Nahlásil:** @pokornyIt
+
+---
+
+### 4. EAN v logu - citlivá hodnota
+
+**Stav:** 🔴 Otevřený
+
+**Popis:** EAN kód se zobrazuje v logu v plném znění. Pokud je to citlivá
+hodnota, měl by být maskován (např. `859182400600xxxxx`).
+
+**Nahlásil:** @pokornyIt
+
+---
+
+## Priorita 2 - Střední
+
+### 5. Více signálů pro jeden EAN - neintuitvní názvy entit
+
+**Stav:** 🟡 Otevřený
+
+**Popis:** Pokud EAN má více signálů:
+
+1. Jaké jméno bude mít device při přidání více signálů?
+2. Názvy entit jsou neintuitvní (např. `binary_sensor.cez_hdo_nizky_tarif_aktivni_1`)
+
+**Nahlásil:** @pokornyIt
+
+---
+
+### ~~6. Debug log obsahuje emoji ikonu~~ ✅
+
+**Stav:** ✅ Vyřešeno
+
+**Popis:** Debug log message obsahuje emoji ikonu (🔴), což může
+způsobovat problémy v některých systémech.
+
+```log
+# Před (s emoji)
+2026-01-30 09:25:45 DEBUG ... 🔴 IN HIGH TARIFF: 06:15:00-14:10:00
+
+# Po (bez emoji)
+2026-01-30 09:25:45 DEBUG ... [VT] IN HIGH TARIFF: 06:15:00-14:10:00
+```
+
+**Řešení:** Emoji nahrazeny textovými značkami `[NT]` a `[VT]`.
+
+**Nahlásil:** @pokornyIt
+
+---
+
+## Vyřešené
+
+- **Issue #1:** Senzory se neaktualizují v reálném čase
+- **Issue #2:** UI karta není zaregistrována (nutný refresh prohlížeče)
+- **Issue #6:** Debug log obsahuje emoji ikonu
+
+---
+
+## Jak nahlásit problém
+
+1. Zkontrolujte, zda problém již není v tomto seznamu
+2. Vytvořte [GitHub Issue](https://github.com/Cmajda/ha_cez_distribuce/issues)
+3. Přiložte diagnostiku (Settings → Devices → ČEZ HDO → ⋮ → Download diagnostics)
