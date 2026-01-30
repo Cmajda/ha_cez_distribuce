@@ -80,6 +80,27 @@ body:
         2025-01-28 12:00:00 ERROR (MainThread) [custom_components.cez_hdo] ...
 
   - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostická data
+      description: |
+        **Jak exportovat diagnostiku:**
+        1. Settings → Devices & Services → ČEZ HDO
+        2. Klikněte na zařízení "ČEZ HDO XXXXXX"
+        3. Klikněte na ⋮ (tři tečky) vpravo nahoře
+        4. Vyberte "Download diagnostics"
+        5. Přiložte obsah JSON souboru sem
+
+        **Citlivá data jsou automaticky maskována** (EAN, partner, vkont atd.)
+      render: json
+      placeholder: |
+        {
+          "entry": { ... },
+          "coordinator_data": { ... },
+          "cache_content": { ... }
+        }
+
+  - type: textarea
     id: additional
     attributes:
       label: Další informace

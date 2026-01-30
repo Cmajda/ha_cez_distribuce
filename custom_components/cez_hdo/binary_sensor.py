@@ -81,6 +81,7 @@ async def async_setup_platform(
 
     # Clean up old entities if EAN changed
     from .registry_cleanup import async_cleanup_entity_registry_if_ean_changed
+
     await async_cleanup_entity_registry_if_ean_changed(hass, ean)
 
     # Get or create coordinator (sensor platform creates it first usually)
@@ -102,8 +103,7 @@ def setup_platform(
 ) -> None:
     """Set up the CEZ HDO binary sensor platform (sync - deprecated)."""
     _LOGGER.warning(
-        "Synchronous setup_platform is deprecated. "
-        "Use async_setup_platform instead."
+        "Synchronous setup_platform is deprecated. " "Use async_setup_platform instead."
     )
 
 
@@ -119,15 +119,15 @@ async def _async_get_coordinator(
 
     # Create new coordinator
     coordinator = CezHdoCoordinator(hass, ean, signal)
-    
+
     # Initialize - this loads cache and triggers first refresh
     # Use async_initialize() for YAML platforms (not async_config_entry_first_refresh)
     await coordinator.async_initialize()
-    
+
     # Store in hass.data
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][DATA_COORDINATOR] = coordinator
-    
+
     _LOGGER.debug("Created new coordinator for EAN: %s", ean)
     return coordinator
 
@@ -147,7 +147,7 @@ class CezHdoBinarySensor(CoordinatorEntity[CezHdoCoordinator], BinarySensorEntit
         self.ean = ean
         self._name = name
         self._entry_id = entry_id
-        
+
         # Set entity metadata
         meta = ENTITY_META.get(name, {})
         # Include entry_id in unique_id if from config entry (prevents duplicates with YAML)
@@ -155,9 +155,11 @@ class CezHdoBinarySensor(CoordinatorEntity[CezHdoCoordinator], BinarySensorEntit
             self._attr_unique_id = f"{entry_id}_{ean}_{name.lower()}"
         else:
             self._attr_unique_id = f"{ean}_{name.lower()}"
-        self._attr_suggested_object_id = meta.get("object_id", f"cez_hdo_{name.lower()}")
+        self._attr_suggested_object_id = meta.get(
+            "object_id", f"cez_hdo_{name.lower()}"
+        )
         self._attr_name = meta.get("friendly", f"ČEZ HDO {name}")
-        
+
         # Device info - group all entities under one device
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, ean)},
@@ -186,7 +188,9 @@ class CezHdoBinarySensor(CoordinatorEntity[CezHdoCoordinator], BinarySensorEntit
 class LowTariffActive(CezHdoBinarySensor):
     """Binary sensor for low tariff active state."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "LowTariffActive", entry_id)
 
     @property
@@ -198,7 +202,9 @@ class LowTariffActive(CezHdoBinarySensor):
 class HighTariffActive(CezHdoBinarySensor):
     """Binary sensor for high tariff active state."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "HighTariffActive", entry_id)
 
     @property

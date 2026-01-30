@@ -1,6 +1,6 @@
 /**
  * ČEZ HDO Card - Entry Point
- * 
+ *
  * This file exports all components and sets up the custom card registration.
  */
 

@@ -205,9 +205,7 @@ class CezHdoBaseEntity:
                     if downloader.normalize_datum(s.get("datum")) == yesterday
                 ]
                 if yesterday_signals:
-                    _LOGGER.debug(
-                        "CEZ HDO: Loaded yesterday's signals from cache"
-                    )
+                    _LOGGER.debug("CEZ HDO: Loaded yesterday's signals from cache")
             except Exception as e:
                 _LOGGER.warning(
                     "CEZ HDO: Failed to read yesterday's signals from cache %s: %s",

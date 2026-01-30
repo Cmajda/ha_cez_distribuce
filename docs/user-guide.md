@@ -1,104 +1,124 @@
 # ⚡️ ČEZ HDO – Uživatelská dokumentace
 
-Tato stránka je kompletní návod pro běžného uživatele: instalace, konfigurace, vytvořené entity, Lovelace karta a řešení problémů.
+Kompletní návod pro instalaci, konfiguraci a používání integrace ČEZ HDO v Home Assistantu.
+
+---
 
 ## 📑 Obsah
 
-- [📑 Obsah](#-obsah)
 - [🚀 Instalace](#-instalace)
-  - [Instalace přes HACS (doporučeno)](#instalace-přes-hacs-doporučeno)
-- [⚙️ Konfigurace (`configuration.yaml`)](#️-konfigurace-configurationyaml)
-  - [Kde najít EAN](#kde-najít-ean)
-- [📦 Vytvářené entity a jejich význam](#-vytvářené-entity-a-jejich-význam)
-  - [Binary sensors](#binary-sensors)
-  - [Sensors](#sensors)
+- [⚙️ Konfigurace integrace](#️-konfigurace-integrace)
+- [📦 Vytvářené entity](#-vytvářené-entity)
 - [🎴 Lovelace karta](#-lovelace-karta)
-  - [Přidání karty](#přidání-karty)
-  - [Ukázka karty](#ukázka-karty)
-  - [Nastavení entit v UI](#nastavení-entit-v-ui)
-  - [Kompletní konfigurace karty](#kompletní-konfigurace-karty)
-    - [Titulek](#titulek)
-    - [Výběr entit](#výběr-entit)
-    - [Přepínače zobrazení](#přepínače-zobrazení)
-    - [Cenová pole](#cenová-pole)
-  - [Příklad kompletní YAML konfigurace](#příklad-kompletní-yaml-konfigurace)
-  - [Ruční registrace zdroje (jen pokud se karta nenačítá)](#ruční-registrace-zdroje-jen-pokud-se-karta-nenačítá)
-- [💰 Nastavení cen tarifů](#-nastavení-cen-tarifů)
-  - [Nastavení v Lovelace kartě](#nastavení-v-lovelace-kartě)
-  - [Nastavení přes službu](#nastavení-přes-službu)
-  - [Zobrazení cen v kartě](#zobrazení-cen-v-kartě)
-- [📊 Použití v Energy Dashboard](#-použití-v-energy-dashboard)
-- [📅 HDO rozvrh – vizualizace v kartě](#-hdo-rozvrh--vizualizace-v-kartě)
-  - [Aktivace rozvrhu](#aktivace-rozvrhu)
-  - [Popis vizualizace](#popis-vizualizace)
-  - [Formát dat senzoru](#formát-dat-senzoru)
-- [🎛️ Přehled přepínačů v editoru karty](#️-přehled-přepínačů-v-editoru-karty)
-- [🔧 Co dělat, když komponenta nefunguje](#-co-dělat-když-komponenta-nefunguje)
-- [🔍 Diagnostika (když chcete poslat logy)](#-diagnostika-když-chcete-poslat-logy)
+- [💰 Nastavení cen](#-nastavení-cen)
+- [📊 Energy Dashboard](#-energy-dashboard)
+- [📅 HDO rozvrh](#-hdo-rozvrh)
+- [🔧 Řešení problémů](#-řešení-problémů)
+- [📊 Diagnostika](#-diagnostika)
+
+---
 
 ## 🚀 Instalace
 
 ### Instalace přes HACS (doporučeno)
 
-1. Otevřete HACS → Integrations
-1. Přidejte repozitář jako Custom repository (Integration):
+1. Otevřete **HACS → Integrations**
+2. Klikněte na **⋮** → **Custom repositories**
+3. Přidejte repozitář:
 
 [![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-1. Nainstalujte integraci „ČEZ HDO"
-1. Restart Home Assistant
+4. Nainstalujte integraci **ČEZ HDO**
+5. **Restartujte Home Assistant**
 
-Poznámka: po instalaci/aktualizaci a restartu HA může být potřeba jednou udělat `Ctrl+F5`, aby se Lovelace karta objevila v seznamu karet.
+### Po instalaci
 
-## ⚙️ Konfigurace (`configuration.yaml`)
+Po restartu pokračujte konfigurací integrace (viz další sekce).
 
-Přidejte do `configuration.yaml` přesně tento blok (EAN je povinný):
+> **Poznámka:** Po instalaci/aktualizaci může být potřeba stisknout `Ctrl+F5` pro vyčištění cache prohlížeče.
 
-```yaml
-sensor:
-  - platform: cez_hdo
-    ean: "Váš EAN"
+---
 
-binary_sensor:
-  - platform: cez_hdo
-    ean: "Váš EAN"
-```
+## ⚙️ Konfigurace integrace
 
-Pak restartujte Home Assistant.
+Od verze 3.0.0 se integrace konfiguruje přes GUI (ne přes YAML).
 
-### Kde najít EAN
+### Přidání integrace
 
-EAN je identifikátor odběrného místa a najdete ho typicky:
+1. **Settings → Devices & Services**
+2. Klikněte **+ Add Integration**
+3. Vyhledejte **ČEZ HDO**
 
-- na faktuře / vyúčtování
-- v portálu dodavatele/distributora
+### Krok 1: EAN
 
-## 📦 Vytvářené entity a jejich význam
+Zadejte vaše **EAN číslo** (18 číslic).
 
-Integrace vytváří tyto entity (výchozí názvy):
+EAN najdete:
+- Na faktuře / vyúčtování za elektřinu
+- V portálu vašeho dodavatele elektřiny
+- Na stránkách [ČEZ Distribuce](https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo)
+
+![EAN na faktuře](../ean_example.png)
+
+### Krok 2: Signál
+
+Vyberte **signál** ze seznamu dostupných signálů pro vaše odběrné místo.
+
+- Pokud je k dispozici pouze jeden signál, bude vybrán automaticky
+- Signál určuje, kdy se přepíná mezi NT a VT
+
+### Krok 3: Ceny
+
+Zadejte ceny elektřiny:
+- **Cena NT (Kč/kWh)** – cena za kWh v nízkém tarifu
+- **Cena VT (Kč/kWh)** – cena za kWh ve vysokém tarifu
+
+Ceny najdete na faktuře od dodavatele elektřiny.
+
+### Dokončení
+
+Klikněte **Finish**. Integrace vytvoří:
+- Zařízení "ČEZ HDO XXXXXX" (posledních 6 číslic EAN)
+- Všechny senzory a binární senzory
+
+---
+
+## 📦 Vytvářené entity
+
+Integrace vytváří následující entity:
 
 ### Binary sensors
 
-- `binary_sensor.cez_hdo_nizky_tarif_aktivni` – nízký tarif je aktivní (`on/off`)
-- `binary_sensor.cez_hdo_vysoky_tarif_aktivni` – vysoký tarif je aktivní (`on/off`)
+| Entita | Popis |
+| ------ | ----- |
+| `binary_sensor.cez_hdo_*_nizky_tarif_aktivni` | Nízký tarif je aktivní (`on/off`) |
+| `binary_sensor.cez_hdo_*_vysoky_tarif_aktivni` | Vysoký tarif je aktivní (`on/off`) |
 
 ### Sensors
 
-- `sensor.cez_hdo_nizky_tarif_zacatek` – čas začátku nízkého tarifu (např. `01:10`)
-- `sensor.cez_hdo_nizky_tarif_konec` – čas konce nízkého tarifu (např. `08:30`)
-- `sensor.cez_hdo_nizky_tarif_zbyva` – zbývající čas do změny tarifu
-- `sensor.cez_hdo_vysoky_tarif_zacatek` – čas začátku vysokého tarifu
-- `sensor.cez_hdo_vysoky_tarif_konec` – čas konce vysokého tarifu
-- `sensor.cez_hdo_vysoky_tarif_zbyva` – zbývající čas do změny tarifu
-- `sensor.cez_hdo_aktualni_cena` – aktuální cena elektřiny v Kč/kWh (podle aktivního tarifu)
-- `sensor.cez_hdo_rozvrh` – 7denní rozvrh HDO pro vizualizaci v kartě
-- `sensor.cez_hdo_surova_data` – surová data / timestamp (diagnostika)
+| Entita | Popis |
+| ------ | ----- |
+| `sensor.cez_hdo_*_nizky_tarif_zacatek` | Čas začátku NT (např. `01:10`) |
+| `sensor.cez_hdo_*_nizky_tarif_konec` | Čas konce NT (např. `08:30`) |
+| `sensor.cez_hdo_*_nizky_tarif_zbyva` | Zbývající čas do změny tarifu |
+| `sensor.cez_hdo_*_vysoky_tarif_zacatek` | Čas začátku VT |
+| `sensor.cez_hdo_*_vysoky_tarif_konec` | Čas konce VT |
+| `sensor.cez_hdo_*_vysoky_tarif_zbyva` | Zbývající čas do změny tarifu |
+| `sensor.cez_hdo_*_aktualni_cena` | Aktuální cena v Kč/kWh |
+| `sensor.cez_hdo_*_rozvrh` | 7denní HDO rozvrh |
+| `sensor.cez_hdo_*_surova_data` | Timestamp poslední aktualizace |
+
+> **Poznámka:** `*` označuje suffix odvozený z EAN pro rozlišení více instancí.
+
+---
 
 ## 🎴 Lovelace karta
 
 ### Přidání karty
 
-V Lovelace přidejte kartu typu:
+1. Otevřete dashboard v edit módu
+2. Přidejte kartu → vyhledejte **ČEZ HDO Card**
+3. Nebo v YAML:
 
 ```yaml
 type: custom:cez-hdo-card
@@ -108,116 +128,40 @@ type: custom:cez-hdo-card
 
 ![ČEZ HDO karta](../entity_card.png)
 
-### Nastavení entit v UI
+### Nastavení karty
 
-- Karta má UI editor a nabízí výběr entit.
-- Tip: když necháte nějaké pole prázdné, karta použije výchozí entity (pokud existují).
+Karta má vizuální editor s těmito možnostmi:
 
-### Kompletní konfigurace karty
+| Přepínač | Popis | Výchozí |
+| -------- | ----- | ------- |
+| Zobrazit titulek | Nadpis karty | ✅ Zapnuto |
+| Zobrazit stavy tarifů | Boxy NT/VT se stavem | ✅ Zapnuto |
+| Zobrazit ceny u tarifů | Cena v boxu NT/VT | ❌ Vypnuto |
+| Zobrazit časy | Začátek/konec tarifů | ✅ Zapnuto |
+| Zobrazit zbývající čas | Čas do změny tarifu | ✅ Zapnuto |
+| Zobrazit aktuální cenu | Velký box s cenou | ✅ Zapnuto |
+| Zobrazit HDO rozvrh | 7denní vizualizace | ❌ Vypnuto |
+| Zobrazit ceny v legendě | Ceny u NT/VT v legendě | ❌ Vypnuto |
+| Kompaktní režim | Zmenšená velikost | ❌ Vypnuto |
 
-![Editor karty](../entity_card_edit.png)
+### Výběr entit
 
-Editor karty obsahuje následující nastavení:
+Karta automaticky detekuje entity ČEZ HDO. Pokud máte více instancí integrace, vyberte správné entity v editoru.
 
-#### Titulek
+---
 
-Textové pole pro zadání názvu karty. Výchozí hodnota je "ČEZ HDO". Můžete změnit na libovolný text nebo nechat prázdné.
+## 💰 Nastavení cen
 
-#### Výběr entit
+Ceny se nastavují **v integraci**, ne v kartě.
 
-Karta automaticky detekuje entity ČEZ HDO, ale můžete je ručně změnit:
+### Změna cen
 
-| Entity picker            | Popis                           | Výchozí entita                              |
-| ------------------------ | ------------------------------- | ------------------------------------------- |
-| Nízký tarif (binary)     | Binární senzor pro stav NT      | `binary_sensor.cez_hdo_nizky_tarif_aktivni` |
-| Vysoký tarif (binary)    | Binární senzor pro stav VT      | `binary_sensor.cez_hdo_vysoky_tarif_aktivni`|
-| NT začátek               | Čas začátku nízkého tarifu      | `sensor.cez_hdo_nizky_tarif_zacatek`        |
-| NT konec                 | Čas konce nízkého tarifu        | `sensor.cez_hdo_nizky_tarif_konec`          |
-| NT zbývá                 | Zbývající čas do změny z NT     | `sensor.cez_hdo_nizky_tarif_zbyva`          |
-| VT začátek               | Čas začátku vysokého tarifu     | `sensor.cez_hdo_vysoky_tarif_zacatek`       |
-| VT konec                 | Čas konce vysokého tarifu       | `sensor.cez_hdo_vysoky_tarif_konec`         |
-| VT zbývá                 | Zbývající čas do změny z VT     | `sensor.cez_hdo_vysoky_tarif_zbyva`         |
-| Rozvrh HDO               | Senzor s 7denním rozvrhem       | `sensor.cez_hdo_rozvrh`                     |
+1. **Settings → Devices & Services → ČEZ HDO**
+2. Klikněte na **Configure**
+3. Projděte kroky až ke **Krok 3: Ceny**
+4. Změňte ceny a uložte
 
-#### Přepínače zobrazení
-
-> **Poznámka:** Pořadí přepínačů v editoru odpovídá pořadí zobrazení prvků na kartě – od shora dolů.
-
-| # | Přepínač | Popis | Výchozí |
-| - | -------- | ----- | ------- |
-| 1 | **Zobrazit titulek** | Zobrazí/skryje nadpis karty úplně nahoře. Když je vypnutý, karta nemá žádný hlavní nadpis. | ✅ Zapnuto |
-| 2 | **Zobrazit stavy tarifů** | Zobrazí dva boxy vedle sebe – "Nízký tarif" a "Vysoký tarif" s textem "Aktivní" nebo "Neaktivní". Aktivní tarif je zvýrazněn barvou (zelená pro NT, oranžová pro VT). | ✅ Zapnuto |
-| 3 | **Zobrazit ceny u tarifů** | Pod textem "Aktivní/Neaktivní" v boxech tarifů zobrazí nastavenou cenu (např. "2.50 Kč/kWh"). Vyžaduje nastavené ceny v polích níže. | ❌ Vypnuto |
-| 4 | **Zobrazit časy (začátek/konec)** | Zobrazí sekci s časy: NT začátek, NT konec, VT začátek, VT konec. Užitečné pro plánování spotřeby. | ✅ Zapnuto |
-| 5 | **Zobrazit zbývající čas** | Zobrazí sekci "NT zbývá" a "VT zbývá" – kolik času zbývá do konce aktuálního tarifu nebo do začátku dalšího. | ✅ Zapnuto |
-| 6 | **Zobrazit aktuální cenu** | Zobrazí velký zvýrazněný box s aktuální cenou elektřiny. Barva pozadí odpovídá aktivnímu tarifu (zelená = NT, oranžová = VT). Pod cenou je text "Nízký tarif" nebo "Vysoký tarif". | ✅ Zapnuto |
-| 7 | **Zobrazit HDO rozvrh** | Zobrazí vizuální timeline s 7denním rozvrhem HDO. Každý den má pruh s barevnými bloky: zelená = NT, oranžová = VT. Časová osa 0:00–24:00. | ❌ Vypnuto |
-| 8 | **Zobrazit ceny v legendě rozvrhu** | V legendě rozvrhu (nad grafem) přidá k textu "NT" a "VT" také ceny (např. "NT 2.50 Kč"). Vyžaduje nastavené ceny a zapnutý rozvrh. | ❌ Vypnuto |
-| 9 | **Kompaktní režim** | Zmenší velikost karty – menší fonty, menší odsazení. Vhodné pro menší displeje nebo když chcete více karet vedle sebe. | ❌ Vypnuto |
-
-#### Cenová pole
-
-| Pole | Popis |
-| ---- | ----- |
-| **Cena NT (Kč/kWh)** | Cena za kWh v nízkém tarifu (např. 2.50) |
-| **Cena VT (Kč/kWh)** | Cena za kWh ve vysokém tarifu (např. 4.50) |
-
-Ceny se:
-
-- Ukládají perzistentně (přežijí restart HA)
-- Synchronizují se senzorem `sensor.cez_hdo_aktualni_cena`
-- Zobrazují v kartě podle nastavení přepínačů
-
-### Příklad kompletní YAML konfigurace
-
-```yaml
-type: custom:cez-hdo-card
-title: Můj HDO
-entities:
-  low_tariff: binary_sensor.cez_hdo_nizky_tarif_aktivni
-  high_tariff: binary_sensor.cez_hdo_vysoky_tarif_aktivni
-  low_start: sensor.cez_hdo_nizky_tarif_zacatek
-  low_end: sensor.cez_hdo_nizky_tarif_konec
-  low_duration: sensor.cez_hdo_nizky_tarif_zbyva
-  high_start: sensor.cez_hdo_vysoky_tarif_zacatek
-  high_end: sensor.cez_hdo_vysoky_tarif_konec
-  high_duration: sensor.cez_hdo_vysoky_tarif_zbyva
-  schedule: sensor.cez_hdo_rozvrh
-show_title: true
-show_tariff_status: true
-show_tariff_prices: true
-show_times: true
-show_duration: true
-show_price: true
-show_schedule: true
-show_schedule_prices: true
-compact_mode: false
-low_tariff_price: 2.50
-high_tariff_price: 4.50
-```
-
-### Ruční registrace zdroje (jen pokud se karta nenačítá)
-
-Pokud se karta v seznamu karet nezobrazuje ani po `Ctrl+F5`:
-
-1. Nastavení → Dashboardy → Zdroje
-1. Přidat zdroj
-1. URL: `/cez_hdo/cez-hdo-card.js`
-1. Typ: JavaScript Module
-1. Restart Home Assistant
-
-## 💰 Nastavení cen tarifů
-
-### Nastavení v Lovelace kartě
-
-V editoru karty najdete pole pro zadání cen:
-
-- **Cena NT (Kč/kWh)** – cena za kWh v nízkém tarifu
-- **Cena VT (Kč/kWh)** – cena za kWh ve vysokém tarifu
-
-Po zadání cen a uložení karty se automaticky aktualizuje senzor `sensor.cez_hdo_aktualni_cena`.
-
-### Nastavení přes službu
+### Služba set_prices
 
 Ceny lze nastavit i přes službu:
 
@@ -228,92 +172,100 @@ data:
   high_tariff_price: 4.50
 ```
 
-### Zobrazení cen v kartě
+---
 
-V editoru karty jsou dva přepínače:
+## 📊 Energy Dashboard
 
-- **Zobrazit aktuální cenu** – zobrazí velký box s aktuální cenou
-- **Zobrazit ceny u tarifů** – zobrazí cenu přímo v boxu NT/VT
+Senzor `sensor.cez_hdo_*_aktualni_cena` lze použít v Energy Dashboard:
 
-## 📊 Použití v Energy Dashboard
-
-1. Nastavení → Dashboardy → Energy
-2. V sekci "Electricity grid" klikněte na "Add consumption"
+1. **Settings → Dashboards → Energy**
+2. V sekci "Electricity grid" klikněte na **Add consumption**
 3. Vyberte měřič spotřeby
-4. V poli "Use an entity tracking the total costs" nebo "Use an entity with current price" vyberte `sensor.cez_hdo_aktualni_cena`
+4. V poli "Use an entity with current price" vyberte `sensor.cez_hdo_*_aktualni_cena`
 
-Senzor automaticky přepíná mezi cenou NT a VT podle aktivního tarifu.
-Senzor `sensor.cez_hdo_aktualni_cena` lze použít jako zdroj ceny elektřiny v Energy kartě Home Assistantu.
+![Energy Dashboard](../integration_energy_ha.png)
 
-![Nastavení Energy Dashboard](../integration_energy_ha.png)
+---
 
-## 📅 HDO rozvrh – vizualizace v kartě
+## 📅 HDO rozvrh
 
-Lovelace karta obsahuje integrovanou vizualizaci 7denního HDO rozvrhu:
+Karta obsahuje vizualizaci 7denního HDO rozvrhu:
 
 ![HDO rozvrh](../graph.png)
 
-### Aktivace rozvrhu
+### Aktivace
 
 1. Otevřete editor karty
-2. Zapněte přepínač "Zobrazit HDO rozvrh"
-3. Volitelně zapněte "Zobrazit ceny v legendě rozvrhu" pro zobrazení cen NT/VT
+2. Zapněte **Zobrazit HDO rozvrh**
+3. Volitelně zapněte **Zobrazit ceny v legendě rozvrhu**
 
-### Popis vizualizace
+### Popis
 
 - **Zelené bloky** – nízký tarif (NT)
 - **Oranžové bloky** – vysoký tarif (VT)
-- **Časová osa** – 0:00 až 24:00 pro každý den
-- **Legenda** – s volitelným zobrazením cen
-- **Tooltip** – při najetí myší zobrazí přesné časy intervalu
+- **Časová osa** – 0:00 až 24:00
+- **Tooltip** – přesné časy při najetí myší
 
-### Formát dat senzoru
+---
 
-Senzor `sensor.cez_hdo_rozvrh` poskytuje v atributu `schedule` seznam intervalů:
+## 🔧 Řešení problémů
 
-```json
-[
-  {"start": "2026-01-27T00:00:00", "end": "2026-01-27T07:15:00", "tariff": "NT", "value": 1},
-  {"start": "2026-01-27T07:15:00", "end": "2026-01-27T08:15:00", "tariff": "VT", "value": 0}
-]
-```
+### Karta se nezobrazuje
 
-- `tariff`: "NT" (nízký tarif) nebo "VT" (vysoký tarif)
-- `value`: 1 pro NT, 0 pro VT
+1. Stiskněte `Ctrl+F5` pro vyčištění cache
+2. Zkontrolujte, že URL `http://IP_HA:8123/cez_hdo/cez-hdo-card.js` vrací 200
 
-## 🎛️ Přehled přepínačů v editoru karty
+### Entity nejsou k dispozici
 
-| Přepínač                        | Popis                                 |
-| ------------------------------- | ------------------------------------- |
-| Zobrazit titulek                | Zobrazí/skryje nadpis karty           |
-| Zobrazit stavy tarifů           | Zobrazí/skryje boxy s NT/VT stavem    |
-| Zobrazit ceny u tarifů          | Zobrazí cenu přímo v boxu NT/VT       |
-| Zobrazit časy (začátek/konec)   | Zobrazí časy začátku a konce tarifů   |
-| Zobrazit zbývající čas          | Zobrazí zbývající čas do změny tarifu |
-| Zobrazit aktuální cenu          | Zobrazí velký box s aktuální cenou    |
-| Zobrazit HDO rozvrh             | Zobrazí 7denní vizualizaci rozvrhu    |
-| Zobrazit ceny v legendě rozvrhu | Přidá ceny NT/VT k legendě grafu      |
-| Kompaktní režim                 | Zmenší kartu                          |
+1. Zkontrolujte **Settings → Devices & Services → ČEZ HDO**
+2. Ověřte, že integrace nemá chybu (červená ikona)
+3. Klikněte na **Reload** u integrace
 
-## 🔧 Co dělat, když komponenta nefunguje
+### Chyba "Neplatný EAN" nebo "Nepodařilo se načíst signály"
 
-Pokud se po instalaci/aktualizaci něco rozbije (karta nejde přidat, nejde načíst JS, nebo jsou chyby v konzoli), postupujte takto:
+- Ověřte, že EAN je správný (18 číslic)
+- Zkontrolujte [portál ČEZ Distribuce](https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo) ručně
+- API ČEZ může být dočasně nedostupné
 
-1. Vynutit refresh: `Ctrl+F5`
-1. Odinstalovat doplněk
-1. Pokud existuje složka `www/cez_hdo`, smažte ji
-1. Znovu nainstalovat doplněk
-1. Restart Home Assistant
+### Kompletní reset
 
-## 🔍 Diagnostika (když chcete poslat logy)
+1. **Settings → Devices & Services → ČEZ HDO → Delete**
+2. Smažte složku `custom_components/cez_hdo/data/`
+3. Restart Home Assistant
+4. Přidejte integraci znovu
 
-Nejrychlejší kontrola pro kartu:
+---
 
-- Otevřete v prohlížeči `http://IP_HA:8123/cez_hdo/cez-hdo-card.js`
-  - pokud vrací `200`, zdroj existuje
-  - pokud vrací `404`, karta se nenačte
+## 📊 Diagnostika
 
-Pro integraci:
+Pro nahlášení chyby na GitHubu exportujte diagnostická data:
 
-- Nastavení → Systém → Protokoly (Logs)
-- hledejte záznamy `custom_components.cez_hdo`
+### Export diagnostiky
+
+1. **Settings → Devices & Services → ČEZ HDO**
+2. Klikněte na zařízení
+3. Klikněte na **⋮** (tři tečky) vpravo nahoře
+4. Vyberte **Download diagnostics**
+5. Uložte JSON soubor
+
+### Co diagnostika obsahuje
+
+- Stav všech senzorů (hodnoty, atributy)
+- Obsah cache (HDO rozvrh)
+- Nastavení integrace (signál, ceny)
+- **Citlivé údaje jsou maskovány** (EAN, partner, vkont, vstelle, anlage)
+
+### Přiložení k issue
+
+1. Otevřete [GitHub Issues](https://github.com/Cmajda/ha_cez_distribuce/issues)
+2. Vytvořte nový issue
+3. Přiložte diagnostický JSON soubor
+4. Popište problém
+
+---
+
+## 📚 Další dokumentace
+
+- [Upgrade Guide](upgrade-guide.md) – postup upgradu z v2.x na v3.0.0
+- [Developer Guide](developer-guide.md) – pro vývojáře
+- [Service Guide](service-guide.md) – popis dostupných služeb

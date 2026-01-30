@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 import voluptuous as vol
 
@@ -118,6 +117,7 @@ async def async_setup_platform(
 
     # Clean up old entities if EAN changed
     from .registry_cleanup import async_cleanup_entity_registry_if_ean_changed
+
     await async_cleanup_entity_registry_if_ean_changed(hass, ean)
 
     # Create or get coordinator
@@ -146,8 +146,7 @@ def setup_platform(
 ) -> None:
     """Set up the CEZ HDO sensor platform (sync - deprecated)."""
     _LOGGER.warning(
-        "Synchronous setup_platform is deprecated. "
-        "Use async_setup_platform instead."
+        "Synchronous setup_platform is deprecated. " "Use async_setup_platform instead."
     )
 
 
@@ -163,15 +162,15 @@ async def _async_get_coordinator(
 
     # Create new coordinator
     coordinator = CezHdoCoordinator(hass, ean, signal)
-    
+
     # Initialize - this loads cache and triggers first refresh
     # Use async_initialize() for YAML platforms (not async_config_entry_first_refresh)
     await coordinator.async_initialize()
-    
+
     # Store in hass.data
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][DATA_COORDINATOR] = coordinator
-    
+
     _LOGGER.debug("Created new coordinator for EAN: %s", ean)
     return coordinator
 
@@ -191,7 +190,7 @@ class CezHdoSensor(CoordinatorEntity[CezHdoCoordinator], SensorEntity):
         self.ean = ean
         self._name = name
         self._entry_id = entry_id
-        
+
         # Set entity metadata
         meta = ENTITY_META.get(name, {})
         # Include entry_id in unique_id if from config entry (prevents duplicates with YAML)
@@ -199,9 +198,11 @@ class CezHdoSensor(CoordinatorEntity[CezHdoCoordinator], SensorEntity):
             self._attr_unique_id = f"{entry_id}_{ean}_{name.lower()}"
         else:
             self._attr_unique_id = f"{ean}_{name.lower()}"
-        self._attr_suggested_object_id = meta.get("object_id", f"cez_hdo_{name.lower()}")
+        self._attr_suggested_object_id = meta.get(
+            "object_id", f"cez_hdo_{name.lower()}"
+        )
         self._attr_name = meta.get("friendly", f"ČEZ HDO {name}")
-        
+
         # Device info - group all entities under one device
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, ean)},
@@ -225,7 +226,9 @@ class CezHdoSensor(CoordinatorEntity[CezHdoCoordinator], SensorEntity):
 class LowTariffStart(CezHdoSensor):
     """Sensor for low tariff start time."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "LowTariffStart", entry_id)
 
     @property
@@ -239,7 +242,9 @@ class LowTariffStart(CezHdoSensor):
 class LowTariffEnd(CezHdoSensor):
     """Sensor for low tariff end time."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "LowTariffEnd", entry_id)
 
     @property
@@ -257,7 +262,9 @@ class LowTariffEnd(CezHdoSensor):
 class LowTariffDuration(CezHdoSensor):
     """Sensor for low tariff duration."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "LowTariffDuration", entry_id)
 
     @property
@@ -267,7 +274,10 @@ class LowTariffDuration(CezHdoSensor):
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        if self.data.low_tariff_duration and self.data.low_tariff_duration.total_seconds() > 0:
+        if (
+            self.data.low_tariff_duration
+            and self.data.low_tariff_duration.total_seconds() > 0
+        ):
             return downloader.format_duration(self.data.low_tariff_duration)
         # Return "00:00" when low tariff is not active
         return "00:00"
@@ -276,7 +286,9 @@ class LowTariffDuration(CezHdoSensor):
 class HighTariffStart(CezHdoSensor):
     """Sensor for high tariff start time."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "HighTariffStart", entry_id)
 
     @property
@@ -290,7 +302,9 @@ class HighTariffStart(CezHdoSensor):
 class HighTariffEnd(CezHdoSensor):
     """Sensor for high tariff end time."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "HighTariffEnd", entry_id)
 
     @property
@@ -308,7 +322,9 @@ class HighTariffEnd(CezHdoSensor):
 class HighTariffDuration(CezHdoSensor):
     """Sensor for high tariff duration."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "HighTariffDuration", entry_id)
 
     @property
@@ -318,7 +334,10 @@ class HighTariffDuration(CezHdoSensor):
     @property
     def native_value(self) -> str | None:
         """Return the state of the sensor."""
-        if self.data.high_tariff_duration and self.data.high_tariff_duration.total_seconds() > 0:
+        if (
+            self.data.high_tariff_duration
+            and self.data.high_tariff_duration.total_seconds() > 0
+        ):
             return downloader.format_duration(self.data.high_tariff_duration)
         # Return "00:00" when high tariff is not active
         return "00:00"
@@ -327,7 +346,9 @@ class HighTariffDuration(CezHdoSensor):
 class CurrentPrice(CezHdoSensor):
     """Sensor for current electricity price based on active tariff."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "CurrentPrice", entry_id)
 
     @property
@@ -360,7 +381,9 @@ class CurrentPrice(CezHdoSensor):
 class CezHdoRawData(CezHdoSensor):
     """Sensor for raw HDO JSON data and timestamp."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "RawData", entry_id)
 
     @property
@@ -382,7 +405,9 @@ class CezHdoRawData(CezHdoSensor):
 class HdoSchedule(CezHdoSensor):
     """Sensor providing HDO schedule data for graphs (ApexCharts compatible)."""
 
-    def __init__(self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None) -> None:
+    def __init__(
+        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None
+    ) -> None:
         super().__init__(coordinator, ean, "HdoSchedule", entry_id)
 
     @property
@@ -393,6 +418,7 @@ class HdoSchedule(CezHdoSensor):
     def native_value(self) -> str | None:
         """Return today's date as state value."""
         from datetime import datetime
+
         return datetime.now().strftime("%d.%m.%Y")
 
     @property
@@ -402,5 +428,9 @@ class HdoSchedule(CezHdoSensor):
             "schedule": self.data.schedule,
             "days": 7,
             "signal": self.coordinator.signal,
-            "last_update": self.data.last_update.isoformat() if self.data.last_update else None,
+            "last_update": self.data.last_update.isoformat()
+            if self.data.last_update
+            else None,
+            "low_tariff_price": self.data.low_tariff_price,
+            "high_tariff_price": self.data.high_tariff_price,
         }

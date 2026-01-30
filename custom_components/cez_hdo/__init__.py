@@ -38,7 +38,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Ensure data directory exists
     cache_dir = get_cache_dir(hass)
-    await hass.async_add_executor_job(lambda: cache_dir.mkdir(parents=True, exist_ok=True))
+    await hass.async_add_executor_job(
+        lambda: cache_dir.mkdir(parents=True, exist_ok=True)
+    )
 
     # Register service to reload frontend card
     async def reload_frontend_card(call):
@@ -95,12 +97,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                 # Log results - simplified
                 signal_names = list(signal_groups.keys())
-                _LOGGER.debug(
-                    "CEZ HDO: Found signals: %s", ", ".join(signal_names)
-                )
+                _LOGGER.debug("CEZ HDO: Found signals: %s", ", ".join(signal_names))
 
             else:
-                _LOGGER.error("CEZ HDO: Failed to fetch signals, HTTP status: %s", response.status_code)
+                _LOGGER.error(
+                    "CEZ HDO: Failed to fetch signals, HTTP status: %s",
+                    response.status_code,
+                )
 
         except Exception as e:
             _LOGGER.error("CEZ HDO: Error fetching signals: %s", e)
@@ -124,13 +127,13 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         high_price = call.data.get("high_tariff_price", 0.0)
 
         coordinators_updated = 0
-        
+
         # Check YAML coordinator (stored under DATA_COORDINATOR key)
         coordinator = hass.data[DOMAIN].get(DATA_COORDINATOR)
         if coordinator:
             await coordinator.async_set_prices(low_price, high_price)
             coordinators_updated += 1
-        
+
         # Check config entry coordinators (stored under entry_id keys)
         for key, value in hass.data[DOMAIN].items():
             if isinstance(value, dict) and DATA_COORDINATOR in value:
@@ -197,7 +200,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Create coordinator
     from .coordinator import CezHdoCoordinator
-    
+
     coordinator = CezHdoCoordinator(hass, ean, signal)
     await coordinator.async_initialize()
 

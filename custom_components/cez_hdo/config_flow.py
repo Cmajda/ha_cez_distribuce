@@ -33,14 +33,14 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     Data has the keys from the schema with values provided by the user.
     """
     ean = data[CONF_EAN]
-    
+
     # Try to fetch data from API to validate EAN
     try:
         import requests
-        
+
         url = downloader.BASE_URL
         request_data = downloader.get_request_data(ean)
-        
+
         response = await hass.async_add_executor_job(
             lambda: requests.post(
                 url,
@@ -53,26 +53,28 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
                 },
             )
         )
-        
+
         if response.status_code != 200:
             raise CannotConnect(f"API returned status {response.status_code}")
-        
+
         json_data = response.json()
         signals = json_data.get("data", {}).get("signals", [])
-        
+
         if not signals:
             raise InvalidEan("No signals found for this EAN")
-        
+
         # Get available signal names
-        available_signals = list(set(s.get("signal", "") for s in signals if s.get("signal")))
-        
+        available_signals = list(
+            set(s.get("signal", "") for s in signals if s.get("signal"))
+        )
+
         _LOGGER.debug("EAN %s validated, found signals: %s", ean, available_signals)
-        
+
         return {
             "title": f"ČEZ HDO ({ean[-6:]})",
             "available_signals": available_signals,
         }
-        
+
     except Exception as err:
         _LOGGER.error("Failed to validate EAN: %s", err)
         if isinstance(err, (CannotConnect, InvalidEan)):
@@ -80,7 +82,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         raise CannotConnect(str(err)) from err
 
 
-class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignore[call-arg]
     """Handle a config flow for ČEZ HDO."""
 
     VERSION = 1
@@ -102,14 +104,14 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 info = await validate_input(self.hass, user_input)
                 self._ean = user_input[CONF_EAN]
                 self._available_signals = info.get("available_signals", [])
-                
+
                 # Check if already configured
                 await self.async_set_unique_id(self._ean)
                 self._abort_if_unique_id_configured()
-                
+
                 # Always proceed to signal selection
                 return await self.async_step_signal()
-                
+
             except CannotConnect:
                 errors["base"] = "cannot_connect"
             except InvalidEan:
@@ -142,19 +144,24 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Build signal options
         signal_options = {s: s for s in self._available_signals}
-        
+
         # Set default to first signal
         default_signal = self._available_signals[0] if self._available_signals else None
+
+        # Choose description based on signal count
+        signal_count = len(self._available_signals)
 
         return self.async_show_form(
             step_id="signal",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_SIGNAL, default=default_signal): vol.In(signal_options),
+                    vol.Required(CONF_SIGNAL, default=default_signal): vol.In(
+                        signal_options
+                    ),
                 }
             ),
             description_placeholders={
-                "signal_help": "Vyberte HDO signál pro vaši lokalitu",
+                "signal_count": str(signal_count),
             },
         )
 
@@ -165,7 +172,11 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
             high_price = user_input.get(CONF_HIGH_TARIFF_PRICE, 0.0)
-            
+
+            # Ensure EAN is set (should always be at this point)
+            if self._ean is None:
+                return self.async_abort(reason="missing_ean")
+
             # Create the config entry
             result = self.async_create_entry(
                 title=f"ČEZ HDO ({self._ean[-6:]})",
@@ -174,7 +185,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_SIGNAL: self._signal,
                 },
             )
-            
+
             # Store prices in options (will be loaded by coordinator)
             # We can't set prices directly here because coordinator doesn't exist yet
             # Prices will be stored in hass.data and loaded after setup
@@ -182,7 +193,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 "low_tariff_price": low_price,
                 "high_tariff_price": high_price,
             }
-            
+
             return result
 
         return self.async_show_form(
@@ -190,7 +201,9 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Optional(CONF_LOW_TARIFF_PRICE, default=0.0): vol.Coerce(float),
-                    vol.Optional(CONF_HIGH_TARIFF_PRICE, default=0.0): vol.Coerce(float),
+                    vol.Optional(CONF_HIGH_TARIFF_PRICE, default=0.0): vol.Coerce(
+                        float
+                    ),
                 }
             ),
         )
@@ -230,16 +243,16 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
 
         if user_input is not None:
             ean = user_input.get(CONF_EAN, "")
-            
+
             # Try to validate EAN and get signals
             try:
                 info = await validate_input(self.hass, {CONF_EAN: ean})
                 self._ean = ean
                 self._available_signals = info.get("available_signals", [])
-                
+
                 # Proceed to signal selection
                 return await self.async_step_signal()
-                
+
             except CannotConnect:
                 errors["base"] = "cannot_connect"
             except InvalidEan:
@@ -271,18 +284,28 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         current_signal = self._config_entry.data.get(CONF_SIGNAL, "")
         if self._ean != self._config_entry.data.get(CONF_EAN):
             # EAN changed, use first signal as default
-            current_signal = self._available_signals[0] if self._available_signals else ""
+            current_signal = (
+                self._available_signals[0] if self._available_signals else ""
+            )
 
         # Build signal options
         signal_options = {s: s for s in self._available_signals}
+
+        # Signal count for description
+        signal_count = len(self._available_signals)
 
         return self.async_show_form(
             step_id="signal",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_SIGNAL, default=current_signal): vol.In(signal_options),
+                    vol.Required(CONF_SIGNAL, default=current_signal): vol.In(
+                        signal_options
+                    ),
                 }
             ),
+            description_placeholders={
+                "signal_count": str(signal_count),
+            },
         )
 
     async def async_step_prices(
@@ -292,13 +315,17 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
             high_price = user_input.get(CONF_HIGH_TARIFF_PRICE, 0.0)
-            
+
+            # Ensure EAN is set (should always be at this point)
+            if self._ean is None:
+                return self.async_abort(reason="missing_ean")
+
             # Update config entry data
             new_data = {
                 CONF_EAN: self._ean,
                 CONF_SIGNAL: self._signal,
             }
-            
+
             # Update unique_id if EAN changed
             old_ean = self._config_entry.data.get(CONF_EAN)
             if self._ean != old_ean:
@@ -315,18 +342,19 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                     self._config_entry,
                     data=new_data,
                 )
-            
+
             # Save prices to coordinator
             await self._save_prices(low_price, high_price)
-            
+
             # Return empty options - all config is in data
             return self.async_create_entry(title="", data={})
 
         # Get current prices from coordinator
         current_low_price = 0.0
         current_high_price = 0.0
-        
+
         from . import DOMAIN, DATA_COORDINATOR
+
         entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
         coordinator = entry_data.get(DATA_COORDINATOR)
         if coordinator and coordinator.data:
@@ -337,8 +365,12 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             step_id="prices",
             data_schema=vol.Schema(
                 {
-                    vol.Optional(CONF_LOW_TARIFF_PRICE, default=current_low_price): vol.Coerce(float),
-                    vol.Optional(CONF_HIGH_TARIFF_PRICE, default=current_high_price): vol.Coerce(float),
+                    vol.Optional(
+                        CONF_LOW_TARIFF_PRICE, default=current_low_price
+                    ): vol.Coerce(float),
+                    vol.Optional(
+                        CONF_HIGH_TARIFF_PRICE, default=current_high_price
+                    ): vol.Coerce(float),
                 }
             ),
         )
@@ -346,10 +378,10 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
     async def _save_prices(self, low_price: float, high_price: float) -> None:
         """Save prices to coordinator."""
         from . import DOMAIN, DATA_COORDINATOR
-        
+
         entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
         coordinator = entry_data.get(DATA_COORDINATOR)
-        
+
         if coordinator:
             await coordinator.async_set_prices(low_price, high_price)
 

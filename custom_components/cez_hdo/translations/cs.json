@@ -13,7 +13,7 @@
             },
             "signal": {
                 "title": "Výběr HDO signálu",
-                "description": "Pro vaši lokalitu bylo nalezeno více HDO signálů.\n\n**Pokud neznáte svůj signál**, vyberte první signál v pořadí. Správný signál najdete také ve své smlouvě s ČEZ Distribuce.",
+                "description": "Pro vaši lokalitu byl nalezen {signal_count} signál(y).\n\n**Pokud neznáte svůj signál**, vyberte první signál v pořadí. Správný signál najdete také ve své smlouvě s ČEZ Distribuce.",
                 "data": {
                     "signal": "HDO signál"
                 },
@@ -35,7 +35,7 @@
             }
         },
         "error": {
-            "cannot_connect": "Nepodařilo se připojit k API ČEZ. Zkontrolujte připojení k internetu.",
+            "cannot_connect": "Nepodařilo se ověřit EAN. Zkontrolujte ručně na stránkách ČEZ Distribuce: https://dip.cezdistribuce.cz/irj/portal/anonymous/casy-spinani/",
             "invalid_ean": "Neplatné číslo EAN. Pro toto EAN nebyla nalezena žádná HDO data. Můžete provést manuální kontrolu na stránce https://dip.cezdistribuce.cz/irj/portal/anonymous/casy-spinani/",
             "unknown": "Došlo k neočekávané chybě."
         },
@@ -57,7 +57,7 @@
             },
             "signal": {
                 "title": "Výběr HDO signálu",
-                "description": "Pro vaši lokalitu bylo nalezeno více HDO signálů.\n\n**Pokud neznáte svůj signál**, vyberte první signál v pořadí. Správný signál najdete také ve své smlouvě s ČEZ Distribuce.",
+                "description": "Pro vaši lokalitu byl nalezen {signal_count} signál(y).\n\n**Pokud neznáte svůj signál**, vyberte první signál v pořadí. Správný signál najdete také ve své smlouvě s ČEZ Distribuce.",
                 "data": {
                     "signal": "HDO signál"
                 },
@@ -79,8 +79,8 @@
             }
         },
         "error": {
-            "cannot_connect": "Nepodařilo se připojit k API ČEZ. Zkontrolujte připojení k internetu.",
-            "invalid_ean": "Neplatné číslo EAN. Pro toto EAN nebyla nalezena žádná HDO data. Můžete provést manuální kontrolu na stránce https://dip.cezdistribuce.cz/irj/portal/anonymous/casy-spinani/",
+            "cannot_connect": "Nepodařilo se ověřit EAN. Zkontrolujte ručně na stránkách ČEZ Distribuce: https://dip.cezdistribuce.cz/irj/portal/anonymous/casy-spinani/",
+            "invalid_ean": "Neplatné číslo EAN. Pro toto EAN nebyla nalezena žádná HDO data.",
             "unknown": "Došlo k neočekávané chybě."
         }
     }

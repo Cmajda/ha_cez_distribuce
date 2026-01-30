@@ -1,8 +1,8 @@
 /**
  * ČEZ HDO Card - Custom Lovelace Card for Home Assistant
- * 
+ *
  * Displays HDO (Hromadné Dálkové Ovládání) tariff information from ČEZ Distribuce.
- * 
+ *
  * @version 3.0.0
  * @author ČEZ HDO Integration Contributors
  */
@@ -46,8 +46,6 @@ interface CardConfig {
   show_schedule?: boolean;
   show_schedule_prices?: boolean;
   compact_mode?: boolean;
-  low_tariff_price?: number;
-  high_tariff_price?: number;
 }
 
 interface ScheduleItem {
@@ -113,6 +111,24 @@ export class CezHdoCard extends LitElement {
     return this.getEntityState(entityId) === 'on';
   }
 
+  /**
+   * Get tariff prices from schedule sensor attributes
+   */
+  private getPricesFromSensor(): { low: number; high: number } {
+    const scheduleEntity = this.config.entities?.schedule || DEFAULT_ENTITIES.schedule;
+    const scheduleState = this.hass?.states[scheduleEntity];
+
+    if (scheduleState?.attributes) {
+      const low = scheduleState.attributes.low_tariff_price;
+      const high = scheduleState.attributes.high_tariff_price;
+      return {
+        low: typeof low === 'number' ? low : 0,
+        high: typeof high === 'number' ? high : 0,
+      };
+    }
+    return { low: 0, high: 0 };
+  }
+
   render() {
     if (!this.config || !this.hass) {
       return html`<ha-card>Loading...</ha-card>`;
@@ -137,8 +153,12 @@ export class CezHdoCard extends LitElement {
     const showDuration = this.config.show_duration !== false;
     const compactMode = this.config.compact_mode === true;
     const showPrice = this.config.show_price !== false;
-    const lowTariffPrice = this.config.low_tariff_price || 0;
-    const highTariffPrice = this.config.high_tariff_price || 0;
+
+    // Get prices from sensor attributes (set via Options Flow)
+    const prices = this.getPricesFromSensor();
+    const lowTariffPrice = prices.low;
+    const highTariffPrice = prices.high;
+
     const currentPrice = lowTariffActive ? lowTariffPrice : highTariffPrice;
     const showTariffPrices = this.config.show_tariff_prices === true;
     const showTitle = this.config.show_title !== false;
@@ -213,10 +233,10 @@ export class CezHdoCard extends LitElement {
 
   private _renderSchedule() {
     if (!this.config.show_schedule) return html``;
-    
+
     const scheduleEntity = this.config.entities?.schedule || 'sensor.cez_hdo_rozvrh';
     const scheduleState = this.hass.states[scheduleEntity];
-    
+
     if (!scheduleState || !scheduleState.attributes.schedule) {
       return html`<div class="schedule-error">Rozvrh není k dispozici</div>`;
     }
@@ -232,7 +252,7 @@ export class CezHdoCard extends LitElement {
       const day = String(start.getDate()).padStart(2, '0');
       const dayKey = `${year}-${month}-${day}`;
       const dayLabel = start.toLocaleDateString('cs-CZ', { weekday: 'short', day: '2-digit', month: '2-digit' });
-      
+
       if (!days[dayKey]) {
         days[dayKey] = { label: dayLabel, items: [] };
       }
@@ -241,8 +261,10 @@ export class CezHdoCard extends LitElement {
 
     const sortedDays = Object.keys(days).sort();
 
-    const ntPrice = this.config.low_tariff_price || 0;
-    const vtPrice = this.config.high_tariff_price || 0;
+    // Get prices from sensor attributes
+    const prices = this.getPricesFromSensor();
+    const ntPrice = prices.low;
+    const vtPrice = prices.high;
     const showSchedulePrices = this.config.show_schedule_prices === true && (ntPrice > 0 || vtPrice > 0);
 
     return html`
@@ -278,7 +300,7 @@ export class CezHdoCard extends LitElement {
                   const startStr = start.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
                   const endStr = end.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
                   return html`
-                    <div 
+                    <div
                       class="schedule-block ${item.tariff.toLowerCase()}"
                       style="left:${left}%;width:${width}%"
                       title="${startStr}-${endStr}"
@@ -606,5 +628,3 @@ window.customCards.push({
   description: 'Custom card for ČEZ HDO integration',
   preview: true,
 });
-
-

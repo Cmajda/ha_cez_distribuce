@@ -1,6 +1,6 @@
 /**
  * ČEZ HDO Card Editor - Visual Configuration Editor
- * 
+ *
  * Provides a visual configuration interface for the ČEZ HDO Card in Home Assistant.
  * Uses ha-selector for entity selection (HA native component).
  */
@@ -46,8 +46,6 @@ interface CardConfig {
   show_schedule?: boolean;
   show_schedule_prices?: boolean;
   compact_mode?: boolean;
-  low_tariff_price?: number;
-  high_tariff_price?: number;
   entities?: Record<string, string>;
 }
 
@@ -100,27 +98,6 @@ export class CezHdoCardEditor extends HTMLElement {
     this._emitConfigChanged();
     if (!skipRender) {
       this._render();
-    }
-  }
-
-  private _setPriceOption(key: string, value: number): void {
-    // Only store value locally, don't emit (emit on blur/change)
-    this._config = { ...this._config, [key]: value };
-  }
-
-  private _emitPriceChange(key: string, value: number): void {
-    this._config = { ...this._config, [key]: value };
-    this._emitConfigChanged();
-
-    // Call set_prices service to persist prices to backend
-    if (this._hass) {
-      const lowPrice = key === 'low_tariff_price' ? value : (this._config.low_tariff_price || 0);
-      const highPrice = key === 'high_tariff_price' ? value : (this._config.high_tariff_price || 0);
-      
-      this._hass.callService('cez_hdo', 'set_prices', {
-        low_tariff_price: lowPrice,
-        high_tariff_price: highPrice,
-      });
     }
   }
 
@@ -238,33 +215,6 @@ export class CezHdoCardEditor extends HTMLElement {
     wrap.appendChild(mkToggle('Zobrazit HDO rozvrh', 'show_schedule', this._config.show_schedule === true));
     wrap.appendChild(mkToggle('Zobrazit ceny v legendě rozvrhu', 'show_schedule_prices', this._config.show_schedule_prices === true));
     wrap.appendChild(mkToggle('Kompaktní režim', 'compact_mode', compactMode));
-
-    // Price fields - input only stores locally, change/blur emits
-    const lowPriceField = document.createElement('ha-textfield') as any;
-    lowPriceField.label = 'Cena NT (Kč/kWh)';
-    lowPriceField.type = 'number';
-    lowPriceField.step = '0.01';
-    lowPriceField.value = this._config.low_tariff_price || '';
-    lowPriceField.addEventListener('input', (ev: Event) => {
-      this._setPriceOption('low_tariff_price', parseFloat((ev.target as HTMLInputElement).value) || 0);
-    });
-    lowPriceField.addEventListener('change', (ev: Event) => {
-      this._emitPriceChange('low_tariff_price', parseFloat((ev.target as HTMLInputElement).value) || 0);
-    });
-    wrap.appendChild(lowPriceField);
-
-    const highPriceField = document.createElement('ha-textfield') as any;
-    highPriceField.label = 'Cena VT (Kč/kWh)';
-    highPriceField.type = 'number';
-    highPriceField.step = '0.01';
-    highPriceField.value = this._config.high_tariff_price || '';
-    highPriceField.addEventListener('input', (ev: Event) => {
-      this._setPriceOption('high_tariff_price', parseFloat((ev.target as HTMLInputElement).value) || 0);
-    });
-    highPriceField.addEventListener('change', (ev: Event) => {
-      this._emitPriceChange('high_tariff_price', parseFloat((ev.target as HTMLInputElement).value) || 0);
-    });
-    wrap.appendChild(highPriceField);
 
     // Entity pickers using ha-selector
     wrap.appendChild(this._entityPicker('NT aktivní (binary_sensor)', 'low_tariff', ['binary_sensor']));
