@@ -8,7 +8,7 @@
         "codeowners": [
                 "@cmajda"
         ],
-        "config_flow": false,
+        "config_flow": true,
         "dependencies": [],
         "documentation": "https://github.com/Cmajda/ha_cez_distribuce",
         "iot_class": "cloud_polling",
@@ -19,5 +19,5 @@
                 "lxml",
                 "packaging"
         ],
-        "version": "2.2.0"
+        "version": "3.0.0-RC.2"
 }

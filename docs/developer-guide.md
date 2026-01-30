@@ -6,31 +6,41 @@ Stručný přehled pro vývoj/přispívání.
 
 ### Home Assistant
 
-Pro vývojový deploy přes [dev/deploy.sh](../dev/deploy.sh) je nejjednodušší mít v HA dostupný SMB share `/config`.
+Pro vývojový deploy přes [dev/deploy.sh](../dev/deploy.sh) je nejjednodušší
+mít v HA dostupný SMB share `/config`.
 
-- Home Assistant OS / Supervised: nainstalujte a spusťte oficiální add-on **Samba share**.
+- Home Assistant OS / Supervised: nainstalujte a spusťte
+  oficiální add-on **Samba share**.
 - V add-onu nastavte uživatele (username) a heslo.
-- Ověřte, že z vašeho PC jde na HA připojení na SMB (typicky TCP 445) a že share `config` je dostupný jako `//IP_HA/config`.
+- Ověřte, že z vašeho PC jde na HA připojení na SMB (typicky TCP 445)
+  a že share `config` je dostupný jako `//IP_HA/config`.
 
-Pokud nechcete SMB řešit, můžete deployovat i lokálně: nastavte `HA_CONFIG_DIR` na cestu k HA configu na stejném stroji (např. u Dockeru bind-mount).
+Pokud nechcete SMB řešit, můžete deployovat i lokálně:
+nastavte `HA_CONFIG_DIR` na cestu k HA configu na stejném stroji
+(např. u Dockeru bind-mount).
 
 ### Vývojový stroj (Linux)
 
 - `bash`, `sudo`
 - CIFS klient: balíček `cifs-utils` (kvůli `mount -t cifs`)
-- (volitelné) `npm` pouze pokud používáte separátní build frontendu v `dev/frontend` (v tomto repu typicky není)
+- (volitelné) `npm` pouze pokud používáte separátní build frontendu
+  v `dev/frontend` (v tomto repu typicky není)
 
 ## Proměnné prostředí a argumenty
 
-Skript [dev/deploy.sh](../dev/deploy.sh) umí deployovat buď do lokálního adresáře, nebo si sám připojí SMB share z HA.
+Skript [dev/deploy.sh](../dev/deploy.sh) umí deployovat buď do lokálního
+adresáře, nebo si sám připojí SMB share z HA.
 
 ### Environment variables
 
-- `HA_CONFIG_DIR` – mount point / cesta k HA configu (default: `/mnt/ha-config`)
+- `HA_CONFIG_DIR` – mount point / cesta k HA configu
+  (default: `/mnt/ha-config`)
 - `HA_IP` – IP adresa Home Assistant (pokud není předaná jako argument)
 - `HA_USERNAME` – SMB uživatel (default: aktuální uživatel v OS)
-- `HA_PASSWORD` – SMB heslo (pokud není předané jako argument; jinak se skript zeptá interaktivně)
-- `DEPLOY_WWW` – `1` = navíc zkopíruje kartu do `/config/www/cez_hdo` jako fallback pro `/local/...` (default: `0`)
+- `HA_PASSWORD` – SMB heslo (pokud není předané jako argument;
+  jinak se skript zeptá interaktivně)
+- `DEPLOY_WWW` – `1` = navíc zkopíruje kartu do `/config/www/cez_hdo`
+  jako fallback pro `/local/...` (default: `0`)
 
 ### Argumenty
 

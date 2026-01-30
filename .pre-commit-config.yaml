@@ -23,3 +23,9 @@ repos:
         additional_dependencies: [types-requests]
         args: [--ignore-missing-imports]
         exclude: ^dev/
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args: [--fix]

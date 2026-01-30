@@ -17,7 +17,7 @@ _LOGGER = logging.getLogger(__name__)
 DOMAIN = "cez_hdo"
 URL_BASE = "/cez_hdo_card"
 CEZ_HDO_CARDS = [
-    {"name": "CEZ HDO Card", "filename": "cez-hdo-card.js", "version": "2.2.0"}
+    {"name": "CEZ HDO Card", "filename": "cez-hdo-card.js", "version": "3.0.0-RC.2"}
 ]
 
 

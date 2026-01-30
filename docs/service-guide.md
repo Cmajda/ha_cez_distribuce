@@ -20,7 +20,8 @@ Kde to uvidíte:
 
 ## `cez_hdo.set_prices`
 
-Nastaví ceny pro nízký a vysoký tarif. Ceny se uloží perzistentně a přežijí restart Home Assistantu.
+Nastaví ceny pro nízký a vysoký tarif.
+Ceny se uloží perzistentně a přežijí restart Home Assistantu.
 
 Použití:
 
@@ -40,7 +41,8 @@ Po nastavení se automaticky aktualizuje senzor `sensor.cez_hdo_aktualni_cena`.
 
 ## `cez_hdo.reload_frontend_card`
 
-Znovu nasadí/obnoví frontend soubor karty (užitečné při vývoji nebo když se karta nenačítá).
+Znovu nasadí/obnoví frontend soubor karty.
+Užitečné při vývoji nebo když se karta nenačítá.
 
 Použití:
 

@@ -2,8 +2,7 @@
 from __future__ import annotations
 
 import logging
-import json
-import os
+from pathlib import Path
 
 import voluptuous as vol
 
@@ -17,63 +16,30 @@ from .frontend import CezHdoCardRegistration
 _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = "cez_hdo"
-PRICES_STORAGE_DIR = "/config/www/cez_hdo"
-PRICES_STORAGE_FILE = "cez_hdo_prices.json"
+
+# Keys for hass.data[DOMAIN]
+DATA_COORDINATOR = "coordinator"
 
 # Configuration schema - integrace se konfiguruje pouze přes platformy
 CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXTRA)
 
 
-def _get_prices_file_path(hass: HomeAssistant) -> str:
-    """Get path to prices storage file."""
-    return os.path.join(PRICES_STORAGE_DIR, PRICES_STORAGE_FILE)
-
-
-def _load_prices(hass: HomeAssistant) -> dict:
-    """Load prices from persistent storage."""
-    file_path = _get_prices_file_path(hass)
-    try:
-        if os.path.exists(file_path):
-            with open(file_path, "r") as f:
-                data = json.load(f)
-                _LOGGER.debug("Loaded prices from storage: %s", data)
-                return data
-    except Exception as err:
-        _LOGGER.warning("Failed to load prices from storage: %s", err)
-    return {"low_tariff_price": 0.0, "high_tariff_price": 0.0}
-
-
-def _save_prices(hass: HomeAssistant, low_price: float, high_price: float) -> None:
-    """Save prices to persistent storage."""
-    file_path = _get_prices_file_path(hass)
-    try:
-        # Ensure directory exists
-        os.makedirs(PRICES_STORAGE_DIR, exist_ok=True)
-        with open(file_path, "w") as f:
-            json.dump(
-                {"low_tariff_price": low_price, "high_tariff_price": high_price}, f
-            )
-        _LOGGER.debug(
-            "Saved prices to storage: NT=%.2f, VT=%.2f", low_price, high_price
-        )
-    except Exception as err:
-        _LOGGER.warning("Failed to save prices to storage: %s", err)
+def get_cache_dir(hass: HomeAssistant) -> Path:
+    """Get path to data directory using hass.config.path()."""
+    return Path(hass.config.path("custom_components", "cez_hdo", "data"))
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
 
-    # Load prices from persistent storage at startup
-    prices = await hass.async_add_executor_job(_load_prices, hass)
-    hass.data[DOMAIN] = {
-        "low_tariff_price": prices.get("low_tariff_price", 0.0),
-        "high_tariff_price": prices.get("high_tariff_price", 0.0),
-    }
-    _LOGGER.info(
-        "💰 ČEZ HDO ceny načteny: NT=%.2f Kč/kWh, VT=%.2f Kč/kWh",
-        hass.data[DOMAIN]["low_tariff_price"],
-        hass.data[DOMAIN]["high_tariff_price"],
+    # Initialize domain data storage
+    hass.data.setdefault(DOMAIN, {})
+
+    # Ensure data directory exists
+    cache_dir = get_cache_dir(hass)
+    await hass.async_add_executor_job(
+        lambda: cache_dir.mkdir(parents=True, exist_ok=True)
     )
 
     # Register service to reload frontend card
@@ -81,7 +47,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         """Service to reload frontend card."""
         cards = CezHdoCardRegistration(hass)
         await cards.async_register()
-        _LOGGER.info("🔄 ČEZ HDO frontend card reloaded")
+        _LOGGER.debug("CEZ HDO: Frontend card reloaded")
 
     # Register service to list available signals
     async def list_signals(call):
@@ -131,15 +97,16 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                 # Log results - simplified
                 signal_names = list(signal_groups.keys())
-                _LOGGER.warning(
-                    f"📡 Nalezené signály pro EAN {ean}: {', '.join(signal_names)}"
-                )
+                _LOGGER.debug("CEZ HDO: Found signals: %s", ", ".join(signal_names))
 
             else:
-                _LOGGER.error(f"Failed to fetch signals: HTTP {response.status_code}")
+                _LOGGER.error(
+                    "CEZ HDO: Failed to fetch signals, HTTP status: %s",
+                    response.status_code,
+                )
 
         except Exception as e:
-            _LOGGER.error(f"Error fetching signals for EAN {ean}: {e}")
+            _LOGGER.error("CEZ HDO: Error fetching signals: %s", e)
 
     hass.services.async_register(DOMAIN, "reload_frontend_card", reload_frontend_card)
     hass.services.async_register(
@@ -159,46 +126,38 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         low_price = call.data.get("low_tariff_price", 0.0)
         high_price = call.data.get("high_tariff_price", 0.0)
 
-        # Store prices in hass.data for sensors to access
-        if DOMAIN not in hass.data:
-            hass.data[DOMAIN] = {}
-        hass.data[DOMAIN]["low_tariff_price"] = low_price
-        hass.data[DOMAIN]["high_tariff_price"] = high_price
+        coordinators_updated = 0
 
-        # Save prices to persistent storage
-        await hass.async_add_executor_job(_save_prices, hass, low_price, high_price)
+        # Check YAML coordinator (stored under DATA_COORDINATOR key)
+        coordinator = hass.data[DOMAIN].get(DATA_COORDINATOR)
+        if coordinator:
+            await coordinator.async_set_prices(low_price, high_price)
+            coordinators_updated += 1
 
-        _LOGGER.info(
-            "💰 ČEZ HDO ceny nastaveny: NT=%.2f Kč/kWh, VT=%.2f Kč/kWh",
-            low_price,
-            high_price,
-        )
-        _LOGGER.debug("hass.data[%s] = %s", DOMAIN, hass.data.get(DOMAIN))
+        # Check config entry coordinators (stored under entry_id keys)
+        for key, value in hass.data[DOMAIN].items():
+            if isinstance(value, dict) and DATA_COORDINATOR in value:
+                entry_coordinator = value[DATA_COORDINATOR]
+                await entry_coordinator.async_set_prices(low_price, high_price)
+                coordinators_updated += 1
 
-        # Force update all CurrentPrice sensors by searching entity registry
-        from homeassistant.helpers import entity_registry as er
-
-        registry = er.async_get(hass)
-
-        for entity in registry.entities.values():
-            # Match by platform and entity_id pattern
-            if entity.platform == DOMAIN and (
-                "currentprice" in entity.entity_id.lower()
-                or "aktualni_cena" in entity.entity_id.lower()
-                or "current_price" in entity.entity_id.lower()
-            ):
-                _LOGGER.debug("Triggering update for entity: %s", entity.entity_id)
-                try:
-                    await hass.services.async_call(
-                        "homeassistant",
-                        "update_entity",
-                        {"entity_id": entity.entity_id},
-                        blocking=False,
-                    )
-                except Exception as err:
-                    _LOGGER.warning(
-                        "Failed to update entity %s: %s", entity.entity_id, err
-                    )
+        if coordinators_updated == 0:
+            # Fallback for when coordinator not yet initialized
+            # Store in hass.data for sensors to access
+            hass.data[DOMAIN]["low_tariff_price"] = low_price
+            hass.data[DOMAIN]["high_tariff_price"] = high_price
+            _LOGGER.debug(
+                "CEZ HDO: Prices stored (no coordinator): NT=%.2f, VT=%.2f",
+                low_price,
+                high_price,
+            )
+        else:
+            _LOGGER.debug(
+                "CEZ HDO: Prices set on %d coordinator(s): NT=%.2f, VT=%.2f",
+                coordinators_updated,
+                low_price,
+                high_price,
+            )
 
     hass.services.async_register(
         DOMAIN,
@@ -219,25 +178,79 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     return True
 
 
+# Platforms to set up from config entry
+PLATFORMS = ["sensor", "binary_sensor"]
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up ČEZ HDO from a config entry."""
-    _LOGGER.debug("async_setup_entry Start")
+    _LOGGER.debug("async_setup_entry Start for %s", entry.entry_id)
 
     # Register frontend card
     cards = CezHdoCardRegistration(hass)
     await cards.async_register()
 
-    _LOGGER.debug("async_setup_entry Complete")
+    # Get config data
+    ean = entry.data.get("ean")
+    signal = entry.data.get("signal")
+    entity_suffix = entry.data.get("entity_suffix")
+
+    if not ean:
+        _LOGGER.error("No EAN in config entry")
+        return False
+
+    # Create coordinator
+    from .coordinator import CezHdoCoordinator
+
+    coordinator = CezHdoCoordinator(hass, ean, signal)
+    await coordinator.async_initialize()
+
+    # Check for initial prices from config flow
+    initial_prices = hass.data.get("cez_hdo_initial_prices", {}).pop(ean, None)
+    if initial_prices:
+        await coordinator.async_set_prices(
+            initial_prices.get("low_tariff_price", 0.0),
+            initial_prices.get("high_tariff_price", 0.0),
+        )
+        _LOGGER.debug("Set initial prices from config flow: %s", initial_prices)
+
+    # Store coordinator in hass.data
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry.entry_id] = {
+        DATA_COORDINATOR: coordinator,
+        "ean": ean,
+        "signal": signal,
+        "entity_suffix": entity_suffix,
+    }
+
+    # Forward setup to platforms
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    _LOGGER.debug("async_setup_entry Complete for %s", entry.entry_id)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    _LOGGER.debug("async_unload_entry")
+    _LOGGER.debug("async_unload_entry for %s", entry.entry_id)
 
-    # Unregister frontend card
-    cards = CezHdoCardRegistration(hass)
-    await cards.async_unregister()
+    # Stop state updates on coordinator before unloading
+    entry_data = hass.data[DOMAIN].get(entry.entry_id, {})
+    coordinator = entry_data.get(DATA_COORDINATOR)
+    if coordinator:
+        coordinator.stop_state_updates()
 
-    _LOGGER.debug("async_unload_entry Done")
-    return True
+    # Unload platforms
+    unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+    if unload_ok:
+        # Remove coordinator from hass.data
+        hass.data[DOMAIN].pop(entry.entry_id, None)
+
+    # Unregister frontend card if no more entries
+    if not hass.data[DOMAIN]:
+        cards = CezHdoCardRegistration(hass)
+        await cards.async_unregister()
+
+    _LOGGER.debug("async_unload_entry Done for %s", entry.entry_id)
+    return unload_ok

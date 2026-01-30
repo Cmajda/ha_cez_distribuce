@@ -9,6 +9,8 @@ from typing import TYPE_CHECKING, Any
 import requests
 from datetime import datetime
 
+from .const import mask_ean
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -34,8 +36,9 @@ class CezHdoBaseEntity:
         self._last_parser_log_time: datetime | None = (
             None  # datetime posledního debug logu výsledku parseru
         )
-        # Nastav výchozí cestu k cache (přizpůsob podle potřeby)
-        self.cache_file = "/config/www/cez_hdo/cez_hdo.json"
+        # Data directory path - will be updated when hass is available
+        # Default path for fallback, actual path set via hass.config.path()
+        self.cache_file = "/config/custom_components/cez_hdo/data/cache.json"
 
         # Provide stable entity registry identifiers and friendly names.
         # - unique_id must be stable
@@ -111,8 +114,8 @@ class CezHdoBaseEntity:
     def _dbg(self) -> str:
         entity_id = getattr(self, "entity_id", None)
         if entity_id:
-            return f"{entity_id} (ean={self.ean}, name={self.name})"
-        return f"ean={self.ean}, name={self.name}"
+            return f"{entity_id} (ean={mask_ean(self.ean)}, name={self.name})"
+        return f"ean={mask_ean(self.ean)}, name={self.name}"
 
     async def async_added_to_hass(self) -> None:
         """Home Assistant callback when entity is added.
@@ -204,10 +207,7 @@ class CezHdoBaseEntity:
                     if downloader.normalize_datum(s.get("datum")) == yesterday
                 ]
                 if yesterday_signals:
-                    _LOGGER.info(
-                        "CEZ HDO: Loaded yesterday's signals from cache (%s)",
-                        cache_file,
-                    )
+                    _LOGGER.debug("CEZ HDO: Loaded yesterday's signals from cache")
             except Exception as e:
                 _LOGGER.warning(
                     "CEZ HDO: Failed to read yesterday's signals from cache %s: %s",
@@ -229,18 +229,7 @@ class CezHdoBaseEntity:
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
                 },
             )
-            _LOGGER.info("CEZ HDO: API REQUEST URL: %s", api_url)
-            _LOGGER.info(
-                "CEZ HDO: API REQUEST PAYLOAD: %s",
-                json.dumps(request_data, ensure_ascii=False),
-            )
-            _LOGGER.info("CEZ HDO: HTTP Response status: %d", response.status_code)
-            try:
-                _LOGGER.info(
-                    "CEZ HDO: API RAW RESPONSE: %s", response.content.decode("utf-8")
-                )
-            except Exception as log_err:
-                _LOGGER.warning("CEZ HDO: Chyba při logování API odpovědi: %s", log_err)
+            _LOGGER.debug("CEZ HDO: API request sent, status: %d", response.status_code)
 
             if response.status_code == 200:
                 content_str = response.content.decode("utf-8")
@@ -264,11 +253,9 @@ class CezHdoBaseEntity:
                     filtered_json_data["data"] = filtered_json_data["data"].copy()
                     filtered_json_data["data"]["signals"] = result_signals
                 signals_count = len(result_signals)
-                _LOGGER.info(
-                    "✅ CEZ HDO: API success, signals for cache: %d (yesterday extra: %d, api: %d)",
+                _LOGGER.debug(
+                    "CEZ HDO: API success, signals count: %d",
                     signals_count,
-                    len(extra_yesterday),
-                    len(signals_api),
                 )
 
                 # 5. Uložit pouze tyto data do cache
@@ -276,21 +263,19 @@ class CezHdoBaseEntity:
                     "timestamp": datetime.now().isoformat(),
                     "data": filtered_json_data,
                 }
-                # Clean installs may not have /config/www/cez_hdo yet.
+                # Clean installs may not have data directory yet.
                 Path(cache_file).parent.mkdir(parents=True, exist_ok=True)
                 with open(cache_file, "w", encoding="utf-8") as f:
                     json.dump(cache_data, f, ensure_ascii=False, indent=2)
-                _LOGGER.info(
-                    "💾 CEZ HDO: Data saved to cache: %s (signals: %d, timestamp: %s)",
-                    cache_file,
+                _LOGGER.debug(
+                    "CEZ HDO: Data saved to cache, signals: %d",
                     signals_count,
-                    cache_data["timestamp"],
                 )
 
                 self._response_data = filtered_json_data
                 self._last_update_success = True
                 self._last_update_time = datetime.now()
-                _LOGGER.info("CEZ HDO: DATA SOURCE = ONLINE (API)")
+                _LOGGER.debug("CEZ HDO: Data loaded from API")
                 return
             else:
                 _LOGGER.warning(
@@ -328,11 +313,7 @@ class CezHdoBaseEntity:
             if "data" in cache_data and "timestamp" in cache_data:
                 json_data = cache_data["data"]
                 timestamp = cache_data["timestamp"]
-                _LOGGER.info(
-                    "CEZ HDO: Loaded cache from %s (timestamp: %s)",
-                    cache_file,
-                    timestamp,
-                )
+                _LOGGER.debug("CEZ HDO: Loaded data from cache")
                 try:
                     self._last_update_time = datetime.fromisoformat(timestamp)
                 except Exception:
@@ -340,7 +321,7 @@ class CezHdoBaseEntity:
             else:
                 # Starý formát - přímo data
                 json_data = cache_data
-                _LOGGER.info("CEZ HDO: Loaded legacy cache from %s", cache_file)
+                _LOGGER.debug("CEZ HDO: Loaded legacy cache format")
                 self._last_update_time = datetime.now()
 
             self._response_data = json_data
@@ -368,9 +349,7 @@ class CezHdoBaseEntity:
             if self._last_update_attempt_time is None or (
                 now - self._last_update_attempt_time
             ) > timedelta(minutes=5):
-                _LOGGER.info(
-                    "CEZ HDO: Plánuji update() na pozadí (data jsou stará/není update)."
-                )
+                _LOGGER.debug("CEZ HDO: Scheduling background update")
                 if getattr(self, "hass", None) is not None:
                     hass2 = self.hass
                     if hass2 is not None:

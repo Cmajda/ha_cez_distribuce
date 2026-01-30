@@ -1,105 +1,72 @@
 #!/bin/bash
 
 # ČEZ HDO Development Deploy Script
-# Builds frontend and deploys to local dev Home Assistant
-#
-# Usage:
-#   ./deploy.sh                                    # Deploy to default /mnt/ha-config
-#   ./deploy.sh clean                              # Remove integration from HA
-#   ./deploy.sh 192.168.1.233 password           # Deploy to specific IP with password
-#   ./deploy.sh clean 192.168.1.233 password     # Clean with specific IP and password
-#   HA_CONFIG_DIR=/path/to/ha ./deploy.sh         # Custom HA config path
-#
-# Environment variables:
-#   HA_CONFIG_DIR - Path to Home Assistant configuration directory
-#                   Default: /mnt/ha-config
-#   HA_IP         - IP address of Home Assistant (e.g., 192.168.1.233)
-#   HA_PASSWORD   - Password for CIFS mount
-#   HA_USERNAME   - Username for CIFS mount (default: current user)
-#   DEPLOY_WWW    - If set to 1, also copy card JS into /config/www/cez_hdo
-#                   Default: 0 (card is served from integration at /cez_hdo/cez-hdo-card.js)
-#
-# Examples:
-#   ./deploy.sh 192.168.1.xxx mypassword
-#   HA_USERNAME=homeassistant ./deploy.sh 192.168.1.xxx secret123
-#   ./deploy.sh clean 192.168.1.xxx mypassword
-
-# Optional behavior
-DEPLOY_WWW="${DEPLOY_WWW:-0}"
 
 # Show help if requested
 if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "ČEZ HDO Development Deploy Script"
-    echo "================================="
-    echo ""
+    echo "Builds frontend and deploys to local dev Home Assistant"
+    echo "#----------------------------------------------------------#"
     echo "Usage:"
-    echo "  $0                                    # Deploy to default /mnt/ha-config"
-    echo "  $0 clean                              # Remove integration from HA"
-    echo "  $0 IP PASSWORD                        # Deploy to specific IP with password"
-    echo "  $0 clean IP PASSWORD                  # Clean with specific IP and password"
-    echo ""
-    echo "Environment variables:"
-    echo "  HA_CONFIG_DIR - Custom mount point (default: /mnt/ha-config)"
-    echo "  HA_IP         - Home Assistant IP address"
+    echo "  ./deploy.sh [IP] [PASSWORD]                   -- Deploy with parameters"
+    echo "  ./deploy.sh                                   -- Deploy using environment variables"
+    echo "  ./deploy.sh clean [IP] [PASSWORD]             -- Remove integration from HA"
+    echo "#----------------------------------------------------------#"
+    echo "Environment variables (used if parameters not provided):"
+    echo "  HA_IP         - IP address of Home Assistant"
     echo "  HA_PASSWORD   - Password for CIFS mount"
     echo "  HA_USERNAME   - Username for CIFS mount (default: current user)"
-    echo "  DEPLOY_WWW    - Also copy card JS into /config/www/cez_hdo (default: 0)"
-    echo ""
+    echo "  HA_CONFIG_DIR - Path to Home Assistant configuration directory"
+    echo "                  Default: /mnt/ha-config"
+    echo "#----------------------------------------------------------#"
+    echo "Note: EAN is no longer required - use Config Flow in HA UI"
+    echo "      (Settings → Devices & Services → Add Integration → ČEZ HDO)"
+    echo "#----------------------------------------------------------#"
     echo "Examples:"
-    echo "  $0 192.168.1.233 mypassword"
-    echo "  HA_USERNAME=homeassistant $0 192.168.1.10 secret123"
-    echo "  $0 clean 192.168.1.233 mypassword"
-    echo ""
+    echo "  HA_IP=192.168.1.1 HA_PASSWORD=pass ./deploy.sh"
+    echo "  ./deploy.sh 192.168.1.1 mypassword"
+    echo "  ./deploy.sh clean 192.168.1.1 mypassword"
     exit 0
 fi
 
-# ČEZ HDO Development Deploy Script
-# Builds frontend and deploys to local dev Home Assistant
-#
-# Usage:
-#   ./deploy.sh                                    # Deploy to default /mnt/ha-config
-#   ./deploy.sh clean                              # Remove integration from HA
-#   ./deploy.sh 192.168.1.xxx password           # Deploy to specific IP with password
-#   HA_CONFIG_DIR=/path/to/ha ./deploy.sh         # Custom HA config path
-#
-# Environment variables:
-#   HA_CONFIG_DIR - Path to Home Assistant configuration directory
-#                   Default: /mnt/ha-config
-#   HA_IP         - IP address of Home Assistant (e.g., 192.168.1.xxx)
-#   HA_PASSWORD   - Password for CIFS mount
-#   HA_USERNAME   - Username for CIFS mount (default: current user)
-
 set -e
-
-# Parse command line arguments
-HA_IP="${1:-${HA_IP}}"
-HA_PASSWORD="${2:-${HA_PASSWORD}}"
-CLEAN_MODE=""
-
-# Check if first argument is "clean"
-if [ "$1" = "clean" ]; then
-    CLEAN_MODE="clean"
-    HA_IP="${2:-${HA_IP}}"
-    HA_PASSWORD="${3:-${HA_PASSWORD}}"
-fi
 
 # Configuration
 # Auto-detect project directory (parent of dev folder)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
+# Parse command line arguments
+CLEAN_MODE=""
+
+# Check if first argument is "clean"
+if [ "$1" = "clean" ]; then
+    CLEAN_MODE="clean"
+    # For clean mode: clean [IP] [PASSWORD]
+    HA_IP="${2:-$HA_IP}"
+    HA_PASSWORD="${3:-$HA_PASSWORD}"
+else
+    # For deploy mode: [IP] [PASSWORD]
+    # Parameters override environment variables
+    if [ -n "$1" ]; then
+        HA_IP="$1"
+    fi
+    if [ -n "$2" ]; then
+        HA_PASSWORD="$2"
+    fi
+fi
+
+# Validate required variables for deploy mode - EAN is optional now (config flow is used)
+# EAN is only needed for legacy YAML configuration
+
 # Default mount point
 MOUNT_POINT="${HA_CONFIG_DIR:-/mnt/ha-config}"
 
 # Target directories
 TARGET_DIR="$MOUNT_POINT/custom_components/cez_hdo"
-WWW_TARGET="$MOUNT_POINT/www/cez_hdo"
 
 # Source directory (this repo)
 SRC_DIR="$PROJECT_DIR/custom_components/cez_hdo"
-
-# WWW source directory (this repo)
-FRONTEND_DIST_SRC="$PROJECT_DIR/custom_components/cez_hdo/frontend/dist"
 
 # Function to setup CIFS mount
 setup_mount() {
@@ -169,7 +136,6 @@ if [ "$CLEAN_MODE" = "clean" ]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
     TARGET_DIR="$MOUNT_POINT/custom_components/cez_hdo"
-    WWW_TARGET="$MOUNT_POINT/www/cez_hdo"
 
     # Colors
     GREEN='\033[0;32m'
@@ -178,7 +144,6 @@ if [ "$CLEAN_MODE" = "clean" ]; then
     NC='\033[0m'
 
     echo "🎯 Target directory: $TARGET_DIR"
-    echo "🌐 WWW directory: $WWW_TARGET"
     echo ""
 
     # Remove component
@@ -188,15 +153,6 @@ if [ "$CLEAN_MODE" = "clean" ]; then
         echo -e "${GREEN}✅ Component removed from $TARGET_DIR${NC}"
     else
         echo -e "${YELLOW}⚠️  Component not found in $TARGET_DIR${NC}"
-    fi
-
-    # Remove frontend from www
-    if [ -d "$WWW_TARGET" ]; then
-        echo -e "${YELLOW}🗑️  Removing www assets...${NC}"
-        rm -rf "$WWW_TARGET"
-        echo -e "${GREEN}✅ WWW assets removed from $WWW_TARGET${NC}"
-    else
-        echo -e "${YELLOW}⚠️  WWW assets not found in $WWW_TARGET${NC}"
     fi
 
     # Clean Python cache
@@ -251,9 +207,7 @@ fi
 
 echo "📁 Project directory: $PROJECT_DIR"
 echo "🎯 Target directory: $TARGET_DIR"
-echo "🌐 WWW directory: $WWW_TARGET"
-echo "🧩 Card URL (preferred): /cez_hdo/cez-hdo-card.js"
-echo "🧩 DEPLOY_WWW: $DEPLOY_WWW"
+echo "🧩 Card URL: /cez_hdo_card/cez-hdo-card.js"
 echo ""
 
 # You can override HA_CONFIG_DIR by setting environment variable:
@@ -279,8 +233,11 @@ fi
 
 # Step 2: Build frontend
 echo -e "${BLUE}📦 Step 2: Building frontend...${NC}"
-if [ -d "$PROJECT_DIR/dev/frontend" ]; then
-    cd "$PROJECT_DIR/dev/frontend"
+FRONTEND_DEV_DIR="$PROJECT_DIR/dev/frontend"
+FRONTEND_COMPONENT_DIR="$SRC_DIR/frontend/dist"
+
+if [ -d "$FRONTEND_DEV_DIR" ]; then
+    cd "$FRONTEND_DEV_DIR"
 
     if command -v npm >/dev/null 2>&1; then
         # Install dependencies if needed
@@ -289,10 +246,17 @@ if [ -d "$PROJECT_DIR/dev/frontend" ]; then
             npm install
         fi
 
-        # Build frontend
-        echo "Building production bundle..."
-        npm run build
+        # Build frontend (production = no console.log)
+        echo "Building production bundle (console.log removed)..."
+        npm run build:prod
         echo -e "${GREEN}✅ Frontend build completed${NC}"
+
+        # Copy built files to component source directory
+        if [ -f "$FRONTEND_DEV_DIR/dist/cez-hdo-card.js" ]; then
+            mkdir -p "$FRONTEND_COMPONENT_DIR"
+            cp "$FRONTEND_DEV_DIR/dist"/* "$FRONTEND_COMPONENT_DIR/"
+            echo -e "${GREEN}✅ Frontend copied to component source: $FRONTEND_COMPONENT_DIR${NC}"
+        fi
     else
         echo -e "${YELLOW}⚠️  npm not found, skipping frontend build${NC}"
     fi
@@ -300,9 +264,20 @@ else
     echo -e "${YELLOW}⚠️  dev/frontend not found, skipping frontend build${NC}"
 fi
 
-# Step 3: Clean existing installation
+# Step 3: Clean existing installation (preserve data directory)
 echo -e "${BLUE}🧹 Step 3: Cleaning existing installation...${NC}"
-rm -rf "$TARGET_DIR"
+
+# Preserve data directory if it exists
+DATA_DIR="$TARGET_DIR/data"
+TEMP_DATA_DIR="/tmp/cez_hdo_data_backup"
+if [ -d "$DATA_DIR" ]; then
+    echo "📦 Preserving data directory..."
+    rm -rf "$TEMP_DATA_DIR" 2>/dev/null || true
+    cp -a "$DATA_DIR" "$TEMP_DATA_DIR" 2>/dev/null || true
+fi
+
+# Remove all files except data directory
+find "$TARGET_DIR" -mindepth 1 -maxdepth 1 ! -name 'data' -exec rm -rf {} + 2>/dev/null || true
 find "$MOUNT_POINT/custom_components" -name "__pycache__" -type d -exec rm -rf {} + 2>/dev/null || true
 find "$MOUNT_POINT/custom_components" -name "*.pyc" -delete 2>/dev/null || true
 
@@ -322,96 +297,32 @@ mkdir -p "$TARGET_DIR"
 # Copy full integration from custom_components/cez_hdo
 cp -a "$SRC_DIR/." "$TARGET_DIR/"
 
-echo -e "${GREEN}✅ Component source copied from $SRC_DIR${NC}"
+echo -e "${GREEN}✅ Component deployed (includes built frontend)${NC}"
 
-# Copy built frontend files (dev build) into integration tree
-if [ -f "$PROJECT_DIR/dev/frontend/dist/cez-hdo-card.js" ]; then
-    mkdir -p "$TARGET_DIR/frontend/dist"
-    cp "$PROJECT_DIR/dev/frontend/dist"/* "$TARGET_DIR/frontend/dist/"
-    echo -e "${GREEN}✅ Frontend files copied from dev build${NC}"
-else
-    echo -e "${YELLOW}ℹ️  Dev frontend build not found, keeping frontend from source tree${NC}"
-fi
-
-# Deploy frontend card into config/www (optional; not needed for /cez_hdo/cez-hdo-card.js)
-if [ "$DEPLOY_WWW" = "1" ]; then
-    WWW_CARD_SRC_DIR=""
-    if [ -d "$PROJECT_DIR/dev/frontend/dist" ] && compgen -G "$PROJECT_DIR/dev/frontend/dist/*.js" > /dev/null; then
-        WWW_CARD_SRC_DIR="$PROJECT_DIR/dev/frontend/dist"
-    elif [ -d "$FRONTEND_DIST_SRC" ] && compgen -G "$FRONTEND_DIST_SRC/*.js" > /dev/null; then
-        WWW_CARD_SRC_DIR="$FRONTEND_DIST_SRC"
-    fi
-
-    if [ -n "$WWW_CARD_SRC_DIR" ]; then
-        mkdir -p "$WWW_TARGET"
-        cp -f "$WWW_CARD_SRC_DIR"/*.js "$WWW_TARGET/"
-        echo -e "${GREEN}✅ Frontend card JS copied to $WWW_TARGET from $WWW_CARD_SRC_DIR${NC}"
-    else
-        echo -e "${YELLOW}⚠️  No frontend JS found to copy into $WWW_TARGET (skipping)${NC}"
-    fi
-else
-    echo -e "${YELLOW}ℹ️  Skipping /config/www/cez_hdo copy (set DEPLOY_WWW=1 to enable)${NC}"
-fi
-
-echo -e "${GREEN}✅ Component files deployed${NC}"
-
-# Step 5: Frontend URL
-echo -e "${BLUE}🌐 Step 5: Frontend URL...${NC}"
-echo -e "${GREEN}✅ Frontend is served by the integration at:${NC}"
-echo -e "${GREEN}   /cez_hdo/cez-hdo-card.js${NC}"
-echo -e "${YELLOW}ℹ️  /local/cez_hdo/cez-hdo-card.js is a fallback (copied to config/www)${NC}"
-
-# Step 6: Verification
+# Step 5: Verification
 echo -e "${BLUE}🔍 Step 6: Verification...${NC}"
 if [ -d "$TARGET_DIR" ] && [ -f "$TARGET_DIR/__init__.py" ]; then
     echo -e "${GREEN}✅ Component installed successfully${NC}"
 
     echo "📂 Files installed:"
     ls -la "$TARGET_DIR" | head -10
-
-    if [ -f "$WWW_TARGET/cez-hdo-card.js" ]; then
-        echo -e "\n🌐 Frontend file:"
-        ls -la "$WWW_TARGET/cez-hdo-card.js"
-    fi
 else
     echo -e "${RED}❌ Installation failed!${NC}"
     exit 1
 fi
 
-# Step 7: Configuration setup
-echo -e "${BLUE}⚙️ Step 7: Checking configuration...${NC}"
+# Step 6: Configuration check (info only - config flow is used now)
+echo -e "${BLUE}⚙️ Step 6: Configuration check...${NC}"
 CONFIG_FILE="$MOUNT_POINT/configuration.yaml"
 
 if [ -f "$CONFIG_FILE" ]; then
-    # Check if ČEZ HDO configuration already exists
+    # Check if old YAML configuration exists
     if grep -q "platform: cez_hdo" "$CONFIG_FILE"; then
-        echo -e "${YELLOW}⚠️  ČEZ HDO configuration already exists in configuration.yaml${NC}"
+        echo -e "${YELLOW}⚠️  Legacy YAML configuration found in configuration.yaml${NC}"
+        echo -e "${YELLOW}   You can remove it and use Config Flow instead (Settings → Devices & Services → Add Integration)${NC}"
     else
-        echo -e "${BLUE}📝 Adding ČEZ HDO configuration to configuration.yaml...${NC}"
-
-        # Backup configuration file
-        cp "$CONFIG_FILE" "$CONFIG_FILE.backup.$(date +%Y%m%d_%H%M%S)"
-        echo -e "${GREEN}✅ Configuration backup created${NC}"
-
-        # Add configuration
-        cat >> "$CONFIG_FILE" << 'EOF'
-
-# ČEZ HDO integrace
-sensor:
-  - platform: cez_hdo
-    code: "405"  # Váš distribuční kód
-    region: stred # Váš region
-    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
-
-binary_sensor:
-  - platform: cez_hdo
-    code: "405"  # Váš distribuční kód
-    region: stred # Váš region
-    scan_interval: 300  # Aktualizace každých 5 minut (volitelné)
-EOF
-
-        echo -e "${GREEN}✅ ČEZ HDO configuration added to configuration.yaml${NC}"
-        echo -e "${YELLOW}📝 Note: Update code and region parameters as needed${NC}"
+        echo -e "${GREEN}✅ No legacy YAML configuration found${NC}"
+        echo -e "${BLUE}   Add integration via: Settings → Devices & Services → Add Integration → ČEZ HDO${NC}"
     fi
 else
     echo -e "${YELLOW}⚠️  configuration.yaml not found at $CONFIG_FILE${NC}"
@@ -420,8 +331,8 @@ fi
 echo ""
 echo -e "${GREEN}✨ ČEZ HDO deployment completed!${NC}"
 echo -e "${YELLOW}📋 Next steps:${NC}"
-echo "   1. Update code and region in configuration.yaml if needed"
-echo "   2. Restart Home Assistant"
-echo "   3. Check logs for any errors"
-echo "   4. Verify entities are working"
+echo "   1. Restart Home Assistant"
+echo "   2. Add integration: Settings → Devices & Services → Add Integration → ČEZ HDO"
+echo "   3. Enter your EAN number in the config flow"
+echo "   4. Check logs for any errors"
 echo "   5. Test Lovelace card functionality"

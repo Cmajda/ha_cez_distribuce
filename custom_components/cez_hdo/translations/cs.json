@@ -1,0 +1,98 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Nastavení ČEZ HDO",
+                "description": "Zadejte číslo EAN z faktury od ČEZ Distribuce.",
+                "data": {
+                    "ean": "Číslo EAN"
+                },
+                "data_description": {
+                    "ean": "18místné číslo EAN z vaší faktury za elektřinu"
+                }
+            },
+            "signal": {
+                "title": "Výběr HDO signálu",
+                "description": "Pro vaši lokalitu byl nalezen {signal_count} signál(y).\n\n**Pokud neznáte svůj signál**, vyberte první signál v pořadí. Správný signál najdete také ve své smlouvě s ČEZ Distribuce.",
+                "data": {
+                    "signal": "HDO signál"
+                },
+                "data_description": {
+                    "signal": "Kód HDO signálu pro časy přepínání tarifů"
+                }
+            },
+            "entity_suffix": {
+                "title": "Přípona entity ID",
+                "description": "Zadejte příponu, která bude použita v názvu entit.\n\n**Příklad s výchozí příponou:**\n`sensor.cez_hdo_lowtariffstart_{example_entity}`\n\n**Příklad s vlastní příponou** (např. `chalupa`):\n`sensor.cez_hdo_lowtariffstart_chalupa`\n\nPříponu můžete změnit pro lepší rozlišení více zařízení.",
+                "data": {
+                    "entity_suffix": "Přípona entity"
+                },
+                "data_description": {
+                    "entity_suffix": "Přípona přidaná ke všem entity ID (můžete zadat vlastní text, např. chalupa, byt, dum)"
+                }
+            },
+            "prices": {
+                "title": "Nastavení cen tarifů",
+                "description": "Nastavte ceny pro nízký (NT) a vysoký (VT) tarif. Ceny se používají pro výpočet nákladů v kartě.",
+                "data": {
+                    "low_tariff_price": "Cena NT (Kč/kWh)",
+                    "high_tariff_price": "Cena VT (Kč/kWh)"
+                },
+                "data_description": {
+                    "low_tariff_price": "Cena za kWh v nízkém tarifu",
+                    "high_tariff_price": "Cena za kWh ve vysokém tarifu"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Nepodařilo se ověřit EAN. Zkontrolujte ručně na stránkách ČEZ Distribuce.",
+            "invalid_ean": "Neplatné číslo EAN. Pro toto EAN nebyla nalezena žádná HDO data.",
+            "unknown": "Došlo k neočekávané chybě."
+        },
+        "abort": {
+            "already_configured": "Tato kombinace EAN a signálu je již nakonfigurována. Vyberte jiný signál.",
+            "already_in_progress": "Konfigurace tohoto EAN již probíhá."
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Změna nastavení ČEZ HDO",
+                "description": "Změňte EAN nebo HDO signál. Po potvrzení proběhne validace na API ČEZ.",
+                "data": {
+                    "ean": "Číslo EAN"
+                },
+                "data_description": {
+                    "ean": "18místné číslo EAN z vaší faktury za elektřinu"
+                }
+            },
+            "signal": {
+                "title": "Výběr HDO signálu",
+                "description": "Pro vaši lokalitu byl nalezen {signal_count} signál(y).\n\n**Pokud neznáte svůj signál**, vyberte první signál v pořadí. Správný signál najdete také ve své smlouvě s ČEZ Distribuce.",
+                "data": {
+                    "signal": "HDO signál"
+                },
+                "data_description": {
+                    "signal": "Kód HDO signálu pro časy přepínání tarifů"
+                }
+            },
+            "prices": {
+                "title": "Nastavení cen tarifů",
+                "description": "Nastavte ceny pro nízký (NT) a vysoký (VT) tarif. Ceny se používají pro výpočet nákladů v kartě.",
+                "data": {
+                    "low_tariff_price": "Cena NT (Kč/kWh)",
+                    "high_tariff_price": "Cena VT (Kč/kWh)"
+                },
+                "data_description": {
+                    "low_tariff_price": "Cena za kWh v nízkém tarifu",
+                    "high_tariff_price": "Cena za kWh ve vysokém tarifu"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Nepodařilo se ověřit EAN. Zkontrolujte ručně na stránkách ČEZ Distribuce.",
+            "invalid_ean": "Neplatné číslo EAN. Pro toto EAN nebyla nalezena žádná HDO data.",
+            "unknown": "Došlo k neočekávané chybě."
+        }
+    }
+}
