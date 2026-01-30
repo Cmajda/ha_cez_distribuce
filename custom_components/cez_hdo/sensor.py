@@ -205,7 +205,7 @@ class CezHdoSensor(CoordinatorEntity[CezHdoCoordinator], SensorEntity):
             self._attr_unique_id = f"{entry_id}_{ean}_{name.lower()}"
         else:
             self._attr_unique_id = f"{ean}_{name.lower()}"
-        
+
         # Build object_id using entity_suffix from config or auto-generate
         base_object_id = meta.get("object_id", f"cez_hdo_{name.lower()}")
         if entity_suffix:
@@ -254,9 +254,16 @@ class LowTariffStart(CezHdoSensor):
     """Sensor for low tariff start time."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(coordinator, ean, "LowTariffStart", entry_id, signal, entity_suffix)
+        super().__init__(
+            coordinator, ean, "LowTariffStart", entry_id, signal, entity_suffix
+        )
 
     @property
     def native_value(self) -> str | None:
@@ -270,9 +277,16 @@ class LowTariffEnd(CezHdoSensor):
     """Sensor for low tariff end time."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(coordinator, ean, "LowTariffEnd", entry_id, signal, entity_suffix)
+        super().__init__(
+            coordinator, ean, "LowTariffEnd", entry_id, signal, entity_suffix
+        )
 
     @property
     def icon(self) -> str:
@@ -290,9 +304,16 @@ class LowTariffDuration(CezHdoSensor):
     """Sensor for low tariff duration."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(coordinator, ean, "LowTariffDuration", entry_id, signal, entity_suffix)
+        super().__init__(
+            coordinator, ean, "LowTariffDuration", entry_id, signal, entity_suffix
+        )
 
     @property
     def icon(self) -> str:
@@ -314,9 +335,16 @@ class HighTariffStart(CezHdoSensor):
     """Sensor for high tariff start time."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(coordinator, ean, "HighTariffStart", entry_id, signal, entity_suffix)
+        super().__init__(
+            coordinator, ean, "HighTariffStart", entry_id, signal, entity_suffix
+        )
 
     @property
     def native_value(self) -> str | None:
@@ -330,9 +358,16 @@ class HighTariffEnd(CezHdoSensor):
     """Sensor for high tariff end time."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(coordinator, ean, "HighTariffEnd", entry_id, signal, entity_suffix)
+        super().__init__(
+            coordinator, ean, "HighTariffEnd", entry_id, signal, entity_suffix
+        )
 
     @property
     def icon(self) -> str:
@@ -350,9 +385,16 @@ class HighTariffDuration(CezHdoSensor):
     """Sensor for high tariff duration."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(coordinator, ean, "HighTariffDuration", entry_id, signal, entity_suffix)
+        super().__init__(
+            coordinator, ean, "HighTariffDuration", entry_id, signal, entity_suffix
+        )
 
     @property
     def icon(self) -> str:
@@ -374,9 +416,16 @@ class CurrentPrice(CezHdoSensor):
     """Sensor for current electricity price based on active tariff."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(coordinator, ean, "CurrentPrice", entry_id, signal, entity_suffix)
+        super().__init__(
+            coordinator, ean, "CurrentPrice", entry_id, signal, entity_suffix
+        )
 
     @property
     def icon(self) -> str:
@@ -409,7 +458,12 @@ class CezHdoRawData(CezHdoSensor):
     """Sensor for raw HDO JSON data and timestamp."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
         super().__init__(coordinator, ean, "RawData", entry_id, signal, entity_suffix)
 
@@ -433,9 +487,16 @@ class HdoSchedule(CezHdoSensor):
     """Sensor providing HDO schedule data for graphs (ApexCharts compatible)."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(coordinator, ean, "HdoSchedule", entry_id, signal, entity_suffix)
+        super().__init__(
+            coordinator, ean, "HdoSchedule", entry_id, signal, entity_suffix
+        )
 
     @property
     def icon(self) -> str:

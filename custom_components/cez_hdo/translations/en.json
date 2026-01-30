@@ -45,12 +45,13 @@
             }
         },
         "error": {
-            "cannot_connect": "Failed to verify EAN. Please check manually on ČEZ Distribuce website: https://dip.cezdistribuce.cz/irj/portal/anonymous/casy-spinani/",
-            "invalid_ean": "Invalid EAN number. No HDO data found for this EAN. You can verify manually at https://dip.cezdistribuce.cz/irj/portal/anonymous/casy-spinani/",
+            "cannot_connect": "Failed to verify EAN. Please check manually on ČEZ Distribuce website.",
+            "invalid_ean": "Invalid EAN number. No HDO data found for this EAN.",
             "unknown": "Unexpected error occurred."
         },
         "abort": {
-            "already_configured": "This EAN is already configured."
+            "already_configured": "This EAN and signal combination is already configured. Select a different signal.",
+            "already_in_progress": "Configuration for this EAN is already in progress."
         }
     },
     "options": {
@@ -89,7 +90,7 @@
             }
         },
         "error": {
-            "cannot_connect": "Failed to verify EAN. Please check manually on ČEZ Distribuce website: https://dip.cezdistribuce.cz/irj/portal/anonymous/casy-spinani/",
+            "cannot_connect": "Failed to verify EAN. Please check manually on ČEZ Distribuce website.",
             "invalid_ean": "Invalid EAN number. No HDO data found for this EAN.",
             "unknown": "Unexpected error occurred."
         }

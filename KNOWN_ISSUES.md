@@ -1,8 +1,14 @@
-# 🐛 Známé problémy (v3.0.0-RC.1)
+# 🐛 Známé problémy
 
 Tento soubor obsahuje seznam známých problémů a jejich stav řešení.
 
-## Priorita 1 - Kritické
+> **Stav:** Všechny problémy z v3.0.0-RC.1 byly vyřešeny v RC.2.
+
+---
+
+## Archiv vyřešených problémů (v3.0.0-RC.1)
+
+### Priorita 1 - Kritické
 
 ### ~~1. Senzory se neaktualizují v reálném čase~~ ✅
 
@@ -75,11 +81,13 @@ Názvy cache/price souborů používají pouze suffix EAN (posledních 6 čísli
 1. Jaké jméno bude mít device při přidání více signálů?
 2. Názvy entit jsou neintuitvní (např. `binary_sensor.cez_hdo_nizky_tarif_aktivni_1`)
 
-**Řešení:** Každý signál nyní vytváří vlastní device s názvem obsahujícím signál.
+**Řešení:** Přidán nový krok v config flow pro zadání přípony entit.
 
+- Výchozí přípona: `{EAN4}_{signál}` (např. `7606_a1b4dp04`)
+- **Uživatel může zadat vlastní příponu** (např. `chalupa`, `byt`, `dum`)
+- Entity mají ID: `sensor.cez_hdo_nizky_tarif_zacatek_{pripona}`
 - Device: `ČEZ HDO 967606 (a1b4dp04)`
-- Device ID zahrnuje signál: `{ean}_{signal}`
-- Entity jsou seskupeny pod správný device podle signálu
+- Stejné EAN lze přidat vícekrát s různými signály
 
 **Nahlásil:** @pokornyIt
 

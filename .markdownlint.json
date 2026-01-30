@@ -8,5 +8,6 @@
   },
   "MD033": {
     "allowed_elements": ["a", "img", "br"]
-  }
+  },
+  "MD060": false
 }

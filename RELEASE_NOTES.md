@@ -2,20 +2,24 @@
 
 ---
 
-## v3.0.0 (2026-01-30)
+## v3.0.0-RC.2 (2026-01-30)
 
 ### 🚀 Hlavní změny
 
-Verze 3.0.0 přináší **kompletní přepracování** integrace s důrazem na moderní architekturu Home Assistantu.
+Verze 3.0.0 přináší **kompletní přepracování** integrace
+s důrazem na moderní architekturu Home Assistantu.
 
 #### Config Flow – GUI konfigurace
 
 - **Žádný YAML** – integrace se konfiguruje přes Settings → Devices & Services
-- **3-krokový průvodce:**
+- **4-krokový průvodce:**
   1. Zadání EAN
   2. Výběr signálu
-  3. Nastavení cen NT/VT
+  3. Přípona entit (uživatelsky konfigurovatelná)
+  4. Nastavení cen NT/VT
 - **Options Flow** – možnost změnit nastavení kdykoli po instalaci
+- **Více signálů pro EAN** – stejné EAN lze přidat vícekrát
+  s různými signály
 
 #### Device Registry
 
@@ -38,9 +42,12 @@ Verze 3.0.0 přináší **kompletní přepracování** integrace s důrazem na m
 ### ✨ Vylepšení
 
 - **Ceny v integraci** – ceny se nastavují v Options Flow, ne v kartě
-- **Update interval** – změněn na 1 hodinu (místo 1 sekundy)
+- **API update interval** – změněn na 1 hodinu
+- **State update interval** – aktualizace stavu každých 5 sekund
 - **Lepší chybové hlášky při zadávání EAN** – s odkazy na portál ČEZ
 - **Dynamické texty** – pro počet signálů
+- **Maskování EAN v logu** – zobrazeny pouze poslední číslice
+- **Bez emoji v logu** – nahrazeny textovými značkami `[NT]`/`[VT]`
 
 ### 🔧 Technické změny
 
@@ -77,7 +84,7 @@ Viz [Upgrade Guide](docs/upgrade-guide.md) pro detailní postup.
 - Zobrazit HDO rozvrh
 - Zobrazit ceny v legendě rozvrhu
 
-### ✨ Vylepšení
+### ✨ Vylepšení (v2.2.0)
 
 - Správné zpracování času 24:00 (půlnoc)
 - Opravena duplicita aktuálního dne

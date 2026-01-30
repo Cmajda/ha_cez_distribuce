@@ -70,7 +70,9 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             set(s.get("signal", "") for s in signals if s.get("signal"))
         )
 
-        _LOGGER.debug("EAN %s validated, found signals: %s", mask_ean(ean), available_signals)
+        _LOGGER.debug(
+            "EAN %s validated, found signals: %s", mask_ean(ean), available_signals
+        )
 
         return {
             "title": f"ČEZ HDO ({ean[-6:]})",
@@ -108,11 +110,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                 self._ean = user_input[CONF_EAN]
                 self._available_signals = info.get("available_signals", [])
 
-                # Check if already configured
-                await self.async_set_unique_id(self._ean)
-                self._abort_if_unique_id_configured()
-
-                # Always proceed to signal selection
+                # Proceed to signal selection (unique_id check will be done after signal selection)
                 return await self.async_step_signal()
 
             except CannotConnect:
@@ -140,8 +138,16 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle signal selection step."""
+        errors: dict[str, str] = {}
+
         if user_input is not None:
             self._signal = user_input.get(CONF_SIGNAL)
+
+            # Check if this EAN+signal combination is already configured
+            unique_id = f"{self._ean}_{self._signal}"
+            await self.async_set_unique_id(unique_id)
+            self._abort_if_unique_id_configured()
+
             # Proceed to entity suffix step
             return await self.async_step_entity_suffix()
 
@@ -166,6 +172,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             description_placeholders={
                 "signal_count": str(signal_count),
             },
+            errors=errors,
         )
 
     async def async_step_entity_suffix(
@@ -179,7 +186,9 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
 
         # Generate default suffix from EAN and signal
         ean_suffix = self._ean[-4:] if self._ean else "0000"
-        signal_safe = self._signal.lower().replace("|", "_") if self._signal else "signal"
+        signal_safe = (
+            self._signal.lower().replace("|", "_") if self._signal else "signal"
+        )
         default_suffix = f"{ean_suffix}_{signal_safe}"
 
         return self.async_show_form(

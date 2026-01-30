@@ -6,7 +6,8 @@ Tento dokument popisuje postup pro upgrade integrace na novou verzi.
 
 ## ⚠️ Upgrade na v3.0.0 (z v2.x) – DŮLEŽITÉ ZMĚNY
 
-Verze 3.0.0 přináší **zásadní změny** v architektuře integrace. Přečtěte si pozorně celý postup.
+Verze 3.0.0 přináší **zásadní změny** v architektuře integrace.
+Přečtěte si pozorně celý postup.
 
 ### Co je nového v v3.0.0
 
@@ -19,6 +20,8 @@ Verze 3.0.0 přináší **zásadní změny** v architektuře integrace. Přečt�
 | **Cache** | Sdílený soubor | Per-EAN soubory |
 | **Diagnostika** | Manuální logy | Export přes UI |
 | **Více EAN** | Komplikované | Plně podporováno |
+| **Více signálů/EAN** | Nepodporováno | Plně podporováno |
+| **Názvy entit** | Automatické | Uživatelsky konfigurovatelné |
 
 ### Postup upgradu
 
@@ -63,9 +66,11 @@ Po aktualizaci proveďte **plný restart** Home Assistantu (ne jen reload).
 2. Klikněte **+ Add Integration**
 3. Vyhledejte **ČEZ HDO**
 4. **Krok 1 - EAN:** Zadejte vaše EAN číslo
-5. **Krok 2 - Signál:** Vyberte signál ze seznamu (pokud je více možností)
-6. **Krok 3 - Ceny:** Zadejte ceny za NT a VT v Kč/kWh
-7. Klikněte **Finish**
+5. **Krok 2 - Signál:** Vyberte signál ze seznamu
+6. **Krok 3 - Přípona:** Zadejte příponu pro entity
+   (výchozí: `{EAN4}_{signál}`)
+7. **Krok 4 - Ceny:** Zadejte ceny za NT a VT v Kč/kWh
+8. Klikněte **Finish**
 
 #### Krok 7: Smazat starou složku
 
@@ -94,9 +99,9 @@ Po upgradu byste měli vidět:
    - Všechny entity seskupené pod tímto zařízením
 
 2. **Entity s novými názvy:**
-   - `sensor.cez_hdo_xxxxxx_nizky_tarif_zacatek`
-   - `binary_sensor.cez_hdo_xxxxxx_nizky_tarif_aktivni`
-   - atd.
+   - `sensor.cez_hdo_nizky_tarif_zacatek_{pripona}`
+   - `binary_sensor.cez_hdo_nizky_tarif_aktivni_{pripona}`
+   - atd. (kde `{pripona}` je vaše zvolená přípona)
 
 3. **Diagnostika dostupná:**
    - Settings → Devices → ČEZ HDO → ⋮ → Download diagnostics
@@ -109,19 +114,28 @@ Po upgradu byste měli vidět:
 
 1. **Settings → Devices & Services → ČEZ HDO**
 2. Klikněte na **Configure**
-3. Projděte 3 kroky: EAN → Signál → Ceny
+3. Projděte 4 kroky: EAN → Signál → Přípona → Ceny
 4. Uložte změny
 
 ### Více EAN (více odběrných míst)
 
 Pro každé EAN přidejte integraci znovu:
+
 1. Settings → Devices & Services → + Add Integration → ČEZ HDO
 2. Zadejte další EAN
 
 Každé EAN bude mít:
+
 - Vlastní zařízení v Device Registry
-- Vlastní entity (s unikátním suffixem)
+- Vlastní entity (s unikátní příponou)
 - Vlastní cache soubory
+
+### Stejné EAN s různými signály
+
+Pokud máte jedno EAN s více signály (např. pro různé okruhy):
+
+1. Přidejte integraci pro každý signál zvlášť
+2. Každá instance bude mít jinou příponu
 
 ---
 
@@ -159,6 +173,7 @@ Pro nahlášení chyby:
 4. Přiložte JSON soubor k issue na GitHubu
 
 Diagnostika obsahuje:
+
 - Stav senzorů (hodnoty, atributy)
 - Obsah cache (rozvrh, ceny)
 - Nastavení integrace

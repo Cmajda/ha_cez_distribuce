@@ -3,7 +3,7 @@
  *
  * Displays HDO (Hromadné Dálkové Ovládání) tariff information from ČEZ Distribuce.
  *
- * @version 3.0.0
+ * @version 3.0.0-RC.2
  * @author ČEZ HDO Integration Contributors
  */
 
@@ -121,7 +121,7 @@ export class CezHdoCard extends LitElement {
     if (!this.hass?.states) return [];
     const prefixConfig = ENTITY_PREFIXES[key];
     if (!prefixConfig) return [];
-    
+
     const fullPrefix = `${prefixConfig.domain}.${prefixConfig.prefix}`;
     return Object.keys(this.hass.states).filter(id => id.startsWith(fullPrefix));
   }
@@ -135,19 +135,19 @@ export class CezHdoCard extends LitElement {
     if (configured && this.hass?.states[configured]) {
       return configured;
     }
-    
+
     // 2. Try dynamic discovery - only auto-select if exactly one device
     const allMatches = this.findAllEntitiesByPrefix(key);
     if (allMatches.length === 1) {
       return allMatches[0];
     }
-    
+
     // 3. Fall back to legacy default (for backwards compatibility)
     const legacy = DEFAULT_ENTITIES[key];
     if (legacy && this.hass?.states[legacy]) {
       return legacy;
     }
-    
+
     // Multiple devices or none found - return undefined
     return undefined;
   }

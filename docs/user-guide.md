@@ -1,6 +1,7 @@
 # ⚡️ ČEZ HDO – Uživatelská dokumentace
 
-Kompletní návod pro instalaci, konfiguraci a používání integrace ČEZ HDO v Home Assistantu.
+Kompletní návod pro instalaci, konfiguraci a používání
+integrace ČEZ HDO v Home Assistantu.
 
 ---
 
@@ -26,16 +27,17 @@ Kompletní návod pro instalaci, konfiguraci a používání integrace ČEZ HDO 
 2. Klikněte na **⋮** → **Custom repositories**
 3. Přidejte repozitář:
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
+[![HACS Repository Badge](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-4. Nainstalujte integraci **ČEZ HDO**
-5. **Restartujte Home Assistant**
+1. Nainstalujte integraci **ČEZ HDO**
+2. **Restartujte Home Assistant**
 
 ### Po instalaci
 
 Po restartu pokračujte konfigurací integrace (viz další sekce).
 
-> **Poznámka:** Po instalaci/aktualizaci může být potřeba stisknout `Ctrl+F5` pro vyčištění cache prohlížeče.
+> **Poznámka:** Po instalaci/aktualizaci může být potřeba stisknout
+> `Ctrl+F5` pro vyčištění cache prohlížeče.
 
 ---
 
@@ -54,6 +56,7 @@ Od verze 3.0.0 se integrace konfiguruje přes GUI (ne přes YAML).
 Zadejte vaše **EAN číslo** (18 číslic).
 
 EAN najdete:
+
 - Na faktuře / vyúčtování za elektřinu
 - V portálu vašeho dodavatele elektřiny
 - Na stránkách [ČEZ Distribuce](https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo)
@@ -66,10 +69,25 @@ Vyberte **signál** ze seznamu dostupných signálů pro vaše odběrné místo.
 
 - Pokud je k dispozici pouze jeden signál, bude vybrán automaticky
 - Signál určuje, kdy se přepíná mezi NT a VT
+- **Stejné EAN lze přidat vícekrát s různými signály**
 
-### Krok 3: Ceny
+### Krok 3: Přípona entit
+
+Zadejte **příponu** pro názvy entit:
+
+- Výchozí: `{poslední 4 číslice EAN}_{signál}`
+  (např. `7606_a1b4dp04`)
+- Můžete zadat vlastní (např. `chalupa`, `byt`, `dum`)
+- Entity budou mít ID ve formátu:
+  `sensor.cez_hdo_nizky_tarif_zacatek_{pripona}`
+
+> **Tip:** Použijte intuitivní názvy pro snadnější orientaci
+> v automatizacích.
+
+### Krok 4: Ceny
 
 Zadejte ceny elektřiny:
+
 - **Cena NT (Kč/kWh)** – cena za kWh v nízkém tarifu
 - **Cena VT (Kč/kWh)** – cena za kWh ve vysokém tarifu
 
@@ -78,6 +96,7 @@ Ceny najdete na faktuře od dodavatele elektřiny.
 ### Dokončení
 
 Klikněte **Finish**. Integrace vytvoří:
+
 - Zařízení "ČEZ HDO XXXXXX" (posledních 6 číslic EAN)
 - Všechny senzory a binární senzory
 
@@ -108,7 +127,17 @@ Integrace vytváří následující entity:
 | `sensor.cez_hdo_*_rozvrh` | 7denní HDO rozvrh |
 | `sensor.cez_hdo_*_surova_data` | Timestamp poslední aktualizace |
 
-> **Poznámka:** `*` označuje suffix odvozený z EAN pro rozlišení více instancí.
+> **Poznámka:** `*` označuje vaši zvolenou příponu z kroku 3
+> (např. `7606_a1b4dp04` nebo `chalupa`).
+
+### Více EAN / signálů
+
+Integrace podporuje:
+
+- **Více různých EAN** – každé přidáte jako novou instanci
+- **Stejné EAN s různými signály** – každý signál jako nová instance
+
+Každá instance má vlastní zařízení a entity s unikátní příponou.
 
 ---
 
@@ -146,7 +175,8 @@ Karta má vizuální editor s těmito možnostmi:
 
 ### Výběr entit
 
-Karta automaticky detekuje entity ČEZ HDO. Pokud máte více instancí integrace, vyberte správné entity v editoru.
+Karta automaticky detekuje entity ČEZ HDO.
+Pokud máte více instancí integrace, vyberte správné entity v editoru.
 
 ---
 
@@ -224,7 +254,9 @@ Karta obsahuje vizualizaci 7denního HDO rozvrhu:
 ### Chyba "Neplatný EAN" nebo "Nepodařilo se načíst signály"
 
 - Ověřte, že EAN je správný (18 číslic)
-- Zkontrolujte [portál ČEZ Distribuce](https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo) ručně
+- Zkontrolujte
+  [portál ČEZ Distribuce](https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo)
+  ručně
 - API ČEZ může být dočasně nedostupné
 
 ### Kompletní reset

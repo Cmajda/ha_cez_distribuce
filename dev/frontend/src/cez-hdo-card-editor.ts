@@ -23,7 +23,7 @@ function findAllEntitiesByPrefix(hass: HomeAssistant | undefined, key: string): 
   if (!hass?.states) return [];
   const config = ENTITY_PREFIXES[key];
   if (!config) return [];
-  
+
   const fullPrefix = `${config.domain}.${config.prefix}`;
   return Object.keys(hass.states).filter(id => id.startsWith(fullPrefix));
 }
@@ -118,10 +118,10 @@ export class CezHdoCardEditor extends HTMLElement {
     let current = (this._config.entities && this._config.entities[key]) || '';
     const resolved = resolveDefaultForKey(this._hass, key);
     const allMatches = findAllEntitiesByPrefix(this._hass, key);
-    
+
     // If not explicitly configured, use dynamically found entity
     const displayValue = current || resolved || '';
-    
+
     const wrap = document.createElement('div');
     wrap.className = 'entity-row';
 

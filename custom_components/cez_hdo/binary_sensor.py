@@ -162,7 +162,7 @@ class CezHdoBinarySensor(CoordinatorEntity[CezHdoCoordinator], BinarySensorEntit
             self._attr_unique_id = f"{entry_id}_{ean}_{name.lower()}"
         else:
             self._attr_unique_id = f"{ean}_{name.lower()}"
-        
+
         # Build object_id using entity_suffix from config or auto-generate
         base_object_id = meta.get("object_id", f"cez_hdo_{name.lower()}")
         if entity_suffix:
@@ -216,9 +216,16 @@ class LowTariffActive(CezHdoBinarySensor):
     """Binary sensor for low tariff active state."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(coordinator, ean, "LowTariffActive", entry_id, signal, entity_suffix)
+        super().__init__(
+            coordinator, ean, "LowTariffActive", entry_id, signal, entity_suffix
+        )
 
     @property
     def is_on(self) -> bool | None:
@@ -230,9 +237,16 @@ class HighTariffActive(CezHdoBinarySensor):
     """Binary sensor for high tariff active state."""
 
     def __init__(
-        self, coordinator: CezHdoCoordinator, ean: str, entry_id: str | None = None, signal: str | None = None, entity_suffix: str | None = None
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(coordinator, ean, "HighTariffActive", entry_id, signal, entity_suffix)
+        super().__init__(
+            coordinator, ean, "HighTariffActive", entry_id, signal, entity_suffix
+        )
 
     @property
     def is_on(self) -> bool | None:

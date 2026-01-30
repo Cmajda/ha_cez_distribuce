@@ -45,6 +45,6 @@ def sanitize_signal(signal: str) -> str:
         return ""
     # Replace special characters with underscore
     sanitized = signal.lower()
-    for char in "|/\\:*?\"<>":
+    for char in '|/\\:*?"<>':
         sanitized = sanitized.replace(char, "_")
     return sanitized

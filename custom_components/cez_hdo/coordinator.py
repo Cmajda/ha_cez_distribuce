@@ -5,7 +5,7 @@ import json
 import logging
 from datetime import datetime, time, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import requests
 
@@ -77,7 +77,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         )
         self.ean = ean
         self.signal = signal
-        self._state_update_unsub: callable | None = None
+        self._state_update_unsub: Callable[[], None] | None = None
 
         # Use hass.config.path() for proper path resolution
         # Cache files use EAN suffix (last 6 digits) to support multiple instances
@@ -129,7 +129,9 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             self._async_recalculate_state,
             STATE_UPDATE_INTERVAL,
         )
-        _LOGGER.debug("CezHdoCoordinator: Started state updates every %s", STATE_UPDATE_INTERVAL)
+        _LOGGER.debug(
+            "CezHdoCoordinator: Started state updates every %s", STATE_UPDATE_INTERVAL
+        )
 
     def stop_state_updates(self) -> None:
         """Stop periodic state recalculation."""
