@@ -5,6 +5,8 @@
  * Uses ha-selector for entity selection (HA native component).
  */
 
+import { getTranslations, getLanguageFromHass, TranslationStrings } from './localization';
+
 // Entity prefixes for dynamic discovery (new format: cez_hdo_{type}_{ean4}_{signal})
 const ENTITY_PREFIXES: Record<string, { domain: string; prefix: string }> = {
   low_tariff: { domain: 'binary_sensor', prefix: 'cez_hdo_lowtariffactive_' },
@@ -42,6 +44,10 @@ function resolveDefaultForKey(hass: HomeAssistant | undefined, key: string): str
 interface HomeAssistant {
   states: Record<string, { attributes?: { friendly_name?: string } }>;
   callService: (domain: string, service: string, data: Record<string, unknown>) => Promise<void>;
+  language?: string;
+  locale?: {
+    language: string;
+  };
 }
 
 interface CardConfig {
@@ -166,6 +172,10 @@ export class CezHdoCardEditor extends HTMLElement {
       return;
     }
 
+    // Get translations based on HA language
+    const lang = getLanguageFromHass(this._hass);
+    const t = getTranslations(lang);
+
     const title = this._config.title ?? '';
     const showTimes = this._config.show_times !== false;
     const showDuration = this._config.show_duration !== false;
@@ -204,7 +214,7 @@ export class CezHdoCardEditor extends HTMLElement {
 
     // Title field
     const titleField = document.createElement('ha-textfield') as any;
-    titleField.label = 'Titulek';
+    titleField.label = t.editorTitle;
     titleField.value = title;
     titleField.addEventListener('input', (ev: Event) => {
       this._config = { ...this._config, title: (ev.target as HTMLInputElement).value };
@@ -226,30 +236,30 @@ export class CezHdoCardEditor extends HTMLElement {
       return form;
     };
 
-    wrap.appendChild(mkToggle('Zobrazit titulek', 'show_title', this._config.show_title !== false));
-    wrap.appendChild(mkToggle('Zobrazit stavy tarifů', 'show_tariff_status', this._config.show_tariff_status !== false));
-    wrap.appendChild(mkToggle('Zobrazit ceny u tarifů', 'show_tariff_prices', this._config.show_tariff_prices === true));
-    wrap.appendChild(mkToggle('Zobrazit časy (začátek/konec)', 'show_times', showTimes));
-    wrap.appendChild(mkToggle('Zobrazit zbývající čas', 'show_duration', showDuration));
-    wrap.appendChild(mkToggle('Zobrazit aktuální cenu', 'show_price', this._config.show_price !== false));
-    wrap.appendChild(mkToggle('Zobrazit HDO rozvrh', 'show_schedule', this._config.show_schedule === true));
-    wrap.appendChild(mkToggle('Zobrazit ceny v legendě rozvrhu', 'show_schedule_prices', this._config.show_schedule_prices === true));
-    wrap.appendChild(mkToggle('Kompaktní režim', 'compact_mode', compactMode));
+    wrap.appendChild(mkToggle(t.showTitle, 'show_title', this._config.show_title !== false));
+    wrap.appendChild(mkToggle(t.showTariffStatus, 'show_tariff_status', this._config.show_tariff_status !== false));
+    wrap.appendChild(mkToggle(t.showTariffPrices, 'show_tariff_prices', this._config.show_tariff_prices === true));
+    wrap.appendChild(mkToggle(t.showTimes, 'show_times', showTimes));
+    wrap.appendChild(mkToggle(t.showDuration, 'show_duration', showDuration));
+    wrap.appendChild(mkToggle(t.showCurrentPrice, 'show_price', this._config.show_price !== false));
+    wrap.appendChild(mkToggle(t.showHdoSchedule, 'show_schedule', this._config.show_schedule === true));
+    wrap.appendChild(mkToggle(t.showSchedulePrices, 'show_schedule_prices', this._config.show_schedule_prices === true));
+    wrap.appendChild(mkToggle(t.compactMode, 'compact_mode', compactMode));
 
     // Entity pickers using ha-selector
-    wrap.appendChild(this._entityPicker('NT aktivní (binary_sensor)', 'low_tariff', ['binary_sensor']));
-    wrap.appendChild(this._entityPicker('VT aktivní (binary_sensor)', 'high_tariff', ['binary_sensor']));
-    wrap.appendChild(this._entityPicker('NT začátek (sensor)', 'low_start', ['sensor']));
-    wrap.appendChild(this._entityPicker('NT konec (sensor)', 'low_end', ['sensor']));
-    wrap.appendChild(this._entityPicker('NT zbývá (sensor)', 'low_duration', ['sensor']));
-    wrap.appendChild(this._entityPicker('VT začátek (sensor)', 'high_start', ['sensor']));
-    wrap.appendChild(this._entityPicker('VT konec (sensor)', 'high_end', ['sensor']));
-    wrap.appendChild(this._entityPicker('VT zbývá (sensor)', 'high_duration', ['sensor']));
-    wrap.appendChild(this._entityPicker('HDO rozvrh (sensor)', 'schedule', ['sensor']));
+    wrap.appendChild(this._entityPicker(t.ntActiveBinarySensor, 'low_tariff', ['binary_sensor']));
+    wrap.appendChild(this._entityPicker(t.vtActiveBinarySensor, 'high_tariff', ['binary_sensor']));
+    wrap.appendChild(this._entityPicker(t.ntStartSensor, 'low_start', ['sensor']));
+    wrap.appendChild(this._entityPicker(t.ntEndSensor, 'low_end', ['sensor']));
+    wrap.appendChild(this._entityPicker(t.ntRemainingSensor, 'low_duration', ['sensor']));
+    wrap.appendChild(this._entityPicker(t.vtStartSensor, 'high_start', ['sensor']));
+    wrap.appendChild(this._entityPicker(t.vtEndSensor, 'high_end', ['sensor']));
+    wrap.appendChild(this._entityPicker(t.vtRemainingSensor, 'high_duration', ['sensor']));
+    wrap.appendChild(this._entityPicker(t.hdoScheduleSensor, 'schedule', ['sensor']));
 
     const hint = document.createElement('div');
     hint.className = 'hint';
-    hint.textContent = 'Entity jsou předvyplněny automaticky. Změňte pouze pokud máte více instancí integrace.';
+    hint.textContent = t.editorHint;
     wrap.appendChild(hint);
   }
 }

@@ -3,7 +3,7 @@
         "step": {
             "user": {
                 "title": "ČEZ HDO Setup",
-                "description": "Enter your EAN number from ČEZ Distribuce invoice.",
+                "description": "Enter your EAN number from ČEZ Distribuce invoice.\n\n📖 [User Guide](https://github.com/Cmajda/ha_cez_distribuce/blob/main/docs/en/user-guide.md)",
                 "data": {
                     "ean": "EAN Number"
                 },

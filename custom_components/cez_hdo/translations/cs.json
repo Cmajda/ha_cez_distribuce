@@ -3,7 +3,7 @@
         "step": {
             "user": {
                 "title": "Nastavení ČEZ HDO",
-                "description": "Zadejte číslo EAN z faktury od ČEZ Distribuce.",
+                "description": "Zadejte číslo EAN z faktury od ČEZ Distribuce.\n\n📖 [Uživatelská příručka](https://github.com/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md)",
                 "data": {
                     "ean": "Číslo EAN"
                 },

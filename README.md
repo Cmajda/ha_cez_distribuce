@@ -9,6 +9,8 @@
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/Cmajda)](https://github.com/sponsors/Cmajda)
 [![License](https://img.shields.io/badge/License-Apache%202.0%20%2B%20Commons%20Clause-blue)](./LICENSE)
 
+🇬🇧 [English version](README_EN.md)
+
 Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif)
 z API ČEZ Distribuce a vytváří entity + Lovelace kartu.
 
@@ -108,7 +110,8 @@ Pro nahlášení chyby exportujte diagnostiku:
 
 ## 📚 Dokumentace
 
-- [Uživatelský návod](docs/user-guide.md) – kompletní dokumentace
+- [Uživatelský návod (CZ)](docs/cs/user-guide.md) – kompletní dokumentace
+- [User Guide (EN)](docs/en/user-guide.md) – complete documentation (English)
 - [Upgrade Guide](docs/upgrade-guide.md) – přechod z v2.x na v3.0.0
 - [Service Guide](docs/service-guide.md) – dostupné služby
 - [Developer Guide](docs/developer-guide.md) – pro vývojáře
