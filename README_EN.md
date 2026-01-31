@@ -55,7 +55,7 @@ The card has a visual editor with display options:
 - Current price
 - 7-day HDO schedule
 
-![ČEZ HDO card](entity_card.png) ![HDO schedule](graph.png)
+![ČEZ HDO card](img/cs/entity_card_cz.png) ![HDO schedule](img/cs/graph_cz.png)
 
 ### Price Settings
 
@@ -92,7 +92,7 @@ Version 3.0.0 brings **major changes**:
 5. **Add integration** via GUI
 6. **Delete folder** `www/cez_hdo/`
 
-Detailed guide: [docs/upgrade-guide.md](docs/upgrade-guide.md)
+Detailed guide: [docs/en/upgrade-guide.md](docs/en/upgrade-guide.md)
 
 ## 🔧 Troubleshooting
 
@@ -112,9 +112,12 @@ To report a bug, export diagnostics:
 
 - [User Guide (CS)](docs/cs/user-guide.md) – complete documentation (Czech)
 - [User Guide (EN)](docs/en/user-guide.md) – complete documentation (English)
-- [Upgrade Guide](docs/upgrade-guide.md) – migration from v2.x to v3.0.0
-- [Service Guide](docs/service-guide.md) – available services
-- [Developer Guide](docs/developer-guide.md) – for developers
+- [Upgrade Guide (CS)](docs/cs/upgrade-guide.md) – migration from v2.x to v3.0.0 (Czech)
+- [Upgrade Guide (EN)](docs/en/upgrade-guide.md) – migration from v2.x to v3.0.0
+- [Service Guide (CS)](docs/cs/service-guide.md) – available services (Czech)
+- [Service Guide (EN)](docs/en/service-guide.md) – available services
+- [Developer Guide (CS)](docs/cs/developer-guide.md) – for developers (Czech)
+- [Developer Guide (EN)](docs/en/developer-guide.md) – for developers
 
 ## 📝 Release Notes
 

@@ -63,7 +63,7 @@ s důrazem na moderní architekturu Home Assistantu.
 
 ### 📋 Postup upgradu
 
-Viz [Upgrade Guide](docs/upgrade-guide.md) pro detailní postup.
+Viz [Upgrade Guide](docs/cs/upgrade-guide.md) pro detailní postup.
 
 ---
 

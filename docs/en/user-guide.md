@@ -14,8 +14,8 @@ Complete guide for installation, configuration, and usage of the ČEZ HDO integr
 - [📊 Energy Dashboard](#-energy-dashboard)
 - [📅 HDO Schedule](#-hdo-schedule)
 - [🔧 Troubleshooting](#-troubleshooting)
-- [� Debug Logging](#-debug-logging)
-- [�📊 Diagnostics](#-diagnostics)
+- [🐛 Debug Logging](#-debug-logging)
+- [📊 Diagnostics](#-diagnostics)
 
 ---
 
@@ -257,6 +257,8 @@ The `sensor.cez_hdo_*_currentprice` sensor can be used in Energy Dashboard for c
 3. Select your electricity consumption meter
 4. In the "Use an entity with current price" field, select `sensor.cez_hdo_*_currentprice`
 
+![Energy Dashboard](../../img/en/integration_energy_ha.png)
+
 ---
 
 ## 📅 HDO Schedule
@@ -344,7 +346,7 @@ After clicking **Disable**, Home Assistant will automatically generate a file wi
 
 ---
 
-## �📊 Diagnostics
+## 📊 Diagnostics
 
 To report a bug on GitHub, export diagnostic data:
 

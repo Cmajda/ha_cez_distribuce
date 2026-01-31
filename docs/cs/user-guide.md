@@ -14,8 +14,8 @@ Kompletní návod pro instalaci, konfiguraci a používání integrace ČEZ HDO 
 - [📊 Energy Dashboard](#-energy-dashboard)
 - [📅 HDO rozvrh](#-hdo-rozvrh)
 - [🔧 Řešení problémů](#-řešení-problémů)
-- [� Debug logování](#-debug-logování)
-- [�📊 Diagnostika](#-diagnostika)
+- [🐛 Debug logování](#-debug-logování)
+- [📊 Diagnostika](#-diagnostika)
 
 ---
 
@@ -52,19 +52,16 @@ Od verze 3.0.0 se integrace konfiguruje výhradně přes grafické rozhraní (GU
 3. Do vyhledávacího pole napište **ČEZ HDO**
 4. Vyberte integraci ze seznamu
 
-![Přidání integrace](../../img/cs/card_add_integration_1_cz.png)
-
 ### Krok 1: Zadání EAN
 
-Zadejte vaše **EAN číslo** (18 číslic) a klikněte na **Odeslat**.
-
-![Zadání EAN](../../img/cs/card_add_integration_1_cz.png)
-
+Zadejte vaše **EAN číslo** (18 číslic) a klikněte na **Odeslat**.  
 EAN najdete:
 
 - Na faktuře / vyúčtování za elektřinu
 - V portálu vašeho dodavatele elektřiny
-- Na stránkách [ČEZ Distribuce](https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo)
+
+![Přidání integrace](../../img/cs/card_add_integration_1_cz.png)
+
 
 ### Krok 2: Výběr signálu
 
@@ -257,6 +254,8 @@ Senzor `sensor.cez_hdo_*_aktualni_cena` lze použít v Energy Dashboard pro sled
 3. Vyberte váš měřič spotřeby elektřiny
 4. V poli "Použít entitu s aktuální cenou" vyberte `sensor.cez_hdo_*_aktualni_cena`
 
+![Energy Dashboard](../../img/cs/integration_energy_ha_cz.png)
+
 ---
 
 ## 📅 HDO rozvrh
@@ -307,7 +306,7 @@ Karta obsahuje vizualizaci 7denního HDO rozvrhu:
 
 ---
 
-## � Debug logování
+## 🐛 Debug logování
 
 Pokud potřebujete získat podrobné logy pro diagnostiku problému, můžete zapnout debug logování přímo v Home Assistantu.
 
@@ -344,7 +343,7 @@ Po kliknutí na **Zakázat** Home Assistant automaticky vygeneruje soubor s debu
 
 ---
 
-## �📊 Diagnostika
+## 📊 Diagnostika
 
 Pro nahlášení chyby na GitHubu exportujte diagnostická data:
 
