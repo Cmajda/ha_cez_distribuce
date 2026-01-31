@@ -72,17 +72,18 @@ const ENTITY_PREFIXES: Record<keyof EntityConfig, { domain: string; prefix: stri
   schedule: { domain: 'sensor', prefix: 'cez_hdo_schedule_' },
 };
 
-// Legacy default entity mappings (for backwards compatibility)
+// Legacy default entity mappings (deprecated - for backwards compatibility only)
+// These will NOT match actual entities - dynamic discovery is preferred
 const DEFAULT_ENTITIES: Required<EntityConfig> = {
-  low_tariff: 'binary_sensor.cez_hdo_nizky_tarif_aktivni',
-  high_tariff: 'binary_sensor.cez_hdo_vysoky_tarif_aktivni',
-  low_start: 'sensor.cez_hdo_nizky_tarif_zacatek',
-  low_end: 'sensor.cez_hdo_nizky_tarif_konec',
-  low_duration: 'sensor.cez_hdo_nizky_tarif_zbyva',
-  high_start: 'sensor.cez_hdo_vysoky_tarif_zacatek',
-  high_end: 'sensor.cez_hdo_vysoky_tarif_konec',
-  high_duration: 'sensor.cez_hdo_vysoky_tarif_zbyva',
-  schedule: 'sensor.cez_hdo_rozvrh',
+  low_tariff: '',
+  high_tariff: '',
+  low_start: '',
+  low_end: '',
+  low_duration: '',
+  high_start: '',
+  high_end: '',
+  high_duration: '',
+  schedule: '',
 };
 
 @customElement('cez-hdo-card')

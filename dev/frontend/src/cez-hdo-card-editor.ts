@@ -5,7 +5,7 @@
  * Uses ha-selector for entity selection (HA native component).
  */
 
-import { getTranslations, getLanguageFromHass, TranslationStrings } from './localization';
+import { getTranslations, getLanguageFromHass } from './localization';
 
 // Entity prefixes for dynamic discovery (new format: cez_hdo_{type}_{ean4}_{signal})
 const ENTITY_PREFIXES: Record<string, { domain: string; prefix: string }> = {
