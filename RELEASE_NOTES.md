@@ -2,6 +2,33 @@
 
 ---
 
+## v3.0.0-RC.3 (2026-02-01)
+
+### 🐛 Opravy
+
+- **Lovelace karta** – opraveny výchozí entity ID v `DEFAULT_ENTITIES`
+  (odstraněny staré české názvy jako `cez_hdo_nizky_tarif_aktivni`)
+- **Entity discovery** – karta nyní správně detekuje entity
+  podle anglických prefixů (`cez_hdo_lowtariffactive_*`)
+
+### ✨ Vylepšení
+
+- **Lokalizace názvů entit** – přidána podpora `translation_key`
+  pro automatický překlad friendly_name entit podle systémového jazyka HA
+- **Dvojjazyčná dokumentace** – kompletní CS a EN verze všech dokumentů:
+  - `docs/cs/` – česká dokumentace
+  - `docs/en/` – anglická dokumentace
+- **README_EN.md** – přidána anglická verze hlavního README
+- **Obrázky** – reorganizovány do `img/cs/` a `img/en/`
+
+### 📝 Dokumentace
+
+- Opraveny odkazy na obrázky v README_EN.md
+- Aktualizována konfigurace markdownlint
+- Opraveno číslování seznamů v user-guide
+
+---
+
 ## v3.0.0-RC.2 (2026-01-30)
 
 ### 🚀 Hlavní změny
@@ -63,7 +90,7 @@ s důrazem na moderní architekturu Home Assistantu.
 
 ### 📋 Postup upgradu
 
-Viz [Upgrade Guide](docs/upgrade-guide.md) pro detailní postup.
+Viz [Upgrade Guide](docs/cs/upgrade-guide.md) pro detailní postup.
 
 ---
 

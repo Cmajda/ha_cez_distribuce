@@ -71,13 +71,39 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: Logy
+      label: Debug logy
       description: |
-        Přidejte relevantní logy z Home Assistant.
-        Nastavení → Systém → Logy → hledat "cez_hdo"
+        **Jak získat debug logy:**
+        1. Nastavení → Zařízení a služby → ČEZ HDO
+        2. Klikněte na ⋮ (tři tečky) → **Povolit logování ladících informací**
+        3. Proveďte kroky vedoucí k chybě
+        4. Klikněte na informační banner "Logování ladících informací povoleno" → **Zakázat**
+        5. Home Assistant automaticky vygeneruje a nabídne ke stažení soubor s logy
+        6. Přiložte stažený soubor k tomuto issue
+
+        📖 [Podrobný návod](https://github.com/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md#-debug-logování)
       render: shell
       placeholder: |
-        2025-01-28 12:00:00 ERROR (MainThread) [custom_components.cez_hdo] ...
+        Přiložte stažený soubor s debug logy jako přílohu tohoto issue.
+
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostická data
+      description: |
+        **Jak exportovat diagnostiku:**
+        1. Nastavení → Zařízení a služby → ČEZ HDO
+        2. Klikněte na zařízení "ČEZ HDO XXXXXX"
+        3. Klikněte na ⋮ (tři tečky) vpravo nahoře
+        4. Vyberte **Stáhnout diagnostiku**
+        5. Přiložte stažený JSON soubor k tomuto issue
+
+        **Citlivá data jsou automaticky maskována** (EAN, partner, vkont atd.)
+
+        📖 [Podrobný návod](https://github.com/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md#-diagnostika)
+      render: json
+      placeholder: |
+        Přiložte stažený JSON soubor s diagnostikou jako přílohu tohoto issue.
 
   - type: textarea
     id: diagnostics

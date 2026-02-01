@@ -9,6 +9,8 @@
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/Cmajda)](https://github.com/sponsors/Cmajda)
 [![License](https://img.shields.io/badge/License-Apache%202.0%20%2B%20Commons%20Clause-blue)](./LICENSE)
 
+🇬🇧 [English version](README_EN.md)
+
 Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif)
 z API ČEZ Distribuce a vytváří entity + Lovelace kartu.
 
@@ -30,7 +32,7 @@ Pokud mě chcete podpořit můžete zde
 
 ### 3. Přidání integrace
 
-1. **Settings → Devices & Services → + Add Integration**
+1. **Nastavení → Zařízení a služby → + Přidat integraci**
 2. Vyhledejte **ČEZ HDO**
 3. Zadejte **EAN** (18 číslic z faktury)
 4. Vyberte **signál** (pokud je více možností)
@@ -53,12 +55,12 @@ Karta má vizuální editor s možnostmi zobrazení:
 - Aktuální cena
 - 7denní HDO rozvrh
 
-![ČEZ HDO karta](entity_card.png) ![HDO rozvrh](graph.png)
+![ČEZ HDO karta](img/cs/entity_card_cz.png) ![HDO rozvrh](img/cs/graph_cz.png)
 
 ### Nastavení cen
 
 Ceny se nastavují v **integraci**
-(Settings → Devices & Services → ČEZ HDO → Configure), ne v kartě.
+(Nastavení → Zařízení a služby → ČEZ HDO → Konfigurovat), ne v kartě.
 
 ### Energy Dashboard
 
@@ -86,32 +88,36 @@ Verze 3.0.0 přináší **zásadní změny**:
 1. **Smazat YAML konfiguraci** z `configuration.yaml`
 2. **Aktualizovat** přes HACS
 3. **Restart** Home Assistant
-4. **Smazat staré entity** (Settings → Entities)
+4. **Smazat staré entity** (Nastavení → Entity → smazat vše obsahující `cez_hdo`)
 5. **Přidat integraci** přes GUI
 6. **Smazat složku** `www/cez_hdo/`
 
-Detailní postup: [docs/upgrade-guide.md](docs/upgrade-guide.md)
+Detailní postup: [docs/cs/upgrade-guide.md](docs/cs/upgrade-guide.md)
 
 ## 🔧 Řešení problémů
 
 1. **Ctrl+F5** – vyčistit cache prohlížeče
-2. **Reload integrace** – Settings → Devices & Services → ČEZ HDO → Reload
-3. **Zkontrolovat logy** – Settings → System → Logs
+2. **Reload integrace** – Nastavení → Zařízení a služby → ČEZ HDO → Znovu načíst
+3. **Zkontrolovat logy** – Nastavení → Systém → Protokoly
 
 ### Diagnostika
 
 Pro nahlášení chyby exportujte diagnostiku:
 
-1. Settings → Devices & Services → ČEZ HDO
-2. Klikněte na zařízení → ⋮ → **Download diagnostics**
+1. Nastavení → Zařízení a služby → ČEZ HDO
+2. Klikněte na zařízení → ⋮ → **Stáhnout diagnostiku**
 3. Přiložte k [GitHub Issue](https://github.com/Cmajda/ha_cez_distribuce/issues)
 
 ## 📚 Dokumentace
 
-- [Uživatelský návod](docs/user-guide.md) – kompletní dokumentace
-- [Upgrade Guide](docs/upgrade-guide.md) – přechod z v2.x na v3.0.0
-- [Service Guide](docs/service-guide.md) – dostupné služby
-- [Developer Guide](docs/developer-guide.md) – pro vývojáře
+- [Uživatelský návod (CZ)](docs/cs/user-guide.md) – kompletní dokumentace
+- [User Guide (EN)](docs/en/user-guide.md) – complete documentation (English)
+- [Upgrade Guide (CZ)](docs/cs/upgrade-guide.md) – přechod z v2.x na v3.0.0
+- [Upgrade Guide (EN)](docs/en/upgrade-guide.md) – migration from v2.x to v3.0.0
+- [Service Guide (CZ)](docs/cs/service-guide.md) – dostupné služby
+- [Service Guide (EN)](docs/en/service-guide.md) – available services
+- [Developer Guide (CZ)](docs/cs/developer-guide.md) – pro vývojáře
+- [Developer Guide (EN)](docs/en/developer-guide.md) – for developers
 
 ## 📝 Release Notes
 

@@ -94,5 +94,44 @@
             "invalid_ean": "Neplatné číslo EAN. Pro toto EAN nebyla nalezena žádná HDO data.",
             "unknown": "Došlo k neočekávané chybě."
         }
+    },
+    "entity": {
+        "sensor": {
+            "lowtariffstart": {
+                "name": "Nízký tarif začátek"
+            },
+            "lowtariffend": {
+                "name": "Nízký tarif konec"
+            },
+            "lowtariffduration": {
+                "name": "Nízký tarif zbývá"
+            },
+            "hightariffstart": {
+                "name": "Vysoký tarif začátek"
+            },
+            "hightariffend": {
+                "name": "Vysoký tarif konec"
+            },
+            "hightariffduration": {
+                "name": "Vysoký tarif zbývá"
+            },
+            "currentprice": {
+                "name": "Aktuální cena"
+            },
+            "schedule": {
+                "name": "HDO rozvrh"
+            },
+            "rawdata": {
+                "name": "Surová data"
+            }
+        },
+        "binary_sensor": {
+            "lowtariffactive": {
+                "name": "Nízký tarif aktivní"
+            },
+            "hightariffactive": {
+                "name": "Vysoký tarif aktivní"
+            }
+        }
     }
 }
