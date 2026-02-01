@@ -179,6 +179,8 @@ class CezHdoBinarySensor(CoordinatorEntity[CezHdoCoordinator], BinarySensorEntit
         self.entity_id = f"binary_sensor.{self._object_id}"
         
         # Use translation_key for localized entity names
+        # When has_entity_name=True and translation_key is set,
+        # HA looks up name in translations/xx.json under entity.binary_sensor.{translation_key}.name
         self._attr_has_entity_name = True
         self._attr_translation_key = meta.get("translation_key", name.lower())
 
