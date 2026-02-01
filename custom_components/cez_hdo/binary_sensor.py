@@ -177,7 +177,7 @@ class CezHdoBinarySensor(CoordinatorEntity[CezHdoCoordinator], BinarySensorEntit
             else:
                 self._object_id = f"{base_object_id}_{ean4}" if ean4 else base_object_id
         self.entity_id = f"binary_sensor.{self._object_id}"
-        
+
         # Use translation_key for localized entity names
         # When has_entity_name=True and translation_key is set,
         # HA looks up name in translations/xx.json under entity.binary_sensor.{translation_key}.name

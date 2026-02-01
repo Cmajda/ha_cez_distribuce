@@ -29,8 +29,8 @@ Complete guide for installation, configuration, and usage of the ČEZ HDO integr
 
 [![HACS Repository Badge](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-4. Install the **ČEZ HDO** integration
-5. **Restart Home Assistant**
+1. Install the **ČEZ HDO** integration
+2. **Restart Home Assistant**
 
 ### After Installation
 

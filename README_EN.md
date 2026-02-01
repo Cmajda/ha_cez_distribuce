@@ -55,7 +55,7 @@ The card has a visual editor with display options:
 - Current price
 - 7-day HDO schedule
 
-![ČEZ HDO card](img/cs/entity_card_cz.png) ![HDO schedule](img/cs/graph_cz.png)
+![ČEZ HDO card](img/en/entity_card.png) ![HDO schedule](img/en/graph.png)
 
 ### Price Settings
 

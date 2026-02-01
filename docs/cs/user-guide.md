@@ -29,8 +29,8 @@ Kompletní návod pro instalaci, konfiguraci a používání integrace ČEZ HDO 
 
 [![HACS Repository Badge](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-4. Nainstalujte integraci **ČEZ HDO**
-5. **Restartujte Home Assistant**
+1. Nainstalujte integraci **ČEZ HDO**
+2. **Restartujte Home Assistant**
 
 ### Po instalaci
 
@@ -54,14 +54,13 @@ Od verze 3.0.0 se integrace konfiguruje výhradně přes grafické rozhraní (GU
 
 ### Krok 1: Zadání EAN
 
-Zadejte vaše **EAN číslo** (18 číslic) a klikněte na **Odeslat**.  
+Zadejte vaše **EAN číslo** (18 číslic) a klikněte na **Odeslat**.
 EAN najdete:
 
 - Na faktuře / vyúčtování za elektřinu
 - V portálu vašeho dodavatele elektřiny
 
 ![Přidání integrace](../../img/cs/card_add_integration_1_cz.png)
-
 
 ### Krok 2: Výběr signálu
 
