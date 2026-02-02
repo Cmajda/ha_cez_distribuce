@@ -8,7 +8,7 @@
                     "ean": "Číslo EAN"
                 },
                 "data_description": {
-                    "ean": "18-ti místné číslo EAN z vaší faktury za elektřinu"
+                    "ean": "18 místné číslo EAN z vaší faktury za elektřinu"
                 }
             },
             "signal": {
@@ -63,7 +63,7 @@
                     "ean": "Číslo EAN"
                 },
                 "data_description": {
-                    "ean": "18-ti místné číslo EAN z vaší faktury za elektřinu"
+                    "ean": "18 místné číslo EAN z vaší faktury za elektřinu"
                 }
             },
             "signal": {
