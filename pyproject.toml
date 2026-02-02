@@ -2,7 +2,7 @@
 name = "ha_cez_distribuce"
 version = "3.0.0"
 description = "HomeAssistant integration for CEZ Distribution HDO."
-license-files = ["LICEN[CS]E*"]
+license-files = ["LICENSE*"]
 authors = [
     { name = "Cmajda", email = "cmajdalkam@gmail.com" },
     { name = "pokornyIt", email = "8665714+pokornyIt@users.noreply.github.com" },
@@ -21,4 +21,60 @@ dev = [
     "ruff~=0.14.0",
     "mypy~=1.19.1",
     "pre-commit~=4.5.1",
+]
+
+[tool.ruff]
+# Enforce a 120 character line length (also used by E501).
+line-length = 120
+
+# Keep this consistent with `requires-python`.
+target-version = "py314"
+
+# Treat this as the project root for module resolution.
+src = ["custom_components/ha_cez_distribuce"]
+
+# Recommended: avoid linting common generated/virtualenv directories.
+exclude = [".git", ".venv", "__pycache__", "build", "dist"]
+
+[tool.ruff.format]
+quote-style = "double"
+# Optional but often nice for HA-like codebases with doc examples:
+docstring-code-format = true
+
+[tool.ruff.lint]
+# Base: PEP8/pyflakes + import ordering + modern syntax + common bug patterns.
+# Includes logging format checks and timezone-aware datetime checks.
+select = [
+    "E", # pycodestyle errors (includes E501 = line too long)
+
+    # for now we disable some checks to reduce noise before fix codebase
+    # "F",   # pyflakes
+    # "W",   # pycodestyle warnings
+    # "I",   # isort (import sorting)
+    # "UP",  # pyupgrade
+    # "B",   # flake8-bugbear
+    # "SIM", # flake8-simplify
+    # "G",   # flake8-logging-format
+    # "DTZ", # flake8-datetimez
+    # "TC",  # flake8-type-checking
+]
+
+
+ignore = [
+    "DTZ005", # call datetime now without tzinfo
+    "DTZ007", # call datetime strptime without zone
+    "TC002",  # typing only third party import
+    "UP017",  # datetime timezone utc
+]
+
+# Using ruff-format, E501 must not be ignored if I request to enforce 120 characters.
+
+[tool.ruff.lint.pydocstyle]
+# Home Assistant favors Google-style docstrings.
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+# __init__.py often re-exports symbols (unused import).
+"**/__init__.py" = [
+    "F401", # ignore unused imports
 ]
