@@ -23,6 +23,32 @@ jobs:
           my_token: ${{ secrets.TRAFFIC_TOKEN }}
           static_list: ${{ github.repository }}
 
+      - name: Generate custom badges
+        run: |
+          cd ${{ steps.traffic.outputs.traffic_path }}
+
+          # Read values from JSON files
+          VIEWS_COUNT=$(jq '.count' traffic-ha_cez_distribuce/traffic_views.json)
+          VIEWS_UNIQUES=$(jq '.uniques' traffic-ha_cez_distribuce/traffic_views.json)
+          CLONES_COUNT=$(jq '.count' traffic-ha_cez_distribuce/traffic_clones.json)
+          CLONES_UNIQUES=$(jq '.uniques' traffic-ha_cez_distribuce/traffic_clones.json)
+
+          echo "Views: $VIEWS_COUNT (unique: $VIEWS_UNIQUES)"
+          echo "Clones: $CLONES_COUNT (unique: $CLONES_UNIQUES)"
+
+          # Generate custom SVG badges using shields.io endpoint format
+          # Total Views
+          curl -s "https://img.shields.io/badge/views-${VIEWS_COUNT}-brightgreen?logo=github" > views_total.svg
+
+          # Unique Views
+          curl -s "https://img.shields.io/badge/unique%20views-${VIEWS_UNIQUES}-green?logo=github" > views_unique.svg
+
+          # Total Clones
+          curl -s "https://img.shields.io/badge/clones-${CLONES_COUNT}-blue?logo=github" > clones_total.svg
+
+          # Unique Clones
+          curl -s "https://img.shields.io/badge/unique%20clones-${CLONES_UNIQUES}-0969da?logo=github" > clones_unique.svg
+
       - name: Deploy to traffic branch
         uses: peaceiris/actions-gh-pages@v4
         with:
