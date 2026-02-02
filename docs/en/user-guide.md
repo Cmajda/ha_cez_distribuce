@@ -312,7 +312,7 @@ The card includes a 7-day HDO schedule visualization:
 
 ---
 
-## � Debug Logging
+## 🐛 Debug Logging
 
 If you need to obtain detailed logs for diagnosing a problem, you can enable debug logging directly in Home Assistant.
 
