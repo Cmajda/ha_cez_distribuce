@@ -114,7 +114,7 @@ Klikněte na **Odeslat**.
 
 Home Assistant se zeptá, do které oblasti chcete zařízení umístit.
 
-![Dokončení konfigurace](../../img/cs/card_add_finish._cz.png)
+![Dokončení konfigurace](../../img/cs/card_add_finish_cz.png)
 
 - Vyberte oblast (místnost) pro vaše zařízení, nebo
 - Klikněte na **Přeskočit** a dokončete konfiguraci
