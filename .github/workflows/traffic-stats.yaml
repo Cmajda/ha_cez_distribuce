@@ -1,0 +1,23 @@
+name: Traffic Stats
+
+on:
+  schedule:
+    # Každý den v 3:00 UTC (kvůli 14dennímu limitu GitHub Traffic)
+    - cron: "0 3 * * *"
+  workflow_dispatch: # Ruční spuštění
+
+jobs:
+  traffic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Traffic to Badge
+        uses: yi-Xu-0100/traffic-to-badge@v1.6.0
+        with:
+          # GitHub token s oprávněním repo (pro čtení traffic)
+          my_token: ${{ secrets.TRAFFIC_TOKEN }}
+          # Gist ID pro ukládání dat (vytvoř nový secret gist)
+          gist_id: ${{ secrets.GIST_ID }}
+          # ID repozitáře
+          repository: Cmajda/ha_cez_distribuce
+          # Statické texty
+          static_list: '["views", "clones"]'
