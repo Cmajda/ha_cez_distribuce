@@ -1,6 +1,9 @@
 {
   "ignore": [
     "dev/",
-    "dev/**"
+    "dev/**",
+    ".github/copilot-instructions.md",
+    ".vscode/",
+    ".vscode/**"
   ]
 }
