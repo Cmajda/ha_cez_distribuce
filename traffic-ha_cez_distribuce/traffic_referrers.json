@@ -1,0 +1,32 @@
+[
+  {
+    "referrer": "Google",
+    "count": 151,
+    "uniques": 51
+  },
+  {
+    "referrer": "github.com",
+    "count": 66,
+    "uniques": 17
+  },
+  {
+    "referrer": "email.seznam.cz",
+    "count": 14,
+    "uniques": 2
+  },
+  {
+    "referrer": "claude.ai",
+    "count": 10,
+    "uniques": 1
+  },
+  {
+    "referrer": "StartPage",
+    "count": 5,
+    "uniques": 3
+  },
+  {
+    "referrer": "DuckDuckGo",
+    "count": 1,
+    "uniques": 1
+  }
+]
