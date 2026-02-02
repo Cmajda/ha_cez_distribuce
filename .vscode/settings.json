@@ -1,0 +1,38 @@
+{
+    "github.copilot.chat.localeOverride": "en",
+    "cSpell.words": [
+        "casy",
+        "Cmajda",
+        "Distribuce",
+        "homeassistant",
+        "pokorny"
+    ],
+    "cSpell.ignoreWords": [
+        "datetimez",
+        "docstrings",
+        "hass",
+        "isort",
+        "mypy",
+        "pycache",
+        "pycodestyle",
+        "pydocstyle",
+        "pyflakes",
+        "pyupgrade",
+        "venv",
+        "virtualenv",
+        "redef",
+        "strptime",
+        "unsub",
+        "vkont",
+        "vstelle"
+    ],
+    "cSpell.ignorePaths": [
+        "vscode-extension",
+        ".git/{info,lfs,logs,refs,objects}/**",
+        ".git/{index,*refs,*HEAD}",
+        "uv.lock",
+        ".vscode",
+        "README.md",
+        "docs/cs/**"
+    ]
+}
