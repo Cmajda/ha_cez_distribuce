@@ -13,10 +13,22 @@ jobs:
   traffic:
     runs-on: ubuntu-latest
     steps:
-      - name: Traffic to Badge
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Traffic Data
+        id: traffic
         uses: yi-Xu-0100/traffic-to-badge@v1.4.0
         with:
-          # GitHub token s oprávněním repo (pro čtení traffic a zápis do branch)
           my_token: ${{ secrets.TRAFFIC_TOKEN }}
-          # ID repozitáře
           static_list: ${{ github.repository }}
+
+      - name: Deploy to traffic branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: ${{ steps.traffic.outputs.traffic_branch }}
+          publish_dir: ${{ steps.traffic.outputs.traffic_path }}
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'Update traffic data'
