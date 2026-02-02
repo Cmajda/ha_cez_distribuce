@@ -12,7 +12,7 @@
     },
     "files.insertFinalNewline": true,
     "files.watcherExclude": {
-        "**/..pytest_cache/": true,
+        "**/.pytest_cache/": true,
         "**/.venv/": true,
         "**/__pycache__": true,
         "**/build/": true,
