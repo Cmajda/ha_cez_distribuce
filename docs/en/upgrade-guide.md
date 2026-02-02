@@ -20,7 +20,7 @@ Please read the entire procedure carefully.
 | **Cache** | Shared file | Per-EAN files |
 | **Diagnostics** | Manual logs | UI export |
 | **Multiple EAN** | Complicated | Fully supported |
-| **Multiple signals/EAN** | Not supported | Fully supported |
+| **Multiple signals per EAN** | Not supported | Fully supported |
 | **Entity names** | Automatic | User configurable |
 
 ### Upgrade Procedure

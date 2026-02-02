@@ -74,6 +74,7 @@ const ENTITY_PREFIXES: Record<keyof EntityConfig, { domain: string; prefix: stri
 
 // Legacy default entity mappings (deprecated - for backwards compatibility only)
 // These will NOT match actual entities - dynamic discovery is preferred
+// Empty strings force dynamic entity discovery and prevent fallback to non-existent entities
 const DEFAULT_ENTITIES: Required<EntityConfig> = {
   low_tariff: '',
   high_tariff: '',
