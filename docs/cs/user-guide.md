@@ -189,22 +189,22 @@ Integrace vytváří následující entity:
 
 | Entita | Popis |
 |--------|-------|
-| `binary_sensor.cez_hdo_*_nizky_tarif_aktivni` | Nízký tarif je aktivní (`on/off`) |
-| `binary_sensor.cez_hdo_*_vysoky_tarif_aktivni` | Vysoký tarif je aktivní (`on/off`) |
+| `binary_sensor.cez_hdo_lowtariffactive_*` | Nízký tarif je aktivní (`on/off`) |
+| `binary_sensor.cez_hdo_hightariffactive_*` | Vysoký tarif je aktivní (`on/off`) |
 
 ### Sensors
 
 | Entita | Popis |
 |--------|-------|
-| `sensor.cez_hdo_*_nizky_tarif_zacatek` | Čas začátku NT (např. `01:10`) |
-| `sensor.cez_hdo_*_nizky_tarif_konec` | Čas konce NT (např. `08:30`) |
-| `sensor.cez_hdo_*_nizky_tarif_zbyva` | Zbývající čas do změny tarifu |
-| `sensor.cez_hdo_*_vysoky_tarif_zacatek` | Čas začátku VT |
-| `sensor.cez_hdo_*_vysoky_tarif_konec` | Čas konce VT |
-| `sensor.cez_hdo_*_vysoky_tarif_zbyva` | Zbývající čas do změny tarifu |
-| `sensor.cez_hdo_*_aktualni_cena` | Aktuální cena v Kč/kWh |
-| `sensor.cez_hdo_*_rozvrh` | 7denní HDO rozvrh |
-| `sensor.cez_hdo_*_surova_data` | Timestamp poslední aktualizace |
+| `sensor.cez_hdo_lowtariffstart_*` | Čas začátku NT (např. `01:10`) |
+| `sensor.cez_hdo_lowtariffend_*` | Čas konce NT (např. `08:30`) |
+| `sensor.cez_hdo_lowtariffremaining_*` | Zbývající čas do změny tarifu |
+| `sensor.cez_hdo_hightariffstart_*` | Čas začátku VT |
+| `sensor.cez_hdo_hightariffend_*` | Čas konce VT |
+| `sensor.cez_hdo_hightariffremaining_*` | Zbývající čas do změny tarifu |
+| `sensor.cez_hdo_currentprice_*` | Aktuální cena v Kč/kWh |
+| `sensor.cez_hdo_schedule_*` | 7denní HDO rozvrh |
+| `sensor.cez_hdo_rawdata_*` | Timestamp poslední aktualizace |
 
 > **Poznámka:** `*` označuje vaši zvolenou příponu z kroku 3 (např. `7606_a1b4dp04` nebo `chalupa`).
 
@@ -233,7 +233,7 @@ Ceny se nastavují **v integraci**, ne v kartě.
 
 ### Služba set_prices
 
-Ceny lze nastavit i programově přes službu:
+Ceny lze nastavit i programově přes službu v **Nástroje pro vývojáře → Služby**:
 
 ```yaml
 service: cez_hdo.set_prices
@@ -242,11 +242,14 @@ data:
   high_tariff_price: 4.50
 ```
 
+> **⚠️ Omezení:** V aktuální verzi tato služba nastavuje ceny pro všechny instance integrace.
+> Rozlišení podle konkrétního zařízení bude přidáno v budoucí verzi.
+
 ---
 
 ## 📊 Energy Dashboard
 
-Senzor `sensor.cez_hdo_*_aktualni_cena` lze použít v Energy Dashboard pro sledování nákladů:
+Senzor `sensor.cez_hdo_currentprice_*` lze použít v Energy Dashboard pro sledování nákladů:
 
 1. Přejděte do **Nastavení → Dashboardy → Energie**
 2. V sekci "Elektrická síť" klikněte na **Přidat spotřebu**
@@ -375,3 +378,4 @@ Pro nahlášení chyby na GitHubu exportujte diagnostická data:
 - [Upgrade Guide](upgrade-guide.md) – postup upgradu z v2.x na v3.0.0
 - [Developer Guide](developer-guide.md) – pro vývojáře
 - [Service Guide](service-guide.md) – popis dostupných služeb
+- [Známé problémy](known-issues.md) – seznam známých problémů a omezení

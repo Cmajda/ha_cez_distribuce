@@ -93,24 +93,28 @@ The card has a visual editor with display options:
 Prices are configured in the **integration**
 (Settings → Devices & Services → ČEZ HDO → Configure), not in the card.
 
+> **To change prices:** Go through all configuration steps – price settings are at the end.
+
 ### Energy Dashboard
 
-The sensor `sensor.cez_hdo_*_aktualni_cena` can be used as a price source in the Energy Dashboard.
+The sensor `sensor.cez_hdo_currentprice_*` can be used as a price source in the Energy Dashboard.
 
 ## 📦 Created Entities
 
 | Type | Entity | Description |
 | ---- | ------ | ----------- |
-| Binary | `*_nizky_tarif_aktivni` | NT (low tariff) is active |
-| Binary | `*_vysoky_tarif_aktivni` | VT (high tariff) is active |
-| Sensor | `*_nizky_tarif_zacatek` | NT start time |
-| Sensor | `*_nizky_tarif_konec` | NT end time |
-| Sensor | `*_nizky_tarif_zbyva` | NT remaining time |
-| Sensor | `*_vysoky_tarif_zacatek` | VT start time |
-| Sensor | `*_vysoky_tarif_konec` | VT end time |
-| Sensor | `*_vysoky_tarif_zbyva` | VT remaining time |
-| Sensor | `*_aktualni_cena` | Current price (CZK/kWh) |
-| Sensor | `*_rozvrh` | 7-day HDO schedule |
+| Binary | `cez_hdo_lowtariffactive_*` | NT (low tariff) is active |
+| Binary | `cez_hdo_hightariffactive_*` | VT (high tariff) is active |
+| Sensor | `cez_hdo_lowtariffstart_*` | NT start time |
+| Sensor | `cez_hdo_lowtariffend_*` | NT end time |
+| Sensor | `cez_hdo_lowtariffremaining_*` | NT remaining time |
+| Sensor | `cez_hdo_hightariffstart_*` | VT start time |
+| Sensor | `cez_hdo_hightariffend_*` | VT end time |
+| Sensor | `cez_hdo_hightariffremaining_*` | VT remaining time |
+| Sensor | `cez_hdo_currentprice_*` | Current price (CZK/kWh) |
+| Sensor | `cez_hdo_schedule_*` | 7-day HDO schedule |
+
+> **Note:** `*` represents your chosen suffix (e.g., `home` or `7606_a1b4dp04`).
 
 ## ⚠️ Upgrade from v2.x
 
@@ -149,6 +153,8 @@ To report a bug, export diagnostics:
 - [Service Guide (EN)](docs/en/service-guide.md) – available services
 - [Developer Guide (CS)](docs/cs/developer-guide.md) – for developers (Czech)
 - [Developer Guide (EN)](docs/en/developer-guide.md) – for developers
+- [Known Issues (CS)](docs/cs/known-issues.md) – list of known issues (Czech)
+- [Known Issues (EN)](docs/en/known-issues.md) – list of known issues
 
 ## 📝 Release Notes
 

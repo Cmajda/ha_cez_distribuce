@@ -22,8 +22,8 @@ s důrazem na moderní architekturu Home Assistantu.
 
 #### Device Registry
 
-- Všechny entity jsou seskupeny pod jedno **zařízení**
-- Název zařízení: "ČEZ HDO XXXXXX" (posledních 6 číslic EAN)
+- Všechny entity jsou seskupeny pod **hub** (posledních 6 číslic EAN)
+- Každý signál vytváří vlastní **zařízení** s kódem signálu
 - Lepší přehled v UI Home Assistantu
 
 #### Nové úložiště dat

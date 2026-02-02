@@ -2,11 +2,29 @@
 
 Tento soubor obsahuje seznam známých problémů a jejich stav řešení.
 
-> **Stav:** Všechny problémy z v3.0.0-RC.1 byly vyřešeny v RC.2.
+---
+
+## Aktuální problémy (v3.0.0)
+
+### 1. Služba set_prices nerozeznává zařízení
+
+**Stav:** ⚠️ Známé omezení
+
+**Popis:** Služba `cez_hdo.set_prices` (volatelná přes Nástroje pro vývojáře → Služby)
+nastavuje ceny pro všechny instance integrace. Nelze rozlišit, kterému
+zařízení se mají ceny nastavit.
+
+**Dočasné řešení:** Pro změnu cen použijte Options Flow v nastavení integrace
+(Nastavení → Zařízení a služby → ČEZ HDO → Konfigurovat).
+
+**Plánované řešení:** Přidání parametru `device_id` nebo `entry_id` do služby
+pro rozlišení konkrétního zařízení.
 
 ---
 
 ## Archiv vyřešených problémů (v3.0.0-RC.1)
+
+> **Stav:** Všechny problémy z v3.0.0-RC.1 byly vyřešeny v RC.2.
 
 ### Priorita 1 - Kritické
 
@@ -49,7 +67,7 @@ Options flow nefunguje nebo není dostupný.
 Settings → Devices & Services → ČEZ HDO → Configure (ozubené kolo) →
 proklikat kroky → poslední krok je nastavení cen.
 
-Dokumentováno v [user-guide.md](docs/user-guide.md#-nastavení-cen).
+Dokumentováno v [user-guide.md](user-guide.md#-nastavení-cen).
 
 **Nahlásil:** @pokornyIt
 

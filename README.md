@@ -93,24 +93,28 @@ Karta má vizuální editor s možnostmi zobrazení:
 Ceny se nastavují v **integraci**
 (Nastavení → Zařízení a služby → ČEZ HDO → Konfigurovat), ne v kartě.
 
+> **Pro změnu ceny:** Projděte všechny kroky konfigurace – nastavení ceny je až na konci.
+
 ### Energy Dashboard
 
-Senzor `sensor.cez_hdo_*_aktualni_cena` lze použít jako zdroj ceny v Energy Dashboard.
+Senzor `sensor.cez_hdo_currentprice_*` lze použít jako zdroj ceny v Energy Dashboard.
 
 ## 📦 Vytvářené entity
 
 | Typ | Entita | Popis |
 | --- | ------ | ----- |
-| Binary | `*_nizky_tarif_aktivni` | NT je aktivní |
-| Binary | `*_vysoky_tarif_aktivni` | VT je aktivní |
-| Sensor | `*_nizky_tarif_zacatek` | Čas začátku NT |
-| Sensor | `*_nizky_tarif_konec` | Čas konce NT |
-| Sensor | `*_nizky_tarif_zbyva` | Zbývající čas NT |
-| Sensor | `*_vysoky_tarif_zacatek` | Čas začátku VT |
-| Sensor | `*_vysoky_tarif_konec` | Čas konce VT |
-| Sensor | `*_vysoky_tarif_zbyva` | Zbývající čas VT |
-| Sensor | `*_aktualni_cena` | Aktuální cena (Kč/kWh) |
-| Sensor | `*_rozvrh` | 7denní HDO rozvrh |
+| Binary | `cez_hdo_lowtariffactive_*` | NT je aktivní |
+| Binary | `cez_hdo_hightariffactive_*` | VT je aktivní |
+| Sensor | `cez_hdo_lowtariffstart_*` | Čas začátku NT |
+| Sensor | `cez_hdo_lowtariffend_*` | Čas konce NT |
+| Sensor | `cez_hdo_lowtariffremaining_*` | Zbývající čas NT |
+| Sensor | `cez_hdo_hightariffstart_*` | Čas začátku VT |
+| Sensor | `cez_hdo_hightariffend_*` | Čas konce VT |
+| Sensor | `cez_hdo_hightariffremaining_*` | Zbývající čas VT |
+| Sensor | `cez_hdo_currentprice_*` | Aktuální cena (Kč/kWh) |
+| Sensor | `cez_hdo_schedule_*` | 7denní HDO rozvrh |
+
+> **Poznámka:** `*` označuje vaši zvolenou příponu (např. `doma` nebo `7606_a1b4dp04`).
 
 ## ⚠️ Upgrade z v2.x
 
@@ -149,6 +153,8 @@ Pro nahlášení chyby exportujte diagnostiku:
 - [Service Guide (EN)](docs/en/service-guide.md) – available services
 - [Developer Guide (CZ)](docs/cs/developer-guide.md) – pro vývojáře
 - [Developer Guide (EN)](docs/en/developer-guide.md) – for developers
+- [Známé problémy (CZ)](docs/cs/known-issues.md) – seznam známých problémů
+- [Known Issues (EN)](docs/en/known-issues.md) – list of known issues
 
 ## 📝 Release Notes
 

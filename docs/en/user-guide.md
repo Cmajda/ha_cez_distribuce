@@ -193,22 +193,22 @@ The integration creates the following entities:
 
 | Entity | Description |
 |--------|-------------|
-| `binary_sensor.cez_hdo_*_lowtariffactive` | Low tariff is active (`on/off`) |
-| `binary_sensor.cez_hdo_*_hightariffactive` | High tariff is active (`on/off`) |
+| `binary_sensor.cez_hdo_lowtariffactive_*` | Low tariff is active (`on/off`) |
+| `binary_sensor.cez_hdo_hightariffactive_*` | High tariff is active (`on/off`) |
 
 ### Sensors
 
 | Entity | Description |
 |--------|-------------|
-| `sensor.cez_hdo_*_lowtariffstart` | NT start time (e.g., `01:10`) |
-| `sensor.cez_hdo_*_lowtariffend` | NT end time (e.g., `08:30`) |
-| `sensor.cez_hdo_*_lowtariffremaining` | Remaining time until tariff change |
-| `sensor.cez_hdo_*_hightariffstart` | VT start time |
-| `sensor.cez_hdo_*_hightariffend` | VT end time |
-| `sensor.cez_hdo_*_hightariffremaining` | Remaining time until tariff change |
-| `sensor.cez_hdo_*_currentprice` | Current price in CZK/kWh |
-| `sensor.cez_hdo_*_schedule` | 7-day HDO schedule |
-| `sensor.cez_hdo_*_rawdata` | Last update timestamp |
+| `sensor.cez_hdo_lowtariffstart_*` | NT start time (e.g., `01:10`) |
+| `sensor.cez_hdo_lowtariffend_*` | NT end time (e.g., `08:30`) |
+| `sensor.cez_hdo_lowtariffremaining_*` | Remaining time until tariff change |
+| `sensor.cez_hdo_hightariffstart_*` | VT start time |
+| `sensor.cez_hdo_hightariffend_*` | VT end time |
+| `sensor.cez_hdo_hightariffremaining_*` | Remaining time until tariff change |
+| `sensor.cez_hdo_currentprice_*` | Current price in CZK/kWh |
+| `sensor.cez_hdo_schedule_*` | 7-day HDO schedule |
+| `sensor.cez_hdo_rawdata_*` | Last update timestamp |
 
 > **Note:** `*` represents your chosen suffix from step 3 (e.g., `7606_a1b4dp04` or `cottage`).
 
@@ -237,7 +237,7 @@ Prices are set **in the integration**, not in the card.
 
 ### set_prices Service
 
-Prices can also be set programmatically via service:
+Prices can also be set programmatically via service in **Developer Tools → Services**:
 
 ```yaml
 service: cez_hdo.set_prices
@@ -245,6 +245,9 @@ data:
   low_tariff_price: 2.50
   high_tariff_price: 4.50
 ```
+
+> **⚠️ Limitation:** In the current version, this service sets prices for all integration instances.
+> Device-specific price setting will be added in a future version.
 
 ---
 
@@ -379,3 +382,4 @@ To report a bug on GitHub, export diagnostic data:
 - [Upgrade Guide](upgrade-guide.md) – upgrade procedure from v2.x to v3.0.0
 - [Developer Guide](developer-guide.md) – for developers
 - [Service Guide](service-guide.md) – description of available services
+- [Known Issues](known-issues.md) – list of known issues and limitations
