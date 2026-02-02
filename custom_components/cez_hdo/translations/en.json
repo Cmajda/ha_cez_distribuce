@@ -94,5 +94,44 @@
             "invalid_ean": "Invalid EAN number. No HDO data found for this EAN.",
             "unknown": "Unexpected error occurred."
         }
+    },
+    "entity": {
+        "sensor": {
+            "lowtariffstart": {
+                "name": "Low tariff start"
+            },
+            "lowtariffend": {
+                "name": "Low tariff end"
+            },
+            "lowtariffduration": {
+                "name": "Low tariff remaining"
+            },
+            "hightariffstart": {
+                "name": "High tariff start"
+            },
+            "hightariffend": {
+                "name": "High tariff end"
+            },
+            "hightariffduration": {
+                "name": "High tariff remaining"
+            },
+            "currentprice": {
+                "name": "Current price"
+            },
+            "schedule": {
+                "name": "HDO schedule"
+            },
+            "rawdata": {
+                "name": "Raw data"
+            }
+        },
+        "binary_sensor": {
+            "lowtariffactive": {
+                "name": "Low tariff active"
+            },
+            "hightariffactive": {
+                "name": "High tariff active"
+            }
+        }
     }
 }

@@ -9,6 +9,7 @@
 
 import { LitElement, html, css, CSSResultGroup } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
+import { getTranslations, getLanguageFromHass, TranslationStrings } from './localization';
 
 // Type definitions
 interface HassEntity {
@@ -19,6 +20,10 @@ interface HassEntity {
 interface HomeAssistant {
   states: Record<string, HassEntity>;
   callService: (domain: string, service: string, data: Record<string, unknown>) => Promise<void>;
+  language?: string;
+  locale?: {
+    language: string;
+  };
 }
 
 interface EntityConfig {
@@ -67,17 +72,19 @@ const ENTITY_PREFIXES: Record<keyof EntityConfig, { domain: string; prefix: stri
   schedule: { domain: 'sensor', prefix: 'cez_hdo_schedule_' },
 };
 
-// Legacy default entity mappings (for backwards compatibility)
+// Legacy default entity mappings (deprecated - for backwards compatibility only)
+// These will NOT match actual entities - dynamic discovery is preferred
+// Empty strings force dynamic entity discovery and prevent fallback to non-existent entities
 const DEFAULT_ENTITIES: Required<EntityConfig> = {
-  low_tariff: 'binary_sensor.cez_hdo_nizky_tarif_aktivni',
-  high_tariff: 'binary_sensor.cez_hdo_vysoky_tarif_aktivni',
-  low_start: 'sensor.cez_hdo_nizky_tarif_zacatek',
-  low_end: 'sensor.cez_hdo_nizky_tarif_konec',
-  low_duration: 'sensor.cez_hdo_nizky_tarif_zbyva',
-  high_start: 'sensor.cez_hdo_vysoky_tarif_zacatek',
-  high_end: 'sensor.cez_hdo_vysoky_tarif_konec',
-  high_duration: 'sensor.cez_hdo_vysoky_tarif_zbyva',
-  schedule: 'sensor.cez_hdo_rozvrh',
+  low_tariff: '',
+  high_tariff: '',
+  low_start: '',
+  low_end: '',
+  low_duration: '',
+  high_start: '',
+  high_end: '',
+  high_duration: '',
+  schedule: '',
 };
 
 @customElement('cez-hdo-card')
@@ -185,6 +192,10 @@ export class CezHdoCard extends LitElement {
       return html`<ha-card>Loading...</ha-card>`;
     }
 
+    // Get translations based on HA language
+    const lang = getLanguageFromHass(this.hass);
+    const t = getTranslations(lang);
+
     // Resolve entities dynamically
     const resolvedEntities = {
       low_tariff: this.resolveEntity('low_tariff'),
@@ -230,14 +241,14 @@ export class CezHdoCard extends LitElement {
         ${showTariffStatus ? html`
           <div class="status-container">
             <div class="status-item ${lowTariffActive ? 'active low-tariff' : 'inactive'}">
-              <div class="status-title">Nízký tarif</div>
-              <div class="status-value">${lowTariffActive ? 'Aktivní' : 'Neaktivní'}</div>
-              ${showTariffPrices && lowTariffPrice > 0 ? html`<div class="status-price">${lowTariffPrice} Kč/kWh</div>` : ''}
+              <div class="status-title">${t.lowTariff}</div>
+              <div class="status-value">${lowTariffActive ? t.active : t.inactive}</div>
+              ${showTariffPrices && lowTariffPrice > 0 ? html`<div class="status-price">${lowTariffPrice} ${t.currency}</div>` : ''}
             </div>
             <div class="status-item ${highTariffActive ? 'active high-tariff' : 'inactive'}">
-              <div class="status-title">Vysoký tarif</div>
-              <div class="status-value">${highTariffActive ? 'Aktivní' : 'Neaktivní'}</div>
-              ${showTariffPrices && highTariffPrice > 0 ? html`<div class="status-price">${highTariffPrice} Kč/kWh</div>` : ''}
+              <div class="status-title">${t.highTariff}</div>
+              <div class="status-value">${highTariffActive ? t.active : t.inactive}</div>
+              ${showTariffPrices && highTariffPrice > 0 ? html`<div class="status-price">${highTariffPrice} ${t.currency}</div>` : ''}
             </div>
           </div>
         ` : ''}
@@ -246,29 +257,29 @@ export class CezHdoCard extends LitElement {
           <div class="details-container">
             ${showTimes ? html`
               <div class="detail-item">
-                <span class="detail-label">NT začátek</span>
+                <span class="detail-label">${t.ntStart}</span>
                 <span class="detail-value">${lowStart}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">VT začátek</span>
+                <span class="detail-label">${t.vtStart}</span>
                 <span class="detail-value">${highStart}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">NT konec</span>
+                <span class="detail-label">${t.ntEnd}</span>
                 <span class="detail-value">${lowEnd}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">VT konec</span>
+                <span class="detail-label">${t.vtEnd}</span>
                 <span class="detail-value">${highEnd}</span>
               </div>
             ` : ''}
             ${showDuration ? html`
               <div class="detail-item">
-                <span class="detail-label">NT zbývá</span>
+                <span class="detail-label">${t.ntRemaining}</span>
                 <span class="detail-value">${lowDuration}</span>
               </div>
               <div class="detail-item">
-                <span class="detail-label">VT zbývá</span>
+                <span class="detail-label">${t.vtRemaining}</span>
                 <span class="detail-value">${highDuration}</span>
               </div>
             ` : ''}
@@ -278,30 +289,34 @@ export class CezHdoCard extends LitElement {
         ${showPrice ? html`
           <div class="price-container">
             <div class="price-item ${lowTariffActive ? 'active' : ''}">
-              <span class="price-label">Aktuální cena</span>
-              <span class="price-value">${currentPrice} Kč/kWh</span>
-              <span class="price-tariff">${lowTariffActive ? 'Nízký tarif' : 'Vysoký tarif'}</span>
+              <span class="price-label">${t.currentPrice}</span>
+              <span class="price-value">${currentPrice} ${t.currency}</span>
+              <span class="price-tariff">${lowTariffActive ? t.lowTariff : t.highTariff}</span>
             </div>
           </div>
         ` : ''}
 
-        ${this._renderSchedule()}
+        ${this._renderSchedule(t)}
       </ha-card>
     `;
   }
 
-  private _renderSchedule() {
+  private _renderSchedule(t: TranslationStrings) {
     if (!this.config.show_schedule) return html``;
 
     const scheduleEntity = this.resolveEntity('schedule');
     const scheduleState = scheduleEntity ? this.hass.states[scheduleEntity] : undefined;
 
     if (!scheduleState || !scheduleState.attributes.schedule) {
-      return html`<div class="schedule-error">Rozvrh není k dispozici</div>`;
+      return html`<div class="schedule-error">${t.scheduleNotAvailable}</div>`;
     }
 
     const schedule = scheduleState.attributes.schedule as ScheduleItem[];
     const days: Record<string, { label: string; items: ScheduleItem[] }> = {};
+
+    // Get locale for date formatting
+    const lang = getLanguageFromHass(this.hass);
+    const dateLocale = lang === 'cs' ? 'cs-CZ' : lang === 'sk' ? 'sk-SK' : 'en-US';
 
     // Group by days - use local date (not UTC)
     schedule.forEach((item) => {
@@ -310,7 +325,7 @@ export class CezHdoCard extends LitElement {
       const month = String(start.getMonth() + 1).padStart(2, '0');
       const day = String(start.getDate()).padStart(2, '0');
       const dayKey = `${year}-${month}-${day}`;
-      const dayLabel = start.toLocaleDateString('cs-CZ', { weekday: 'short', day: '2-digit', month: '2-digit' });
+      const dayLabel = start.toLocaleDateString(dateLocale, { weekday: 'short', day: '2-digit', month: '2-digit' });
 
       if (!days[dayKey]) {
         days[dayKey] = { label: dayLabel, items: [] };
@@ -329,13 +344,13 @@ export class CezHdoCard extends LitElement {
     return html`
       <div class="schedule-container">
         <div class="schedule-header">
-          <span class="schedule-title">HDO rozvrh</span>
+          <span class="schedule-title">${t.hdoSchedule}</span>
           <div class="schedule-legend">
             <span class="legend-item nt">
-              <span class="legend-color"></span>NT${showSchedulePrices ? html` <span class="legend-price">${ntPrice} Kč</span>` : ''}
+              <span class="legend-color"></span>${t.nt}${showSchedulePrices ? html` <span class="legend-price">${ntPrice} ${t.currencyShort}</span>` : ''}
             </span>
             <span class="legend-item vt">
-              <span class="legend-color"></span>VT${showSchedulePrices ? html` <span class="legend-price">${vtPrice} Kč</span>` : ''}
+              <span class="legend-color"></span>${t.vt}${showSchedulePrices ? html` <span class="legend-price">${vtPrice} ${t.currencyShort}</span>` : ''}
             </span>
           </div>
         </div>
@@ -356,8 +371,8 @@ export class CezHdoCard extends LitElement {
                   if (endHour === 0) endHour = 24;
                   const left = (startHour / 24) * 100;
                   const width = ((endHour - startHour) / 24) * 100;
-                  const startStr = start.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
-                  const endStr = end.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+                  const startStr = start.toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit' });
+                  const endStr = end.toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit' });
                   return html`
                     <div
                       class="schedule-block ${item.tariff.toLowerCase()}"

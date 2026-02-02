@@ -9,6 +9,12 @@
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/Cmajda)](https://github.com/sponsors/Cmajda)
 [![License](https://img.shields.io/badge/License-Apache%202.0%20%2B%20Commons%20Clause-blue)](./LICENSE)
 
+🇬🇧 [English version](README_EN.md)
+
+> 🔴 **UPOZORNĚNÍ PRO UŽIVATELE VERZE 2.x:**
+> Před upgradem na v3.0.0 si přečtěte [**Upgrade Guide**](docs/cs/upgrade-guide.md)!
+> Verze 3.0.0 přináší zásadní změny a vyžaduje manuální kroky.
+
 Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif)
 z API ČEZ Distribuce a vytváří entity + Lovelace kartu.
 
@@ -20,6 +26,33 @@ Pokud mě chcete podpořit můžete zde
 
 [![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=FF813F&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/cmajda)
 
+## 🤝 Spolupracovníci
+
+Děkuji všem spoluautorům, kteří se aktivně podílejí na vývoji kódu této integrace:
+
+<!-- readme: collaborators -start -->
+<table>
+    <tbody>
+        <tr>
+            <td align="center">
+                <a href="https://github.com/pokornyIt">
+                    <img src="https://github.com/pokornyIt.png" width="96;" alt="pokornyIt"/>
+                    <br />
+                    <sub><b>pokornyIt</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/VojtechJurcik">
+                    <img src="https://github.com/VojtechJurcik.png" width="96;" alt="VojtechJurcik"/>
+                    <br />
+                    <sub><b>VojtechJurcik</b></sub>
+                </a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<!-- readme: collaborators -end -->
+
 ## 🚀 Rychlý start
 
 ### 1. Instalace přes HACS
@@ -30,7 +63,7 @@ Pokud mě chcete podpořit můžete zde
 
 ### 3. Přidání integrace
 
-1. **Settings → Devices & Services → + Add Integration**
+1. **Nastavení → Zařízení a služby → + Přidat integraci**
 2. Vyhledejte **ČEZ HDO**
 3. Zadejte **EAN** (18 číslic z faktury)
 4. Vyberte **signál** (pokud je více možností)
@@ -53,31 +86,35 @@ Karta má vizuální editor s možnostmi zobrazení:
 - Aktuální cena
 - 7denní HDO rozvrh
 
-![ČEZ HDO karta](entity_card.png) ![HDO rozvrh](graph.png)
+![ČEZ HDO karta](img/cs/entity_card_cz.png) ![HDO rozvrh](img/cs/graph_cz.png)
 
 ### Nastavení cen
 
 Ceny se nastavují v **integraci**
-(Settings → Devices & Services → ČEZ HDO → Configure), ne v kartě.
+(Nastavení → Zařízení a služby → ČEZ HDO → Konfigurovat), ne v kartě.
+
+> **Pro změnu ceny:** Projděte všechny kroky konfigurace – nastavení ceny je až na konci.
 
 ### Energy Dashboard
 
-Senzor `sensor.cez_hdo_*_aktualni_cena` lze použít jako zdroj ceny v Energy Dashboard.
+Senzor `sensor.cez_hdo_currentprice_*` lze použít jako zdroj ceny v Energy Dashboard.
 
 ## 📦 Vytvářené entity
 
 | Typ | Entita | Popis |
 | --- | ------ | ----- |
-| Binary | `*_nizky_tarif_aktivni` | NT je aktivní |
-| Binary | `*_vysoky_tarif_aktivni` | VT je aktivní |
-| Sensor | `*_nizky_tarif_zacatek` | Čas začátku NT |
-| Sensor | `*_nizky_tarif_konec` | Čas konce NT |
-| Sensor | `*_nizky_tarif_zbyva` | Zbývající čas NT |
-| Sensor | `*_vysoky_tarif_zacatek` | Čas začátku VT |
-| Sensor | `*_vysoky_tarif_konec` | Čas konce VT |
-| Sensor | `*_vysoky_tarif_zbyva` | Zbývající čas VT |
-| Sensor | `*_aktualni_cena` | Aktuální cena (Kč/kWh) |
-| Sensor | `*_rozvrh` | 7denní HDO rozvrh |
+| Binary | `cez_hdo_lowtariffactive_*` | NT je aktivní |
+| Binary | `cez_hdo_hightariffactive_*` | VT je aktivní |
+| Sensor | `cez_hdo_lowtariffstart_*` | Čas začátku NT |
+| Sensor | `cez_hdo_lowtariffend_*` | Čas konce NT |
+| Sensor | `cez_hdo_lowtariffremaining_*` | Zbývající čas NT |
+| Sensor | `cez_hdo_hightariffstart_*` | Čas začátku VT |
+| Sensor | `cez_hdo_hightariffend_*` | Čas konce VT |
+| Sensor | `cez_hdo_hightariffremaining_*` | Zbývající čas VT |
+| Sensor | `cez_hdo_currentprice_*` | Aktuální cena (Kč/kWh) |
+| Sensor | `cez_hdo_schedule_*` | 7denní HDO rozvrh |
+
+> **Poznámka:** `*` označuje vaši zvolenou příponu (např. `doma` nebo `7606_a1b4dp04`).
 
 ## ⚠️ Upgrade z v2.x
 
@@ -86,32 +123,38 @@ Verze 3.0.0 přináší **zásadní změny**:
 1. **Smazat YAML konfiguraci** z `configuration.yaml`
 2. **Aktualizovat** přes HACS
 3. **Restart** Home Assistant
-4. **Smazat staré entity** (Settings → Entities)
+4. **Smazat staré entity** (Nastavení → Entity → smazat vše obsahující `cez_hdo`)
 5. **Přidat integraci** přes GUI
 6. **Smazat složku** `www/cez_hdo/`
 
-Detailní postup: [docs/upgrade-guide.md](docs/upgrade-guide.md)
+Detailní postup: [docs/cs/upgrade-guide.md](docs/cs/upgrade-guide.md)
 
 ## 🔧 Řešení problémů
 
 1. **Ctrl+F5** – vyčistit cache prohlížeče
-2. **Reload integrace** – Settings → Devices & Services → ČEZ HDO → Reload
-3. **Zkontrolovat logy** – Settings → System → Logs
+2. **Reload integrace** – Nastavení → Zařízení a služby → ČEZ HDO → Znovu načíst
+3. **Zkontrolovat logy** – Nastavení → Systém → Protokoly
 
 ### Diagnostika
 
 Pro nahlášení chyby exportujte diagnostiku:
 
-1. Settings → Devices & Services → ČEZ HDO
-2. Klikněte na zařízení → ⋮ → **Download diagnostics**
+1. Nastavení → Zařízení a služby → ČEZ HDO
+2. Klikněte na zařízení → ⋮ → **Stáhnout diagnostiku**
 3. Přiložte k [GitHub Issue](https://github.com/Cmajda/ha_cez_distribuce/issues)
 
 ## 📚 Dokumentace
 
-- [Uživatelský návod](docs/user-guide.md) – kompletní dokumentace
-- [Upgrade Guide](docs/upgrade-guide.md) – přechod z v2.x na v3.0.0
-- [Service Guide](docs/service-guide.md) – dostupné služby
-- [Developer Guide](docs/developer-guide.md) – pro vývojáře
+- [Uživatelský návod (CZ)](docs/cs/user-guide.md) – kompletní dokumentace
+- [User Guide (EN)](docs/en/user-guide.md) – complete documentation (English)
+- [Upgrade Guide (CZ)](docs/cs/upgrade-guide.md) – přechod z v2.x na v3.0.0
+- [Upgrade Guide (EN)](docs/en/upgrade-guide.md) – migration from v2.x to v3.0.0
+- [Service Guide (CZ)](docs/cs/service-guide.md) – dostupné služby
+- [Service Guide (EN)](docs/en/service-guide.md) – available services
+- [Developer Guide (CZ)](docs/cs/developer-guide.md) – pro vývojáře
+- [Developer Guide (EN)](docs/en/developer-guide.md) – for developers
+- [Známé problémy (CZ)](docs/cs/known-issues.md) – seznam známých problémů
+- [Known Issues (EN)](docs/en/known-issues.md) – list of known issues
 
 ## 📝 Release Notes
 

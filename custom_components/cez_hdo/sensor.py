@@ -34,43 +34,43 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-# Entity metadata for stable IDs and friendly names
+# Entity metadata for stable IDs and translation keys
 ENTITY_META = {
     "LowTariffStart": {
         "object_id": "cez_hdo_lowtariffstart",
-        "friendly": "ČEZ HDO nízký tarif začátek",
+        "translation_key": "lowtariffstart",
     },
     "LowTariffEnd": {
         "object_id": "cez_hdo_lowtariffend",
-        "friendly": "ČEZ HDO nízký tarif konec",
+        "translation_key": "lowtariffend",
     },
     "LowTariffDuration": {
         "object_id": "cez_hdo_lowtariffduration",
-        "friendly": "ČEZ HDO nízký tarif zbývá",
+        "translation_key": "lowtariffduration",
     },
     "HighTariffStart": {
         "object_id": "cez_hdo_hightariffstart",
-        "friendly": "ČEZ HDO vysoký tarif začátek",
+        "translation_key": "hightariffstart",
     },
     "HighTariffEnd": {
         "object_id": "cez_hdo_hightariffend",
-        "friendly": "ČEZ HDO vysoký tarif konec",
+        "translation_key": "hightariffend",
     },
     "HighTariffDuration": {
         "object_id": "cez_hdo_hightariffduration",
-        "friendly": "ČEZ HDO vysoký tarif zbývá",
+        "translation_key": "hightariffduration",
     },
     "CurrentPrice": {
         "object_id": "cez_hdo_currentprice",
-        "friendly": "ČEZ HDO aktuální cena",
+        "translation_key": "currentprice",
     },
     "HdoSchedule": {
         "object_id": "cez_hdo_schedule",
-        "friendly": "ČEZ HDO rozvrh",
+        "translation_key": "schedule",
     },
     "RawData": {
         "object_id": "cez_hdo_raw_data",
-        "friendly": "ČEZ HDO surová data",
+        "translation_key": "rawdata",
     },
 }
 
@@ -220,7 +220,12 @@ class CezHdoSensor(CoordinatorEntity[CezHdoCoordinator], SensorEntity):
             else:
                 self._object_id = f"{base_object_id}_{ean4}" if ean4 else base_object_id
         self.entity_id = f"sensor.{self._object_id}"
-        self._attr_name = meta.get("friendly", f"ČEZ HDO {name}")
+
+        # Use translation_key for localized entity names
+        # When has_entity_name=True and translation_key is set,
+        # HA looks up name in translations/xx.json under entity.sensor.{translation_key}.name
+        self._attr_has_entity_name = True
+        self._attr_translation_key = meta.get("translation_key", name.lower())
 
         # Device info - group all entities under one device per EAN+signal combination
         # This ensures each signal for same EAN has its own device

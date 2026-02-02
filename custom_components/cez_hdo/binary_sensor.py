@@ -33,15 +33,15 @@ PLATFORM_SCHEMA = BASE_PLATFORM_SCHEMA.extend(
     }
 )
 
-# Entity metadata for stable IDs and friendly names
+# Entity metadata for stable IDs and translation keys
 ENTITY_META = {
     "LowTariffActive": {
         "object_id": "cez_hdo_lowtariffactive",
-        "friendly": "ČEZ HDO nízký tarif aktivní",
+        "translation_key": "lowtariffactive",
     },
     "HighTariffActive": {
         "object_id": "cez_hdo_hightariffactive",
-        "friendly": "ČEZ HDO vysoký tarif aktivní",
+        "translation_key": "hightariffactive",
     },
 }
 
@@ -177,7 +177,12 @@ class CezHdoBinarySensor(CoordinatorEntity[CezHdoCoordinator], BinarySensorEntit
             else:
                 self._object_id = f"{base_object_id}_{ean4}" if ean4 else base_object_id
         self.entity_id = f"binary_sensor.{self._object_id}"
-        self._attr_name = meta.get("friendly", f"ČEZ HDO {name}")
+
+        # Use translation_key for localized entity names
+        # When has_entity_name=True and translation_key is set,
+        # HA looks up name in translations/xx.json under entity.binary_sensor.{translation_key}.name
+        self._attr_has_entity_name = True
+        self._attr_translation_key = meta.get("translation_key", name.lower())
 
         # Device info - group all entities under one device per EAN+signal combination
         # This ensures each signal for same EAN has its own device
