@@ -11,6 +11,10 @@
 
 🇬🇧 [English version](README_EN.md)
 
+> 🔴 **UPOZORNĚNÍ PRO UŽIVATELE VERZE 2.x:**
+> Před upgradem na v3.0.0 si přečtěte [**Upgrade Guide**](docs/cs/upgrade-guide.md)!
+> Verze 3.0.0 přináší zásadní změny a vyžaduje manuální kroky.
+
 Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif)
 z API ČEZ Distribuce a vytváří entity + Lovelace kartu.
 

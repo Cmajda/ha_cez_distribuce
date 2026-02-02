@@ -2,6 +2,97 @@
 
 ---
 
+## v3.0.0 (2026-02-02)
+
+### 🚀 Hlavní změny
+
+Verze 3.0.0 přináší **kompletní přepracování** integrace
+s důrazem na moderní architekturu Home Assistantu.
+
+#### Config Flow – GUI konfigurace
+
+- **Žádný YAML** – integrace se konfiguruje přes Settings → Devices & Services
+- **4-krokový průvodce:**
+  1. Zadání EAN
+  2. Výběr signálu
+  3. Přípona entit (uživatelsky konfigurovatelná)
+  4. Nastavení cen NT/VT
+- **Options Flow** – možnost změnit nastavení kdykoli po instalaci
+- **Více signálů pro EAN** – stejné EAN lze přidat vícekrát s různými signály
+
+#### Device Registry
+
+- Všechny entity jsou seskupeny pod jedno **zařízení**
+- Název zařízení: "ČEZ HDO XXXXXX" (posledních 6 číslic EAN)
+- Lepší přehled v UI Home Assistantu
+
+#### Nové úložiště dat
+
+- Data přesunuta z `www/cez_hdo/` do `custom_components/cez_hdo/data/`
+- **Per-EAN cache** – každé EAN má vlastní soubory
+- Podpora více instancí integrace
+
+#### Diagnostika
+
+- Export diagnostických dat přes UI
+- Settings → Devices → ČEZ HDO → ⋮ → Download diagnostics
+- Automatické maskování citlivých údajů
+
+#### Lokalizace
+
+- **Lokalizace názvů entit** – podpora `translation_key` pro automatický překlad friendly_name entit podle systémového jazyka HA
+- **Dvojjazyčná dokumentace** – kompletní CS a EN verze všech dokumentů
+
+### ✨ Vylepšení
+
+- **Ceny v integraci** – ceny se nastavují v Options Flow, ne v kartě
+- **API update interval** – změněn na 1 hodinu
+- **State update interval** – aktualizace stavu každých 5 sekund
+- **Lepší chybové hlášky při zadávání EAN** – s odkazy na portál ČEZ
+- **Dynamické texty** – pro počet signálů
+- **Maskování EAN v logu** – zobrazeny pouze poslední číslice
+- **Bez emoji v logu** – nahrazeny textovými značkami `[NT]`/`[VT]`
+
+### 🐛 Opravy
+
+- **Lovelace karta** – opraveny výchozí entity ID v `DEFAULT_ENTITIES`
+- **Entity discovery** – karta správně detekuje entity podle anglických prefixů
+- Opraveny odkazy na obrázky v dokumentaci
+- Opraveno číslování seznamů v user-guide
+
+### 🔧 Technické změny
+
+- DataUpdateCoordinator pro centralizovanou správu dat
+- Refaktoring podle Home Assistant Style Guidelines
+- Vylepšené logování
+
+### 📚 Dokumentace
+
+- **README_EN.md** – přidána anglická verze hlavního README
+- **Dvojjazyčná dokumentace:**
+  - `docs/cs/` – česká dokumentace
+  - `docs/en/` – anglická dokumentace
+- **Obrázky** – reorganizovány do `img/cs/` a `img/en/`
+
+### ⚠️ Breaking Changes
+
+1. **YAML konfigurace již nefunguje** – nutno přidat přes GUI
+2. **Nové cesty k datům** – smazat starou složku `www/cez_hdo/`
+3. **Ceny v kartě** – pole odebrána, nastavují se v integraci
+
+### 📋 Postup upgradu z v2.x
+
+1. **Smazat YAML konfiguraci** z `configuration.yaml`
+2. **Aktualizovat** přes HACS
+3. **Restart** Home Assistant
+4. **Smazat staré entity** (Nastavení → Entity → smazat vše obsahující `cez_hdo`)
+5. **Přidat integraci** přes GUI
+6. **Smazat složku** `www/cez_hdo/`
+
+Detailní postup: [Upgrade Guide (CS)](docs/cs/upgrade-guide.md) | [Upgrade Guide (EN)](docs/en/upgrade-guide.md)
+
+---
+
 ## v3.0.0-RC.3 (2026-02-01)
 
 ### 🐛 Opravy
