@@ -22,6 +22,33 @@ Pokud mě chcete podpořit můžete zde
 
 [![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=FF813F&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/cmajda)
 
+## 🤝 Spolupracovníci
+
+Děkuji všem spoluautorům, kteří se aktivně podílejí na vývoji kódu této integrace:
+
+<!-- readme: collaborators -start -->
+<table>
+    <tbody>
+        <tr>
+            <td align="center">
+                <a href="https://github.com/pokornyIt">
+                    <img src="https://github.com/pokornyIt.png" width="96;" alt="pokornyIt"/>
+                    <br />
+                    <sub><b>pokornyIt</b></sub>
+                </a>
+            </td>
+            <td align="center">
+                <a href="https://github.com/VojtechJurcik">
+                    <img src="https://github.com/VojtechJurcik.png" width="96;" alt="VojtechJurcik"/>
+                    <br />
+                    <sub><b>VojtechJurcik</b></sub>
+                </a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+<!-- readme: collaborators -end -->
+
 ## 🚀 Rychlý start
 
 ### 1. Instalace přes HACS

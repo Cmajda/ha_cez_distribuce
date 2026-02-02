@@ -13,7 +13,7 @@
     "style": "ordered"
   },
   "MD033": {
-    "allowed_elements": ["a", "img", "br"]
+    "allowed_elements": ["a", "img", "br", "table", "tbody", "tr", "td", "sub", "b"]
   },
   "MD060": false
 }
