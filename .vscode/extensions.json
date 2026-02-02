@@ -1,3 +1,11 @@
 {
-
+    "recommendations": [
+        "charliermarsh.ruff",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-python.mypy-type-checker",
+        "esbenp.prettier-vscode",
+        "mhutchie.git-graph"
+    ]
 }

@@ -1,5 +1,64 @@
 {
+    "files.refactoring.autoSave": true,
+    "files.exclude": {
+        ".pytest_cache/": true,
+        ".venv/": true,
+        "__pycache__/": true,
+        "build/": true,
+        "dist/": true,
+        "**/__pycache__": true,
+        "**/.mypy_cache": true,
+        "**/.ruff_cache": true
+    },
+    "files.insertFinalNewline": true,
+    "files.watcherExclude": {
+        "**/..pytest_cache/": true,
+        "**/.venv/": true,
+        "**/__pycache__": true,
+        "**/build/": true,
+        "**/dist/": true,
+        "**/.mypy_cache": true,
+        "**/.ruff_cache": true
+    },
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.analysis.inlayHints.functionReturnTypes": true,
+    "python.analysis.inlayHints.pytestParameters": true,
+    "python.analysis.inlayHints.variableTypes": true,
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.terminal.activateEnvironment": true,
+    "python.analysis.typeCheckingMode": "standard",
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
     "github.copilot.chat.localeOverride": "en",
+    "ruff.lineLength": 120,
+    "ruff.enable": true,
+    "ruff.path": [
+        "${workspaceFolder}/.venv/bin/ruff"
+    ],
+    "ruff.interpreter": [
+        "${workspaceFolder}/.venv/bin/python"
+    ],
+    "ruff.lint.enable": true,
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.wordWrap": "off",
+        "editor.wordWrapColumn": 120,
+        "editor.formatOnSave": true,
+        "editor.rulers": [
+            120
+        ],
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
+    },
     "cSpell.words": [
         "casy",
         "Cmajda",
