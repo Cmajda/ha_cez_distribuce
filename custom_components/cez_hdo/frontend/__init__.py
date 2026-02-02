@@ -62,7 +62,7 @@ class CezHdoCardRegistration:
             # Složka dist obsahuje zkompilovaný JS soubor
             dist_path = pathlib.Path(__file__).parent / "dist"
             await self.hass.http.async_register_static_paths(
-                [StaticPathConfig(URL_BASE, dist_path, False)]
+                [StaticPathConfig(URL_BASE, str(dist_path), False)]
             )
             _LOGGER.debug("Registered CEZ HDO path from %s", dist_path)
         except RuntimeError:
@@ -114,7 +114,7 @@ class CezHdoCardRegistration:
                             res.get("id"),
                             {
                                 "res_type": "module",
-                                "url": url + "?v=" + card.get("version"),
+                                "url": f"{url}?v={card.get('version')}",
                             },
                         )
                         # Remove old gzipped files
@@ -133,7 +133,7 @@ class CezHdoCardRegistration:
                     card.get("version"),
                 )
                 await self.lovelace_resources.async_create_item(
-                    {"res_type": "module", "url": url + "?v=" + card.get("version")}
+                    {"res_type": "module", "url": f"{url}?v={card.get('version')}"}
                 )
 
     def get_resource_path(self, url: str):
