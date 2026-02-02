@@ -4,17 +4,12 @@
 [![Release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?label=stable&logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases/latest)
 [![Pre-release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?include_prereleases&label=pre-release&logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases)
 [![Validate](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/validate.yaml/badge.svg)](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/validate.yaml)
-[![HA Version](https://img.shields.io/badge/Home%20Assistant-2024.1+-blue?logo=home-assistant)](https://www.home-assistant.io/)
-[![Downloads](https://img.shields.io/github/downloads/Cmajda/ha_cez_distribuce/total)](https://github.com/Cmajda/ha_cez_distribuce/releases)
-![Views](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/views_total.svg)
-![Unique Views](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/views_unique.svg)
-![Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_total.svg)
-![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
-[![Stars](https://img.shields.io/github/stars/Cmajda/ha_cez_distribuce?style=social)](https://github.com/Cmajda/ha_cez_distribuce/stargazers)
-[![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
-[![GitHub Issues](https://img.shields.io/github/issues/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/issues)
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/Cmajda)](https://github.com/sponsors/Cmajda)
 [![License](https://img.shields.io/badge/License-Apache%202.0%20%2B%20Commons%20Clause-blue)](./LICENSE)
+
+[![Downloads](https://img.shields.io/github/downloads/Cmajda/ha_cez_distribuce/total)](https://github.com/Cmajda/ha_cez_distribuce/releases)
+![Unique Views](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/views_unique.svg)
+![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
+[![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
 🇨🇿 [Česká verze](README.md)
 
