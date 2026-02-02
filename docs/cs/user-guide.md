@@ -6,16 +6,16 @@ Kompletní návod pro instalaci, konfiguraci a používání integrace ČEZ HDO 
 
 ## 📑 Obsah
 
-- [🚀 Instalace](#instalace)
-- [⚙️ Konfigurace integrace](#konfigurace-integrace)
-- [🎴 Přidání karty na dashboard](#přidání-karty-na-dashboard)
-- [📦 Vytvářené entity](#vytvářené-entity)
-- [💰 Nastavení cen](#nastavení-cen)
-- [📊 Energy Dashboard](#energy-dashboard)
-- [📅 HDO rozvrh](#hdo-rozvrh)
-- [🔧 Řešení problémů](#řešení-problémů)
-- [🐛 Debug logování](#debug-logování)
-- [📊 Diagnostika](#diagnostika)
+- [🚀 Instalace](#-instalace)
+- [⚙️ Konfigurace integrace](#️-konfigurace-integrace)
+- [🎴 Přidání karty na dashboard](#-přidání-karty-na-dashboard)
+- [📦 Vytvářené entity](#-vytvářené-entity)
+- [💰 Nastavení cen](#-nastavení-cen)
+- [📊 Energy Dashboard](#-energy-dashboard)
+- [📅 HDO rozvrh](#-hdo-rozvrh)
+- [🔧 Řešení problémů](#-řešení-problémů)
+- [🐛 Debug logování](#-debug-logování)
+- [📊 Diagnostika](#-diagnostika)
 
 ---
 
