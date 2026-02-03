@@ -79,8 +79,10 @@ We use a lightweight Conventional Commits style.
 
 ### Format
 
+All commit messages and PR titles must be written in English using the following format:
+
 ```plain
-<type>: <short summary>
+<type>: <short imperative English summary>
 ```
 
 ### Allowed types
@@ -156,7 +158,7 @@ git pull
 
 git tag v1.2.3
 git push origin v1.2.3
-````
+```
 
 ---
 

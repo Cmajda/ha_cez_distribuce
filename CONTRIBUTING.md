@@ -79,8 +79,10 @@ Používáme jednoduchou variantu Conventional Commits.
 
 ### Formát
 
+Commit zprávy piš vždy **anglicky** (typ i krátké shrnutí).
+
 ```plain
-<type>: <short summary>
+<type>: <short short imperative English summary>
 ```
 
 ### Povolené typy
