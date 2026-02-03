@@ -50,8 +50,16 @@ ENV/
 env.bak/
 venv.bak/
 
-# IDEs
+# VS Code
 .vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+!*.code-workspace
+
+# JetBrains
 .idea/
 *.swp
 *.swo

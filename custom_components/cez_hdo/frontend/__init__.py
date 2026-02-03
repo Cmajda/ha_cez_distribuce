@@ -16,9 +16,7 @@ _LOGGER = logging.getLogger(__name__)
 # Konstanty pro frontend kartu
 DOMAIN = "cez_hdo"
 URL_BASE = "/cez_hdo_card"
-CEZ_HDO_CARDS = [
-    {"name": "CEZ HDO Card", "filename": "cez-hdo-card.js", "version": "3.0.0-RC.2"}
-]
+CEZ_HDO_CARDS = [{"name": "CEZ HDO Card", "filename": "cez-hdo-card.js", "version": "3.0.0-RC.2"}]
 
 
 class CezHdoCardRegistration:
@@ -32,9 +30,7 @@ class CezHdoCardRegistration:
     def lovelace_mode(self):
         """Get the current Lovelace mode."""
         ha_version = parse(__version__)
-        if (ha_version.major >= 2026) or (
-            (ha_version.major == 2025) and (ha_version.minor >= 2)
-        ):
+        if (ha_version.major >= 2026) or ((ha_version.major == 2025) and (ha_version.minor >= 2)):
             return self.hass.data["lovelace"].mode
         else:
             return self.hass.data["lovelace"]["mode"]
@@ -43,9 +39,7 @@ class CezHdoCardRegistration:
     def lovelace_resources(self):
         """Get Lovelace resources."""
         ha_version = parse(__version__)
-        if (ha_version.major >= 2026) or (
-            (ha_version.major == 2025) and (ha_version.minor >= 2)
-        ):
+        if (ha_version.major >= 2026) or ((ha_version.major == 2025) and (ha_version.minor >= 2)):
             return self.hass.data["lovelace"].resources
         else:
             return self.hass.data["lovelace"]["resources"]
@@ -61,9 +55,7 @@ class CezHdoCardRegistration:
         try:
             # Složka dist obsahuje zkompilovaný JS soubor
             dist_path = pathlib.Path(__file__).parent / "dist"
-            await self.hass.http.async_register_static_paths(
-                [StaticPathConfig(URL_BASE, dist_path, False)]
-            )
+            await self.hass.http.async_register_static_paths([StaticPathConfig(URL_BASE, str(dist_path), False)])
             _LOGGER.debug("Registered CEZ HDO path from %s", dist_path)
         except RuntimeError:
             _LOGGER.debug("CEZ HDO static path already registered")
@@ -89,9 +81,7 @@ class CezHdoCardRegistration:
 
         # Get resources already registered
         cez_hdo_resources = [
-            resource
-            for resource in self.lovelace_resources.async_items()
-            if resource["url"].startswith(URL_BASE)
+            resource for resource in self.lovelace_resources.async_items() if resource["url"].startswith(URL_BASE)
         ]
 
         for card in CEZ_HDO_CARDS:
@@ -114,7 +104,7 @@ class CezHdoCardRegistration:
                             res.get("id"),
                             {
                                 "res_type": "module",
-                                "url": url + "?v=" + card.get("version"),
+                                "url": f"{url}?v={card.get('version')}",
                             },
                         )
                         # Remove old gzipped files
@@ -133,7 +123,7 @@ class CezHdoCardRegistration:
                     card.get("version"),
                 )
                 await self.lovelace_resources.async_create_item(
-                    {"res_type": "module", "url": url + "?v=" + card.get("version")}
+                    {"res_type": "module", "url": f"{url}?v={card.get('version')}"}
                 )
 
     def get_resource_path(self, url: str):
@@ -173,19 +163,14 @@ class CezHdoCardRegistration:
         if not path.exists():
             return
 
-        gzip_files = [
-            filename for filename in os.listdir(path) if filename.endswith(".gz")
-        ]
+        gzip_files = [filename for filename in os.listdir(path) if filename.endswith(".gz")]
 
         _LOGGER.debug("Found gzip files: %s", gzip_files)
         for file in gzip_files:
             try:
                 gz_path = path / file
                 original_path = path / file.replace(".gz", "")
-                if (
-                    original_path.exists()
-                    and gz_path.stat().st_mtime < original_path.stat().st_mtime
-                ):
+                if original_path.exists() and gz_path.stat().st_mtime < original_path.stat().st_mtime:
                     _LOGGER.debug("Removing older gzip file - %s", file)
                     gz_path.unlink()
             except Exception:

@@ -1,4 +1,5 @@
 """ČEZ HDO integration for Home Assistant."""
+
 from __future__ import annotations
 
 import logging
@@ -38,9 +39,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Ensure data directory exists
     cache_dir = get_cache_dir(hass)
-    await hass.async_add_executor_job(
-        lambda: cache_dir.mkdir(parents=True, exist_ok=True)
-    )
+    await hass.async_add_executor_job(lambda: cache_dir.mkdir(parents=True, exist_ok=True))
 
     # Register service to reload frontend card
     async def reload_frontend_card(call):

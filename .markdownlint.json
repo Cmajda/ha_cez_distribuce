@@ -15,5 +15,8 @@
   "MD033": {
     "allowed_elements": ["a", "img", "br", "table", "tbody", "tr", "td", "sub", "b", "h2", "span"]
   },
-  "MD060": false
+  "MD060": false,
+  "ignore": [
+    ".github/copilot-instructions.md"
+  ]
 }

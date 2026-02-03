@@ -1,4 +1,5 @@
 """DataUpdateCoordinator for ČEZ HDO integration."""
+
 from __future__ import annotations
 
 import json
@@ -129,9 +130,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             self._async_recalculate_state,
             STATE_UPDATE_INTERVAL,
         )
-        _LOGGER.debug(
-            "CezHdoCoordinator: Started state updates every %s", STATE_UPDATE_INTERVAL
-        )
+        _LOGGER.debug("CezHdoCoordinator: Started state updates every %s", STATE_UPDATE_INTERVAL)
 
     def stop_state_updates(self) -> None:
         """Stop periodic state recalculation."""
@@ -187,9 +186,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 _LOGGER.warning("CezHdoCoordinator: API failed, using cached data")
                 return self.data
 
-            raise UpdateFailed(
-                "Failed to fetch HDO data from API and no cache available"
-            )
+            raise UpdateFailed("Failed to fetch HDO data from API and no cache available")
 
         except Exception as err:
             # Try cache on any error
@@ -265,9 +262,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             if "data" in cache_data and "timestamp" in cache_data:
                 raw_data = cache_data["data"]
                 try:
-                    self.data.last_update = datetime.fromisoformat(
-                        cache_data["timestamp"]
-                    )
+                    self.data.last_update = datetime.fromisoformat(cache_data["timestamp"])
                 except Exception:
                     self.data.last_update = datetime.now()
             else:

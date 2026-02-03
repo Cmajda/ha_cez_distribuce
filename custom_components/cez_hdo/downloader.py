@@ -1,4 +1,5 @@
 """CEZ HDO data downloader and processor."""
+
 from __future__ import annotations
 import logging
 from datetime import datetime, timedelta, time
@@ -120,9 +121,7 @@ def parse_time_periods(casy_string: str) -> list[tuple[time, time]]:
         return periods
 
     # Split by semicolon and clean up whitespace
-    time_ranges = [
-        period.strip() for period in casy_string.split(";") if period.strip()
-    ]
+    time_ranges = [period.strip() for period in casy_string.split(";") if period.strip()]
 
     for time_range in time_ranges:
         if "-" in time_range:
@@ -135,9 +134,7 @@ def parse_time_periods(casy_string: str) -> list[tuple[time, time]]:
     return periods
 
 
-def get_today_schedule(
-    json_data: dict, preferred_signal: str | None = None
-) -> list[tuple[time, time]]:
+def get_today_schedule(json_data: dict, preferred_signal: str | None = None) -> list[tuple[time, time]]:
     """Get today's schedule from API response."""
 
     # Podpora více úrovní vnoření (pro kompatibilitu s různými API odpověďmi)
@@ -166,9 +163,7 @@ def get_today_schedule(
 
     if not today_signals:
         # Extra diagnostics: show which dates exist (normalized)
-        available_dates_all = {
-            normalize_datum(s.get("datum")) for s in signals if s.get("datum")
-        }
+        available_dates_all = {normalize_datum(s.get("datum")) for s in signals if s.get("datum")}
         available_dates = sorted([d for d in available_dates_all if d is not None])
         _LOGGER.warning(
             "No schedule found for today %s (available: %s)",
@@ -278,11 +273,7 @@ def isHdo(
         Tuple with HDO data: (low_tariff_active, low_start, low_end, low_duration,
                              high_tariff_active, high_start, high_end, high_duration)
     """
-    current_time = (
-        now.astimezone(CEZ_TIMEZONE)
-        if now is not None
-        else datetime.now(tz=CEZ_TIMEZONE)
-    )
+    current_time = now.astimezone(CEZ_TIMEZONE) if now is not None else datetime.now(tz=CEZ_TIMEZONE)
 
     # Initialize return values
     low_tariff_active = False
@@ -445,12 +436,8 @@ def generate_schedule_for_graph(
 
         if not nt_periods:
             # No data for this day - add full day as VT
-            day_start_dt = datetime.combine(
-                target_date, time(0, 0), tzinfo=CEZ_TIMEZONE
-            )
-            day_end_dt = datetime.combine(
-                target_date, time(23, 59, 59), tzinfo=CEZ_TIMEZONE
-            )
+            day_start_dt = datetime.combine(target_date, time(0, 0), tzinfo=CEZ_TIMEZONE)
+            day_end_dt = datetime.combine(target_date, time(23, 59, 59), tzinfo=CEZ_TIMEZONE)
             schedule.append(
                 {
                     "start": day_start_dt.isoformat(),
@@ -484,12 +471,8 @@ def generate_schedule_for_graph(
             if current_minute < nt_start_min:
                 vt_start_h, vt_start_m = divmod(current_minute, 60)
                 vt_end_h, vt_end_m = divmod(nt_start_min, 60)
-                vt_start_dt = datetime.combine(
-                    target_date, time(vt_start_h, vt_start_m), tzinfo=CEZ_TIMEZONE
-                )
-                vt_end_dt = datetime.combine(
-                    target_date, time(vt_end_h, vt_end_m), tzinfo=CEZ_TIMEZONE
-                )
+                vt_start_dt = datetime.combine(target_date, time(vt_start_h, vt_start_m), tzinfo=CEZ_TIMEZONE)
+                vt_end_dt = datetime.combine(target_date, time(vt_end_h, vt_end_m), tzinfo=CEZ_TIMEZONE)
                 schedule.append(
                     {
                         "start": vt_start_dt.isoformat(),
@@ -503,9 +486,7 @@ def generate_schedule_for_graph(
             nt_start_dt = datetime.combine(target_date, nt_start, tzinfo=CEZ_TIMEZONE)
             # Handle end time - if it's 24:00 (represented as 00:00), use 23:59:59
             if nt_end_min == end_of_day:
-                nt_end_dt = datetime.combine(
-                    target_date, time(23, 59, 59), tzinfo=CEZ_TIMEZONE
-                )
+                nt_end_dt = datetime.combine(target_date, time(23, 59, 59), tzinfo=CEZ_TIMEZONE)
             else:
                 nt_end_dt = datetime.combine(target_date, nt_end, tzinfo=CEZ_TIMEZONE)
 
@@ -523,12 +504,8 @@ def generate_schedule_for_graph(
         # VT period after last NT until end of day (if needed)
         if current_minute < end_of_day:
             vt_start_h, vt_start_m = divmod(current_minute, 60)
-            vt_start_dt = datetime.combine(
-                target_date, time(vt_start_h, vt_start_m), tzinfo=CEZ_TIMEZONE
-            )
-            vt_end_dt = datetime.combine(
-                target_date, time(23, 59, 59), tzinfo=CEZ_TIMEZONE
-            )
+            vt_start_dt = datetime.combine(target_date, time(vt_start_h, vt_start_m), tzinfo=CEZ_TIMEZONE)
+            vt_end_dt = datetime.combine(target_date, time(23, 59, 59), tzinfo=CEZ_TIMEZONE)
             schedule.append(
                 {
                     "start": vt_start_dt.isoformat(),
