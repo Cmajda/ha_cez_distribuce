@@ -93,6 +93,6 @@
         ".vscode",
         "README.md",
         "docs/cs/**",
-        "CONTRIBUTING_CS.md"
+        "CONTRIBUTING.md"
     ]
 }
