@@ -1,4 +1,4 @@
-name: Traffic Stats
+name: 📊 Traffic Stats
 
 on:
   schedule:
