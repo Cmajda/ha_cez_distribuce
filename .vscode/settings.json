@@ -92,6 +92,7 @@
         "uv.lock",
         ".vscode",
         "README.md",
-        "docs/cs/**"
+        "docs/cs/**",
+        "CONTRIBUTING_CS.md"
     ]
 }
