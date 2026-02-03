@@ -1,4 +1,5 @@
 """Platform for binary sensor integration."""
+
 from __future__ import annotations
 
 import logging
@@ -105,14 +106,10 @@ def setup_platform(
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     """Set up the CEZ HDO binary sensor platform (sync - deprecated)."""
-    _LOGGER.warning(
-        "Synchronous setup_platform is deprecated. " "Use async_setup_platform instead."
-    )
+    _LOGGER.warning("Synchronous setup_platform is deprecated. Use async_setup_platform instead.")
 
 
-async def _async_get_coordinator(
-    hass: HomeAssistant, ean: str, signal: str | None
-) -> CezHdoCoordinator:
+async def _async_get_coordinator(hass: HomeAssistant, ean: str, signal: str | None) -> CezHdoCoordinator:
     """Get or create coordinator instance."""
     # Check if coordinator already exists (sensor platform usually creates it first)
     if DOMAIN in hass.data and DATA_COORDINATOR in hass.data[DOMAIN]:
@@ -228,9 +225,7 @@ class LowTariffActive(CezHdoBinarySensor):
         signal: str | None = None,
         entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(
-            coordinator, ean, "LowTariffActive", entry_id, signal, entity_suffix
-        )
+        super().__init__(coordinator, ean, "LowTariffActive", entry_id, signal, entity_suffix)
 
     @property
     def is_on(self) -> bool | None:
@@ -249,9 +244,7 @@ class HighTariffActive(CezHdoBinarySensor):
         signal: str | None = None,
         entity_suffix: str | None = None,
     ) -> None:
-        super().__init__(
-            coordinator, ean, "HighTariffActive", entry_id, signal, entity_suffix
-        )
+        super().__init__(coordinator, ean, "HighTariffActive", entry_id, signal, entity_suffix)
 
     @property
     def is_on(self) -> bool | None:

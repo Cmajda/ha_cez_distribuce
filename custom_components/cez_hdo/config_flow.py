@@ -1,4 +1,5 @@
 """Config flow for ČEZ HDO integration."""
+
 from __future__ import annotations
 
 import logging
@@ -66,13 +67,9 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             raise InvalidEan("No signals found for this EAN")
 
         # Get available signal names
-        available_signals = list(
-            set(s.get("signal", "") for s in signals if s.get("signal"))
-        )
+        available_signals = list(set(s.get("signal", "") for s in signals if s.get("signal")))
 
-        _LOGGER.debug(
-            "EAN %s validated, found signals: %s", mask_ean(ean), available_signals
-        )
+        _LOGGER.debug("EAN %s validated, found signals: %s", mask_ean(ean), available_signals)
 
         return {
             "title": f"ČEZ HDO ({ean[-6:]})",
@@ -98,9 +95,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
         self._entity_suffix: str | None = None
         self._available_signals: list[str] = []
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the initial step - EAN input."""
         errors: dict[str, str] = {}
 
@@ -134,9 +129,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             },
         )
 
-    async def async_step_signal(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_signal(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle signal selection step."""
         errors: dict[str, str] = {}
 
@@ -164,9 +157,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             step_id="signal",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_SIGNAL, default=default_signal): vol.In(
-                        signal_options
-                    ),
+                    vol.Required(CONF_SIGNAL, default=default_signal): vol.In(signal_options),
                 }
             ),
             description_placeholders={
@@ -175,9 +166,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             errors=errors,
         )
 
-    async def async_step_entity_suffix(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_entity_suffix(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle entity suffix configuration step."""
         if user_input is not None:
             self._entity_suffix = user_input.get(CONF_ENTITY_SUFFIX, "")
@@ -186,9 +175,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
 
         # Generate default suffix from EAN and signal
         ean_suffix = self._ean[-4:] if self._ean else "0000"
-        signal_safe = (
-            self._signal.lower().replace("|", "_") if self._signal else "signal"
-        )
+        signal_safe = self._signal.lower().replace("|", "_") if self._signal else "signal"
         default_suffix = f"{ean_suffix}_{signal_safe}"
 
         return self.async_show_form(
@@ -203,9 +190,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             },
         )
 
-    async def async_step_prices(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_prices(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle prices configuration step."""
         if user_input is not None:
             low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
@@ -240,9 +225,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             data_schema=vol.Schema(
                 {
                     vol.Optional(CONF_LOW_TARIFF_PRICE, default=0.0): vol.Coerce(float),
-                    vol.Optional(CONF_HIGH_TARIFF_PRICE, default=0.0): vol.Coerce(
-                        float
-                    ),
+                    vol.Optional(CONF_HIGH_TARIFF_PRICE, default=0.0): vol.Coerce(float),
                 }
             ),
         )
@@ -271,9 +254,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         """Return the config entry."""
         return self._config_entry
 
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the initial options step - EAN input."""
         errors: dict[str, str] = {}
 
@@ -310,9 +291,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             errors=errors,
         )
 
-    async def async_step_signal(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_signal(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle signal selection step in options."""
         if user_input is not None:
             self._signal = user_input.get(CONF_SIGNAL)
@@ -323,9 +302,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         current_signal = self._config_entry.data.get(CONF_SIGNAL, "")
         if self._ean != self._config_entry.data.get(CONF_EAN):
             # EAN changed, use first signal as default
-            current_signal = (
-                self._available_signals[0] if self._available_signals else ""
-            )
+            current_signal = self._available_signals[0] if self._available_signals else ""
 
         # Build signal options
         signal_options = {s: s for s in self._available_signals}
@@ -337,9 +314,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             step_id="signal",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_SIGNAL, default=current_signal): vol.In(
-                        signal_options
-                    ),
+                    vol.Required(CONF_SIGNAL, default=current_signal): vol.In(signal_options),
                 }
             ),
             description_placeholders={
@@ -347,9 +322,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             },
         )
 
-    async def async_step_prices(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_prices(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle prices configuration step."""
         if user_input is not None:
             low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
@@ -404,12 +377,8 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             step_id="prices",
             data_schema=vol.Schema(
                 {
-                    vol.Optional(
-                        CONF_LOW_TARIFF_PRICE, default=current_low_price
-                    ): vol.Coerce(float),
-                    vol.Optional(
-                        CONF_HIGH_TARIFF_PRICE, default=current_high_price
-                    ): vol.Coerce(float),
+                    vol.Optional(CONF_LOW_TARIFF_PRICE, default=current_low_price): vol.Coerce(float),
+                    vol.Optional(CONF_HIGH_TARIFF_PRICE, default=current_high_price): vol.Coerce(float),
                 }
             ),
         )
