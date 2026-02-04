@@ -66,7 +66,20 @@ You can find your EAN:
 - In your electricity provider's portal
 - On the [ČEZ Distribuce](https://www.cezdistribuce.cz/cs/pro-zakazniky/spinani-hdo) website
 
-### Step 2: Select Signal
+### Step 2: CAPTCHA Verification
+
+To verify access to the ČEZ Distribuce API, you need to enter the **CAPTCHA code from the image**.
+
+![CAPTCHA Verification](../../img/en/card_add_integration_5.png)
+
+1. An image with a code will be displayed
+2. Type the displayed characters into the text field
+3. Click **Submit**
+
+> **⚠️ Important:** If you enter the wrong code, a new CAPTCHA image will be displayed.
+> Data from the API is valid for **6 days**. After this period, you will need to reconfigure the integration.
+
+### Step 3: Select Signal
 
 Select the **HDO signal** from the list of available signals for your metering point.
 
@@ -79,7 +92,7 @@ Select the **HDO signal** from the list of available signals for your metering p
 
 After selecting the signal, click **Submit**.
 
-### Step 3: Entity ID Suffix
+### Step 4: Entity ID Suffix
 
 Enter a **suffix** that will be used in all entity names.
 
@@ -90,31 +103,31 @@ Enter a **suffix** that will be used in all entity names.
 
 **Examples of resulting entity IDs:**
 
-| Suffix | Resulting Entity ID |
-|--------|---------------------|
+| Suffix          | Resulting Entity ID                           |
+| --------------- | --------------------------------------------- |
 | `7606_a1b4dp04` | `sensor.cez_hdo_lowtariffstart_7606_a1b4dp04` |
-| `cottage` | `sensor.cez_hdo_lowtariffstart_cottage` |
+| `cottage`       | `sensor.cez_hdo_lowtariffstart_cottage`       |
 
 > **Tip:** Use intuitive names for easier navigation in automations, especially if you have multiple metering points.
 
 Click **Submit**.
 
-### Step 4: Price Settings
+### Step 5: Price Settings
 
 Enter electricity prices for low and high tariff.
 
 ![Price settings](../../img/en/card_add_integration_4.png)
 
-| Field | Description |
-|-------|-------------|
-| **NT Price (CZK/kWh)** | Price per kWh in low tariff |
+| Field                  | Description                  |
+| ---------------------- | ---------------------------- |
+| **NT Price (CZK/kWh)** | Price per kWh in low tariff  |
 | **VT Price (CZK/kWh)** | Price per kWh in high tariff |
 
 You can find prices on your invoice or in the price list from your electricity provider. These prices are used for cost calculations in the card and for integration with Energy Dashboard.
 
 Click **Submit**.
 
-### Step 5: Device Placement
+### Step 6: Device Placement
 
 Home Assistant will ask which area you want to place the device in.
 
@@ -156,17 +169,17 @@ The card editor will open with configuration options.
 
 #### Card Configuration Options
 
-| Toggle | Description | Default |
-|--------|-------------|---------|
-| **Show title** | Card header | ✅ On |
-| **Show tariff states** | NT/VT boxes with state (active/inactive) | ✅ On |
-| **Show prices with tariffs** | Price in NT/VT box | ❌ Off |
-| **Show times** | Tariff start and end times | ✅ On |
-| **Show remaining time** | Time until tariff change | ✅ On |
-| **Show current price** | Large box with current price | ✅ On |
-| **Show HDO schedule** | 7-day schedule visualization | ❌ Off |
-| **Show prices in legend** | Prices for NT/VT in schedule legend | ❌ Off |
-| **Compact mode** | Reduced card size | ❌ Off |
+| Toggle                       | Description                              | Default |
+| ---------------------------- | ---------------------------------------- | ------- |
+| **Show title**               | Card header                              | ✅ On    |
+| **Show tariff states**       | NT/VT boxes with state (active/inactive) | ✅ On    |
+| **Show prices with tariffs** | Price in NT/VT box                       | ❌ Off   |
+| **Show times**               | Tariff start and end times               | ✅ On    |
+| **Show remaining time**      | Time until tariff change                 | ✅ On    |
+| **Show current price**       | Large box with current price             | ✅ On    |
+| **Show HDO schedule**        | 7-day schedule visualization             | ❌ Off   |
+| **Show prices in legend**    | Prices for NT/VT in schedule legend      | ❌ Off   |
+| **Compact mode**             | Reduced card size                        | ❌ Off   |
 
 #### Entity Selection
 
@@ -191,26 +204,30 @@ The integration creates the following entities:
 
 ### Binary Sensors
 
-| Entity | Description |
-|--------|-------------|
-| `binary_sensor.cez_hdo_lowtariffactive_*` | Low tariff is active (`on/off`) |
+| Entity                                     | Description                      |
+| ------------------------------------------ | -------------------------------- |
+| `binary_sensor.cez_hdo_lowtariffactive_*`  | Low tariff is active (`on/off`)  |
 | `binary_sensor.cez_hdo_hightariffactive_*` | High tariff is active (`on/off`) |
+| `binary_sensor.cez_hdo_data_valid_*`       | API data is valid (`on/off`)     |
 
 ### Sensors
 
-| Entity | Description |
-|--------|-------------|
-| `sensor.cez_hdo_lowtariffstart_*` | NT start time (e.g., `01:10`) |
-| `sensor.cez_hdo_lowtariffend_*` | NT end time (e.g., `08:30`) |
-| `sensor.cez_hdo_lowtariffremaining_*` | Remaining time until tariff change |
-| `sensor.cez_hdo_hightariffstart_*` | VT start time |
-| `sensor.cez_hdo_hightariffend_*` | VT end time |
-| `sensor.cez_hdo_hightariffremaining_*` | Remaining time until tariff change |
-| `sensor.cez_hdo_currentprice_*` | Current price in CZK/kWh |
-| `sensor.cez_hdo_schedule_*` | 7-day HDO schedule |
-| `sensor.cez_hdo_rawdata_*` | Last update timestamp |
+| Entity                                 | Description                            |
+| -------------------------------------- | -------------------------------------- |
+| `sensor.cez_hdo_lowtariffstart_*`      | NT start time (e.g., `01:10`)          |
+| `sensor.cez_hdo_lowtariffend_*`        | NT end time (e.g., `08:30`)            |
+| `sensor.cez_hdo_lowtariffremaining_*`  | Remaining time until tariff change     |
+| `sensor.cez_hdo_hightariffstart_*`     | VT start time                          |
+| `sensor.cez_hdo_hightariffend_*`       | VT end time                            |
+| `sensor.cez_hdo_hightariffremaining_*` | Remaining time until tariff change     |
+| `sensor.cez_hdo_currentprice_*`        | Current price in CZK/kWh               |
+| `sensor.cez_hdo_schedule_*`            | 7-day HDO schedule                     |
+| `sensor.cez_hdo_rawdata_*`             | Last update timestamp                  |
+| `sensor.cez_hdo_data_valid_until_*`    | Data validity expiration date and time |
+| `sensor.cez_hdo_data_age_days_*`       | Data age in days                       |
+| `sensor.cez_hdo_days_until_expiry_*`   | Days until data expires                |
 
-> **Note:** `*` represents your chosen suffix from step 3 (e.g., `7606_a1b4dp04` or `cottage`).
+> **Note:** `*` represents your chosen suffix from step 4 (e.g., `7606_a1b4dp04` or `cottage`).
 
 ### Multiple EANs / Signals
 
@@ -220,6 +237,61 @@ The integration supports:
 - **Same EAN with different signals** – each signal as a new instance
 
 Each instance has its own device and entities with a unique suffix.
+
+---
+
+## ⏰ Data Validity and Renewal
+
+### Why Does Data Expire?
+
+ČEZ Distribuce uses CAPTCHA protection on their API. Data is fetched **only during integration configuration** and is valid for **6 days**. After this period, you need to reconfigure the integration.
+
+### Tracking Data Validity
+
+The integration provides sensors for tracking validity:
+
+| Entity                               | Description                            |
+| ------------------------------------ | -------------------------------------- |
+| `binary_sensor.cez_hdo_data_valid_*` | `on` = data valid, `off` = expired     |
+| `sensor.cez_hdo_days_until_expiry_*` | Days until expiry (negative = expired) |
+| `sensor.cez_hdo_data_age_days_*`     | How many days old the data is          |
+| `sensor.cez_hdo_data_valid_until_*`  | Exact expiration date and time         |
+
+### Automatic Notifications
+
+The integration automatically displays **persistent notifications**:
+
+- **Day 5:** Warning that data will expire soon
+- **Day 6:** Alert that data has expired
+
+### Automation Example
+
+For custom notifications, you can use an automation:
+
+```yaml
+automation:
+  - alias: "ČEZ HDO - Data expiring soon"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.cez_hdo_days_until_expiry_SUFFIX
+        below: 2
+    action:
+      - service: notify.mobile_app_phone
+        data:
+          title: "ČEZ HDO"
+          message: "HDO data will expire in {{ states('sensor.cez_hdo_days_until_expiry_SUFFIX') }} days!"
+```
+
+> **Note:** Replace `SUFFIX` with your entity suffix (e.g., `7606_a1b4dp04`).
+
+### Renewing Data
+
+To fetch new data:
+
+1. Go to **Settings → Devices & Services**
+2. Find the **ČEZ HDO** integration
+3. Click **Configure**
+4. Complete all steps including CAPTCHA verification
 
 ---
 

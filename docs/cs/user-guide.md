@@ -62,7 +62,20 @@ EAN najdete:
 
 ![Přidání integrace](../../img/cs/card_add_integration_1_cz.png)
 
-### Krok 2: Výběr signálu
+### Krok 2: Ověření CAPTCHA
+
+Pro ověření přístupu k API ČEZ Distribuce je nutné zadat **kód z obrázku CAPTCHA**.
+
+![Ověření CAPTCHA](../../img/cs/card_add_integration_5_cz.png)
+
+1. Zobrazí se obrázek s kódem
+2. Opište zobrazené znaky do textového pole
+3. Klikněte na **Odeslat**
+
+> **⚠️ Důležité:** Pokud zadáte špatný kód, zobrazí se nový obrázek CAPTCHA.
+> Data z API jsou platná **6 dní**. Po této době bude nutné integraci překonfigurovat.
+
+### Krok 3: Výběr signálu
 
 Vyberte **HDO signál** ze seznamu dostupných signálů pro vaše odběrné místo.
 
@@ -75,7 +88,7 @@ Vyberte **HDO signál** ze seznamu dostupných signálů pro vaše odběrné mí
 
 Po výběru signálu klikněte na **Odeslat**.
 
-### Krok 3: Přípona Entity ID
+### Krok 4: Přípona Entity ID
 
 Zadejte **příponu**, která bude použita v názvech všech entit.
 
@@ -86,31 +99,31 @@ Zadejte **příponu**, která bude použita v názvech všech entit.
 
 **Příklady výsledných entity ID:**
 
-| Přípona | Výsledné entity ID |
-|---------|-------------------|
+| Přípona         | Výsledné entity ID                                 |
+| --------------- | -------------------------------------------------- |
 | `7606_a1b4dp04` | `sensor.cez_hdo_nizky_tarif_zacatek_7606_a1b4dp04` |
-| `chalupa` | `sensor.cez_hdo_nizky_tarif_zacatek_chalupa` |
+| `chalupa`       | `sensor.cez_hdo_nizky_tarif_zacatek_chalupa`       |
 
 > **Tip:** Použijte intuitivní názvy pro snadnější orientaci v automatizacích, zejména pokud máte více odběrných míst.
 
 Klikněte na **Odeslat**.
 
-### Krok 4: Nastavení cen
+### Krok 5: Nastavení cen
 
 Zadejte ceny elektřiny pro nízký a vysoký tarif.
 
 ![Nastavení cen](../../img/cs/card_add_integration_4_cz.png)
 
-| Pole | Popis |
-|------|-------|
-| **Cena NT (Kč/kWh)** | Cena za kWh v nízkém tarifu |
+| Pole                 | Popis                         |
+| -------------------- | ----------------------------- |
+| **Cena NT (Kč/kWh)** | Cena za kWh v nízkém tarifu   |
 | **Cena VT (Kč/kWh)** | Cena za kWh ve vysokém tarifu |
 
 Ceny najdete na faktuře nebo v ceníku od vašeho dodavatele elektřiny. Tyto ceny se používají pro výpočet nákladů v kartě a pro integraci s Energy Dashboard.
 
 Klikněte na **Odeslat**.
 
-### Krok 5: Umístění zařízení
+### Krok 6: Umístění zařízení
 
 Home Assistant se zeptá, do které oblasti chcete zařízení umístit.
 
@@ -152,17 +165,17 @@ Otevře se editor karty s možnostmi konfigurace.
 
 #### Možnosti nastavení karty
 
-| Přepínač | Popis | Výchozí |
-|----------|-------|---------|
-| **Zobrazit titulek** | Nadpis karty | ✅ Zapnuto |
-| **Zobrazit stavy tarifů** | Boxy NT/VT se stavem (aktivní/neaktivní) | ✅ Zapnuto |
-| **Zobrazit ceny u tarifů** | Cena v boxu NT/VT | ❌ Vypnuto |
-| **Zobrazit časy** | Čas začátku a konce tarifů | ✅ Zapnuto |
-| **Zobrazit zbývající čas** | Čas do změny tarifu | ✅ Zapnuto |
-| **Zobrazit aktuální cenu** | Velký box s aktuální cenou | ✅ Zapnuto |
-| **Zobrazit HDO rozvrh** | 7denní vizualizace rozvrhu | ❌ Vypnuto |
-| **Zobrazit ceny v legendě** | Ceny u NT/VT v legendě rozvrhu | ❌ Vypnuto |
-| **Kompaktní režim** | Zmenšená velikost karty | ❌ Vypnuto |
+| Přepínač                    | Popis                                    | Výchozí   |
+| --------------------------- | ---------------------------------------- | --------- |
+| **Zobrazit titulek**        | Nadpis karty                             | ✅ Zapnuto |
+| **Zobrazit stavy tarifů**   | Boxy NT/VT se stavem (aktivní/neaktivní) | ✅ Zapnuto |
+| **Zobrazit ceny u tarifů**  | Cena v boxu NT/VT                        | ❌ Vypnuto |
+| **Zobrazit časy**           | Čas začátku a konce tarifů               | ✅ Zapnuto |
+| **Zobrazit zbývající čas**  | Čas do změny tarifu                      | ✅ Zapnuto |
+| **Zobrazit aktuální cenu**  | Velký box s aktuální cenou               | ✅ Zapnuto |
+| **Zobrazit HDO rozvrh**     | 7denní vizualizace rozvrhu               | ❌ Vypnuto |
+| **Zobrazit ceny v legendě** | Ceny u NT/VT v legendě rozvrhu           | ❌ Vypnuto |
+| **Kompaktní režim**         | Zmenšená velikost karty                  | ❌ Vypnuto |
 
 #### Výběr entit
 
@@ -187,26 +200,30 @@ Integrace vytváří následující entity:
 
 ### Binary sensors
 
-| Entita | Popis |
-|--------|-------|
-| `binary_sensor.cez_hdo_lowtariffactive_*` | Nízký tarif je aktivní (`on/off`) |
+| Entita                                     | Popis                              |
+| ------------------------------------------ | ---------------------------------- |
+| `binary_sensor.cez_hdo_lowtariffactive_*`  | Nízký tarif je aktivní (`on/off`)  |
 | `binary_sensor.cez_hdo_hightariffactive_*` | Vysoký tarif je aktivní (`on/off`) |
+| `binary_sensor.cez_hdo_data_valid_*`       | Data z API jsou platná (`on/off`)  |
 
 ### Sensors
 
-| Entita | Popis |
-|--------|-------|
-| `sensor.cez_hdo_lowtariffstart_*` | Čas začátku NT (např. `01:10`) |
-| `sensor.cez_hdo_lowtariffend_*` | Čas konce NT (např. `08:30`) |
-| `sensor.cez_hdo_lowtariffremaining_*` | Zbývající čas do změny tarifu |
-| `sensor.cez_hdo_hightariffstart_*` | Čas začátku VT |
-| `sensor.cez_hdo_hightariffend_*` | Čas konce VT |
-| `sensor.cez_hdo_hightariffremaining_*` | Zbývající čas do změny tarifu |
-| `sensor.cez_hdo_currentprice_*` | Aktuální cena v Kč/kWh |
-| `sensor.cez_hdo_schedule_*` | 7denní HDO rozvrh |
-| `sensor.cez_hdo_rawdata_*` | Timestamp poslední aktualizace |
+| Entita                                 | Popis                              |
+| -------------------------------------- | ---------------------------------- |
+| `sensor.cez_hdo_lowtariffstart_*`      | Čas začátku NT (např. `01:10`)     |
+| `sensor.cez_hdo_lowtariffend_*`        | Čas konce NT (např. `08:30`)       |
+| `sensor.cez_hdo_lowtariffremaining_*`  | Zbývající čas do změny tarifu      |
+| `sensor.cez_hdo_hightariffstart_*`     | Čas začátku VT                     |
+| `sensor.cez_hdo_hightariffend_*`       | Čas konce VT                       |
+| `sensor.cez_hdo_hightariffremaining_*` | Zbývající čas do změny tarifu      |
+| `sensor.cez_hdo_currentprice_*`        | Aktuální cena v Kč/kWh             |
+| `sensor.cez_hdo_schedule_*`            | 7denní HDO rozvrh                  |
+| `sensor.cez_hdo_rawdata_*`             | Timestamp poslední aktualizace     |
+| `sensor.cez_hdo_data_valid_until_*`    | Datum a čas vypršení platnosti dat |
+| `sensor.cez_hdo_data_age_days_*`       | Stáří dat ve dnech                 |
+| `sensor.cez_hdo_days_until_expiry_*`   | Počet dnů do vypršení platnosti    |
 
-> **Poznámka:** `*` označuje vaši zvolenou příponu z kroku 3 (např. `7606_a1b4dp04` nebo `chalupa`).
+> **Poznámka:** `*` označuje vaši zvolenou příponu z kroku 4 (např. `7606_a1b4dp04` nebo `chalupa`).
 
 ### Více EAN / signálů
 
@@ -216,6 +233,61 @@ Integrace podporuje:
 - **Stejné EAN s různými signály** – každý signál jako nová instance
 
 Každá instance má vlastní zařízení a entity s unikátní příponou.
+
+---
+
+## ⏰ Platnost dat a obnovení
+
+### Proč data vyprší?
+
+ČEZ Distribuce používá CAPTCHA ochranu na svém API. Data se načítají **pouze při konfiguraci integrace** a jsou platná **6 dní**. Po této době je nutné integraci překonfigurovat.
+
+### Sledování platnosti dat
+
+Integrace poskytuje senzory pro sledování platnosti:
+
+| Entita                               | Popis                                      |
+| ------------------------------------ | ------------------------------------------ |
+| `binary_sensor.cez_hdo_data_valid_*` | `on` = data platná, `off` = vypršela       |
+| `sensor.cez_hdo_days_until_expiry_*` | Počet dnů do vypršení (záporné = vypršelo) |
+| `sensor.cez_hdo_data_age_days_*`     | Kolik dnů jsou data stará                  |
+| `sensor.cez_hdo_data_valid_until_*`  | Přesný datum a čas vypršení                |
+
+### Automatická upozornění
+
+Integrace automaticky zobrazí **persistent notification**:
+
+- **Den 5:** Varování, že data brzy vyprší
+- **Den 6:** Upozornění, že data vypršela
+
+### Příklad automatizace
+
+Pro vlastní upozornění můžete použít automatizaci:
+
+```yaml
+automation:
+  - alias: "ČEZ HDO - Data brzy vyprší"
+    trigger:
+      - platform: numeric_state
+        entity_id: sensor.cez_hdo_days_until_expiry_SUFFIX
+        below: 2
+    action:
+      - service: notify.mobile_app_telefon
+        data:
+          title: "ČEZ HDO"
+          message: "HDO data vyprší za {{ states('sensor.cez_hdo_days_until_expiry_SUFFIX') }} dní!"
+```
+
+> **Poznámka:** Nahraďte `SUFFIX` vaší příponou entity (např. `7606_a1b4dp04`).
+
+### Obnovení dat
+
+Pro načtení nových dat:
+
+1. Přejděte do **Nastavení → Zařízení a služby**
+2. Najděte integraci **ČEZ HDO**
+3. Klikněte na **Konfigurovat**
+4. Projděte všechny kroky včetně zadání CAPTCHA
 
 ---
 

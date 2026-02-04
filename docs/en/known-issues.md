@@ -4,9 +4,26 @@ This file contains a list of known issues and their resolution status.
 
 ---
 
-## Current Issues (v3.0.0)
+## Current Issues (v3.1.0)
 
-### 1. set_prices service doesn't distinguish devices
+### 1. CAPTCHA Protection on ČEZ Distribuce API
+
+**Status:** ✅ Resolved in v3.1.0
+
+**Description:** ČEZ Distribuce introduced CAPTCHA protection on their API, which
+caused the integration to stop working for new installations.
+
+**Resolution:** The integration now displays a CAPTCHA image during configuration.
+Data is fetched once and stored in cache. Data validity is **6 days**,
+after which reconfiguration is required.
+
+**Validity tracking:** New sensors `data_valid`, `days_until_expiry`,
+`data_age_days`, and `data_valid_until` allow tracking data validity
+and creating automations for notifications.
+
+---
+
+### 2. set_prices service doesn't distinguish devices
 
 **Status:** ⚠️ Known limitation
 

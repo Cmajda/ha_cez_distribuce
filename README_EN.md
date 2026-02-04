@@ -11,9 +11,9 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ⚠️ **CURRENT ISSUE:** ČEZ Distribuce has added CAPTCHA protection to their API.
-> New installations currently do not work. We are working on a solution.
-> Follow [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
+> ℹ️ **CAPTCHA VERIFICATION:** From version 3.1.0, the integration supports CAPTCHA verification.
+> During configuration, you will enter a code from the image. Data is valid for 6 days.
+> More info in [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
 
 🇨🇿 [Česká verze](README.md)
 
@@ -72,8 +72,9 @@ Thanks to all co-authors who actively contribute to the development of this inte
 1. **Settings → Devices & Services → + Add Integration**
 2. Search for **ČEZ HDO**
 3. Enter your **EAN** (18-digit number from your electricity bill)
-4. Select **signal** (if multiple options available)
-5. Enter **prices** for NT and VT (CZK/kWh)
+4. Enter the **CAPTCHA code** from the image
+5. Select **signal** (if multiple options available)
+6. Enter **prices** for NT and VT (CZK/kWh)
 
 ### 4. Add Card
 
@@ -111,6 +112,7 @@ The sensor `sensor.cez_hdo_currentprice_*` can be used as a price source in the 
 | ------ | ------------------------------- | -------------------------- |
 | Binary | `cez_hdo_lowtariffactive_*`     | NT (low tariff) is active  |
 | Binary | `cez_hdo_hightariffactive_*`    | VT (high tariff) is active |
+| Binary | `cez_hdo_data_valid_*`          | Data is valid              |
 | Sensor | `cez_hdo_lowtariffstart_*`      | NT start time              |
 | Sensor | `cez_hdo_lowtariffend_*`        | NT end time                |
 | Sensor | `cez_hdo_lowtariffremaining_*`  | NT remaining time          |
@@ -119,6 +121,9 @@ The sensor `sensor.cez_hdo_currentprice_*` can be used as a price source in the 
 | Sensor | `cez_hdo_hightariffremaining_*` | VT remaining time          |
 | Sensor | `cez_hdo_currentprice_*`        | Current price (CZK/kWh)    |
 | Sensor | `cez_hdo_schedule_*`            | 7-day HDO schedule         |
+| Sensor | `cez_hdo_data_valid_until_*`    | Data expiration date       |
+| Sensor | `cez_hdo_data_age_days_*`       | Data age (days)            |
+| Sensor | `cez_hdo_days_until_expiry_*`   | Days until expiry          |
 
 > **Note:** `*` represents your chosen suffix (e.g., `home` or `7606_a1b4dp04`).
 
