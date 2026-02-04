@@ -543,9 +543,9 @@ class DataValidUntil(CezHdoSensor):
         if valid_until is None:
             return None
         # Coordinator returns naive datetime in local time
-        # Make it timezone-aware using the local timezone
+        # Convert to timezone-aware datetime using Home Assistant's local timezone
         if valid_until.tzinfo is None:
-            return valid_until.replace(tzinfo=dt_util.DEFAULT_TIME_ZONE)
+            return dt_util.as_local(valid_until)
         return valid_until
 
     @property

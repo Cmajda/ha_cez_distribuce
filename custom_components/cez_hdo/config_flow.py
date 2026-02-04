@@ -268,7 +268,13 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             if self._raw_data:
                 self.hass.data.setdefault("cez_hdo_initial_data", {})[self._ean] = self._raw_data
                 _LOGGER.debug(
-                    "Stored initial data for EAN %s before creating entry",
+                    "ConfigFlow: Stored initial data for EAN %s, data keys=%s",
+                    mask_ean(self._ean),
+                    list(self._raw_data.keys()) if isinstance(self._raw_data, dict) else "not a dict",
+                )
+            else:
+                _LOGGER.warning(
+                    "ConfigFlow: No raw_data to store for EAN %s!",
                     mask_ean(self._ean),
                 )
 
@@ -311,6 +317,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         self._signal: str | None = None
         self._available_signals: list[str] = []
         self._captcha_session: downloader.CaptchaSession | None = None
+        self._raw_data: dict[str, Any] | None = None
 
     @property
     def config_entry(self) -> config_entries.ConfigEntry:
@@ -359,6 +366,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                         self._captcha_session.cookies,
                     )
                     self._available_signals = info.get("available_signals", [])
+                    self._raw_data = info.get("raw_data")
 
                     # Clear CAPTCHA session after successful validation
                     self._captcha_session = None
@@ -472,6 +480,10 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             # Save prices to coordinator
             await self._save_prices(low_price, high_price)
 
+            # Save raw data to coordinator cache if we have it
+            if self._raw_data:
+                await self._save_raw_data_to_cache()
+
             # Return empty options - all config is in data
             return self.async_create_entry(title="", data={})
 
@@ -506,6 +518,45 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
 
         if coordinator:
             await coordinator.async_set_prices(low_price, high_price)
+
+    async def _save_raw_data_to_cache(self) -> None:
+        """Save raw data from CAPTCHA validation to coordinator cache."""
+        from . import DOMAIN, DATA_COORDINATOR
+        from datetime import datetime
+
+        entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
+        coordinator = entry_data.get(DATA_COORDINATOR)
+
+        _LOGGER.debug(
+            "OptionsFlow._save_raw_data_to_cache: entry_id=%s, coordinator=%s, raw_data=%s",
+            self._config_entry.entry_id,
+            coordinator is not None,
+            self._raw_data is not None,
+        )
+
+        if coordinator and self._raw_data:
+            # Save to cache file
+            await self.hass.async_add_executor_job(coordinator._save_to_cache, self._raw_data)
+            # Update coordinator data
+            coordinator._parse_data(self._raw_data)
+            coordinator.data.raw_data = self._raw_data
+            coordinator.data.last_update = datetime.now()
+            # Notify listeners
+            coordinator.async_set_updated_data(coordinator.data)
+            _LOGGER.info(
+                "OptionsFlow: Saved raw data to cache for EAN %s",
+                mask_ean(self._ean or ""),
+            )
+        elif not coordinator:
+            _LOGGER.warning(
+                "OptionsFlow: Coordinator not found for entry_id=%s",
+                self._config_entry.entry_id,
+            )
+        elif not self._raw_data:
+            _LOGGER.warning(
+                "OptionsFlow: No raw_data to save for EAN %s",
+                mask_ean(self._ean or ""),
+            )
 
 
 class CannotConnect(HomeAssistantError):

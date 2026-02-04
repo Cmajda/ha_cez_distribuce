@@ -256,13 +256,10 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         if days_old >= DATA_WARNING_DAYS and not self._warning_shown:
             self._warning_shown = True
             days_remaining = DATA_VALIDITY_DAYS - days_old
+            title, message = await self._get_notification_text("warning", days_old, days_remaining)
             await self._show_notification(
-                title="ČEZ HDO - Data brzy vyprší",
-                message=(
-                    f"HDO data jsou stará {days_old} dní. "
-                    f"Zbývá {days_remaining} den/dny do vypršení. "
-                    "Prosím překonfigurujte integraci pro načtení nových dat."
-                ),
+                title=title,
+                message=message,
                 notification_id=f"cez_hdo_warning_{self.ean}",
             )
             _LOGGER.warning(
@@ -274,15 +271,72 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         # Show expired notification at day 6
         if days_old >= DATA_VALIDITY_DAYS and not self._expired_shown:
             self._expired_shown = True
+            title, message = await self._get_notification_text("expired", days_old, 0)
             await self._show_notification(
-                title="ČEZ HDO - Data vypršela!",
-                message=(
-                    f"HDO data jsou stará {days_old} dní a již nejsou platná. "
-                    "Prosím smažte a znovu přidejte integraci pro načtení nových dat."
-                ),
+                title=title,
+                message=message,
                 notification_id=f"cez_hdo_expired_{self.ean}",
             )
             _LOGGER.error("CezHdoCoordinator: Data has expired (%d days old)", days_old)
+
+    async def _get_notification_text(
+        self, notification_type: str, days_old: int, days_remaining: int
+    ) -> tuple[str, str]:
+        """Get localized notification text based on Home Assistant language.
+
+        Args:
+            notification_type: Type of notification ('warning' or 'expired').
+            days_old: How many days old the data is.
+            days_remaining: Days remaining until expiry.
+
+        Returns:
+            Tuple of (title, message) in the appropriate language.
+        """
+        # Get Home Assistant language setting
+        lang = self.hass.config.language or "en"
+
+        # Notification texts in supported languages
+        texts = {
+            "cs": {
+                "warning": {
+                    "title": "ČEZ HDO - Data brzy vyprší",
+                    "message": (
+                        f"HDO data jsou stará {days_old} dní. "
+                        f"Zbývá {days_remaining} den/dny do vypršení. "
+                        "Prosím překonfigurujte integraci pro načtení nových dat."
+                    ),
+                },
+                "expired": {
+                    "title": "ČEZ HDO - Data vypršela!",
+                    "message": (
+                        f"HDO data jsou stará {days_old} dní a již nejsou platná. "
+                        "Prosím smažte a znovu přidejte integraci pro načtení nových dat."
+                    ),
+                },
+            },
+            "en": {
+                "warning": {
+                    "title": "ČEZ HDO - Data expiring soon",
+                    "message": (
+                        f"HDO data is {days_old} days old. "
+                        f"{days_remaining} day(s) remaining until expiry. "
+                        "Please reconfigure the integration to fetch new data."
+                    ),
+                },
+                "expired": {
+                    "title": "ČEZ HDO - Data expired!",
+                    "message": (
+                        f"HDO data is {days_old} days old and no longer valid. "
+                        "Please delete and re-add the integration to fetch new data."
+                    ),
+                },
+            },
+        }
+
+        # Use Czech for Czech, English for everything else
+        lang_texts = texts.get(lang, texts["en"])
+        notification = lang_texts.get(notification_type, lang_texts["warning"])
+        return notification["title"], notification["message"]
 
     async def _show_notification(self, title: str, message: str, notification_id: str) -> None:
         """Show a persistent notification in Home Assistant."""
@@ -304,20 +358,36 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 "timestamp": datetime.now().isoformat(),
                 "data": data,
             }
+            _LOGGER.debug(
+                "CezHdoCoordinator._save_to_cache: saving to %s, data keys=%s",
+                self._cache_file,
+                list(data.keys()) if isinstance(data, dict) else "not a dict",
+            )
             with open(self._cache_file, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, ensure_ascii=False, indent=2)
-            _LOGGER.debug("CezHdoCoordinator: Data saved to cache")
+            _LOGGER.debug("CezHdoCoordinator: Data saved to cache at %s", self._cache_file)
         except Exception as err:
             _LOGGER.warning("CezHdoCoordinator: Failed to save cache: %s", err)
 
     def _load_from_cache(self) -> bool:
         """Load data from cache file (blocking). Returns True if successful."""
         try:
+            _LOGGER.debug(
+                "CezHdoCoordinator._load_from_cache: checking file %s, exists=%s",
+                self._cache_file,
+                self._cache_file.exists(),
+            )
             if not self._cache_file.exists():
+                _LOGGER.debug("CezHdoCoordinator._load_from_cache: file does not exist")
                 return False
 
             with open(self._cache_file, "r", encoding="utf-8") as f:
                 cache_data = json.load(f)
+
+            _LOGGER.debug(
+                "CezHdoCoordinator._load_from_cache: loaded cache, keys=%s",
+                list(cache_data.keys()) if isinstance(cache_data, dict) else "not a dict",
+            )
 
             # Support new format with timestamp and old format
             if "data" in cache_data and "timestamp" in cache_data:
@@ -326,10 +396,15 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                     self.data.last_update = datetime.fromisoformat(cache_data["timestamp"])
                 except Exception:
                     self.data.last_update = datetime.now()
+                _LOGGER.debug(
+                    "CezHdoCoordinator._load_from_cache: new format, timestamp=%s",
+                    self.data.last_update,
+                )
             else:
                 # Old format - data directly
                 raw_data = cache_data
                 self.data.last_update = datetime.now()
+                _LOGGER.debug("CezHdoCoordinator._load_from_cache: old format detected")
 
             self.data.raw_data = raw_data
             self._parse_data(raw_data)
