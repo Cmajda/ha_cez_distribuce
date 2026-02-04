@@ -44,6 +44,10 @@ ENTITY_META = {
         "object_id": "cez_hdo_hightariffactive",
         "translation_key": "hightariffactive",
     },
+    "DataValid": {
+        "object_id": "cez_hdo_data_valid",
+        "translation_key": "datavalid",
+    },
 }
 
 
@@ -69,6 +73,7 @@ async def async_setup_entry(
     entities = [
         LowTariffActive(coordinator, ean, entry_id, signal, entity_suffix),
         HighTariffActive(coordinator, ean, entry_id, signal, entity_suffix),
+        DataValid(coordinator, ean, entry_id, signal, entity_suffix),
     ]
     async_add_entities(entities)
 
@@ -250,3 +255,29 @@ class HighTariffActive(CezHdoBinarySensor):
     def is_on(self) -> bool | None:
         """Return True if high tariff is active."""
         return self.data.high_tariff_active
+
+
+class DataValid(CezHdoBinarySensor):
+    """Binary sensor indicating if cached HDO data is still valid."""
+
+    def __init__(
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
+    ) -> None:
+        super().__init__(coordinator, ean, "DataValid", entry_id, signal, entity_suffix)
+
+    @property
+    def icon(self) -> str:
+        """Return icon based on validity state."""
+        if self.is_on:
+            return "mdi:check-circle"
+        return "mdi:alert-circle"
+
+    @property
+    def is_on(self) -> bool:
+        """Return True if cached data is still valid (within 6 days)."""
+        return self.coordinator.data_is_valid
