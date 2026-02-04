@@ -11,6 +11,10 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
+> ⚠️ **AKTUÁLNÍ PROBLÉM:** ČEZ Distribuce zavedl CAPTCHA ochranu na svém API.
+> Nové instalace integrace momentálně nefungují. Pracujeme na řešení.
+> Sledujte [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
+
 🇬🇧 [English version](README_EN.md)
 
 > 🔴 **UPOZORNĚNÍ PRO UŽIVATELE VERZE 2.x:**
@@ -103,18 +107,18 @@ Senzor `sensor.cez_hdo_currentprice_*` lze použít jako zdroj ceny v Energy Das
 
 ## 📦 Vytvářené entity
 
-| Typ | Entita | Popis |
-| --- | ------ | ----- |
-| Binary | `cez_hdo_lowtariffactive_*` | NT je aktivní |
-| Binary | `cez_hdo_hightariffactive_*` | VT je aktivní |
-| Sensor | `cez_hdo_lowtariffstart_*` | Čas začátku NT |
-| Sensor | `cez_hdo_lowtariffend_*` | Čas konce NT |
-| Sensor | `cez_hdo_lowtariffremaining_*` | Zbývající čas NT |
-| Sensor | `cez_hdo_hightariffstart_*` | Čas začátku VT |
-| Sensor | `cez_hdo_hightariffend_*` | Čas konce VT |
-| Sensor | `cez_hdo_hightariffremaining_*` | Zbývající čas VT |
-| Sensor | `cez_hdo_currentprice_*` | Aktuální cena (Kč/kWh) |
-| Sensor | `cez_hdo_schedule_*` | 7denní HDO rozvrh |
+| Typ    | Entita                          | Popis                  |
+| ------ | ------------------------------- | ---------------------- |
+| Binary | `cez_hdo_lowtariffactive_*`     | NT je aktivní          |
+| Binary | `cez_hdo_hightariffactive_*`    | VT je aktivní          |
+| Sensor | `cez_hdo_lowtariffstart_*`      | Čas začátku NT         |
+| Sensor | `cez_hdo_lowtariffend_*`        | Čas konce NT           |
+| Sensor | `cez_hdo_lowtariffremaining_*`  | Zbývající čas NT       |
+| Sensor | `cez_hdo_hightariffstart_*`     | Čas začátku VT         |
+| Sensor | `cez_hdo_hightariffend_*`       | Čas konce VT           |
+| Sensor | `cez_hdo_hightariffremaining_*` | Zbývající čas VT       |
+| Sensor | `cez_hdo_currentprice_*`        | Aktuální cena (Kč/kWh) |
+| Sensor | `cez_hdo_schedule_*`            | 7denní HDO rozvrh      |
 
 > **Poznámka:** `*` označuje vaši zvolenou příponu (např. `doma` nebo `7606_a1b4dp04`).
 
