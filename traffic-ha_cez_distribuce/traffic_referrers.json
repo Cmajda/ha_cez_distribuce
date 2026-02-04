@@ -1,13 +1,13 @@
 [
   {
     "referrer": "Google",
-    "count": 151,
-    "uniques": 51
+    "count": 136,
+    "uniques": 50
   },
   {
     "referrer": "github.com",
-    "count": 66,
-    "uniques": 17
+    "count": 89,
+    "uniques": 19
   },
   {
     "referrer": "email.seznam.cz",
@@ -21,8 +21,8 @@
   },
   {
     "referrer": "StartPage",
-    "count": 5,
-    "uniques": 3
+    "count": 7,
+    "uniques": 4
   },
   {
     "referrer": "DuckDuckGo",

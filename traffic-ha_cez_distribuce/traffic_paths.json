@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 291,
-    "uniques": 130
+    "count": 337,
+    "uniques": 134
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 156,
-    "uniques": 74
+    "count": 145,
+    "uniques": 70
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/23",
@@ -24,39 +24,39 @@
     "uniques": 26
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/releases",
+    "title": "Releases · Cmajda/ha_cez_distribuce",
+    "count": 37,
+    "uniques": 25
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/blob/v2.0.7/docs/user-guide.md",
     "title": "ha_cez_distribuce/docs/user-guide.md at v2.0.7 · Cmajda/ha_cez_distribuce · G...",
-    "count": 49,
-    "uniques": 18
+    "count": 36,
+    "uniques": 15
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/v2.0.8",
     "title": "Release v2.0.8 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 30,
+    "count": 31,
     "uniques": 22
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/releases",
-    "title": "Releases · Cmajda/ha_cez_distribuce",
-    "count": 29,
-    "uniques": 23
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/upgrade-guide.md",
     "title": "ha_cez_distribuce/docs/upgrade-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 29,
+    "count": 28,
     "uniques": 22
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
-    "title": "ha_cez_distribuce/custom_components/cez_hdo/downloader.py at main · Cmajda/ha...",
-    "count": 27,
-    "uniques": 8
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/v2.0.8/docs/user-guide.md",
     "title": "ha_cez_distribuce/docs/user-guide.md at v2.0.8 · Cmajda/ha_cez_distribuce · G...",
-    "count": 26,
-    "uniques": 22
+    "count": 25,
+    "uniques": 21
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
+    "title": "ha_cez_distribuce/custom_components/cez_hdo/downloader.py at main · Cmajda/ha...",
+    "count": 25,
+    "uniques": 9
   }
 ]
