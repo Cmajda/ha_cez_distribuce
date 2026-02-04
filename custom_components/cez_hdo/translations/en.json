@@ -11,6 +11,16 @@
                     "ean": "18-digit EAN number from your electricity invoice"
                 }
             },
+            "captcha": {
+                "title": "CAPTCHA Verification",
+                "description": "To verify EAN **{ean}**, enter the code from the image below.\n\n![CAPTCHA]({captcha_image})\n\n*If you don't see the image, go back and try again.*",
+                "data": {
+                    "captcha": "Code from image"
+                },
+                "data_description": {
+                    "captcha": "Type the characters shown in the image above"
+                }
+            },
             "signal": {
                 "title": "Select HDO Signal",
                 "description": "{signal_count} HDO signal(s) found for your location.\n\n**If you don't know your signal**, select the first one. You can also find your signal in your contract with ČEZ Distribuce.",
@@ -47,6 +57,10 @@
         "error": {
             "cannot_connect": "Failed to verify EAN. Please check manually on ČEZ Distribuce website.",
             "invalid_ean": "Invalid EAN number. No HDO data found for this EAN.",
+            "invalid_captcha": "Invalid CAPTCHA code. Please try again.",
+            "captcha_required": "Please enter the code from the image.",
+            "captcha_expired": "CAPTCHA expired. Go back and try again.",
+            "captcha_fetch_failed": "Failed to load CAPTCHA image. Please try again.",
             "unknown": "Unexpected error occurred."
         },
         "abort": {
@@ -64,6 +78,16 @@
                 },
                 "data_description": {
                     "ean": "18-digit EAN number from your electricity invoice"
+                }
+            },
+            "captcha": {
+                "title": "CAPTCHA Verification",
+                "description": "To verify EAN **{ean}**, enter the code from the image below.\n\n![CAPTCHA]({captcha_image})\n\n*If you don't see the image, go back and try again.*",
+                "data": {
+                    "captcha": "Code from image"
+                },
+                "data_description": {
+                    "captcha": "Type the characters shown in the image above"
                 }
             },
             "signal": {
@@ -92,6 +116,10 @@
         "error": {
             "cannot_connect": "Failed to verify EAN. Please check manually on ČEZ Distribuce website.",
             "invalid_ean": "Invalid EAN number. No HDO data found for this EAN.",
+            "invalid_captcha": "Invalid CAPTCHA code. Please try again.",
+            "captcha_required": "Please enter the code from the image.",
+            "captcha_expired": "CAPTCHA expired. Go back and try again.",
+            "captcha_fetch_failed": "Failed to load CAPTCHA image. Please try again.",
             "unknown": "Unexpected error occurred."
         }
     },
@@ -123,6 +151,15 @@
             },
             "rawdata": {
                 "name": "Raw data"
+            },
+            "datavaliduntil": {
+                "name": "Data valid until"
+            },
+            "dataagedays": {
+                "name": "Data age"
+            },
+            "daysuntilexpiry": {
+                "name": "Days until expiry"
             }
         },
         "binary_sensor": {
@@ -131,6 +168,9 @@
             },
             "hightariffactive": {
                 "name": "High tariff active"
+            },
+            "datavalid": {
+                "name": "Data valid"
             }
         }
     }
