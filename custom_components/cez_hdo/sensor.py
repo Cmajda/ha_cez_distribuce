@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 
 import voluptuous as vol
 
@@ -17,6 +18,7 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util import dt as dt_util
 
 from . import DOMAIN, DATA_COORDINATOR
 from .coordinator import CezHdoCoordinator, CezHdoData
@@ -73,6 +75,18 @@ ENTITY_META = {
         "object_id": "cez_hdo_raw_data",
         "translation_key": "rawdata",
     },
+    "DataValidUntil": {
+        "object_id": "cez_hdo_data_valid_until",
+        "translation_key": "datavaliduntil",
+    },
+    "DataAgeDays": {
+        "object_id": "cez_hdo_data_age_days",
+        "translation_key": "dataagedays",
+    },
+    "DaysUntilExpiry": {
+        "object_id": "cez_hdo_days_until_expiry",
+        "translation_key": "daysuntilexpiry",
+    },
 }
 
 
@@ -105,6 +119,9 @@ async def async_setup_entry(
         CurrentPrice(coordinator, ean, entry_id, signal, entity_suffix),
         HdoSchedule(coordinator, ean, entry_id, signal, entity_suffix),
         CezHdoRawData(coordinator, ean, entry_id, signal, entity_suffix),
+        DataValidUntil(coordinator, ean, entry_id, signal, entity_suffix),
+        DataAgeDays(coordinator, ean, entry_id, signal, entity_suffix),
+        DaysUntilExpiry(coordinator, ean, entry_id, signal, entity_suffix),
     ]
     async_add_entities(entities)
 
@@ -500,3 +517,97 @@ class HdoSchedule(CezHdoSensor):
             "low_tariff_price": self.data.low_tariff_price,
             "high_tariff_price": self.data.high_tariff_price,
         }
+
+
+class DataValidUntil(CezHdoSensor):
+    """Sensor showing datetime when cached data expires."""
+
+    def __init__(
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
+    ) -> None:
+        super().__init__(coordinator, ean, "DataValidUntil", entry_id, signal, entity_suffix)
+
+    @property
+    def icon(self) -> str:
+        return "mdi:calendar-clock"
+
+    @property
+    def native_value(self) -> datetime | None:
+        """Return datetime when data expires."""
+        valid_until = self.coordinator.data_valid_until
+        if valid_until is None:
+            return None
+        # Coordinator returns naive datetime in local time
+        # Convert to timezone-aware datetime using Home Assistant's local timezone
+        if valid_until.tzinfo is None:
+            return dt_util.as_local(valid_until)
+        return valid_until
+
+    @property
+    def device_class(self) -> str:
+        return "timestamp"
+
+
+class DataAgeDays(CezHdoSensor):
+    """Sensor showing how many days old the cached data is."""
+
+    def __init__(
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
+    ) -> None:
+        super().__init__(coordinator, ean, "DataAgeDays", entry_id, signal, entity_suffix)
+
+    @property
+    def icon(self) -> str:
+        return "mdi:calendar-question"
+
+    @property
+    def native_value(self) -> int:
+        """Return number of days since data was fetched."""
+        return self.coordinator.data_age_days
+
+    @property
+    def native_unit_of_measurement(self) -> str:
+        return "days"
+
+
+class DaysUntilExpiry(CezHdoSensor):
+    """Sensor showing days until cached data expires."""
+
+    def __init__(
+        self,
+        coordinator: CezHdoCoordinator,
+        ean: str,
+        entry_id: str | None = None,
+        signal: str | None = None,
+        entity_suffix: str | None = None,
+    ) -> None:
+        super().__init__(coordinator, ean, "DaysUntilExpiry", entry_id, signal, entity_suffix)
+
+    @property
+    def icon(self) -> str:
+        """Return icon based on days remaining."""
+        days = self.coordinator.days_until_expiry
+        if days <= 0:
+            return "mdi:calendar-remove"
+        elif days <= 1:
+            return "mdi:calendar-alert"
+        return "mdi:calendar-check"
+
+    @property
+    def native_value(self) -> int:
+        """Return number of days until data expires (negative if expired)."""
+        return self.coordinator.days_until_expiry
+
+    @property
+    def native_unit_of_measurement(self) -> str:
+        return "days"

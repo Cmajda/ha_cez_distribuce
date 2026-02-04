@@ -8,8 +8,6 @@ from datetime import datetime, time, timedelta
 from pathlib import Path
 from typing import Any, Callable
 
-import requests
-
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.update_coordinator import (
@@ -22,11 +20,15 @@ from .const import ean_suffix, mask_ean
 
 _LOGGER = logging.getLogger(__name__)
 
-# Update interval for API data - HDO data changes rarely (once per day typically)
-API_UPDATE_INTERVAL = timedelta(hours=1)
+# Data validity period - HDO data is valid for 6 days
+DATA_VALIDITY_DAYS = 6
+DATA_WARNING_DAYS = 5  # Show warning 1 day before expiry
 
 # Update interval for state recalculation - needs to be frequent for countdown
 STATE_UPDATE_INTERVAL = timedelta(seconds=5)
+
+# Update interval for data expiry check
+DATA_CHECK_INTERVAL = timedelta(hours=1)
 
 # Cache directory and file - stored in custom_components/cez_hdo/data/
 CACHE_SUBDIR = "custom_components/cez_hdo/data"
@@ -74,11 +76,13 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             hass,
             _LOGGER,
             name="ČEZ HDO",
-            update_interval=API_UPDATE_INTERVAL,
+            update_interval=DATA_CHECK_INTERVAL,
         )
         self.ean = ean
         self.signal = signal
         self._state_update_unsub: Callable[[], None] | None = None
+        self._warning_shown: bool = False
+        self._expired_shown: bool = False
 
         # Use hass.config.path() for proper path resolution
         # Cache files use EAN suffix (last 6 digits) to support multiple instances
@@ -109,16 +113,69 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         # Load prices from storage
         await self._async_load_prices()
 
-        # Try to load from cache first for quick startup
-        cache_loaded = await self.hass.async_add_executor_job(self._load_from_cache)
-        if cache_loaded:
-            _LOGGER.debug("CezHdoCoordinator: Loaded initial data from cache")
+        # Check if we have initial data from config flow (CAPTCHA validation)
+        _LOGGER.debug(
+            "CezHdoCoordinator.async_initialize: checking for initial data, ean=%s, hass.data keys=%s",
+            mask_ean(self.ean),
+            list(self.hass.data.get("cez_hdo_initial_data", {}).keys()),
+        )
+        initial_data = self.hass.data.get("cez_hdo_initial_data", {}).get(self.ean)
+        if initial_data:
+            _LOGGER.info(
+                "CezHdoCoordinator: Using initial data from config flow for EAN %s",
+                mask_ean(self.ean),
+            )
+            # Save to cache and use it
+            await self.hass.async_add_executor_job(self._save_to_cache, initial_data)
+            self._parse_data(initial_data)
+            self.data.raw_data = initial_data
+            self.data.last_update = datetime.now()
+            # Clean up the temporary data
+            self.hass.data.get("cez_hdo_initial_data", {}).pop(self.ean, None)
+            _LOGGER.debug("CezHdoCoordinator: Initial data saved to cache")
+        else:
+            _LOGGER.debug("CezHdoCoordinator: No initial data found, trying cache")
+            # Try to load from cache first for quick startup
+            cache_loaded = await self.hass.async_add_executor_job(self._load_from_cache)
+            if cache_loaded:
+                _LOGGER.debug("CezHdoCoordinator: Loaded initial data from cache")
 
-        # Then do the actual refresh (doesn't raise ConfigEntryError)
-        await self.async_refresh()
+            # Then do the actual refresh (doesn't raise ConfigEntryError)
+            await self.async_refresh()
 
         # Start periodic state recalculation (every 5 seconds)
         self._start_state_updates()
+
+    @property
+    def data_valid_until(self) -> datetime | None:
+        """Return datetime when cached data expires."""
+        if self.data.last_update is None:
+            return None
+        return self.data.last_update + timedelta(days=DATA_VALIDITY_DAYS)
+
+    @property
+    def data_is_valid(self) -> bool:
+        """Return True if cached data is still valid."""
+        valid_until = self.data_valid_until
+        if valid_until is None:
+            return False
+        return datetime.now() < valid_until
+
+    @property
+    def days_until_expiry(self) -> int:
+        """Return number of days until data expires (can be negative if expired)."""
+        valid_until = self.data_valid_until
+        if valid_until is None:
+            return 0
+        delta = valid_until - datetime.now()
+        return delta.days
+
+    @property
+    def data_age_days(self) -> int:
+        """Return how many days old the data is."""
+        if self.data.last_update is None:
+            return 0
+        return (datetime.now() - self.data.last_update).days
 
     def _start_state_updates(self) -> None:
         """Start periodic state recalculation."""
@@ -160,80 +217,138 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
     async def _async_update_data(self) -> CezHdoData:
-        """Fetch data from API."""
+        """Check data validity and load from cache.
+
+        Due to CAPTCHA protection on ČEZ API, we only fetch data during
+        initial configuration. This method only checks cache validity
+        and shows notifications when data is about to expire.
+        """
         try:
-            # Fetch from API in executor
-            raw_data = await self.hass.async_add_executor_job(self._fetch_from_api)
-
-            if raw_data:
-                # Save to cache
-                await self.hass.async_add_executor_job(self._save_to_cache, raw_data)
-
-                # Parse data
-                self._parse_data(raw_data)
-                self.data.raw_data = raw_data
-                self.data.last_update = datetime.now()
-
-                _LOGGER.debug(
-                    "CezHdoCoordinator: Data updated successfully, low_tariff=%s",
-                    self.data.low_tariff_active,
-                )
-                return self.data
-
-            # API failed, try cache
+            # Load data from cache
             cache_loaded = await self.hass.async_add_executor_job(self._load_from_cache)
-            if cache_loaded:
-                _LOGGER.warning("CezHdoCoordinator: API failed, using cached data")
-                return self.data
 
-            raise UpdateFailed("Failed to fetch HDO data from API and no cache available")
+            if not cache_loaded:
+                raise UpdateFailed("No cached HDO data available. Please reconfigure the integration.")
 
-        except Exception as err:
-            # Try cache on any error
-            cache_loaded = await self.hass.async_add_executor_job(self._load_from_cache)
-            if cache_loaded:
-                _LOGGER.warning(
-                    "CezHdoCoordinator: Update failed (%s), using cached data",
-                    err,
-                )
-                return self.data
-            raise UpdateFailed(f"Failed to update HDO data: {err}") from err
+            # Check data age and show notifications
+            await self._check_data_validity()
 
-    def _fetch_from_api(self) -> dict[str, Any] | None:
-        """Fetch data from ČEZ API (blocking)."""
-        try:
-            url = downloader.BASE_URL
-            request_data = downloader.get_request_data(self.ean)
-
-            response = requests.post(
-                url,
-                json=request_data,
-                timeout=10,
-                headers={
-                    "Accept": "application/json, text/plain, */*",
-                    "Content-Type": "application/json",
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                },
+            _LOGGER.debug(
+                "CezHdoCoordinator: Data loaded from cache, low_tariff=%s",
+                self.data.low_tariff_active,
             )
+            return self.data
 
-            if response.status_code == 200:
-                json_data = response.json()
-                signals_count = len(json_data.get("data", {}).get("signals", []))
-                _LOGGER.debug(
-                    "CezHdoCoordinator: API success, signals count: %d",
-                    signals_count,
-                )
-                return json_data
+        except UpdateFailed:
+            raise
+        except Exception as err:
+            raise UpdateFailed(f"Failed to load HDO data: {err}") from err
 
+    async def _check_data_validity(self) -> None:
+        """Check if cached data is still valid and show notifications."""
+        if self.data.last_update is None:
+            return
+
+        data_age = datetime.now() - self.data.last_update
+        days_old = data_age.days
+
+        # Show warning notification at day 5
+        if days_old >= DATA_WARNING_DAYS and not self._warning_shown:
+            self._warning_shown = True
+            days_remaining = DATA_VALIDITY_DAYS - days_old
+            title, message = await self._get_notification_text("warning", days_old, days_remaining)
+            await self._show_notification(
+                title=title,
+                message=message,
+                notification_id=f"cez_hdo_warning_{self.ean}",
+            )
             _LOGGER.warning(
-                "CezHdoCoordinator: API request failed, status: %d",
-                response.status_code,
+                "CezHdoCoordinator: Data is %d days old, will expire in %d days",
+                days_old,
+                days_remaining,
             )
-            return None
 
-        except Exception as err:
-            _LOGGER.warning("CezHdoCoordinator: API request exception: %s", err)
-            return None
+        # Show expired notification at day 6
+        if days_old >= DATA_VALIDITY_DAYS and not self._expired_shown:
+            self._expired_shown = True
+            title, message = await self._get_notification_text("expired", days_old, 0)
+            await self._show_notification(
+                title=title,
+                message=message,
+                notification_id=f"cez_hdo_expired_{self.ean}",
+            )
+            _LOGGER.error("CezHdoCoordinator: Data has expired (%d days old)", days_old)
+
+    async def _get_notification_text(
+        self, notification_type: str, days_old: int, days_remaining: int
+    ) -> tuple[str, str]:
+        """Get localized notification text based on Home Assistant language.
+
+        Args:
+            notification_type: Type of notification ('warning' or 'expired').
+            days_old: How many days old the data is.
+            days_remaining: Days remaining until expiry.
+
+        Returns:
+            Tuple of (title, message) in the appropriate language.
+        """
+        # Get Home Assistant language setting
+        lang = self.hass.config.language or "en"
+
+        # Notification texts in supported languages
+        texts = {
+            "cs": {
+                "warning": {
+                    "title": "ČEZ HDO - Data brzy vyprší",
+                    "message": (
+                        f"HDO data jsou stará {days_old} dní. "
+                        f"Zbývá {days_remaining} den/dny do vypršení. "
+                        "Prosím překonfigurujte integraci pro načtení nových dat."
+                    ),
+                },
+                "expired": {
+                    "title": "ČEZ HDO - Data vypršela!",
+                    "message": (
+                        f"HDO data jsou stará {days_old} dní a již nejsou platná. "
+                        "Prosím smažte a znovu přidejte integraci pro načtení nových dat."
+                    ),
+                },
+            },
+            "en": {
+                "warning": {
+                    "title": "ČEZ HDO - Data expiring soon",
+                    "message": (
+                        f"HDO data is {days_old} days old. "
+                        f"{days_remaining} day(s) remaining until expiry. "
+                        "Please reconfigure the integration to fetch new data."
+                    ),
+                },
+                "expired": {
+                    "title": "ČEZ HDO - Data expired!",
+                    "message": (
+                        f"HDO data is {days_old} days old and no longer valid. "
+                        "Please delete and re-add the integration to fetch new data."
+                    ),
+                },
+            },
+        }
+
+        # Use Czech for Czech, English for everything else
+        lang_texts = texts.get(lang, texts["en"])
+        notification = lang_texts.get(notification_type, lang_texts["warning"])
+        return notification["title"], notification["message"]
+
+    async def _show_notification(self, title: str, message: str, notification_id: str) -> None:
+        """Show a persistent notification in Home Assistant."""
+        await self.hass.services.async_call(
+            "persistent_notification",
+            "create",
+            {
+                "title": title,
+                "message": message,
+                "notification_id": notification_id,
+            },
+        )
 
     def _save_to_cache(self, data: dict[str, Any]) -> None:
         """Save data to cache file (blocking)."""
@@ -243,20 +358,36 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 "timestamp": datetime.now().isoformat(),
                 "data": data,
             }
+            _LOGGER.debug(
+                "CezHdoCoordinator._save_to_cache: saving to %s, data keys=%s",
+                self._cache_file,
+                list(data.keys()) if isinstance(data, dict) else "not a dict",
+            )
             with open(self._cache_file, "w", encoding="utf-8") as f:
                 json.dump(cache_data, f, ensure_ascii=False, indent=2)
-            _LOGGER.debug("CezHdoCoordinator: Data saved to cache")
+            _LOGGER.debug("CezHdoCoordinator: Data saved to cache at %s", self._cache_file)
         except Exception as err:
             _LOGGER.warning("CezHdoCoordinator: Failed to save cache: %s", err)
 
     def _load_from_cache(self) -> bool:
         """Load data from cache file (blocking). Returns True if successful."""
         try:
+            _LOGGER.debug(
+                "CezHdoCoordinator._load_from_cache: checking file %s, exists=%s",
+                self._cache_file,
+                self._cache_file.exists(),
+            )
             if not self._cache_file.exists():
+                _LOGGER.debug("CezHdoCoordinator._load_from_cache: file does not exist")
                 return False
 
             with open(self._cache_file, "r", encoding="utf-8") as f:
                 cache_data = json.load(f)
+
+            _LOGGER.debug(
+                "CezHdoCoordinator._load_from_cache: loaded cache, keys=%s",
+                list(cache_data.keys()) if isinstance(cache_data, dict) else "not a dict",
+            )
 
             # Support new format with timestamp and old format
             if "data" in cache_data and "timestamp" in cache_data:
@@ -265,10 +396,15 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                     self.data.last_update = datetime.fromisoformat(cache_data["timestamp"])
                 except Exception:
                     self.data.last_update = datetime.now()
+                _LOGGER.debug(
+                    "CezHdoCoordinator._load_from_cache: new format, timestamp=%s",
+                    self.data.last_update,
+                )
             else:
                 # Old format - data directly
                 raw_data = cache_data
                 self.data.last_update = datetime.now()
+                _LOGGER.debug("CezHdoCoordinator._load_from_cache: old format detected")
 
             self.data.raw_data = raw_data
             self._parse_data(raw_data)

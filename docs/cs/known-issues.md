@@ -4,9 +4,26 @@ Tento soubor obsahuje seznam známých problémů a jejich stav řešení.
 
 ---
 
-## Aktuální problémy (v3.0.0)
+## Aktuální problémy (v3.1.0)
 
-### 1. Služba set_prices nerozeznává zařízení
+### 1. CAPTCHA ochrana API ČEZ Distribuce
+
+**Stav:** ✅ Vyřešeno v v3.1.0
+
+**Popis:** ČEZ Distribuce zavedl CAPTCHA ochranu na svém API, což způsobovalo
+nefunkčnost integrace pro nové instalace.
+
+**Řešení:** Integrace nyní zobrazuje CAPTCHA obrázek během konfigurace.
+Data jsou načtena jednorázově a uložena do cache. Platnost dat je **6 dní**,
+poté je nutné integraci překonfigurovat.
+
+**Sledování platnosti:** Nové senzory `data_valid`, `days_until_expiry`,
+`data_age_days` a `data_valid_until` umožňují sledovat platnost dat
+a vytvářet automatizace pro upozornění.
+
+---
+
+### 2. Služba set_prices nerozeznává zařízení
 
 **Stav:** ⚠️ Známé omezení
 

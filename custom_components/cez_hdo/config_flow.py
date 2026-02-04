@@ -24,43 +24,35 @@ DOMAIN = "cez_hdo"
 CONF_EAN = "ean"
 CONF_SIGNAL = "signal"
 CONF_ENTITY_SUFFIX = "entity_suffix"
+CONF_CAPTCHA = "captcha"
 
 
 CONF_LOW_TARIFF_PRICE = "low_tariff_price"
 CONF_HIGH_TARIFF_PRICE = "high_tariff_price"
 
 
-async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect.
+async def validate_input_with_captcha(
+    hass: HomeAssistant, ean: str, captcha_code: str, cookies: dict[str, str]
+) -> dict[str, Any]:
+    """Validate the user input with CAPTCHA.
 
-    Data has the keys from the schema with values provided by the user.
+    Args:
+        hass: Home Assistant instance.
+        ean: EAN number to validate.
+        captcha_code: CAPTCHA code entered by user.
+        cookies: Session cookies from CAPTCHA request.
+
+    Returns:
+        Dictionary with title and available signals.
+
+    Raises:
+        CannotConnect: If API connection fails.
+        InvalidEan: If EAN is invalid.
+        InvalidCaptcha: If CAPTCHA code is invalid.
     """
-    ean = data[CONF_EAN]
-
-    # Try to fetch data from API to validate EAN
     try:
-        import requests
+        json_data = await hass.async_add_executor_job(downloader.validate_ean_with_captcha, ean, captcha_code, cookies)
 
-        url = downloader.BASE_URL
-        request_data = downloader.get_request_data(ean)
-
-        response = await hass.async_add_executor_job(
-            lambda: requests.post(
-                url,
-                json=request_data,
-                timeout=10,
-                headers={
-                    "Accept": "application/json, text/plain, */*",
-                    "Content-Type": "application/json",
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                },
-            )
-        )
-
-        if response.status_code != 200:
-            raise CannotConnect(f"API returned status {response.status_code}")
-
-        json_data = response.json()
         signals = json_data.get("data", {}).get("signals", [])
 
         if not signals:
@@ -74,12 +66,16 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         return {
             "title": f"ČEZ HDO ({ean[-6:]})",
             "available_signals": available_signals,
+            "raw_data": json_data,
         }
 
+    except ValueError as err:
+        if str(err) == "invalid_captcha":
+            raise InvalidCaptcha("Invalid CAPTCHA code") from err
+        _LOGGER.error("Failed to validate EAN: %s", err)
+        raise CannotConnect(str(err)) from err
     except Exception as err:
         _LOGGER.error("Failed to validate EAN: %s", err)
-        if isinstance(err, (CannotConnect, InvalidEan)):
-            raise
         raise CannotConnect(str(err)) from err
 
 
@@ -94,27 +90,17 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
         self._signal: str | None = None
         self._entity_suffix: str | None = None
         self._available_signals: list[str] = []
+        self._captcha_session: downloader.CaptchaSession | None = None
+        self._raw_data: dict[str, Any] | None = None
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the initial step - EAN input."""
         errors: dict[str, str] = {}
 
         if user_input is not None:
-            try:
-                info = await validate_input(self.hass, user_input)
-                self._ean = user_input[CONF_EAN]
-                self._available_signals = info.get("available_signals", [])
-
-                # Proceed to signal selection (unique_id check will be done after signal selection)
-                return await self.async_step_signal()
-
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
-            except InvalidEan:
-                errors["base"] = "invalid_ean"
-            except Exception:
-                _LOGGER.exception("Unexpected exception")
-                errors["base"] = "unknown"
+            self._ean = user_input[CONF_EAN]
+            # Proceed to CAPTCHA step
+            return await self.async_step_captcha()
 
         return self.async_show_form(
             step_id="user",
@@ -126,6 +112,75 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             errors=errors,
             description_placeholders={
                 "ean_help": "Číslo EAN najdete na faktuře od ČEZ Distribuce",
+            },
+        )
+
+    async def async_step_captcha(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        """Handle CAPTCHA verification step."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            captcha_code = user_input.get(CONF_CAPTCHA, "").strip()
+
+            if not captcha_code:
+                errors["base"] = "captcha_required"
+            elif self._captcha_session is None:
+                errors["base"] = "captcha_expired"
+            elif self._ean is None:
+                errors["base"] = "unknown"
+            else:
+                try:
+                    info = await validate_input_with_captcha(
+                        self.hass,
+                        self._ean,
+                        captcha_code,
+                        self._captcha_session.cookies,
+                    )
+                    self._available_signals = info.get("available_signals", [])
+                    self._raw_data = info.get("raw_data")
+
+                    # Clear CAPTCHA session after successful validation
+                    self._captcha_session = None
+
+                    # Proceed to signal selection
+                    return await self.async_step_signal()
+
+                except InvalidCaptcha:
+                    errors["base"] = "invalid_captcha"
+                    # Fetch new CAPTCHA for retry
+                    self._captcha_session = None
+                except CannotConnect:
+                    errors["base"] = "cannot_connect"
+                except InvalidEan:
+                    errors["base"] = "invalid_ean"
+                except Exception:
+                    _LOGGER.exception("Unexpected exception during CAPTCHA validation")
+                    errors["base"] = "unknown"
+
+        # Fetch CAPTCHA image if not already fetched or on error
+        if self._captcha_session is None:
+            try:
+                self._captcha_session = await self.hass.async_add_executor_job(downloader.fetch_captcha)
+            except Exception as err:
+                _LOGGER.error("Failed to fetch CAPTCHA: %s", err)
+                errors["base"] = "captcha_fetch_failed"
+
+        # Build CAPTCHA image URL for display
+        captcha_image = ""
+        if self._captcha_session:
+            captcha_image = f"data:image/png;base64,{self._captcha_session.image_base64}"
+
+        return self.async_show_form(
+            step_id="captcha",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_CAPTCHA): cv.string,
+                }
+            ),
+            errors=errors,
+            description_placeholders={
+                "captcha_image": captcha_image,
+                "ean": self._ean or "",
             },
         )
 
@@ -200,8 +255,31 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             if self._ean is None:
                 return self.async_abort(reason="missing_ean")
 
-            # Create the config entry
-            result = self.async_create_entry(
+            # Store prices in hass.data BEFORE creating entry
+            # (coordinator will pick them up during async_setup_entry)
+            self.hass.data.setdefault("cez_hdo_initial_prices", {})[self._ean] = {
+                "low_tariff_price": low_price,
+                "high_tariff_price": high_price,
+            }
+
+            # Store raw data from CAPTCHA validation for coordinator to use
+            # This avoids the need for another API call which would require CAPTCHA
+            # MUST be set BEFORE async_create_entry() because setup happens immediately
+            if self._raw_data:
+                self.hass.data.setdefault("cez_hdo_initial_data", {})[self._ean] = self._raw_data
+                _LOGGER.debug(
+                    "ConfigFlow: Stored initial data for EAN %s, data keys=%s",
+                    mask_ean(self._ean),
+                    list(self._raw_data.keys()) if isinstance(self._raw_data, dict) else "not a dict",
+                )
+            else:
+                _LOGGER.warning(
+                    "ConfigFlow: No raw_data to store for EAN %s!",
+                    mask_ean(self._ean),
+                )
+
+            # Create the config entry - this triggers async_setup_entry immediately
+            return self.async_create_entry(
                 title=f"ČEZ HDO ({self._ean[-6:]})",
                 data={
                     CONF_EAN: self._ean,
@@ -209,16 +287,6 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                     CONF_ENTITY_SUFFIX: self._entity_suffix,
                 },
             )
-
-            # Store prices in options (will be loaded by coordinator)
-            # We can't set prices directly here because coordinator doesn't exist yet
-            # Prices will be stored in hass.data and loaded after setup
-            self.hass.data.setdefault("cez_hdo_initial_prices", {})[self._ean] = {
-                "low_tariff_price": low_price,
-                "high_tariff_price": high_price,
-            }
-
-            return result
 
         return self.async_show_form(
             step_id="prices",
@@ -248,6 +316,8 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         self._ean: str | None = None
         self._signal: str | None = None
         self._available_signals: list[str] = []
+        self._captcha_session: downloader.CaptchaSession | None = None
+        self._raw_data: dict[str, Any] | None = None
 
     @property
     def config_entry(self) -> config_entries.ConfigEntry:
@@ -262,24 +332,9 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         current_ean = self._config_entry.data.get(CONF_EAN, "")
 
         if user_input is not None:
-            ean = user_input.get(CONF_EAN, "")
-
-            # Try to validate EAN and get signals
-            try:
-                info = await validate_input(self.hass, {CONF_EAN: ean})
-                self._ean = ean
-                self._available_signals = info.get("available_signals", [])
-
-                # Proceed to signal selection
-                return await self.async_step_signal()
-
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
-            except InvalidEan:
-                errors["base"] = "invalid_ean"
-            except Exception:
-                _LOGGER.exception("Unexpected exception in options flow")
-                errors["base"] = "unknown"
+            self._ean = user_input.get(CONF_EAN, "")
+            # Proceed to CAPTCHA step
+            return await self.async_step_captcha()
 
         return self.async_show_form(
             step_id="init",
@@ -289,6 +344,73 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                 }
             ),
             errors=errors,
+        )
+
+    async def async_step_captcha(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+        """Handle CAPTCHA verification step in options."""
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            captcha_code = user_input.get(CONF_CAPTCHA, "").strip()
+
+            if not captcha_code:
+                errors["base"] = "captcha_required"
+            elif self._captcha_session is None:
+                errors["base"] = "captcha_expired"
+            else:
+                try:
+                    info = await validate_input_with_captcha(
+                        self.hass,
+                        self._ean or "",
+                        captcha_code,
+                        self._captcha_session.cookies,
+                    )
+                    self._available_signals = info.get("available_signals", [])
+                    self._raw_data = info.get("raw_data")
+
+                    # Clear CAPTCHA session after successful validation
+                    self._captcha_session = None
+
+                    # Proceed to signal selection
+                    return await self.async_step_signal()
+
+                except InvalidCaptcha:
+                    errors["base"] = "invalid_captcha"
+                    # Fetch new CAPTCHA for retry
+                    self._captcha_session = None
+                except CannotConnect:
+                    errors["base"] = "cannot_connect"
+                except InvalidEan:
+                    errors["base"] = "invalid_ean"
+                except Exception:
+                    _LOGGER.exception("Unexpected exception during CAPTCHA validation")
+                    errors["base"] = "unknown"
+
+        # Fetch CAPTCHA image if not already fetched or on error
+        if self._captcha_session is None:
+            try:
+                self._captcha_session = await self.hass.async_add_executor_job(downloader.fetch_captcha)
+            except Exception as err:
+                _LOGGER.error("Failed to fetch CAPTCHA: %s", err)
+                errors["base"] = "captcha_fetch_failed"
+
+        # Build CAPTCHA image URL for display
+        captcha_image = ""
+        if self._captcha_session:
+            captcha_image = f"data:image/png;base64,{self._captcha_session.image_base64}"
+
+        return self.async_show_form(
+            step_id="captcha",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_CAPTCHA): cv.string,
+                }
+            ),
+            errors=errors,
+            description_placeholders={
+                "captcha_image": captcha_image,
+                "ean": self._ean or "",
+            },
         )
 
     async def async_step_signal(self, user_input: dict[str, Any] | None = None) -> FlowResult:
@@ -358,6 +480,10 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             # Save prices to coordinator
             await self._save_prices(low_price, high_price)
 
+            # Save raw data to coordinator cache if we have it
+            if self._raw_data:
+                await self._save_raw_data_to_cache()
+
             # Return empty options - all config is in data
             return self.async_create_entry(title="", data={})
 
@@ -393,6 +519,45 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         if coordinator:
             await coordinator.async_set_prices(low_price, high_price)
 
+    async def _save_raw_data_to_cache(self) -> None:
+        """Save raw data from CAPTCHA validation to coordinator cache."""
+        from . import DOMAIN, DATA_COORDINATOR
+        from datetime import datetime
+
+        entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
+        coordinator = entry_data.get(DATA_COORDINATOR)
+
+        _LOGGER.debug(
+            "OptionsFlow._save_raw_data_to_cache: entry_id=%s, coordinator=%s, raw_data=%s",
+            self._config_entry.entry_id,
+            coordinator is not None,
+            self._raw_data is not None,
+        )
+
+        if coordinator and self._raw_data:
+            # Save to cache file
+            await self.hass.async_add_executor_job(coordinator._save_to_cache, self._raw_data)
+            # Update coordinator data
+            coordinator._parse_data(self._raw_data)
+            coordinator.data.raw_data = self._raw_data
+            coordinator.data.last_update = datetime.now()
+            # Notify listeners
+            coordinator.async_set_updated_data(coordinator.data)
+            _LOGGER.info(
+                "OptionsFlow: Saved raw data to cache for EAN %s",
+                mask_ean(self._ean or ""),
+            )
+        elif not coordinator:
+            _LOGGER.warning(
+                "OptionsFlow: Coordinator not found for entry_id=%s",
+                self._config_entry.entry_id,
+            )
+        elif not self._raw_data:
+            _LOGGER.warning(
+                "OptionsFlow: No raw_data to save for EAN %s",
+                mask_ean(self._ean or ""),
+            )
+
 
 class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""
@@ -400,3 +565,7 @@ class CannotConnect(HomeAssistantError):
 
 class InvalidEan(HomeAssistantError):
     """Error to indicate invalid EAN."""
+
+
+class InvalidCaptcha(HomeAssistantError):
+    """Error to indicate invalid CAPTCHA code."""

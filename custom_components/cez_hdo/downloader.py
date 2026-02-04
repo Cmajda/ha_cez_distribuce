@@ -1,9 +1,13 @@
 """CEZ HDO data downloader and processor."""
 
 from __future__ import annotations
+
+import base64
 import logging
-from datetime import datetime, timedelta, time
-from typing import NamedTuple
+from datetime import datetime, time, timedelta
+from typing import Any, NamedTuple
+
+import requests
 
 try:
     # python 3.9+
@@ -15,7 +19,104 @@ except ImportError:
 _LOGGER = logging.getLogger(__name__)
 
 BASE_URL = "https://dip.cezdistribuce.cz/irj/portal/anonymous/casy-spinani?path=switch-times/signals"
+CAPTCHA_URL = "https://dip.cezdistribuce.cz/irj/portal/anonymous/captcha"
 CEZ_TIMEZONE = ZoneInfo("Europe/Prague")
+
+# HTTP headers for CEZ API requests
+CEZ_HEADERS = {
+    "Accept": "application/json, text/plain, */*",
+    "Content-Type": "application/json",
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    ),
+}
+
+
+class CaptchaSession:
+    """Class to hold CAPTCHA session data."""
+
+    def __init__(self, image_base64: str, cookies: dict[str, str]) -> None:
+        """Initialize CAPTCHA session.
+
+        Args:
+            image_base64: Base64 encoded CAPTCHA image (PNG).
+            cookies: Session cookies from CAPTCHA request.
+        """
+        self.image_base64 = image_base64
+        self.cookies = cookies
+
+
+def fetch_captcha() -> CaptchaSession:
+    """Fetch CAPTCHA image and session cookies from CEZ API.
+
+    Returns:
+        CaptchaSession with base64 encoded image and cookies.
+
+    Raises:
+        requests.RequestException: If the request fails.
+    """
+    timestamp = int(datetime.now().timestamp() * 1000)
+    url = f"{CAPTCHA_URL}?t={timestamp}"
+
+    response = requests.get(
+        url,
+        headers={
+            "User-Agent": CEZ_HEADERS["User-Agent"],
+            "Accept": "image/webp,image/png,*/*",
+        },
+        timeout=10,
+    )
+    response.raise_for_status()
+
+    # Encode image to base64
+    image_base64 = base64.b64encode(response.content).decode("utf-8")
+
+    # Extract cookies
+    cookies = dict(response.cookies)
+
+    _LOGGER.debug("CAPTCHA fetched successfully, cookies: %s", list(cookies.keys()))
+
+    return CaptchaSession(image_base64=image_base64, cookies=cookies)
+
+
+def validate_ean_with_captcha(ean: str, captcha_code: str, cookies: dict[str, str]) -> dict[str, Any]:
+    """Validate EAN with CAPTCHA code using session cookies.
+
+    Args:
+        ean: EAN number to validate.
+        captcha_code: CAPTCHA code entered by user.
+        cookies: Session cookies from CAPTCHA request.
+
+    Returns:
+        API response as dictionary.
+
+    Raises:
+        requests.RequestException: If the request fails.
+        ValueError: If the API returns an error.
+    """
+    request_data = {"ean": ean, "captcha": captcha_code}
+
+    response = requests.post(
+        BASE_URL,
+        json=request_data,
+        headers=CEZ_HEADERS,
+        cookies=cookies,
+        timeout=10,
+    )
+
+    json_data = response.json()
+
+    # Check for CAPTCHA error
+    flash_messages = json_data.get("flashMessages", [])
+    for msg in flash_messages:
+        if msg.get("key") == "CPT-002":
+            raise ValueError("invalid_captcha")
+
+    if response.status_code != 200:
+        raise ValueError(f"API returned status {response.status_code}")
+
+    return json_data
 
 
 class HdoData(NamedTuple):

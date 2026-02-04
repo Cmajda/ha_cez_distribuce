@@ -2,6 +2,55 @@
 
 ---
 
+## v3.1.0 (2026-02-04)
+
+### 🚀 Hlavní změny
+
+Verze 3.1.0 přináší **podporu CAPTCHA ověření** a nové senzory pro sledování platnosti dat.
+
+#### CAPTCHA ochrana API
+
+- ČEZ Distribuce zavedl CAPTCHA ochranu na svém API
+- **Nový krok v konfiguraci** – zobrazí se obrázek CAPTCHA a uživatel zadá kód
+- Data jsou načtena jednorázově a uložena do cache
+- **Platnost dat 6 dní** – poté je nutné překonfigurovat integraci
+
+#### Nové entity pro sledování platnosti dat
+
+| Typ    | Entita                        | Popis                     |
+| ------ | ----------------------------- | ------------------------- |
+| Binary | `cez_hdo_data_valid_*`        | Data jsou platná (on/off) |
+| Sensor | `cez_hdo_data_valid_until_*`  | Datum vypršení platnosti  |
+| Sensor | `cez_hdo_data_age_days_*`     | Stáří dat ve dnech        |
+| Sensor | `cez_hdo_days_until_expiry_*` | Dnů do vypršení           |
+
+#### Automatická upozornění
+
+- **Den 5:** Persistent notification s varováním
+- **Den 6:** Persistent notification o vypršení dat
+
+### ✨ Vylepšení
+
+- Lepší error handling při validaci CAPTCHA
+- Options Flow také podporuje CAPTCHA pro obnovení dat
+- Aktualizovaná dokumentace s příklady automatizací
+
+### 📚 Dokumentace
+
+- Přidána sekce "Platnost dat a obnovení" do user-guide
+- Aktualizován known-issues s informací o vyřešeném CAPTCHA problému
+- Přidány příklady automatizací pro upozornění na vypršení dat
+
+---
+
+## v3.0.1 (2026-02-03)
+
+### 📚 Dokumentace
+
+- Přidáno upozornění o CAPTCHA problému do README
+
+---
+
 ## v3.0.0 (2026-02-02)
 
 ### 🚀 Hlavní změny

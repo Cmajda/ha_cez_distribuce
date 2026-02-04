@@ -11,6 +11,16 @@
                     "ean": "18 místné číslo EAN z vaší faktury za elektřinu"
                 }
             },
+            "captcha": {
+                "title": "Ověření CAPTCHA",
+                "description": "Pro ověření EAN **{ean}** zadejte kód z obrázku níže.\n\n![CAPTCHA]({captcha_image})\n\n*Pokud obrázek nevidíte, vraťte se a zkuste to znovu.*",
+                "data": {
+                    "captcha": "Kód z obrázku"
+                },
+                "data_description": {
+                    "captcha": "Opište znaky zobrazené na obrázku výše"
+                }
+            },
             "signal": {
                 "title": "Výběr HDO signálu",
                 "description": "Pro vaši lokalitu byl nalezen {signal_count} signál(y).\n\n**Pokud neznáte svůj signál**, vyberte první signál v pořadí. Správný signál najdete také ve své smlouvě s ČEZ Distribuce.",
@@ -47,6 +57,10 @@
         "error": {
             "cannot_connect": "Nepodařilo se ověřit EAN. Zkontrolujte ručně na stránkách ČEZ Distribuce.",
             "invalid_ean": "Neplatné číslo EAN. Pro toto EAN nebyla nalezena žádná HDO data.",
+            "invalid_captcha": "Neplatný kód CAPTCHA. Zkuste to prosím znovu.",
+            "captcha_required": "Zadejte kód z obrázku.",
+            "captcha_expired": "CAPTCHA vypršela. Vraťte se zpět a zkuste to znovu.",
+            "captcha_fetch_failed": "Nepodařilo se načíst CAPTCHA obrázek. Zkuste to prosím znovu.",
             "unknown": "Došlo k neočekávané chybě."
         },
         "abort": {
@@ -64,6 +78,16 @@
                 },
                 "data_description": {
                     "ean": "18 místné číslo EAN z vaší faktury za elektřinu"
+                }
+            },
+            "captcha": {
+                "title": "Ověření CAPTCHA",
+                "description": "Pro ověření EAN **{ean}** zadejte kód z obrázku níže.\n\n![CAPTCHA]({captcha_image})\n\n*Pokud obrázek nevidíte, vraťte se a zkuste to znovu.*",
+                "data": {
+                    "captcha": "Kód z obrázku"
+                },
+                "data_description": {
+                    "captcha": "Opište znaky zobrazené na obrázku výše"
                 }
             },
             "signal": {
@@ -92,6 +116,10 @@
         "error": {
             "cannot_connect": "Nepodařilo se ověřit EAN. Zkontrolujte ručně na stránkách ČEZ Distribuce.",
             "invalid_ean": "Neplatné číslo EAN. Pro toto EAN nebyla nalezena žádná HDO data.",
+            "invalid_captcha": "Neplatný kód CAPTCHA. Zkuste to prosím znovu.",
+            "captcha_required": "Zadejte kód z obrázku.",
+            "captcha_expired": "CAPTCHA vypršela. Vraťte se zpět a zkuste to znovu.",
+            "captcha_fetch_failed": "Nepodařilo se načíst CAPTCHA obrázek. Zkuste to prosím znovu.",
             "unknown": "Došlo k neočekávané chybě."
         }
     },
@@ -123,6 +151,15 @@
             },
             "rawdata": {
                 "name": "Surová data"
+            },
+            "datavaliduntil": {
+                "name": "Data platná do"
+            },
+            "dataagedays": {
+                "name": "Stáří dat"
+            },
+            "daysuntilexpiry": {
+                "name": "Dní do vypršení"
             }
         },
         "binary_sensor": {
@@ -131,6 +168,9 @@
             },
             "hightariffactive": {
                 "name": "Vysoký tarif aktivní"
+            },
+            "datavalid": {
+                "name": "Data platná"
             }
         }
     }

@@ -3,7 +3,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![Release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?label=stable&logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases/latest)
 [![Pre-release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?include_prereleases&label=pre-release&logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases)
-[![Validate](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml/badge.svg)](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml)
+[![Validate](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml/badge.svg?branch=main)](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0%20%2B%20Commons%20Clause-blue)](./LICENSE)
 
 [![Downloads](https://img.shields.io/github/downloads/Cmajda/ha_cez_distribuce/total)](https://github.com/Cmajda/ha_cez_distribuce/releases)
@@ -11,9 +11,9 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ⚠️ **AKTUÁLNÍ PROBLÉM:** ČEZ Distribuce zavedl CAPTCHA ochranu na svém API.
-> Nové instalace integrace momentálně nefungují. Pracujeme na řešení.
-> Sledujte [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
+> ℹ️ **CAPTCHA OVĚŘENÍ:** Od verze 3.1.0 integrace podporuje CAPTCHA ověření.
+> Při konfiguraci zadáte kód z obrázku. Data jsou platná 6 dní.
+> Více v [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
 
 🇬🇧 [English version](README_EN.md)
 
@@ -72,8 +72,9 @@ Děkuji všem spoluautorům, kteří se aktivně podílejí na vývoji kódu té
 1. **Nastavení → Zařízení a služby → + Přidat integraci**
 2. Vyhledejte **ČEZ HDO**
 3. Zadejte **EAN** (18 číslic z faktury)
-4. Vyberte **signál** (pokud je více možností)
-5. Zadejte **ceny** NT a VT (Kč/kWh)
+4. Zadejte **kód CAPTCHA** z obrázku
+5. Vyberte **signál** (pokud je více možností)
+6. Zadejte **ceny** NT a VT (Kč/kWh)
 
 ### 4. Přidání karty
 
@@ -111,6 +112,7 @@ Senzor `sensor.cez_hdo_currentprice_*` lze použít jako zdroj ceny v Energy Das
 | ------ | ------------------------------- | ---------------------- |
 | Binary | `cez_hdo_lowtariffactive_*`     | NT je aktivní          |
 | Binary | `cez_hdo_hightariffactive_*`    | VT je aktivní          |
+| Binary | `cez_hdo_data_valid_*`          | Data jsou platná       |
 | Sensor | `cez_hdo_lowtariffstart_*`      | Čas začátku NT         |
 | Sensor | `cez_hdo_lowtariffend_*`        | Čas konce NT           |
 | Sensor | `cez_hdo_lowtariffremaining_*`  | Zbývající čas NT       |
@@ -119,6 +121,9 @@ Senzor `sensor.cez_hdo_currentprice_*` lze použít jako zdroj ceny v Energy Das
 | Sensor | `cez_hdo_hightariffremaining_*` | Zbývající čas VT       |
 | Sensor | `cez_hdo_currentprice_*`        | Aktuální cena (Kč/kWh) |
 | Sensor | `cez_hdo_schedule_*`            | 7denní HDO rozvrh      |
+| Sensor | `cez_hdo_data_valid_until_*`    | Datum vypršení dat     |
+| Sensor | `cez_hdo_data_age_days_*`       | Stáří dat (dny)        |
+| Sensor | `cez_hdo_days_until_expiry_*`   | Dní do vypršení        |
 
 > **Poznámka:** `*` označuje vaši zvolenou příponu (např. `doma` nebo `7606_a1b4dp04`).
 
