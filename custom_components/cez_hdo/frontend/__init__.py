@@ -27,15 +27,6 @@ class CezHdoCardRegistration:
         self.hass = hass
 
     @property
-    def lovelace_mode(self):
-        """Get the current Lovelace mode."""
-        ha_version = parse(__version__)
-        if (ha_version.major >= 2026) or ((ha_version.major == 2025) and (ha_version.minor >= 2)):
-            return self.hass.data["lovelace"].mode
-        else:
-            return self.hass.data["lovelace"]["mode"]
-
-    @property
     def lovelace_resources(self):
         """Get Lovelace resources."""
         ha_version = parse(__version__)
@@ -44,10 +35,21 @@ class CezHdoCardRegistration:
         else:
             return self.hass.data["lovelace"]["resources"]
 
+    @property
+    def is_storage_mode(self) -> bool:
+        """Check if Lovelace is running in storage mode.
+
+        In HA 2026.02+, LovelaceData no longer has a 'mode' attribute.
+        We detect storage mode by checking if resources is a ResourceStorageCollection.
+        """
+        resources = self.lovelace_resources
+        # ResourceStorageCollection has async_create_item method, ResourceYAMLCollection does not
+        return hasattr(resources, "async_create_item")
+
     async def async_register(self):
         """Register the CEZ HDO card."""
         await self.async_register_cez_hdo_path()
-        if self.lovelace_mode == "storage":
+        if self.is_storage_mode:
             await self.async_wait_for_lovelace_resources()
 
     async def async_register_cez_hdo_path(self):
@@ -139,7 +141,7 @@ class CezHdoCardRegistration:
 
     async def async_unregister(self):
         """Unregister CEZ HDO cards from Lovelace resources."""
-        if self.lovelace_mode == "storage":
+        if self.is_storage_mode:
             for card in CEZ_HDO_CARDS:
                 url = f"{URL_BASE}/{card.get('filename')}"
                 cez_hdo_resources = [
