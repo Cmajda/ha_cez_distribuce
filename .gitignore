@@ -183,7 +183,6 @@ test2.py
 *local*
 *package-lock.json
 *package.json
-RELEASE_NOTES_*.md
 __*
 !__init__.py
 

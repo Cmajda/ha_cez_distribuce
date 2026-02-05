@@ -4,9 +4,34 @@ Tento soubor obsahuje seznam známých problémů a jejich stav řešení.
 
 ---
 
-## Aktuální problémy (v3.1.0)
+## Aktuální problémy (v3.1.1)
 
-### 1. CAPTCHA ochrana API ČEZ Distribuce
+### 1. HDO rozvrh nezobrazuje správně poslední dny
+
+**Stav:** ⚠️ Známé omezení (CAPTCHA)
+
+**Popis:** Po 1 dnu od konfigurace může HDO rozvrh zobrazovat poslední dny
+jako vysoký tarif (VT). To je způsobeno omezením API ČEZ – kvůli CAPTCHA nelze
+data automaticky aktualizovat denně.
+
+**Dočasné řešení:** Překonfigurujte integraci (Nastavení → Zařízení a služby → ČEZ HDO →
+Konfigurovat), opište nový CAPTCHA kód. Data se načtou aktuální
+
+### 2. Kompatibilita s Home Assistant 2026.02+ (v3.1.0)
+
+**Stav:** ✅ Vyřešeno v v3.1.1
+
+**Popis:** V Home Assistant 2026.02+ byla změněna struktura `LovelaceData`.
+Objekt již nemá atribut `mode`, což způsobovalo chybu při spuštění integrace:
+`'LovelaceData' object has no attribute 'mode'`
+
+**Řešení:** Nová detekce storage režimu pomocí kontroly typu resources kolekce.
+
+**Sledování:** [#62](https://github.com/Cmajda/ha_cez_distribuce/issues/62)
+
+---
+
+### 3. CAPTCHA ochrana API ČEZ Distribuce
 
 **Stav:** ✅ Vyřešeno v v3.1.0
 
@@ -23,7 +48,7 @@ a vytvářet automatizace pro upozornění.
 
 ---
 
-### 2. Služba set_prices nerozeznává zařízení
+### 4. Služba set_prices nerozeznává zařízení
 
 **Stav:** ⚠️ Známé omezení
 
@@ -164,4 +189,4 @@ způsobovat problémy v některých systémech.
 
 1. Zkontrolujte, zda problém již není v tomto seznamu
 2. Vytvořte [GitHub Issue](https://github.com/Cmajda/ha_cez_distribuce/issues)
-3. Přiložte diagnostiku (Settings → Devices → ČEZ HDO → ⋮ → Download diagnostics)
+3. Přiložte diagnostiku (Nastavení → Zařízení → ČEZ HDO → ⋮ → Stáhnout diagnostiku)

@@ -4,9 +4,34 @@ This file contains a list of known issues and their resolution status.
 
 ---
 
-## Current Issues (v3.1.0)
+## Current Issues (v3.1.1)
 
-### 1. CAPTCHA Protection on ČEZ Distribuce API
+### 1. HDO schedule doesn't display last days correctly
+
+**Status:** ⚠️ Known limitation (CAPTCHA)
+
+**Description:** After 1 day from configuration, the HDO schedule may display last days
+as high tariff (VT). This is caused by ČEZ API limitation – due to CAPTCHA,
+data cannot be automatically updated daily.
+
+**Workaround:** Reconfigure the integration (Settings → Devices & Services → ČEZ HDO →
+Configure), enter a new CAPTCHA code. Current data will be loaded.
+
+### 2. Compatibility with Home Assistant 2026.02+ (v3.1.0)
+
+**Status:** ✅ Resolved in v3.1.1
+
+**Description:** In Home Assistant 2026.02+, the `LovelaceData` structure was changed.
+The object no longer has a `mode` attribute, which caused an error during integration startup:
+`'LovelaceData' object has no attribute 'mode'`
+
+**Resolution:** New storage mode detection using resources collection type check.
+
+**Tracking:** [#62](https://github.com/Cmajda/ha_cez_distribuce/issues/62)
+
+---
+
+### 3. CAPTCHA Protection on ČEZ Distribuce API
 
 **Status:** ✅ Resolved in v3.1.0
 
@@ -23,7 +48,7 @@ and creating automations for notifications.
 
 ---
 
-### 2. set_prices service doesn't distinguish devices
+### 4. set_prices service doesn't distinguish devices
 
 **Status:** ⚠️ Known limitation
 
