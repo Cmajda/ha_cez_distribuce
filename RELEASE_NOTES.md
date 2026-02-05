@@ -2,6 +2,20 @@
 
 ---
 
+## v3.1.1 (2026-02-05)
+
+### 🐛 Opravy
+
+#### Kompatibilita s Home Assistant 2026.02+
+
+- **Opravena chyba** `'LovelaceData' object has no attribute 'mode'`
+- V HA 2026.02+ byla změněna struktura `LovelaceData` – objekt již nemá atribut `mode`
+- Nová detekce storage režimu pomocí kontroly typu resources kolekce
+
+**Fixes:** [#62](https://github.com/Cmajda/ha_cez_distribuce/issues/62)
+
+---
+
 ## v3.1.0 (2026-02-04)
 
 ### 🚀 Hlavní změny
