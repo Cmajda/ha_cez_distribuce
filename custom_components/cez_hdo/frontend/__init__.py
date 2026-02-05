@@ -40,7 +40,9 @@ class CezHdoCardRegistration:
         """Check if Lovelace is running in storage mode.
 
         In HA 2026.02+, LovelaceData no longer has a 'mode' attribute.
-        We detect storage mode by checking if resources is a ResourceStorageCollection.
+        We detect storage mode by checking whether the resources collection
+        exposes the ``async_create_item`` method, which is present for
+        storage-backed resources and absent for YAML-based resources.
         """
         resources = self.lovelace_resources
         # ResourceStorageCollection has async_create_item method, ResourceYAMLCollection does not
