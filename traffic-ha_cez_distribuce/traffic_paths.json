@@ -2,61 +2,61 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 669,
-    "uniques": 335
+    "count": 843,
+    "uniques": 390
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 214,
-    "uniques": 86
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues/58",
-    "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
-    "count": 96,
-    "uniques": 40
+    "count": 354,
+    "uniques": 106
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/en/user-guide.md",
     "title": "ha_cez_distribuce/docs/en/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 90,
-    "uniques": 58
+    "count": 139,
+    "uniques": 83
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at main · Cmajda/ha_cez_distribuce...",
-    "count": 60,
-    "uniques": 44
+    "path": "/Cmajda/ha_cez_distribuce/issues/58",
+    "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
+    "count": 128,
+    "uniques": 55
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 48,
-    "uniques": 11
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.0.0/docs/cs/upgrade-guide.md",
-    "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.0.0 · Cmajda/ha_cez_distribu...",
-    "count": 44,
-    "uniques": 33
+    "count": 85,
+    "uniques": 26
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 43,
-    "uniques": 26
+    "count": 80,
+    "uniques": 44
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at main · Cmajda/ha_cez_distribuce...",
+    "count": 73,
+    "uniques": 52
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/62",
+    "title": "[Dotaz]: Bug v HA 2026.02 · Issue #62 · Cmajda/ha_cez_distribuce",
+    "count": 53,
+    "uniques": 25
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.0.0/docs/cs/upgrade-guide.md",
+    "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.0.0 · Cmajda/ha_cez_distribu...",
+    "count": 49,
+    "uniques": 34
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases",
     "title": "Releases · Cmajda/ha_cez_distribuce",
-    "count": 40,
+    "count": 48,
     "uniques": 27
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/user-guide.md",
-    "title": "ha_cez_distribuce/docs/user-guide.md at main · Cmajda/ha_cez_distribuce",
-    "count": 34,
-    "uniques": 17
   }
 ]
