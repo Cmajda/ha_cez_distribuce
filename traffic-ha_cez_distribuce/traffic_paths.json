@@ -2,44 +2,44 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 843,
-    "uniques": 390
+    "count": 949,
+    "uniques": 419
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 354,
-    "uniques": 106
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/en/user-guide.md",
-    "title": "ha_cez_distribuce/docs/en/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 139,
-    "uniques": 83
+    "count": 363,
+    "uniques": 107
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/58",
     "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
-    "count": 128,
-    "uniques": 55
+    "count": 154,
+    "uniques": 68
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/pulls",
-    "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 85,
-    "uniques": 26
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/en/user-guide.md",
+    "title": "ha_cez_distribuce/docs/en/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
+    "count": 140,
+    "uniques": 83
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 80,
-    "uniques": 44
+    "count": 97,
+    "uniques": 58
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/pulls",
+    "title": "Pull requests · Cmajda/ha_cez_distribuce",
+    "count": 90,
+    "uniques": 30
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
     "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at main · Cmajda/ha_cez_distribuce...",
-    "count": 73,
-    "uniques": 52
+    "count": 87,
+    "uniques": 61
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/62",
@@ -48,15 +48,15 @@
     "uniques": 25
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.0.0/docs/cs/upgrade-guide.md",
-    "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.0.0 · Cmajda/ha_cez_distribu...",
-    "count": 49,
-    "uniques": 34
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/releases",
     "title": "Releases · Cmajda/ha_cez_distribuce",
-    "count": 48,
-    "uniques": 27
+    "count": 52,
+    "uniques": 31
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.0.0/docs/cs/upgrade-guide.md",
+    "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.0.0 · Cmajda/ha_cez_distribuce",
+    "count": 50,
+    "uniques": 34
   }
 ]
