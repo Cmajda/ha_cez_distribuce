@@ -38,14 +38,14 @@
       "uniques": 20
     },
     {
-      "timestamp": "2026-01-26T00:00:00Z",
-      "count": 30,
-      "uniques": 16
-    },
-    {
       "timestamp": "2026-01-27T00:00:00Z",
       "count": 69,
       "uniques": 22
+    },
+    {
+      "timestamp": "2026-01-26T00:00:00Z",
+      "count": 30,
+      "uniques": 16
     },
     {
       "timestamp": "2026-01-28T00:00:00Z",
