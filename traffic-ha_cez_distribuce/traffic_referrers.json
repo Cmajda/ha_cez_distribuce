@@ -1,13 +1,18 @@
 [
   {
     "referrer": "github.com",
-    "count": 297,
-    "uniques": 37
+    "count": 321,
+    "uniques": 44
   },
   {
     "referrer": "Google",
-    "count": 240,
+    "count": 218,
     "uniques": 66
+  },
+  {
+    "referrer": "lm.facebook.com",
+    "count": 24,
+    "uniques": 9
   },
   {
     "referrer": "claude.ai",
@@ -16,26 +21,31 @@
   },
   {
     "referrer": "StartPage",
+    "count": 9,
+    "uniques": 6
+  },
+  {
+    "referrer": "m.facebook.com",
     "count": 8,
-    "uniques": 5
+    "uniques": 6
   },
   {
     "referrer": "chatgpt.com",
-    "count": 6,
-    "uniques": 1
+    "count": 7,
+    "uniques": 2
   },
   {
-    "referrer": "Bing",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "referrer": "email.seznam.cz",
-    "count": 1,
-    "uniques": 1
+    "referrer": "facebook.com",
+    "count": 4,
+    "uniques": 4
   },
   {
     "referrer": "statics.teams.cdn.office.net",
+    "count": 3,
+    "uniques": 3
+  },
+  {
+    "referrer": "Bing",
     "count": 1,
     "uniques": 1
   }
