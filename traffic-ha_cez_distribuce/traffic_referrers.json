@@ -1,13 +1,13 @@
 [
   {
     "referrer": "github.com",
-    "count": 337,
-    "uniques": 47
+    "count": 348,
+    "uniques": 52
   },
   {
     "referrer": "Google",
-    "count": 215,
-    "uniques": 64
+    "count": 212,
+    "uniques": 61
   },
   {
     "referrer": "lm.facebook.com",
@@ -20,14 +20,14 @@
     "uniques": 10
   },
   {
+    "referrer": "l.facebook.com",
+    "count": 7,
+    "uniques": 7
+  },
+  {
     "referrer": "chatgpt.com",
     "count": 7,
     "uniques": 2
-  },
-  {
-    "referrer": "l.facebook.com",
-    "count": 6,
-    "uniques": 6
   },
   {
     "referrer": "facebook.com",

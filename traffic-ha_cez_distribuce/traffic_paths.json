@@ -2,26 +2,26 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 1201,
-    "uniques": 559
+    "count": 1226,
+    "uniques": 581
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 399,
-    "uniques": 117
+    "count": 403,
+    "uniques": 122
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/58",
     "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
-    "count": 228,
-    "uniques": 99
+    "count": 244,
+    "uniques": 107
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 147,
-    "uniques": 85
+    "count": 153,
+    "uniques": 89
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/en/user-guide.md",
@@ -32,26 +32,26 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
     "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at main · Cmajda/ha_cez_distribuce...",
-    "count": 108,
-    "uniques": 72
+    "count": 115,
+    "uniques": 75
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 104,
-    "uniques": 41
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/releases",
-    "title": "Releases · Cmajda/ha_cez_distribuce",
-    "count": 57,
-    "uniques": 31
+    "count": 108,
+    "uniques": 44
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/62",
     "title": "[Dotaz]: Bug v HA 2026.02 · Issue #62 · Cmajda/ha_cez_distribuce",
-    "count": 57,
-    "uniques": 28
+    "count": 59,
+    "uniques": 29
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/releases",
+    "title": "Releases · Cmajda/ha_cez_distribuce",
+    "count": 54,
+    "uniques": 30
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.0.0/docs/cs/upgrade-guide.md",
