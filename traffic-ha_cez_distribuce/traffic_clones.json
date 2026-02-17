@@ -73,14 +73,14 @@
       "uniques": 19
     },
     {
-      "timestamp": "2026-02-02T00:00:00Z",
-      "count": 530,
-      "uniques": 157
-    },
-    {
       "timestamp": "2026-02-03T00:00:00Z",
       "count": 154,
       "uniques": 51
+    },
+    {
+      "timestamp": "2026-02-02T00:00:00Z",
+      "count": 530,
+      "uniques": 157
     },
     {
       "timestamp": "2026-02-04T00:00:00Z",
