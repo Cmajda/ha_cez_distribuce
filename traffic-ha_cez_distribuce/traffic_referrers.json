@@ -1,13 +1,13 @@
 [
   {
     "referrer": "github.com",
-    "count": 356,
-    "uniques": 57
+    "count": 324,
+    "uniques": 55
   },
   {
     "referrer": "Google",
-    "count": 209,
-    "uniques": 61
+    "count": 195,
+    "uniques": 55
   },
   {
     "referrer": "lm.facebook.com",
@@ -15,9 +15,14 @@
     "uniques": 24
   },
   {
+    "referrer": "statics.teams.cdn.office.net",
+    "count": 40,
+    "uniques": 7
+  },
+  {
     "referrer": "m.facebook.com",
-    "count": 18,
-    "uniques": 12
+    "count": 21,
+    "uniques": 13
   },
   {
     "referrer": "l.facebook.com",
@@ -36,13 +41,8 @@
   },
   {
     "referrer": "StartPage",
-    "count": 4,
-    "uniques": 3
-  },
-  {
-    "referrer": "statics.teams.cdn.office.net",
-    "count": 3,
-    "uniques": 3
+    "count": 2,
+    "uniques": 2
   },
   {
     "referrer": "Bing",
