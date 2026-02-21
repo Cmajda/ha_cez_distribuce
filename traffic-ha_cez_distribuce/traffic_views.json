@@ -93,14 +93,14 @@
       "uniques": 129
     },
     {
-      "timestamp": "2026-02-06T00:00:00Z",
-      "count": 330,
-      "uniques": 95
-    },
-    {
       "timestamp": "2026-02-07T00:00:00Z",
       "count": 171,
       "uniques": 62
+    },
+    {
+      "timestamp": "2026-02-06T00:00:00Z",
+      "count": 330,
+      "uniques": 95
     },
     {
       "timestamp": "2026-02-08T00:00:00Z",
