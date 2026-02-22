@@ -1,18 +1,13 @@
 [
   {
     "referrer": "github.com",
-    "count": 151,
-    "uniques": 43
+    "count": 356,
+    "uniques": 57
   },
   {
     "referrer": "Google",
-    "count": 102,
-    "uniques": 41
-  },
-  {
-    "referrer": "statics.teams.cdn.office.net",
-    "count": 83,
-    "uniques": 9
+    "count": 209,
+    "uniques": 61
   },
   {
     "referrer": "lm.facebook.com",
@@ -21,8 +16,8 @@
   },
   {
     "referrer": "m.facebook.com",
-    "count": 22,
-    "uniques": 14
+    "count": 18,
+    "uniques": 12
   },
   {
     "referrer": "l.facebook.com",
@@ -30,9 +25,9 @@
     "uniques": 8
   },
   {
-    "referrer": "email.seznam.cz",
-    "count": 5,
-    "uniques": 1
+    "referrer": "chatgpt.com",
+    "count": 7,
+    "uniques": 2
   },
   {
     "referrer": "facebook.com",
@@ -41,11 +36,16 @@
   },
   {
     "referrer": "StartPage",
-    "count": 2,
-    "uniques": 2
+    "count": 4,
+    "uniques": 3
   },
   {
-    "referrer": "chatgpt.com",
+    "referrer": "statics.teams.cdn.office.net",
+    "count": 3,
+    "uniques": 3
+  },
+  {
+    "referrer": "Bing",
     "count": 1,
     "uniques": 1
   }
