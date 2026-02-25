@@ -11,8 +11,8 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **CAPTCHA OVĚŘENÍ:** Od verze 3.1.0 integrace podporuje CAPTCHA ověření.
-> Při konfiguraci zadáte kód z obrázku. Data jsou platná 6 dní.
+> ℹ️ **CAPTCHA OVĚŘENÍ:** Od verze 3.2.0 integrace podporuje automatické obnovování dat.
+> Při konfiguraci zadáte kód z obrázku. Data se obnovují automaticky.
 > Více v [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
 
 🇬🇧 [English version](README_EN.md)

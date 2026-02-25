@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 import base64
+import json
 import logging
+import urllib.error
+import urllib.parse
+import urllib.request
 from datetime import datetime, time, timedelta
 from typing import Any, NamedTuple
 
@@ -21,6 +25,10 @@ _LOGGER = logging.getLogger(__name__)
 BASE_URL = "https://dip.cezdistribuce.cz/irj/portal/anonymous/casy-spinani?path=switch-times/signals"
 CAPTCHA_URL = "https://dip.cezdistribuce.cz/irj/portal/anonymous/captcha"
 CEZ_TIMEZONE = ZoneInfo("Europe/Prague")
+
+# OCR.space API configuration
+OCR_SPACE_API_URL = "https://api.ocr.space/parse/image"
+OCR_SPACE_API_KEY = "helloworld"  # Free demo key
 
 # HTTP headers for CEZ API requests
 CEZ_HEADERS = {
@@ -75,7 +83,7 @@ def fetch_captcha() -> CaptchaSession:
     # Extract cookies
     cookies = dict(response.cookies)
 
-    _LOGGER.debug("CAPTCHA fetched successfully, cookies: %s", list(cookies.keys()))
+    _LOGGER.info("CAPTCHA saved, cookies: %s", list(cookies.keys()))
 
     return CaptchaSession(image_base64=image_base64, cookies=cookies)
 
@@ -107,16 +115,196 @@ def validate_ean_with_captcha(ean: str, captcha_code: str, cookies: dict[str, st
 
     json_data = response.json()
 
-    # Check for CAPTCHA error
+    # Check for CAPTCHA error in flashMessages
     flash_messages = json_data.get("flashMessages", [])
     for msg in flash_messages:
         if msg.get("key") == "CPT-002":
             raise ValueError("invalid_captcha")
 
+    # Status 400 usually means invalid CAPTCHA even without CPT-002
+    if response.status_code == 400:
+        _LOGGER.debug("API 400 response: %s", json_data)
+        raise ValueError("invalid_captcha")
+
     if response.status_code != 200:
+        _LOGGER.warning("API unexpected status %d: %s", response.status_code, json_data)
         raise ValueError(f"API returned status {response.status_code}")
 
     return json_data
+
+
+class OcrRateLimitError(Exception):
+    """Raised when OCR.space rate limit (403) is reached."""
+
+
+def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
+    """Solve CAPTCHA using OCR.space Engine 3 with retry logic.
+
+    Args:
+        captcha_base64: Base64 encoded CAPTCHA image (PNG).
+        attempt: Current attempt number (for logging).
+
+    Returns:
+        Recognized 4-letter uppercase code or None if failed.
+
+    Raises:
+        OcrRateLimitError: When OCR.space returns 403 (free tier exhausted).
+    """
+    _LOGGER.info("=" * 60)
+    _LOGGER.info("STEP 2: Solving CAPTCHA with OCR.space Engine 3...")
+    _LOGGER.info("=" * 60)
+    _LOGGER.info("  Note: Free API limit is 10 requests per 10 minutes")
+
+    payload = {
+        "base64Image": f"data:image/png;base64,{captcha_base64}",
+        "language": "eng",
+        "isOverlayRequired": "false",
+        "OCREngine": "3",
+        "scale": "true",
+        "isTable": "false",
+    }
+
+    data = urllib.parse.urlencode(payload).encode("utf-8")
+    ocr_attempt = 1
+    max_ocr_attempts = 10  # Max retries for OCR timeouts
+
+    while ocr_attempt <= max_ocr_attempts:
+        _LOGGER.info("  OCR Attempt %d/%d...", ocr_attempt, max_ocr_attempts)
+
+        req = urllib.request.Request(OCR_SPACE_API_URL, data=data)
+        req.add_header("apikey", OCR_SPACE_API_KEY)
+
+        try:
+            # OCR.space free tier can be slow, use 90s timeout
+            with urllib.request.urlopen(req, timeout=90) as response:
+                # Check for 403 rate limit
+                if response.status == 403:
+                    _LOGGER.warning("  OCR rate limit reached (403) - free tier exhausted")
+                    raise OcrRateLimitError("OCR.space free tier limit reached")
+
+                result = json.loads(response.read().decode("utf-8"))
+
+            # Check for server-side timeout (E101)
+            error_msgs = result.get("ErrorMessage", [])
+            if error_msgs and "E101" in str(error_msgs):
+                _LOGGER.warning("  OCR server timeout (E101), retrying...")
+                ocr_attempt += 1
+                continue
+
+            if result.get("ParsedResults"):
+                raw_text = result["ParsedResults"][0].get("ParsedText", "").strip()
+                _LOGGER.info("  Raw OCR output: '%s'", raw_text)
+
+                # Filter: only uppercase letters A-Z, no numbers, no special chars
+                text = "".join(c for c in raw_text.upper() if c.isalpha() and c.isascii())
+
+                _LOGGER.info("  Filtered (letters only): '%s'", text)
+
+                # CAPTCHA must be exactly 4 characters
+                if len(text) != 4:
+                    _LOGGER.warning("  OCR expected 4 characters, got %d: '%s'", len(text), text)
+                    return None
+
+                _LOGGER.info("  ✓ OCR recognized: '%s'", text)
+                return text
+
+            _LOGGER.warning("  OCR failed - no parsed results: %s", error_msgs or result)
+            return None
+
+        except urllib.error.HTTPError as err:
+            if err.code == 403:
+                _LOGGER.warning("  OCR rate limit reached (403) - free tier exhausted")
+                raise OcrRateLimitError("OCR.space free tier limit reached") from err
+            _LOGGER.warning("  OCR HTTP error %d: %s", err.code, err.reason)
+            ocr_attempt += 1
+
+        except urllib.error.URLError as err:
+            # Timeout or network error - retry
+            _LOGGER.warning("  OCR request failed: %s, retrying...", err.reason)
+            ocr_attempt += 1
+
+        except Exception as err:
+            _LOGGER.warning("  OCR unexpected error: %s, retrying...", err)
+            ocr_attempt += 1
+
+    _LOGGER.warning("  All OCR attempts exhausted")
+    return None
+
+
+def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
+    """Fetch HDO data with automatic CAPTCHA solving using OCR.
+
+    This function attempts to:
+    1. Fetch a new CAPTCHA image
+    2. Solve it using OCR.space API (with retry on timeout/E101)
+    3. Call the CEZ API with the solved CAPTCHA
+    4. If CAPTCHA is wrong, retry the whole process (max 3 times)
+
+    Args:
+        ean: EAN number to fetch data for.
+
+    Returns:
+        API response dict if successful, None if failed.
+    """
+    max_captcha_attempts = 3
+
+    for attempt in range(1, max_captcha_attempts + 1):
+        try:
+            # Step 1: Fetch CAPTCHA
+            _LOGGER.info("=" * 60)
+            _LOGGER.info("STEP 1: Downloading CAPTCHA... (attempt %d/%d)", attempt, max_captcha_attempts)
+            _LOGGER.info("=" * 60)
+            captcha_session = fetch_captcha()
+            _LOGGER.info("✓ CAPTCHA downloaded")
+            _LOGGER.info("✓ Cookies saved: %s", list(captcha_session.cookies.keys()))
+
+            # Step 2: Solve CAPTCHA with OCR
+            captcha_code = solve_captcha_with_ocr(captcha_session.image_base64, attempt)
+
+            if not captcha_code:
+                _LOGGER.warning("OCR failed to solve CAPTCHA")
+                if attempt < max_captcha_attempts:
+                    _LOGGER.info("Retrying with new CAPTCHA...")
+                    continue
+                return None
+
+            # Step 3: Call API with solved CAPTCHA
+            _LOGGER.info("=" * 60)
+            _LOGGER.info("STEP 3: Calling CEZ HDO API...")
+            _LOGGER.info("=" * 60)
+            _LOGGER.info("EAN: %s...%s", ean[:2], ean[-2:])
+            _LOGGER.info("CAPTCHA: %s", captcha_code)
+
+            response = validate_ean_with_captcha(ean, captcha_code, captcha_session.cookies)
+
+            # Check if response is valid
+            if response.get("statusCode") == 200 and response.get("data"):
+                _LOGGER.info("✓ API call successful!")
+                return response
+
+            _LOGGER.warning("API returned invalid response: %s", response.get("statusCode"))
+            return None
+
+        except OcrRateLimitError:
+            _LOGGER.error("OCR rate limit reached - stopping refresh process")
+            return None
+
+        except ValueError as err:
+            if str(err) == "invalid_captcha":
+                _LOGGER.warning("✗ CAPTCHA code was incorrect")
+                if attempt < max_captcha_attempts:
+                    _LOGGER.info("Retrying with new CAPTCHA...")
+                    continue
+                _LOGGER.error("All CAPTCHA attempts failed")
+                return None
+            _LOGGER.warning("API error: %s", err)
+            return None
+
+        except Exception as err:
+            _LOGGER.warning("Unexpected error: %s", err)
+            return None
+
+    return None
 
 
 class HdoData(NamedTuple):

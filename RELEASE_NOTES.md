@@ -2,6 +2,25 @@
 
 ---
 
+## v3.2.0 (2026-02-25)
+
+### 🚀 Hlavní změny
+
+#### Vylepšené automatické obnovování dat
+
+- **Spolehlivější získávání dat** – vylepšená logika pro automatické obnovení HDO dat
+- **Retry mechanismus** – při selhání se systém pokusí znovu získat data (až 3 pokusy)
+- **Lepší error handling** – robustnější zpracování chyb při komunikaci s API
+- **Detailnější logování** – přehlednější informace o průběhu aktualizace dat v logu
+
+### ✨ Vylepšení
+
+- Optimalizovaná komunikace s ČEZ Distribuce API
+- Vylepšené zprávy v logu pro snazší diagnostiku
+- Zvýšená spolehlivost při nestabilním připojení
+
+---
+
 ## v3.1.1 (2026-02-05)
 
 ### 🐛 Opravy

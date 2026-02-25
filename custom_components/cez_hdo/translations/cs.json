@@ -43,14 +43,16 @@
             },
             "prices": {
                 "title": "Nastavení cen tarifů",
-                "description": "Nastavte ceny pro nízký (NT) a vysoký (VT) tarif. Ceny se používají pro výpočet nákladů v kartě.",
+                "description": "Nastavte ceny pro nízký (NT) a vysoký (VT) tarif. Ceny se používají pro výpočet nákladů v kartě.\n\n**Automatické obnovení dat** využívá OCR k automatickému řešení CAPTCHA a obnovení dat, když se blíží konec jejich platnosti.",
                 "data": {
                     "low_tariff_price": "Cena NT (Kč/kWh)",
-                    "high_tariff_price": "Cena VT (Kč/kWh)"
+                    "high_tariff_price": "Cena VT (Kč/kWh)",
+                    "auto_refresh": "Automatické obnovení dat"
                 },
                 "data_description": {
                     "low_tariff_price": "Cena za kWh v nízkém tarifu",
-                    "high_tariff_price": "Cena za kWh ve vysokém tarifu"
+                    "high_tariff_price": "Cena za kWh ve vysokém tarifu",
+                    "auto_refresh": "Povolit automatické obnovení HDO dat pomocí OCR (max. 24 pokusů denně)"
                 }
             }
         },
@@ -102,14 +104,16 @@
             },
             "prices": {
                 "title": "Nastavení cen tarifů",
-                "description": "Nastavte ceny pro nízký (NT) a vysoký (VT) tarif. Ceny se používají pro výpočet nákladů v kartě.",
+                "description": "Nastavte ceny pro nízký (NT) a vysoký (VT) tarif. Ceny se používají pro výpočet nákladů v kartě.\n\n**Automatické obnovení dat** využívá OCR k automatickému řešení CAPTCHA a obnovení dat, když se blíží konec jejich platnosti.",
                 "data": {
                     "low_tariff_price": "Cena NT (Kč/kWh)",
-                    "high_tariff_price": "Cena VT (Kč/kWh)"
+                    "high_tariff_price": "Cena VT (Kč/kWh)",
+                    "auto_refresh": "Automatické obnovení dat"
                 },
                 "data_description": {
                     "low_tariff_price": "Cena za kWh v nízkém tarifu",
-                    "high_tariff_price": "Cena za kWh ve vysokém tarifu"
+                    "high_tariff_price": "Cena za kWh ve vysokém tarifu",
+                    "auto_refresh": "Povolit automatické obnovení HDO dat pomocí OCR (max. 24 pokusů denně)"
                 }
             }
         },

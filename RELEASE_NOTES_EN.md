@@ -2,6 +2,25 @@
 
 ---
 
+## v3.2.0 (2026-02-25)
+
+### 🚀 Main Changes
+
+#### Improved Automatic Data Refresh
+
+- **More reliable data fetching** – improved logic for automatic HDO data refresh
+- **Retry mechanism** – system will retry fetching data on failure (up to 3 attempts)
+- **Better error handling** – more robust error handling when communicating with API
+- **Detailed logging** – clearer information about data update progress in logs
+
+### ✨ Improvements
+
+- Optimized communication with ČEZ Distribuce API
+- Improved log messages for easier diagnostics
+- Increased reliability with unstable connections
+
+---
+
 ## v3.1.1 (2026-02-05)
 
 ### 🐛 Fixes

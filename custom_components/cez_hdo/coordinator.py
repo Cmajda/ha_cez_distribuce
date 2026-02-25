@@ -4,19 +4,29 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, time, timedelta
+import random
+from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any, Callable
 
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.event import async_track_time_interval
+from homeassistant.helpers.event import async_track_point_in_time, async_track_time_interval
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
 
 from . import downloader
-from .const import ean_suffix, mask_ean
+from .const import (
+    AUTO_REFRESH_END_HOUR,
+    AUTO_REFRESH_START_HOUR,
+    CONF_AUTO_REFRESH,
+    DEFAULT_AUTO_REFRESH,
+    MAX_DAILY_OCR_ATTEMPTS,
+    MIN_RETRY_DELAY_MINUTES,
+    ean_suffix,
+    mask_ean,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -70,6 +80,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         hass: HomeAssistant,
         ean: str,
         signal: str | None = None,
+        auto_refresh: bool = DEFAULT_AUTO_REFRESH,
     ) -> None:
         """Initialize the coordinator."""
         super().__init__(
@@ -84,21 +95,30 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self._warning_shown: bool = False
         self._expired_shown: bool = False
 
+        # Auto-refresh configuration
+        self._auto_refresh_enabled: bool = auto_refresh
+        self._daily_attempts: int = 0
+        self._last_attempt_date: date | None = None
+        self._data_fetch_successful_today: bool = False
+        self._next_attempt_unsub: Callable[[], None] | None = None
+
         # Use hass.config.path() for proper path resolution
         # Cache files use EAN suffix (last 6 digits) to support multiple instances
         self._cache_dir = Path(hass.config.path(CACHE_SUBDIR))
         ean_short = ean_suffix(ean)
         self._cache_file = self._cache_dir / f"cache_{ean_short}.json"
         self._prices_file = self._cache_dir / f"prices_{ean_short}.json"
+        self._refresh_state_file = self._cache_dir / f"refresh_state_{ean_short}.json"
 
         # Initialize data container
         self.data = CezHdoData()
 
         _LOGGER.debug(
-            "CezHdoCoordinator initialized: ean=%s, signal=%s, cache=%s",
+            "CezHdoCoordinator initialized: ean=%s, signal=%s, cache=%s, auto_refresh=%s",
             mask_ean(self.ean),
             self.signal,
             self._cache_file,
+            self._auto_refresh_enabled,
         )
 
     async def async_initialize(self) -> None:
@@ -112,6 +132,9 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
         # Load prices from storage
         await self._async_load_prices()
+
+        # Load auto-refresh state
+        await self._async_load_refresh_state()
 
         # Check if we have initial data from config flow (CAPTCHA validation)
         _LOGGER.debug(
@@ -133,6 +156,10 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             # Clean up the temporary data
             self.hass.data.get("cez_hdo_initial_data", {}).pop(self.ean, None)
             _LOGGER.debug("CezHdoCoordinator: Initial data saved to cache")
+            # Mark as successful fetch today
+            self._data_fetch_successful_today = True
+            self._last_attempt_date = date.today()
+            await self._async_save_refresh_state()
         else:
             _LOGGER.debug("CezHdoCoordinator: No initial data found, trying cache")
             # Try to load from cache first for quick startup
@@ -145,6 +172,10 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
         # Start periodic state recalculation (every 5 seconds)
         self._start_state_updates()
+
+        # Schedule auto-refresh if enabled and data is expiring
+        if self._auto_refresh_enabled:
+            await self._async_schedule_auto_refresh()
 
     @property
     def data_valid_until(self) -> datetime | None:
@@ -196,6 +227,231 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             self._state_update_unsub = None
             _LOGGER.debug("CezHdoCoordinator: Stopped state updates")
 
+    def stop_auto_refresh(self) -> None:
+        """Stop scheduled auto-refresh attempts."""
+        if self._next_attempt_unsub is not None:
+            self._next_attempt_unsub()
+            self._next_attempt_unsub = None
+            _LOGGER.debug("CezHdoCoordinator: Stopped auto-refresh scheduling")
+
+    async def _async_load_refresh_state(self) -> None:
+        """Load auto-refresh state from storage."""
+        state = await self.hass.async_add_executor_job(self._load_refresh_state)
+        if state:
+            stored_date = state.get("last_attempt_date")
+            if stored_date:
+                try:
+                    self._last_attempt_date = date.fromisoformat(stored_date)
+                except ValueError:
+                    self._last_attempt_date = None
+
+            # Reset counters if it's a new day
+            if self._last_attempt_date != date.today():
+                self._daily_attempts = 0
+                self._data_fetch_successful_today = False
+                self._last_attempt_date = date.today()
+            else:
+                self._daily_attempts = state.get("daily_attempts", 0)
+                self._data_fetch_successful_today = state.get("successful_today", False)
+
+            _LOGGER.debug(
+                "CezHdoCoordinator: Loaded refresh state - attempts: %d, successful: %s",
+                self._daily_attempts,
+                self._data_fetch_successful_today,
+            )
+
+    def _load_refresh_state(self) -> dict[str, Any] | None:
+        """Load refresh state from file (blocking)."""
+        try:
+            if self._refresh_state_file.exists():
+                with open(self._refresh_state_file, "r", encoding="utf-8") as f:
+                    return json.load(f)
+        except Exception as err:
+            _LOGGER.warning("CezHdoCoordinator: Failed to load refresh state: %s", err)
+        return None
+
+    async def _async_save_refresh_state(self) -> None:
+        """Save auto-refresh state to storage."""
+        await self.hass.async_add_executor_job(self._save_refresh_state)
+
+    def _save_refresh_state(self) -> None:
+        """Save refresh state to file (blocking)."""
+        try:
+            self._cache_dir.mkdir(parents=True, exist_ok=True)
+            state = {
+                "last_attempt_date": self._last_attempt_date.isoformat() if self._last_attempt_date else None,
+                "daily_attempts": self._daily_attempts,
+                "successful_today": self._data_fetch_successful_today,
+            }
+            with open(self._refresh_state_file, "w", encoding="utf-8") as f:
+                json.dump(state, f)
+            _LOGGER.debug("CezHdoCoordinator: Saved refresh state")
+        except Exception as err:
+            _LOGGER.warning("CezHdoCoordinator: Failed to save refresh state: %s", err)
+
+    async def _async_schedule_auto_refresh(self, min_delay_minutes: int = 0) -> None:
+        """Schedule the next auto-refresh attempt if needed.
+
+        Args:
+            min_delay_minutes: Minimum delay in minutes before next attempt (used after failure).
+        """
+        if not self._auto_refresh_enabled:
+            return
+
+        # Check if it's a new day - reset counters
+        today = date.today()
+        if self._last_attempt_date != today:
+            self._daily_attempts = 0
+            self._data_fetch_successful_today = False
+            self._last_attempt_date = today
+            await self._async_save_refresh_state()
+
+        # Don't schedule if already successful today
+        if self._data_fetch_successful_today:
+            _LOGGER.debug("CezHdoCoordinator: Already fetched data successfully today, skipping")
+            return
+
+        # Don't schedule if we've used all attempts for today
+        if self._daily_attempts >= MAX_DAILY_OCR_ATTEMPTS:
+            _LOGGER.debug(
+                "CezHdoCoordinator: Used all %d attempts for today",
+                MAX_DAILY_OCR_ATTEMPTS,
+            )
+            return
+
+        # Calculate next attempt time
+        now = datetime.now()
+        current_hour = now.hour
+
+        # Only schedule during allowed hours
+        if current_hour < AUTO_REFRESH_START_HOUR:
+            # Schedule for start hour
+            next_time = now.replace(hour=AUTO_REFRESH_START_HOUR, minute=random.randint(0, 59), second=0, microsecond=0)
+        elif current_hour >= AUTO_REFRESH_END_HOUR:
+            # Schedule for tomorrow
+            tomorrow = now + timedelta(days=1)
+            next_time = tomorrow.replace(
+                hour=AUTO_REFRESH_START_HOUR, minute=random.randint(0, 59), second=0, microsecond=0
+            )
+        else:
+            # Schedule randomly within remaining hours today
+            remaining_attempts = MAX_DAILY_OCR_ATTEMPTS - self._daily_attempts
+            remaining_hours = AUTO_REFRESH_END_HOUR - current_hour
+
+            if remaining_hours <= 0 or remaining_attempts <= 0:
+                return
+
+            # Spread attempts evenly, add some randomness
+            hours_per_attempt = remaining_hours / remaining_attempts
+            next_hour_offset = random.uniform(0.5, min(hours_per_attempt, 2.0))
+            next_time = now + timedelta(hours=next_hour_offset)
+
+        # Apply minimum delay if specified (e.g., 10 minutes after failure)
+        if min_delay_minutes > 0:
+            min_next_time = now + timedelta(minutes=min_delay_minutes)
+            if next_time < min_next_time:
+                next_time = min_next_time
+
+        # Cancel any existing scheduled attempt
+        if self._next_attempt_unsub is not None:
+            self._next_attempt_unsub()
+
+        _LOGGER.info(
+            "CezHdoCoordinator: Scheduling auto-refresh attempt %d/%d at %s",
+            self._daily_attempts + 1,
+            MAX_DAILY_OCR_ATTEMPTS,
+            next_time.strftime("%H:%M:%S"),
+        )
+
+        self._next_attempt_unsub = async_track_point_in_time(
+            self.hass,
+            self._async_auto_refresh_attempt,
+            next_time,
+        )
+
+    async def _async_auto_refresh_attempt(self, _now: datetime | None = None) -> None:
+        """Perform an automatic data refresh attempt using OCR."""
+        self._next_attempt_unsub = None  # Clear the subscription
+        self._daily_attempts += 1
+
+        _LOGGER.info(
+            "CezHdoCoordinator: Starting auto-refresh attempt %d/%d for EAN %s",
+            self._daily_attempts,
+            MAX_DAILY_OCR_ATTEMPTS,
+            mask_ean(self.ean),
+        )
+
+        try:
+            # Try to fetch data with automatic CAPTCHA solving
+            new_data = await self.hass.async_add_executor_job(
+                downloader.fetch_data_with_auto_captcha,
+                self.ean,
+            )
+
+            if new_data and new_data.get("data"):
+                _LOGGER.info(
+                    "CezHdoCoordinator: Auto-refresh successful for EAN %s!",
+                    mask_ean(self.ean),
+                )
+
+                # Save to cache
+                await self.hass.async_add_executor_job(self._save_to_cache, new_data)
+
+                # Update data
+                self._parse_data(new_data)
+                self.data.raw_data = new_data
+                self.data.last_update = datetime.now()
+
+                # Mark as successful
+                self._data_fetch_successful_today = True
+                self._warning_shown = False
+                self._expired_shown = False
+
+                # Notify listeners
+                self.async_set_updated_data(self.data)
+
+                # Show success notification
+                await self._show_auto_refresh_notification(success=True)
+
+            else:
+                _LOGGER.warning(
+                    "CezHdoCoordinator: Auto-refresh attempt %d/%d failed",
+                    self._daily_attempts,
+                    MAX_DAILY_OCR_ATTEMPTS,
+                )
+
+                # Schedule next attempt with minimum delay
+                await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES)
+
+        except Exception as err:
+            _LOGGER.error(
+                "CezHdoCoordinator: Auto-refresh error: %s",
+                err,
+            )
+            # Schedule next attempt with minimum delay
+            await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES)
+
+        # Save state
+        await self._async_save_refresh_state()
+
+    async def _show_auto_refresh_notification(self, success: bool) -> None:
+        """Show notification about auto-refresh result."""
+        lang = self.hass.config.language or "en"
+
+        if success:
+            if lang == "cs":
+                title = "ČEZ HDO - Data aktualizována"
+                message = "HDO data byla úspěšně automaticky obnovena pomocí OCR."
+            else:
+                title = "ČEZ HDO - Data Updated"
+                message = "HDO data has been automatically refreshed using OCR."
+
+            await self._show_notification(
+                title=title,
+                message=message,
+                notification_id=f"cez_hdo_auto_refresh_{self.ean}",
+            )
+
     @callback
     def _async_recalculate_state(self, _now: datetime | None = None) -> None:
         """Recalculate current state based on cached data.
@@ -217,11 +473,12 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
     async def _async_update_data(self) -> CezHdoData:
-        """Check data validity and load from cache.
+        """Check data validity, load from cache, and trigger auto-refresh if needed.
 
-        Due to CAPTCHA protection on ČEZ API, we only fetch data during
-        initial configuration. This method only checks cache validity
-        and shows notifications when data is about to expire.
+        This method:
+        1. Loads data from cache
+        2. Checks data validity and shows notifications when expiring
+        3. Schedules automatic refresh attempts if enabled and data is old
         """
         try:
             # Load data from cache
@@ -232,6 +489,10 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
             # Check data age and show notifications
             await self._check_data_validity()
+
+            # Schedule auto-refresh if data is expiring
+            if self._auto_refresh_enabled and self.data_age_days >= DATA_WARNING_DAYS:
+                await self._async_schedule_auto_refresh()
 
             _LOGGER.debug(
                 "CezHdoCoordinator: Data loaded from cache, low_tariff=%s",

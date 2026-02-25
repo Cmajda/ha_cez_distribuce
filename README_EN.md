@@ -11,8 +11,8 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **CAPTCHA VERIFICATION:** From version 3.1.0, the integration supports CAPTCHA verification.
-> During configuration, you will enter a code from the image. Data is valid for 6 days.
+> ℹ️ **CAPTCHA VERIFICATION:** From version 3.2.0, the integration supports automatic data refresh.
+> During configuration, you will enter a code from the image. Data is refreshed automatically.
 > More info in [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
 
 🇨🇿 [Česká verze](README.md)

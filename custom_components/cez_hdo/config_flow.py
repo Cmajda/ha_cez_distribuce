@@ -5,16 +5,15 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
-import homeassistant.helpers.config_validation as cv
 
 from . import downloader
-from .const import mask_ean
+from .const import CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH, mask_ean
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -250,6 +249,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
         if user_input is not None:
             low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
             high_price = user_input.get(CONF_HIGH_TARIFF_PRICE, 0.0)
+            auto_refresh = user_input.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
 
             # Ensure EAN is set (should always be at this point)
             if self._ean is None:
@@ -285,6 +285,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                     CONF_EAN: self._ean,
                     CONF_SIGNAL: self._signal,
                     CONF_ENTITY_SUFFIX: self._entity_suffix,
+                    CONF_AUTO_REFRESH: auto_refresh,
                 },
             )
 
@@ -294,6 +295,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                 {
                     vol.Optional(CONF_LOW_TARIFF_PRICE, default=0.0): vol.Coerce(float),
                     vol.Optional(CONF_HIGH_TARIFF_PRICE, default=0.0): vol.Coerce(float),
+                    vol.Optional(CONF_AUTO_REFRESH, default=DEFAULT_AUTO_REFRESH): cv.boolean,
                 }
             ),
         )
@@ -449,6 +451,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         if user_input is not None:
             low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
             high_price = user_input.get(CONF_HIGH_TARIFF_PRICE, 0.0)
+            auto_refresh = user_input.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
 
             # Ensure EAN is set (should always be at this point)
             if self._ean is None:
@@ -458,6 +461,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             new_data = {
                 CONF_EAN: self._ean,
                 CONF_SIGNAL: self._signal,
+                CONF_AUTO_REFRESH: auto_refresh,
             }
 
             # Update unique_id if EAN changed
@@ -484,14 +488,18 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             if self._raw_data:
                 await self._save_raw_data_to_cache()
 
+            # Update auto_refresh setting in coordinator
+            await self._update_auto_refresh(auto_refresh)
+
             # Return empty options - all config is in data
             return self.async_create_entry(title="", data={})
 
         # Get current prices from coordinator
         current_low_price = 0.0
         current_high_price = 0.0
+        current_auto_refresh = self._config_entry.data.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
 
-        from . import DOMAIN, DATA_COORDINATOR
+        from . import DATA_COORDINATOR, DOMAIN
 
         entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
         coordinator = entry_data.get(DATA_COORDINATOR)
@@ -505,13 +513,28 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                 {
                     vol.Optional(CONF_LOW_TARIFF_PRICE, default=current_low_price): vol.Coerce(float),
                     vol.Optional(CONF_HIGH_TARIFF_PRICE, default=current_high_price): vol.Coerce(float),
+                    vol.Optional(CONF_AUTO_REFRESH, default=current_auto_refresh): cv.boolean,
                 }
             ),
         )
 
+    async def _update_auto_refresh(self, enabled: bool) -> None:
+        """Update auto_refresh setting in coordinator."""
+        from . import DATA_COORDINATOR, DOMAIN
+
+        entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
+        coordinator = entry_data.get(DATA_COORDINATOR)
+
+        if coordinator:
+            coordinator._auto_refresh_enabled = enabled
+            if enabled:
+                await coordinator._async_schedule_auto_refresh()
+            else:
+                coordinator.stop_auto_refresh()
+
     async def _save_prices(self, low_price: float, high_price: float) -> None:
         """Save prices to coordinator."""
-        from . import DOMAIN, DATA_COORDINATOR
+        from . import DATA_COORDINATOR, DOMAIN
 
         entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
         coordinator = entry_data.get(DATA_COORDINATOR)
@@ -521,8 +544,9 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
 
     async def _save_raw_data_to_cache(self) -> None:
         """Save raw data from CAPTCHA validation to coordinator cache."""
-        from . import DOMAIN, DATA_COORDINATOR
         from datetime import datetime
+
+        from . import DATA_COORDINATOR, DOMAIN
 
         entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
         coordinator = entry_data.get(DATA_COORDINATOR)

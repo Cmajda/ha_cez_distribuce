@@ -1,45 +1,57 @@
 # ČEZ HDO Services
+refresh_data:
+    name: Obnovit HDO data
+    description: Manuálně obnoví HDO data pomocí OCR pro vyřešení CAPTCHA. Toto volání se NEPOČÍTÁ do denního limitu 24 pokusů.
+    fields:
+        entry_id:
+            name: ID záznamu
+            description: ID konfiguračního záznamu (volitelné - pokud není zadáno, obnoví všechny)
+            required: false
+            example: "abcd1234"
+            selector:
+                text:
+
 list_signals:
-  name: Zobrazit dostupné signály
-  description: Zobrazí seznam dostupných HDO signálů pro zadané EAN číslo v logách Home Assistant
-  fields:
-    ean:
-      name: EAN číslo
-      description: EAN číslo odběrného místa (najdete na faktutře)
-      required: true
-      example: "859182400609846929"
-      selector:
-        text:
+    name: Zobrazit dostupné signály
+    description: Zobrazí seznam dostupných HDO signálů pro zadané EAN číslo v logách Home Assistant
+    fields:
+        ean:
+            name: EAN číslo
+            description: EAN číslo odběrného místa (najdete na faktutře)
+            required: true
+            example: "859182400609846929"
+            selector:
+                text:
 
 reload_frontend_card:
-  name: Obnovit frontend kartu
-  description: Aktualizuje frontend kartu ČEZ HDO (užitečné při vývoji)
+    name: Obnovit frontend kartu
+    description: Aktualizuje frontend kartu ČEZ HDO (užitečné při vývoji)
 
 set_prices:
-  name: Nastavit ceny tarifů
-  description: Nastaví ceny za kWh pro nízký a vysoký tarif, které se použijí v senzoru aktuální ceny
-  fields:
-    low_tariff_price:
-      name: Cena nízkého tarifu
-      description: Cena za kWh v nízkém tarifu (NT)
-      required: true
-      example: 2.50
-      selector:
-        number:
-          min: 0
-          max: 100
-          step: 0.01
-          unit_of_measurement: "Kč/kWh"
-          mode: box
-    high_tariff_price:
-      name: Cena vysokého tarifu
-      description: Cena za kWh ve vysokém tarifu (VT)
-      required: true
-      example: 4.50
-      selector:
-        number:
-          min: 0
-          max: 100
-          step: 0.01
-          unit_of_measurement: "Kč/kWh"
-          mode: box
+    name: Nastavit ceny tarifů
+    description: Nastaví ceny za kWh pro nízký a vysoký tarif, které se použijí v senzoru aktuální ceny
+    fields:
+        low_tariff_price:
+            name: Cena nízkého tarifu
+            description: Cena za kWh v nízkém tarifu (NT)
+            required: true
+            example: 2.50
+            selector:
+                number:
+                    min: 0
+                    max: 100
+                    step: 0.01
+                    unit_of_measurement: "Kč/kWh"
+                    mode: box
+        high_tariff_price:
+            name: Cena vysokého tarifu
+            description: Cena za kWh ve vysokém tarifu (VT)
+            required: true
+            example: 4.50
+            selector:
+                number:
+                    min: 0
+                    max: 100
+                    step: 0.01
+                    unit_of_measurement: "Kč/kWh"
+                    mode: box
