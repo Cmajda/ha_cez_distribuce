@@ -11,6 +11,7 @@ from typing import Any, Callable
 
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_point_in_time, async_track_time_interval
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
@@ -41,11 +42,15 @@ STATE_UPDATE_INTERVAL = timedelta(seconds=5)
 # Update interval for data expiry check
 DATA_CHECK_INTERVAL = timedelta(hours=1)
 
-# Cache directory - stored in .storage/cez_hdo/ (survives integration updates)
-# Previously was in custom_components/cez_hdo/data/ which got deleted on updates
-CACHE_SUBDIR = ".storage/cez_hdo"
-OLD_CACHE_SUBDIR = "custom_components/cez_hdo/data"  # For migration
-# File names are per-EAN: cache_{ean}.json, prices_{ean}.json
+# Storage version for data migration
+STORAGE_VERSION = 1
+DOMAIN = "cez_hdo"
+
+# Old cache locations (for migration from previous versions)
+# v3.2.0 used: .storage/cez_hdo/cache_{ean}.json
+# Pre-v3.2.0 used: custom_components/cez_hdo/data/cache_{ean}.json
+OLD_CACHE_SUBDIR_STORAGE = ".storage/cez_hdo"
+OLD_CACHE_SUBDIR_COMPONENT = "custom_components/cez_hdo/data"
 
 
 class CezHdoData:
@@ -106,22 +111,26 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self._next_attempt_unsub: Callable[[], None] | None = None
         self._next_attempt_time: datetime | None = None
 
-        # Use hass.config.path() for proper path resolution
-        # Cache files use EAN suffix (last 6 digits) to support multiple instances
-        self._cache_dir = Path(hass.config.path(CACHE_SUBDIR))
+        # Use Home Assistant's Store helper for atomic writes and proper storage
+        # Storage keys use EAN suffix (last 6 digits) to support multiple instances
         ean_short = ean_suffix(ean)
-        self._cache_file = self._cache_dir / f"cache_{ean_short}.json"
-        self._prices_file = self._cache_dir / f"prices_{ean_short}.json"
-        self._refresh_state_file = self._cache_dir / f"refresh_state_{ean_short}.json"
+        self._cache_store: Store = Store(
+            hass, STORAGE_VERSION, f"{DOMAIN}.cache_{ean_short}"
+        )
+        self._prices_store: Store = Store(
+            hass, STORAGE_VERSION, f"{DOMAIN}.prices_{ean_short}"
+        )
+        self._refresh_state_store: Store = Store(
+            hass, STORAGE_VERSION, f"{DOMAIN}.refresh_state_{ean_short}"
+        )
 
         # Initialize data container
         self.data = CezHdoData()
 
         _LOGGER.debug(
-            "CezHdoCoordinator initialized: ean=%s, signal=%s, cache=%s, auto_refresh=%s",
+            "CezHdoCoordinator initialized: ean=%s, signal=%s, auto_refresh=%s",
             mask_ean(self.ean),
             self.signal,
-            self._cache_file,
             self._auto_refresh_enabled,
         )
 
@@ -131,11 +140,8 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         This method is for YAML-based platforms. For config entry platforms,
         use async_config_entry_first_refresh() instead.
         """
-        # Ensure cache directory exists
-        await self.hass.async_add_executor_job(self._ensure_cache_dir)
-
-        # Migrate data from old location (custom_components/cez_hdo/data/)
-        await self.hass.async_add_executor_job(self._migrate_old_cache)
+        # Migrate data from old location (if needed)
+        await self._async_migrate_old_cache()
 
         # Load prices from storage
         await self._async_load_prices()
@@ -156,7 +162,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 mask_ean(self.ean),
             )
             # Save to cache and use it
-            await self.hass.async_add_executor_job(self._save_to_cache, initial_data)
+            await self._async_save_to_cache(initial_data)
             self._parse_data(initial_data)
             self.data.raw_data = initial_data
             self.data.last_update = datetime.now(CEZ_TIMEZONE)
@@ -170,7 +176,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         else:
             _LOGGER.debug("CezHdoCoordinator: No initial data found, trying cache")
             # Try to load from cache first for quick startup
-            cache_loaded = await self.hass.async_add_executor_job(self._load_from_cache)
+            cache_loaded = await self._async_load_from_cache()
             if cache_loaded:
                 _LOGGER.debug("CezHdoCoordinator: Loaded initial data from cache")
 
@@ -244,9 +250,9 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
     # --- Public API methods (wrappers for private methods) ---
 
-    def save_to_cache(self, data: dict[str, Any]) -> None:
-        """Save data to cache file (blocking). Public wrapper for _save_to_cache."""
-        self._save_to_cache(data)
+    async def async_save_to_cache(self, data: dict[str, Any]) -> None:
+        """Save data to cache (async). Public wrapper for _async_save_to_cache."""
+        await self._async_save_to_cache(data)
 
     def parse_data(self, raw_data: dict[str, Any]) -> None:
         """Parse raw API data into structured format. Public wrapper for _parse_data."""
@@ -268,7 +274,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
     async def _async_load_refresh_state(self) -> None:
         """Load auto-refresh state from storage."""
-        state = await self.hass.async_add_executor_job(self._load_refresh_state)
+        state = await self._refresh_state_store.async_load()
         if state:
             stored_date = state.get("last_attempt_date")
             if stored_date:
@@ -307,35 +313,16 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 self._next_attempt_time.strftime("%H:%M:%S") if self._next_attempt_time else None,
             )
 
-    def _load_refresh_state(self) -> dict[str, Any] | None:
-        """Load refresh state from file (blocking)."""
-        try:
-            if self._refresh_state_file.exists():
-                with open(self._refresh_state_file, "r", encoding="utf-8") as f:
-                    return json.load(f)
-        except Exception as err:
-            _LOGGER.warning("CezHdoCoordinator: Failed to load refresh state: %s", err)
-        return None
-
     async def _async_save_refresh_state(self) -> None:
         """Save auto-refresh state to storage."""
-        await self.hass.async_add_executor_job(self._save_refresh_state)
-
-    def _save_refresh_state(self) -> None:
-        """Save refresh state to file (blocking)."""
-        try:
-            self._cache_dir.mkdir(parents=True, exist_ok=True)
-            state = {
-                "last_attempt_date": self._last_attempt_date.isoformat() if self._last_attempt_date else None,
-                "daily_attempts": self._daily_attempts,
-                "successful_today": self._data_fetch_successful_today,
-                "next_attempt_time": self._next_attempt_time.isoformat() if self._next_attempt_time else None,
-            }
-            with open(self._refresh_state_file, "w", encoding="utf-8") as f:
-                json.dump(state, f)
-            _LOGGER.debug("CezHdoCoordinator: Saved refresh state")
-        except Exception as err:
-            _LOGGER.warning("CezHdoCoordinator: Failed to save refresh state: %s", err)
+        state = {
+            "last_attempt_date": self._last_attempt_date.isoformat() if self._last_attempt_date else None,
+            "daily_attempts": self._daily_attempts,
+            "successful_today": self._data_fetch_successful_today,
+            "next_attempt_time": self._next_attempt_time.isoformat() if self._next_attempt_time else None,
+        }
+        await self._refresh_state_store.async_save(state)
+        _LOGGER.debug("CezHdoCoordinator: Saved refresh state")
 
     async def _async_schedule_auto_refresh(self, min_delay_minutes: int = 0, after_failure: bool = False) -> None:
         """Schedule the next auto-refresh attempt if needed.
@@ -458,7 +445,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 )
 
                 # Save to cache
-                await self.hass.async_add_executor_job(self._save_to_cache, new_data)
+                await self._async_save_to_cache(new_data)
 
                 # Update data
                 self._parse_data(new_data)
@@ -538,56 +525,88 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         # Notify all listeners that data has changed
         self.async_set_updated_data(self.data)
 
-    def _ensure_cache_dir(self) -> None:
-        """Ensure cache directory exists."""
-        self._cache_dir.mkdir(parents=True, exist_ok=True)
+    async def _async_migrate_old_cache(self) -> None:
+        """Migrate cache files from old locations to new Store format.
 
-    def _migrate_old_cache(self) -> None:
-        """Migrate cache files from old location to new location.
+        Checks these old locations (in order):
+        1. .storage/cez_hdo/cache_{ean}.json (v3.2.0 manual storage)
+        2. custom_components/cez_hdo/data/cache_{ean}.json (pre-v3.2.0)
 
-        Old location: custom_components/cez_hdo/data/
-        New location: .storage/cez_hdo/
-
-        This ensures data survives integration updates via HACS.
+        Migrates to new Store format: .storage/cez_hdo.cache_{ean}
         """
-        import shutil
+        ean_short = ean_suffix(self.ean)
 
-        old_cache_dir = Path(self.hass.config.path(OLD_CACHE_SUBDIR))
-        if not old_cache_dir.exists():
+        # Check if Store already has data (no migration needed)
+        existing_cache = await self._cache_store.async_load()
+        if existing_cache:
+            _LOGGER.debug("CezHdoCoordinator: Store already has cache data, skipping migration")
             return
 
-        ean_short = ean_suffix(self.ean)
-        files_to_migrate = [
-            f"cache_{ean_short}.json",
-            f"prices_{ean_short}.json",
-            f"refresh_state_{ean_short}.json",
+        # Try migration from old locations
+        old_locations = [
+            (OLD_CACHE_SUBDIR_STORAGE, "v3.2.0 storage"),
+            (OLD_CACHE_SUBDIR_COMPONENT, "pre-v3.2.0 component"),
         ]
 
-        migrated_count = 0
-        for filename in files_to_migrate:
-            old_file = old_cache_dir / filename
-            new_file = self._cache_dir / filename
+        for old_subdir, location_name in old_locations:
+            old_cache_file = Path(self.hass.config.path(old_subdir)) / f"cache_{ean_short}.json"
 
-            if old_file.exists() and not new_file.exists():
+            if old_cache_file.exists():
                 try:
-                    shutil.copy2(old_file, new_file)
+                    with open(old_cache_file, encoding="utf-8") as f:
+                        old_data = json.load(f)
+
+                    # Save to new Store
+                    await self._cache_store.async_save(old_data)
                     _LOGGER.info(
-                        "CezHdoCoordinator: Migrated %s to new location",
-                        filename,
+                        "CezHdoCoordinator: Migrated cache from %s to Store",
+                        location_name,
                     )
-                    migrated_count += 1
+
+                    # Also try to migrate prices and refresh state
+                    await self._async_migrate_file(
+                        old_subdir, f"prices_{ean_short}.json", self._prices_store, location_name
+                    )
+                    await self._async_migrate_file(
+                        old_subdir, f"refresh_state_{ean_short}.json", self._refresh_state_store, location_name
+                    )
+                    return  # Migration successful
+
                 except Exception as err:
                     _LOGGER.warning(
-                        "CezHdoCoordinator: Failed to migrate %s: %s",
-                        filename,
+                        "CezHdoCoordinator: Failed to migrate from %s: %s",
+                        location_name,
                         err,
                     )
 
-        if migrated_count > 0:
-            _LOGGER.info(
-                "CezHdoCoordinator: Migrated %d files from old cache location",
-                migrated_count,
-            )
+    async def _async_migrate_file(
+        self, old_subdir: str, filename: str, store: Store, location_name: str
+    ) -> None:
+        """Migrate a single file from old location to Store."""
+        old_file = Path(self.hass.config.path(old_subdir)) / filename
+
+        if old_file.exists():
+            try:
+                # Check if Store already has data
+                existing = await store.async_load()
+                if existing:
+                    return
+
+                with open(old_file, encoding="utf-8") as f:
+                    old_data = json.load(f)
+                await store.async_save(old_data)
+                _LOGGER.debug(
+                    "CezHdoCoordinator: Migrated %s from %s",
+                    filename,
+                    location_name,
+                )
+            except Exception as err:
+                _LOGGER.warning(
+                    "CezHdoCoordinator: Failed to migrate %s from %s: %s",
+                    filename,
+                    location_name,
+                    err,
+                )
 
     async def _async_update_data(self) -> CezHdoData:
         """Check data validity, load from cache, and trigger auto-refresh if needed.
@@ -599,7 +618,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         """
         try:
             # Load data from cache
-            cache_loaded = await self.hass.async_add_executor_job(self._load_from_cache)
+            cache_loaded = await self._async_load_from_cache()
 
             if not cache_loaded:
                 raise UpdateFailed("No cached HDO data available. Please reconfigure the integration.")
@@ -728,76 +747,59 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             },
         )
 
-    def _save_to_cache(self, data: dict[str, Any]) -> None:
-        """Save data to cache file (blocking)."""
-        try:
-            self._cache_dir.mkdir(parents=True, exist_ok=True)
-            cache_data = {
-                "timestamp": datetime.now(CEZ_TIMEZONE).isoformat(),
-                "data": data,
-            }
-            _LOGGER.debug(
-                "CezHdoCoordinator._save_to_cache: saving to %s, data keys=%s",
-                self._cache_file,
-                list(data.keys()) if isinstance(data, dict) else "not a dict",
-            )
-            with open(self._cache_file, "w", encoding="utf-8") as f:
-                json.dump(cache_data, f, ensure_ascii=False, indent=2)
-            _LOGGER.debug("CezHdoCoordinator: Data saved to cache at %s", self._cache_file)
-        except Exception as err:
-            _LOGGER.warning("CezHdoCoordinator: Failed to save cache: %s", err)
+    async def _async_save_to_cache(self, data: dict[str, Any]) -> None:
+        """Save data to cache using Store (async, atomic writes)."""
+        cache_data = {
+            "timestamp": datetime.now(CEZ_TIMEZONE).isoformat(),
+            "data": data,
+        }
+        _LOGGER.debug(
+            "CezHdoCoordinator: Saving cache, data keys=%s",
+            list(data.keys()) if isinstance(data, dict) else "not a dict",
+        )
+        await self._cache_store.async_save(cache_data)
+        _LOGGER.debug("CezHdoCoordinator: Data saved to cache")
 
-    def _load_from_cache(self) -> bool:
-        """Load data from cache file (blocking). Returns True if successful."""
-        try:
-            _LOGGER.debug(
-                "CezHdoCoordinator._load_from_cache: checking file %s, exists=%s",
-                self._cache_file,
-                self._cache_file.exists(),
-            )
-            if not self._cache_file.exists():
-                _LOGGER.debug("CezHdoCoordinator._load_from_cache: file does not exist")
-                return False
+    async def _async_load_from_cache(self) -> bool:
+        """Load data from cache using Store (async). Returns True if successful."""
+        cache_data = await self._cache_store.async_load()
 
-            with open(self._cache_file, "r", encoding="utf-8") as f:
-                cache_data = json.load(f)
-
-            _LOGGER.debug(
-                "CezHdoCoordinator._load_from_cache: loaded cache, keys=%s",
-                list(cache_data.keys()) if isinstance(cache_data, dict) else "not a dict",
-            )
-
-            # Support new format with timestamp and old format
-            if "data" in cache_data and "timestamp" in cache_data:
-                raw_data = cache_data["data"]
-                try:
-                    parsed_ts = datetime.fromisoformat(cache_data["timestamp"])
-                    # Ensure timezone-aware datetime (old cache may have naive datetime)
-                    if parsed_ts.tzinfo is None:
-                        self.data.last_update = parsed_ts.replace(tzinfo=CEZ_TIMEZONE)
-                    else:
-                        self.data.last_update = parsed_ts
-                except Exception:
-                    self.data.last_update = datetime.now(CEZ_TIMEZONE)
-                _LOGGER.debug(
-                    "CezHdoCoordinator._load_from_cache: new format, timestamp=%s",
-                    self.data.last_update,
-                )
-            else:
-                # Old format - data directly
-                raw_data = cache_data
-                self.data.last_update = datetime.now(CEZ_TIMEZONE)
-                _LOGGER.debug("CezHdoCoordinator._load_from_cache: old format detected")
-
-            self.data.raw_data = raw_data
-            self._parse_data(raw_data)
-
-            _LOGGER.debug("CezHdoCoordinator: Loaded data from cache")
-            return True
-
-        except Exception as err:
-            _LOGGER.warning("CezHdoCoordinator: Failed to load cache: %s", err)
+        if not cache_data:
+            _LOGGER.debug("CezHdoCoordinator: No cache data found")
             return False
+
+        _LOGGER.debug(
+            "CezHdoCoordinator: Loaded cache, keys=%s",
+            list(cache_data.keys()) if isinstance(cache_data, dict) else "not a dict",
+        )
+
+        # Support new format with timestamp and old format
+        if "data" in cache_data and "timestamp" in cache_data:
+            raw_data = cache_data["data"]
+            try:
+                parsed_ts = datetime.fromisoformat(cache_data["timestamp"])
+                # Ensure timezone-aware datetime (old cache may have naive datetime)
+                if parsed_ts.tzinfo is None:
+                    self.data.last_update = parsed_ts.replace(tzinfo=CEZ_TIMEZONE)
+                else:
+                    self.data.last_update = parsed_ts
+            except Exception:
+                self.data.last_update = datetime.now(CEZ_TIMEZONE)
+            _LOGGER.debug(
+                "CezHdoCoordinator: Cache loaded, timestamp=%s",
+                self.data.last_update,
+            )
+        else:
+            # Old format - data directly
+            raw_data = cache_data
+            self.data.last_update = datetime.now(CEZ_TIMEZONE)
+            _LOGGER.debug("CezHdoCoordinator: Old cache format detected")
+
+        self.data.raw_data = raw_data
+        self._parse_data(raw_data)
+
+        _LOGGER.debug("CezHdoCoordinator: Data loaded from cache")
+        return True
 
     def _parse_data(self, raw_data: dict[str, Any]) -> None:
         """Parse raw API data into structured format."""
@@ -836,29 +838,24 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             self.data.schedule = []
 
     async def _async_load_prices(self) -> None:
-        """Load prices from storage."""
-        prices = await self.hass.async_add_executor_job(self._load_prices)
-        self.data.low_tariff_price = prices.get("low_tariff_price", 0.0)
-        self.data.high_tariff_price = prices.get("high_tariff_price", 0.0)
-
-    def _load_prices(self) -> dict[str, float]:
-        """Load prices from file (blocking)."""
-        try:
-            if self._prices_file.exists():
-                with open(self._prices_file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    _LOGGER.debug("CezHdoCoordinator: Loaded prices: %s", data)
-                    return data
-        except Exception as err:
-            _LOGGER.warning("CezHdoCoordinator: Failed to load prices: %s", err)
-        return {"low_tariff_price": 0.0, "high_tariff_price": 0.0}
+        """Load prices from storage using Store (async)."""
+        prices = await self._prices_store.async_load()
+        if prices:
+            self.data.low_tariff_price = prices.get("low_tariff_price", 0.0)
+            self.data.high_tariff_price = prices.get("high_tariff_price", 0.0)
+            _LOGGER.debug("CezHdoCoordinator: Loaded prices: %s", prices)
+        else:
+            self.data.low_tariff_price = 0.0
+            self.data.high_tariff_price = 0.0
 
     async def async_set_prices(self, low_price: float, high_price: float) -> None:
         """Set tariff prices and save to storage."""
         self.data.low_tariff_price = low_price
         self.data.high_tariff_price = high_price
 
-        await self.hass.async_add_executor_job(self._save_prices, low_price, high_price)
+        await self._prices_store.async_save(
+            {"low_tariff_price": low_price, "high_tariff_price": high_price}
+        )
 
         # Notify listeners that data changed
         self.async_set_updated_data(self.data)
@@ -868,23 +865,6 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             low_price,
             high_price,
         )
-
-    def _save_prices(self, low_price: float, high_price: float) -> None:
-        """Save prices to file (blocking)."""
-        try:
-            self._cache_dir.mkdir(parents=True, exist_ok=True)
-            with open(self._prices_file, "w", encoding="utf-8") as f:
-                json.dump(
-                    {"low_tariff_price": low_price, "high_tariff_price": high_price},
-                    f,
-                )
-            _LOGGER.debug(
-                "CezHdoCoordinator: Saved prices: NT=%.2f, VT=%.2f",
-                low_price,
-                high_price,
-            )
-        except Exception as err:
-            _LOGGER.warning("CezHdoCoordinator: Failed to save prices: %s", err)
 
     @property
     def current_price(self) -> float:

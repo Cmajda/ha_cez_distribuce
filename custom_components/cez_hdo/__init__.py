@@ -171,7 +171,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     coordinator.async_set_updated_data(coordinator.data)
 
                     # Save to cache
-                    await hass.async_add_executor_job(coordinator.save_to_cache, new_data)
+                    await coordinator.async_save_to_cache(new_data)
 
                     _LOGGER.info("CEZ HDO refresh_data: Successfully refreshed data for EAN %s", mask_ean(ean))
                     refreshed_count += 1

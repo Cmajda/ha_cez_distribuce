@@ -255,7 +255,9 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
             captcha_code = solve_captcha_with_ocr(captcha_session.image_base64, attempt)
 
             if not captcha_code:
-                _LOGGER.warning("OCR failed - retrying with new CAPTCHA..." if attempt < max_captcha_attempts else "OCR failed")
+                _LOGGER.warning(
+                    "OCR failed - retrying with new CAPTCHA..." if attempt < max_captcha_attempts else "OCR failed"
+                )
                 if attempt < max_captcha_attempts:
                     continue
                 return None
