@@ -166,6 +166,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 if new_data and new_data.get("statusCode") == 200:
                     # Update coordinator with new data
                     coordinator.data.raw_data = new_data
+                    coordinator.parse_data(new_data)
                     coordinator.data.last_update = datetime.now(CEZ_TIMEZONE)
                     coordinator.async_set_updated_data(coordinator.data)
 

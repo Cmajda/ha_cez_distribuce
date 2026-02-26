@@ -19,7 +19,7 @@
 > Po aktualizaci z verze 3.2.0 nebo starší je nutné:
 >
 > - **Znovu nakonfigurovat integraci**, nebo
-> - **Ručně zkopírovat data:**, z /config/custom_components/cez_hdo/data/*.json do /config/.storage/cez_hdo
+> - **Ručně zkopírovat data:** z /config/custom_components/cez_hdo/data/*.json do /config/.storage/cez_hdo
 >
 >   ```bash
 >   mkdir -p /config/.storage/cez_hdo

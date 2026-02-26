@@ -165,7 +165,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             _LOGGER.debug("CezHdoCoordinator: Initial data saved to cache")
             # Mark as successful fetch today
             self._data_fetch_successful_today = True
-            self._last_attempt_date = date.today()
+            self._last_attempt_date = datetime.now(CEZ_TIMEZONE).date()
             await self._async_save_refresh_state()
         else:
             _LOGGER.debug("CezHdoCoordinator: No initial data found, trying cache")
@@ -277,11 +277,12 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 except ValueError:
                     self._last_attempt_date = None
 
-            # Reset counters if it's a new day
-            if self._last_attempt_date != date.today():
+            # Reset counters if it's a new day (based on CEZ_TIMEZONE)
+            today_cez = datetime.now(CEZ_TIMEZONE).date()
+            if self._last_attempt_date != today_cez:
                 self._daily_attempts = 0
                 self._data_fetch_successful_today = False
-                self._last_attempt_date = date.today()
+                self._last_attempt_date = today_cez
             else:
                 self._daily_attempts = state.get("daily_attempts", 0)
                 self._data_fetch_successful_today = state.get("successful_today", False)
@@ -346,8 +347,8 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         if not self._auto_refresh_enabled:
             return
 
-        # Check if it's a new day - reset counters
-        today = date.today()
+        # Check if it's a new day - reset counters (based on CEZ_TIMEZONE)
+        today = datetime.now(CEZ_TIMEZONE).date()
         if self._last_attempt_date != today:
             self._daily_attempts = 0
             self._data_fetch_successful_today = False

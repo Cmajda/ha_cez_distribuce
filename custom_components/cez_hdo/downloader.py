@@ -150,10 +150,10 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
     Raises:
         OcrRateLimitError: When OCR.space returns 403 (free tier exhausted).
     """
-    _LOGGER.info("=" * 60)
-    _LOGGER.info("STEP 2: Solving CAPTCHA with OCR.space Engine 3...")
-    _LOGGER.info("=" * 60)
-    _LOGGER.info("  Note: Free API limit is 10 requests per 10 minutes")
+    _LOGGER.debug("=" * 60)
+    _LOGGER.debug("STEP 2: Solving CAPTCHA with OCR.space Engine 3...")
+    _LOGGER.debug("=" * 60)
+    _LOGGER.debug("  Note: Free API limit is 10 requests per 10 minutes")
 
     payload = {
         "base64Image": f"data:image/png;base64,{captcha_base64}",
@@ -251,12 +251,12 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
     for attempt in range(1, max_captcha_attempts + 1):
         try:
             # Step 1: Fetch CAPTCHA
-            _LOGGER.info("=" * 60)
-            _LOGGER.info("STEP 1: Downloading CAPTCHA... (attempt %d/%d)", attempt, max_captcha_attempts)
-            _LOGGER.info("=" * 60)
+            _LOGGER.debug("=" * 60)
+            _LOGGER.debug("STEP 1: Downloading CAPTCHA... (attempt %d/%d)", attempt, max_captcha_attempts)
+            _LOGGER.debug("=" * 60)
             captcha_session = fetch_captcha()
-            _LOGGER.info("✓ CAPTCHA downloaded")
-            _LOGGER.info("✓ Cookies saved: %s", list(captcha_session.cookies.keys()))
+            _LOGGER.debug("✓ CAPTCHA downloaded")
+            _LOGGER.debug("✓ Cookies saved: %s", list(captcha_session.cookies.keys()))
 
             # Step 2: Solve CAPTCHA with OCR
             captcha_code = solve_captcha_with_ocr(captcha_session.image_base64, attempt)
@@ -269,11 +269,11 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
                 return None
 
             # Step 3: Call API with solved CAPTCHA
-            _LOGGER.info("=" * 60)
-            _LOGGER.info("STEP 3: Calling CEZ HDO API...")
-            _LOGGER.info("=" * 60)
-            _LOGGER.info("EAN: %s...%s", ean[:2], ean[-2:])
-            _LOGGER.info("CAPTCHA: %s", captcha_code)
+            _LOGGER.debug("=" * 60)
+            _LOGGER.debug("STEP 3: Calling CEZ HDO API...")
+            _LOGGER.debug("=" * 60)
+            _LOGGER.debug("EAN: %s...%s", ean[:2], ean[-2:])
+            _LOGGER.debug("CAPTCHA: %s", captcha_code)
 
             response = validate_ean_with_captcha(ean, captcha_code, captcha_session.cookies)
 
