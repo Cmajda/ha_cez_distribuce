@@ -114,15 +114,9 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         # Use Home Assistant's Store helper for atomic writes and proper storage
         # Storage keys use EAN suffix (last 6 digits) to support multiple instances
         ean_short = ean_suffix(ean)
-        self._cache_store: Store = Store(
-            hass, STORAGE_VERSION, f"{DOMAIN}.cache_{ean_short}"
-        )
-        self._prices_store: Store = Store(
-            hass, STORAGE_VERSION, f"{DOMAIN}.prices_{ean_short}"
-        )
-        self._refresh_state_store: Store = Store(
-            hass, STORAGE_VERSION, f"{DOMAIN}.refresh_state_{ean_short}"
-        )
+        self._cache_store: Store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.cache_{ean_short}")
+        self._prices_store: Store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.prices_{ean_short}")
+        self._refresh_state_store: Store = Store(hass, STORAGE_VERSION, f"{DOMAIN}.refresh_state_{ean_short}")
 
         # Initialize data container
         self.data = CezHdoData()
@@ -579,9 +573,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                         err,
                     )
 
-    async def _async_migrate_file(
-        self, old_subdir: str, filename: str, store: Store, location_name: str
-    ) -> None:
+    async def _async_migrate_file(self, old_subdir: str, filename: str, store: Store, location_name: str) -> None:
         """Migrate a single file from old location to Store."""
         old_file = Path(self.hass.config.path(old_subdir)) / filename
 
@@ -853,9 +845,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self.data.low_tariff_price = low_price
         self.data.high_tariff_price = high_price
 
-        await self._prices_store.async_save(
-            {"low_tariff_price": low_price, "high_tariff_price": high_price}
-        )
+        await self._prices_store.async_save({"low_tariff_price": low_price, "high_tariff_price": high_price})
 
         # Notify listeners that data changed
         self.async_set_updated_data(self.data)

@@ -150,8 +150,6 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
     Raises:
         OcrRateLimitError: When OCR.space returns 403 (free tier exhausted).
     """
-    _LOGGER.debug("Solving CAPTCHA with OCR.space Engine 3 (API limit: 10/10min)")
-
     payload = {
         "base64Image": f"data:image/png;base64,{captcha_base64}",
         "language": "eng",
@@ -166,7 +164,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
     max_ocr_attempts = 10  # Max retries for OCR timeouts
 
     while ocr_attempt <= max_ocr_attempts:
-        _LOGGER.debug("OCR attempt %d/%d...", ocr_attempt, max_ocr_attempts)
+        _LOGGER.debug("OCR Engine 3, attempt %d/%d", ocr_attempt, max_ocr_attempts)
 
         req = urllib.request.Request(OCR_SPACE_API_URL, data=data)
         req.add_header("apikey", OCR_SPACE_API_KEY)
@@ -190,12 +188,11 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
 
             if result.get("ParsedResults"):
                 raw_text = result["ParsedResults"][0].get("ParsedText", "").strip()
-                _LOGGER.debug("OCR raw output: '%s'", raw_text)
 
                 # Filter: only uppercase letters A-Z, no numbers, no special chars
                 text = "".join(c for c in raw_text.upper() if c.isalpha() and c.isascii())
 
-                _LOGGER.debug("OCR filtered: '%s'", text)
+                _LOGGER.debug("OCR: raw='%s' → filtered='%s'", raw_text, text)
 
                 # CAPTCHA must be exactly 4 characters
                 if len(text) != 4:
@@ -263,7 +260,7 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
                 return None
 
             # Step 3: Call API with solved CAPTCHA
-            _LOGGER.debug("Calling CEZ API with EAN %s...%s, CAPTCHA %s", ean[:2], ean[-2:], captcha_code)
+            _LOGGER.debug("CEZ API: EAN %s...%s, CAPTCHA %s", ean[:2], ean[-2:], captcha_code)
 
             response = validate_ean_with_captcha(ean, captcha_code, captcha_session.cookies)
 
@@ -632,10 +629,7 @@ def isHdo(
             high_duration = timedelta(0)
 
             _LOGGER.debug(
-                "[NT] IN LOW TARIFF: %s-%s, remaining: %s",
-                low_start,
-                low_end,
-                format_duration(low_duration),
+                "NT active: %s-%s, remaining %s", low_start, low_end, format_duration(low_duration)
             )
         else:
             high_tariff_active = True
@@ -664,11 +658,8 @@ def isHdo(
                 low_duration = timedelta(0)
 
                 _LOGGER.debug(
-                    "[VT] IN HIGH TARIFF: %s-%s, remaining: %s, next low: %s",
-                    high_start,
-                    high_end,
-                    format_duration(high_duration),
-                    low_start,
+                    "VT active: %s-%s, remaining %s, next NT: %s",
+                    high_start, high_end, format_duration(high_duration), low_start
                 )
             else:
                 _LOGGER.error("Could not determine next low tariff period")
