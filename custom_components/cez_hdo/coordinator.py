@@ -290,7 +290,12 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             next_time_str = state.get("next_attempt_time")
             if next_time_str:
                 try:
-                    self._next_attempt_time = datetime.fromisoformat(next_time_str)
+                    parsed_next = datetime.fromisoformat(next_time_str)
+                    # Ensure timezone-aware datetime
+                    if parsed_next.tzinfo is None:
+                        self._next_attempt_time = parsed_next.replace(tzinfo=CEZ_TIMEZONE)
+                    else:
+                        self._next_attempt_time = parsed_next
                 except ValueError:
                     self._next_attempt_time = None
 
@@ -765,7 +770,12 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             if "data" in cache_data and "timestamp" in cache_data:
                 raw_data = cache_data["data"]
                 try:
-                    self.data.last_update = datetime.fromisoformat(cache_data["timestamp"])
+                    parsed_ts = datetime.fromisoformat(cache_data["timestamp"])
+                    # Ensure timezone-aware datetime (old cache may have naive datetime)
+                    if parsed_ts.tzinfo is None:
+                        self.data.last_update = parsed_ts.replace(tzinfo=CEZ_TIMEZONE)
+                    else:
+                        self.data.last_update = parsed_ts
                 except Exception:
                     self.data.last_update = datetime.now(CEZ_TIMEZONE)
                 _LOGGER.debug(
