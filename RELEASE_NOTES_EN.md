@@ -4,12 +4,24 @@
 
 ## v3.2.1 (2026-02-26)
 
+### 🚨 Breaking Changes
+
+- **Cache location changed** from `custom_components/cez_hdo/data/` to `.storage/cez_hdo/`
+- After update, you need to:
+
+> - **Reconfigure the integration**, or
+> - **Manually copy data:**, from /config/custom_components/cez_hdo/data/*.json to /config/.storage/cez_hdo
+>
+>   ```bash
+>   mkdir -p /config/.storage/cez_hdo
+>   cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
+>   ```
+
 ### 🐛 Fixes
 
 #### Data survives integration updates
 
 - **Cache moved to `.storage/cez_hdo/`** – data (HDO schedule, prices, auto-refresh state) is now stored in a safe location
-- **Automatic migration** – data is automatically migrated from the old location on first start (if it exists)
 - **Fixed:** Future updates via HACS will no longer delete saved data
 
 ### ⚠️ Important for users updating from 3.2.0
@@ -18,8 +30,13 @@
 
 **Solution:**
 
-- Wait for automatic refresh (runs automatically within 1-2 hours and fetches new data using OCR)
-- Or reconfigure the integration
+- Reconfigure the integration, or
+- Manually copy data:
+
+  ```bash
+  mkdir -p /config/.storage/cez_hdo
+  cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
+  ```
 
 ---
 

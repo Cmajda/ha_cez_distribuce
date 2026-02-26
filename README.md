@@ -14,12 +14,13 @@
 > ℹ️ **AUTOMATICKÉ OBNOVOVÁNÍ DAT:** Od verze 3.2.1 integrace automaticky obnovuje HDO data.
 > Při konfiguraci zadáte kód z CAPTCHA obrázku. Data se pak obnovují automaticky.
 > Data jsou uložena v `.storage/cez_hdo/` a přežijí aktualizace přes HACS.
-
-> 🚨 **BREAKING CHANGE v3.2.1:** Změna umístění cache z `custom_components/cez_hdo/data/` na `.storage/cez_hdo/`.
+---
+> 🚨 **BREAKING CHANGE v3.2.X:** Změna umístění cache z `custom_components/cez_hdo/data/` na `.storage/cez_hdo/`.
 > Po aktualizaci z verze 3.2.0 nebo starší je nutné:
-> - **Počkat na auto-refresh** (do 1-2 hodin se data načtou automaticky pomocí OCR), nebo
+>
 > - **Znovu nakonfigurovat integraci**, nebo
-> - **Ručně zkopírovat data:**
+> - **Ručně zkopírovat data:**, z /config/custom_components/cez_hdo/data/*.json do /config/.storage/cez_hdo
+>
 >   ```bash
 >   mkdir -p /config/.storage/cez_hdo
 >   cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
