@@ -11,20 +11,13 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **AUTOMATICKÉ OBNOVOVÁNÍ DAT:** Od verze 3.2.1 integrace automaticky obnovuje HDO data.
+> ℹ️ **AUTOMATICKÉ OBNOVOVÁNÍ DAT:** Od verze 3.2.X integrace automaticky obnovuje HDO data.
 > Při konfiguraci zadáte kód z CAPTCHA obrázku. Data se pak obnovují automaticky.
-> Data jsou uložena v `.storage/cez_hdo/` a přežijí aktualizace přes HACS.
+> Nová umístění souborů (spravuje Home Assistant automaticky) v `.storage` a přežijí aktualizace přes HACS.
 ---
-> 🚨 **BREAKING CHANGE v3.2.X:** Změna umístění cache z `custom_components/cez_hdo/data/` na `.storage/cez_hdo/`.
-> Po aktualizaci z verze 3.2.0 nebo starší je nutné:
->
-> - **Znovu nakonfigurovat integraci**, nebo
-> - **Ručně zkopírovat data:** z /config/custom_components/cez_hdo/data/*.json do /config/.storage/cez_hdo
->
->   ```bash
->   mkdir -p /config/.storage/cez_hdo
->   cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
->   ```
+> 🚨 **BREAKING CHANGE v3.2.X:** Změna umístění cache z `custom_components/cez_hdo/data/` na `.storage`.
+> Po aktualizaci z verze 3.2.0 nebo starší je nutné: **Znovu nakonfigurovat integraci**
+> znovu zadat ceny pro NT a VT
 
 🇬🇧 [English version](README_EN.md)
 

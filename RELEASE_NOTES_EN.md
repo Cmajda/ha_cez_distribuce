@@ -2,6 +2,47 @@
 
 ---
 
+## v3.2.2 (2026-02-26)
+
+### 🚀 Main Changes
+
+#### Migration to Home Assistant Store API
+
+- **New data storage system** – integration now uses native Home Assistant Store helper
+- **Atomic writes** – data is saved safely without risk of corruption during outages
+- **Automatic management** – HA handles file locations in `.storage/`
+
+#### Improved Logging
+
+- **Detailed API logs** – each step of the process is now logged with attempt number
+- **Structured messages** – clear information about what's happening (API calls, results)
+- **Removed misleading log** – "Manually updated" no longer appears every 5 seconds
+
+### 🐛 Fixes
+
+- **Fixed diagnostics** – works correctly with new Store API
+- **Removed unused code** – cleaned up legacy files and functions
+
+### 🌐 Localization
+
+- **Services translated to English** – `services.yaml` now in English per HA best practices
+- **Service localization** – Czech service translations moved to `translations/cs.json`
+- **Comments in English** – all code comments are now in English
+
+### 📁 Data Storage Changes
+
+New file locations (managed automatically by Home Assistant):
+
+| File          | New Location                            |
+| ------------- | --------------------------------------- |
+| Data cache    | `.storage/cez_hdo.cache_XXXXXX`         |
+| Prices        | `.storage/cez_hdo.prices_XXXXXX`        |
+| Refresh state | `.storage/cez_hdo.refresh_state_XXXXXX` |
+
+> **Note:** `XXXXXX` = last 6 digits of EAN
+
+---
+
 ## v3.2.1 (2026-02-26)
 
 ### 🚨 Breaking Changes

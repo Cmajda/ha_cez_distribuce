@@ -11,20 +11,13 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **AUTOMATIC DATA REFRESH:** From version 3.2.1, the integration automatically refreshes HDO data.
+> ℹ️ **AUTOMATIC DATA REFRESH:** From version 3.2.X, the integration automatically refreshes HDO data.
 > During configuration, you will enter a code from the CAPTCHA image. Data is then refreshed automatically.
-> Data is stored in `.storage/cez_hdo/` and survives updates via HACS.
+> New file locations (managed automatically by Home Assistant) in `.storage` survive updates via HACS.
 ---
-> 🚨 **BREAKING CHANGE v3.2.X:** Cache location changed from `custom_components/cez_hdo/data/` to `.storage/cez_hdo/`.
-> After updating from version 3.2.0 or older, you need to:
->
-> - **Reconfigure the integration**, or
-> - **Manually copy data:** from /config/custom_components/cez_hdo/data/*.json to /config/.storage/cez_hdo
->
->   ```bash
->   mkdir -p /config/.storage/cez_hdo
->   cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
->   ```
+> 🚨 **BREAKING CHANGE v3.2.X:** Cache location changed from `custom_components/cez_hdo/data/` to `.storage`.
+> After updating from version 3.2.0 or older, you need to: **Reconfigure the integration**
+> and re-enter prices for NT and VT
 
 🇨🇿 [Česká verze](README.md)
 

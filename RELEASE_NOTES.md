@@ -2,6 +2,47 @@
 
 ---
 
+## v3.2.2 (2026-02-26)
+
+### 🚀 Hlavní změny
+
+#### Migrace na Home Assistant Store API
+
+- **Nový systém ukládání dat** – integrace nyní používá nativní Home Assistant Store helper
+- **Atomické zápisy** – data jsou ukládána bezpečně bez rizika poškození při výpadku
+- **Automatická správa** – HA se stará o umístění souborů v `.storage/`
+
+#### Vylepšené logování
+
+- **Detailnější logy API** – každý krok procesu je nyní logován s číslem pokusu
+- **Strukturované zprávy** – jasné informace o tom, co se děje (API volání, výsledky)
+- **Odstraněn zavádějící log** – "Manually updated" se již nezobrazuje každých 5 sekund
+
+### 🐛 Opravy
+
+- **Opravena diagnostika** – funguje správně s novým Store API
+- **Odstraněn nepoužívaný kód** – vyčištěny legacy soubory a funkce
+
+### 🌐 Lokalizace
+
+- **Služby přeloženy do angličtiny** – `services.yaml` nyní v angličtině dle HA best practices
+- **Lokalizace služeb** – české překlady služeb přesunuty do `translations/cs.json`
+- **Komentáře v angličtině** – veškeré komentáře v kódu jsou nyní anglicky
+
+### 📁 Změny v ukládání dat
+
+Nová umístění souborů (spravuje Home Assistant automaticky):
+
+| Soubor       | Nové umístění                           |
+| ------------ | --------------------------------------- |
+| Cache dat    | `.storage/cez_hdo.cache_XXXXXX`         |
+| Ceny         | `.storage/cez_hdo.prices_XXXXXX`        |
+| Stav refresh | `.storage/cez_hdo.refresh_state_XXXXXX` |
+
+> **Poznámka:** `XXXXXX` = posledních 6 číslic EAN
+
+---
+
 ## v3.2.1 (2026-02-26)
 
 ### 🚨 Breaking Changes
