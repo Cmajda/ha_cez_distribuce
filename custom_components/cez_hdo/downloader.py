@@ -670,8 +670,6 @@ def isHdo(
             high_start = low_end
             high_end = next_low[0].time() if next_low is not None else None
             high_duration = timedelta(0)
-
-            _LOGGER.debug("NT active: %s-%s, remaining %s", low_start, low_end, format_duration(low_duration))
         else:
             high_tariff_active = True
 
@@ -697,14 +695,6 @@ def isHdo(
                 low_start = next_low[0].time()
                 low_end = next_low[1].time()
                 low_duration = timedelta(0)
-
-                _LOGGER.debug(
-                    "VT active: %s-%s, remaining %s, next NT: %s",
-                    high_start,
-                    high_end,
-                    format_duration(high_duration),
-                    low_start,
-                )
             else:
                 _LOGGER.error("Could not determine next low tariff period")
 
