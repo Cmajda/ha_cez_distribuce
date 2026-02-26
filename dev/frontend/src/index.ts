@@ -5,11 +5,11 @@
  */
 
 // Import components
-import './cez-hdo-card';
-import './cez-hdo-card-editor';
+import "./cez-hdo-card";
+import "./cez-hdo-card-editor";
 
 // Version info
-const VERSION = '3.0.0-RC.2';
+import { VERSION } from "./version";
 
 // Log successful load
 console.info(`ČEZ HDO Card v${VERSION} loaded successfully`);

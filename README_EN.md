@@ -19,7 +19,7 @@
 > After updating from version 3.2.0 or older, you need to:
 >
 > - **Reconfigure the integration**, or
-> - **Manually copy data:**, from /config/custom_components/cez_hdo/data/*.json to /config/.storage/cez_hdo
+> - **Manually copy data:** from /config/custom_components/cez_hdo/data/*.json to /config/.storage/cez_hdo
 >
 >   ```bash
 >   mkdir -p /config/.storage/cez_hdo

@@ -21,7 +21,7 @@ DOMAIN = "cez_hdo"
 # Keys for hass.data[DOMAIN]
 DATA_COORDINATOR = "coordinator"
 
-# Configuration schema - integrace se konfiguruje pouze přes platformy
+# Configuration schema - integration is configured only through platforms
 CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXTRA)
 
 
@@ -56,7 +56,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         """Service to list available signals for given EAN."""
         ean = call.data.get("ean")
         if not ean:
-            _LOGGER.error("EAN parameter is required for list_signals service")
+            _LOGGER.error("CEZ HDO: EAN parameter is required for list_signals service")
             return
 
         import requests
@@ -165,9 +165,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
                 if new_data and new_data.get("statusCode") == 200:
                     # Update coordinator with new data
-                    coordinator.data.raw_data = new_data
                     coordinator.parse_data(new_data)
                     coordinator.data.last_update = datetime.now(CEZ_TIMEZONE)
+                    coordinator.data.raw_data = new_data
                     coordinator.async_set_updated_data(coordinator.data)
 
                     # Save to cache
@@ -262,7 +262,7 @@ PLATFORMS = ["sensor", "binary_sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up ČEZ HDO from a config entry."""
-    _LOGGER.debug("async_setup_entry Start for %s", entry.entry_id)
+    _LOGGER.debug("CEZ HDO: async_setup_entry Start for %s", entry.entry_id)
 
     # Register frontend card
     cards = CezHdoCardRegistration(hass)
@@ -275,7 +275,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     auto_refresh = entry.data.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
 
     if not ean:
-        _LOGGER.error("No EAN in config entry")
+        _LOGGER.error("CEZ HDO: No EAN in config entry")
         return False
 
     # Create coordinator
@@ -305,13 +305,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Forward setup to platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    _LOGGER.debug("async_setup_entry Complete for %s", entry.entry_id)
+    _LOGGER.debug("CEZ HDO: async_setup_entry Complete for %s", entry.entry_id)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    _LOGGER.debug("async_unload_entry for %s", entry.entry_id)
+    _LOGGER.debug("CEZ HDO: async_unload_entry for %s", entry.entry_id)
 
     # Stop state updates and auto-refresh on coordinator before unloading
     entry_data = hass.data[DOMAIN].get(entry.entry_id, {})
@@ -332,5 +332,5 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         cards = CezHdoCardRegistration(hass)
         await cards.async_unregister()
 
-    _LOGGER.debug("async_unload_entry Done for %s", entry.entry_id)
+    _LOGGER.debug("CEZ HDO: async_unload_entry Done for %s", entry.entry_id)
     return unload_ok

@@ -52,7 +52,7 @@
                 "data_description": {
                     "low_tariff_price": "Cena za kWh v nízkém tarifu",
                     "high_tariff_price": "Cena za kWh ve vysokém tarifu",
-                    "auto_refresh": "Povolit automatické obnovení HDO dat pomocí OCR (max. 24 pokusů denně)"
+                    "auto_refresh": "Povolit automatické obnovení HDO dat (max. 24 pokusů denně)"
                 }
             }
         },
@@ -113,7 +113,7 @@
                 "data_description": {
                     "low_tariff_price": "Cena za kWh v nízkém tarifu",
                     "high_tariff_price": "Cena za kWh ve vysokém tarifu",
-                    "auto_refresh": "Povolit automatické obnovení HDO dat pomocí OCR (max. 24 pokusů denně)"
+                    "auto_refresh": "Povolit automatické obnovení HDO dat (max. 24 pokusů denně)"
                 }
             }
         },
@@ -175,6 +175,46 @@
             },
             "datavalid": {
                 "name": "Data platná"
+            }
+        }
+    },
+    "services": {
+        "refresh_data": {
+            "name": "Obnovit HDO data",
+            "description": "Manuálně obnoví HDO data pomocí OCR pro vyřešení CAPTCHA. Toto volání se NEPOČÍTÁ do denního limitu 24 pokusů.",
+            "fields": {
+                "entry_id": {
+                    "name": "ID záznamu",
+                    "description": "ID konfiguračního záznamu (volitelné - pokud není zadáno, obnoví všechny)"
+                }
+            }
+        },
+        "list_signals": {
+            "name": "Zobrazit dostupné signály",
+            "description": "Zobrazí seznam dostupných HDO signálů pro zadané EAN číslo v logách Home Assistant",
+            "fields": {
+                "ean": {
+                    "name": "EAN číslo",
+                    "description": "EAN číslo odběrného místa (najdete na faktuře)"
+                }
+            }
+        },
+        "reload_frontend_card": {
+            "name": "Obnovit frontend kartu",
+            "description": "Aktualizuje frontend kartu ČEZ HDO (užitečné při vývoji)"
+        },
+        "set_prices": {
+            "name": "Nastavit ceny tarifů",
+            "description": "Nastaví ceny za kWh pro nízký a vysoký tarif, které se použijí v senzoru aktuální ceny",
+            "fields": {
+                "low_tariff_price": {
+                    "name": "Cena nízkého tarifu",
+                    "description": "Cena za kWh v nízkém tarifu (NT)"
+                },
+                "high_tariff_price": {
+                    "name": "Cena vysokého tarifu",
+                    "description": "Cena za kWh ve vysokém tarifu (VT)"
+                }
             }
         }
     }

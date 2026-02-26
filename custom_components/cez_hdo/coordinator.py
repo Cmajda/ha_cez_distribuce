@@ -242,6 +242,12 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             self._next_attempt_time = None
             _LOGGER.debug("CezHdoCoordinator: Stopped auto-refresh scheduling")
 
+    @staticmethod
+    def _read_json_file(file_path: Path) -> dict[str, Any]:
+        """Read JSON file synchronously (for use with async_add_executor_job)."""
+        with open(file_path, encoding="utf-8") as f:
+            return json.load(f)
+
     # --- Public API methods (wrappers for private methods) ---
 
     async def async_save_to_cache(self, data: dict[str, Any]) -> None:
@@ -455,9 +461,6 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 # Notify listeners
                 self.async_set_updated_data(self.data)
 
-                # Show success notification
-                await self._show_auto_refresh_notification(success=True)
-
                 # Log next refresh info
                 _LOGGER.info(
                     "CezHdoCoordinator: Next auto-refresh scheduled for tomorrow after %02d:00",
@@ -471,6 +474,9 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                     MAX_DAILY_OCR_ATTEMPTS,
                 )
 
+                # Check if we should show failure notification (last day + no more attempts)
+                await self._check_auto_refresh_failure_notification()
+
                 # Schedule next attempt with minimum delay (log as warning)
                 await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
 
@@ -479,6 +485,8 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 "CezHdoCoordinator: Auto-refresh error: %s",
                 err,
             )
+            # Check if we should show failure notification (last day + no more attempts)
+            await self._check_auto_refresh_failure_notification()
             # Schedule next attempt with minimum delay (log as warning)
             await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
 
@@ -486,22 +494,50 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         await self._async_save_refresh_state()
 
     async def _show_auto_refresh_notification(self, success: bool) -> None:
-        """Show notification about auto-refresh result."""
+        """Show notification about auto-refresh failure requiring manual reconfiguration."""
         lang = self.hass.config.language or "en"
 
-        if success:
+        if not success:
             if lang == "cs":
-                title = "ČEZ HDO - Data aktualizována"
-                message = "HDO data byla úspěšně automaticky obnovena pomocí OCR."
+                title = "ČEZ HDO - Automatické obnovení selhalo"
+                message = (
+                    "Automatické obnovení HDO dat selhalo a data brzy vyprší. "
+                    "Prosím ručně překonfigurujte integraci v Nastavení > Zařízení a služby > ČEZ HDO."
+                )
             else:
-                title = "ČEZ HDO - Data Updated"
-                message = "HDO data has been automatically refreshed using OCR."
+                title = "ČEZ HDO - Auto-refresh failed"
+                message = (
+                    "Automatic HDO data refresh has failed and data is about to expire. "
+                    "Please manually reconfigure the integration in Settings > Devices & Services > ČEZ HDO."
+                )
 
             await self._show_notification(
                 title=title,
                 message=message,
-                notification_id=f"cez_hdo_auto_refresh_{self.ean}",
+                notification_id=f"cez_hdo_auto_refresh_failed_{self.ean}",
             )
+
+    async def _check_auto_refresh_failure_notification(self) -> None:
+        """Check if we should show a failure notification.
+
+        Shows notification when:
+        - Data is on last day of validity (day 5+)
+        - AND no more auto-refresh attempts are available today
+        """
+        # Check if no more attempts available
+        if self._daily_attempts < MAX_DAILY_OCR_ATTEMPTS:
+            return  # Still have attempts left
+
+        # Check if data is on last day of validity
+        if self.data.last_update is None:
+            return
+
+        data_age = datetime.now(CEZ_TIMEZONE) - self.data.last_update
+        days_old = data_age.days
+
+        # Show notification only on last day (day 5+)
+        if days_old >= DATA_WARNING_DAYS:
+            await self._show_auto_refresh_notification(success=False)
 
     @callback
     def _async_recalculate_state(self, _now: datetime | None = None) -> None:
@@ -547,8 +583,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
             if old_cache_file.exists():
                 try:
-                    with open(old_cache_file, encoding="utf-8") as f:
-                        old_data = json.load(f)
+                    old_data = await self.hass.async_add_executor_job(self._read_json_file, old_cache_file)
 
                     # Save to new Store
                     await self._cache_store.async_save(old_data)
@@ -584,8 +619,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 if existing:
                     return
 
-                with open(old_file, encoding="utf-8") as f:
-                    old_data = json.load(f)
+                old_data = await self.hass.async_add_executor_job(self._read_json_file, old_file)
                 await store.async_save(old_data)
                 _LOGGER.debug(
                     "CezHdoCoordinator: Migrated %s from %s",

@@ -251,10 +251,11 @@ if [ -d "$FRONTEND_DEV_DIR" ]; then
         npm run build:prod
         echo -e "${GREEN}✅ Frontend build completed${NC}"
 
-        # Copy built files to component source directory
+        # Copy built files to component source directory (excluding source maps)
         if [ -f "$FRONTEND_DEV_DIR/dist/cez-hdo-card.js" ]; then
             mkdir -p "$FRONTEND_COMPONENT_DIR"
-            cp "$FRONTEND_DEV_DIR/dist"/* "$FRONTEND_COMPONENT_DIR/"
+            cp "$FRONTEND_DEV_DIR/dist/cez-hdo-card.js" "$FRONTEND_COMPONENT_DIR/"
+            [ -f "$FRONTEND_DEV_DIR/dist/cez-hdo-card.js.LICENSE.txt" ] && cp "$FRONTEND_DEV_DIR/dist/cez-hdo-card.js.LICENSE.txt" "$FRONTEND_COMPONENT_DIR/"
             echo -e "${GREEN}✅ Frontend copied to component source: $FRONTEND_COMPONENT_DIR${NC}"
         fi
     else

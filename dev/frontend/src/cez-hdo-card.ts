@@ -3,13 +3,17 @@
  *
  * Displays HDO (Hromadné Dálkové Ovládání) tariff information from ČEZ Distribuce.
  *
- * @version 3.0.0-RC.2
+ * @see ./version.ts for version number
  * @author ČEZ HDO Integration Contributors
  */
 
-import { LitElement, html, css, CSSResultGroup } from 'lit';
-import { customElement, property, state } from 'lit/decorators.js';
-import { getTranslations, getLanguageFromHass, TranslationStrings } from './localization';
+import { css, CSSResultGroup, html, LitElement } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
+import {
+    getLanguageFromHass,
+    getTranslations,
+    TranslationStrings,
+} from "./localization";
 
 // Type definitions
 interface HassEntity {
@@ -19,7 +23,11 @@ interface HassEntity {
 
 interface HomeAssistant {
   states: Record<string, HassEntity>;
-  callService: (domain: string, service: string, data: Record<string, unknown>) => Promise<void>;
+  callService: (
+    domain: string,
+    service: string,
+    data: Record<string, unknown>,
+  ) => Promise<void>;
   language?: string;
   locale?: {
     language: string;
@@ -60,46 +68,49 @@ interface ScheduleItem {
 }
 
 // Entity prefixes for dynamic discovery (new format: cez_hdo_{type}_{ean4}_{signal})
-const ENTITY_PREFIXES: Record<keyof EntityConfig, { domain: string; prefix: string }> = {
-  low_tariff: { domain: 'binary_sensor', prefix: 'cez_hdo_lowtariffactive_' },
-  high_tariff: { domain: 'binary_sensor', prefix: 'cez_hdo_hightariffactive_' },
-  low_start: { domain: 'sensor', prefix: 'cez_hdo_lowtariffstart_' },
-  low_end: { domain: 'sensor', prefix: 'cez_hdo_lowtariffend_' },
-  low_duration: { domain: 'sensor', prefix: 'cez_hdo_lowtariffduration_' },
-  high_start: { domain: 'sensor', prefix: 'cez_hdo_hightariffstart_' },
-  high_end: { domain: 'sensor', prefix: 'cez_hdo_hightariffend_' },
-  high_duration: { domain: 'sensor', prefix: 'cez_hdo_hightariffduration_' },
-  schedule: { domain: 'sensor', prefix: 'cez_hdo_schedule_' },
+const ENTITY_PREFIXES: Record<
+  keyof EntityConfig,
+  { domain: string; prefix: string }
+> = {
+  low_tariff: { domain: "binary_sensor", prefix: "cez_hdo_lowtariffactive_" },
+  high_tariff: { domain: "binary_sensor", prefix: "cez_hdo_hightariffactive_" },
+  low_start: { domain: "sensor", prefix: "cez_hdo_lowtariffstart_" },
+  low_end: { domain: "sensor", prefix: "cez_hdo_lowtariffend_" },
+  low_duration: { domain: "sensor", prefix: "cez_hdo_lowtariffduration_" },
+  high_start: { domain: "sensor", prefix: "cez_hdo_hightariffstart_" },
+  high_end: { domain: "sensor", prefix: "cez_hdo_hightariffend_" },
+  high_duration: { domain: "sensor", prefix: "cez_hdo_hightariffduration_" },
+  schedule: { domain: "sensor", prefix: "cez_hdo_schedule_" },
 };
 
 // Legacy default entity mappings (deprecated - for backwards compatibility only)
 // These will NOT match actual entities - dynamic discovery is preferred
 // Empty strings force dynamic entity discovery and prevent fallback to non-existent entities
 const DEFAULT_ENTITIES: Required<EntityConfig> = {
-  low_tariff: '',
-  high_tariff: '',
-  low_start: '',
-  low_end: '',
-  low_duration: '',
-  high_start: '',
-  high_end: '',
-  high_duration: '',
-  schedule: '',
+  low_tariff: "",
+  high_tariff: "",
+  low_start: "",
+  low_end: "",
+  low_duration: "",
+  high_start: "",
+  high_end: "",
+  high_duration: "",
+  schedule: "",
 };
 
-@customElement('cez-hdo-card')
+@customElement("cez-hdo-card")
 export class CezHdoCard extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @state() private config!: CardConfig;
 
   static getConfigElement(): HTMLElement {
-    return document.createElement('cez-hdo-card-editor');
+    return document.createElement("cez-hdo-card-editor");
   }
 
   static getStubConfig(): CardConfig {
     return {
-      type: 'custom:cez-hdo-card',
-      title: 'ČEZ HDO Status',
+      type: "custom:cez-hdo-card",
+      title: "ČEZ HDO Status",
       show_times: true,
       show_duration: true,
       compact_mode: false,
@@ -111,7 +122,7 @@ export class CezHdoCard extends LitElement {
     if (!config.entities) {
       config = {
         entities: {},
-        title: 'ČEZ HDO Status',
+        title: "ČEZ HDO Status",
         show_times: true,
         show_duration: true,
         compact_mode: false,
@@ -130,7 +141,9 @@ export class CezHdoCard extends LitElement {
     if (!prefixConfig) return [];
 
     const fullPrefix = `${prefixConfig.domain}.${prefixConfig.prefix}`;
-    return Object.keys(this.hass.states).filter(id => id.startsWith(fullPrefix));
+    return Object.keys(this.hass.states).filter((id) =>
+      id.startsWith(fullPrefix),
+    );
   }
 
   /**
@@ -160,28 +173,30 @@ export class CezHdoCard extends LitElement {
   }
 
   private getEntityState(entityId: string | undefined): string {
-    if (!entityId || !this.hass) return 'unavailable';
+    if (!entityId || !this.hass) return "unavailable";
     const entity = this.hass.states[entityId];
-    return entity ? entity.state : 'unavailable';
+    return entity ? entity.state : "unavailable";
   }
 
   private isEntityOn(entityId: string | undefined): boolean {
-    return this.getEntityState(entityId) === 'on';
+    return this.getEntityState(entityId) === "on";
   }
 
   /**
    * Get tariff prices from schedule sensor attributes
    */
   private getPricesFromSensor(): { low: number; high: number } {
-    const scheduleEntity = this.resolveEntity('schedule');
-    const scheduleState = scheduleEntity ? this.hass?.states[scheduleEntity] : undefined;
+    const scheduleEntity = this.resolveEntity("schedule");
+    const scheduleState = scheduleEntity
+      ? this.hass?.states[scheduleEntity]
+      : undefined;
 
     if (scheduleState?.attributes) {
       const low = scheduleState.attributes.low_tariff_price;
       const high = scheduleState.attributes.high_tariff_price;
       return {
-        low: typeof low === 'number' ? low : 0,
-        high: typeof high === 'number' ? high : 0,
+        low: typeof low === "number" ? low : 0,
+        high: typeof high === "number" ? high : 0,
       };
     }
     return { low: 0, high: 0 };
@@ -198,15 +213,15 @@ export class CezHdoCard extends LitElement {
 
     // Resolve entities dynamically
     const resolvedEntities = {
-      low_tariff: this.resolveEntity('low_tariff'),
-      high_tariff: this.resolveEntity('high_tariff'),
-      low_start: this.resolveEntity('low_start'),
-      low_end: this.resolveEntity('low_end'),
-      low_duration: this.resolveEntity('low_duration'),
-      high_start: this.resolveEntity('high_start'),
-      high_end: this.resolveEntity('high_end'),
-      high_duration: this.resolveEntity('high_duration'),
-      schedule: this.resolveEntity('schedule'),
+      low_tariff: this.resolveEntity("low_tariff"),
+      high_tariff: this.resolveEntity("high_tariff"),
+      low_start: this.resolveEntity("low_start"),
+      low_end: this.resolveEntity("low_end"),
+      low_duration: this.resolveEntity("low_duration"),
+      high_start: this.resolveEntity("high_start"),
+      high_end: this.resolveEntity("high_end"),
+      high_duration: this.resolveEntity("high_duration"),
+      schedule: this.resolveEntity("schedule"),
     };
 
     const lowTariffActive = this.isEntityOn(resolvedEntities.low_tariff);
@@ -218,7 +233,7 @@ export class CezHdoCard extends LitElement {
     const highEnd = this.getEntityState(resolvedEntities.high_end);
     const highDuration = this.getEntityState(resolvedEntities.high_duration);
 
-    const title = this.config.title || 'ČEZ HDO';
+    const title = this.config.title || "ČEZ HDO";
     const showTimes = this.config.show_times !== false;
     const showDuration = this.config.show_duration !== false;
     const compactMode = this.config.compact_mode === true;
@@ -235,67 +250,97 @@ export class CezHdoCard extends LitElement {
     const showTariffStatus = this.config.show_tariff_status !== false;
 
     return html`
-      <ha-card class="${compactMode ? 'compact' : ''}">
-        ${title && showTitle ? html`<div class="card-header">${title}</div>` : ''}
-
-        ${showTariffStatus ? html`
-          <div class="status-container">
-            <div class="status-item ${lowTariffActive ? 'active low-tariff' : 'inactive'}">
-              <div class="status-title">${t.lowTariff}</div>
-              <div class="status-value">${lowTariffActive ? t.active : t.inactive}</div>
-              ${showTariffPrices && lowTariffPrice > 0 ? html`<div class="status-price">${lowTariffPrice} ${t.currency}</div>` : ''}
-            </div>
-            <div class="status-item ${highTariffActive ? 'active high-tariff' : 'inactive'}">
-              <div class="status-title">${t.highTariff}</div>
-              <div class="status-value">${highTariffActive ? t.active : t.inactive}</div>
-              ${showTariffPrices && highTariffPrice > 0 ? html`<div class="status-price">${highTariffPrice} ${t.currency}</div>` : ''}
-            </div>
-          </div>
-        ` : ''}
-
-        ${showTimes || showDuration ? html`
-          <div class="details-container">
-            ${showTimes ? html`
-              <div class="detail-item">
-                <span class="detail-label">${t.ntStart}</span>
-                <span class="detail-value">${lowStart}</span>
+      <ha-card class="${compactMode ? "compact" : ""}">
+        ${title && showTitle
+          ? html`<div class="card-header">${title}</div>`
+          : ""}
+        ${showTariffStatus
+          ? html`
+              <div class="status-container">
+                <div
+                  class="status-item ${lowTariffActive
+                    ? "active low-tariff"
+                    : "inactive"}"
+                >
+                  <div class="status-title">${t.lowTariff}</div>
+                  <div class="status-value">
+                    ${lowTariffActive ? t.active : t.inactive}
+                  </div>
+                  ${showTariffPrices && lowTariffPrice > 0
+                    ? html`<div class="status-price">
+                        ${lowTariffPrice} ${t.currency}
+                      </div>`
+                    : ""}
+                </div>
+                <div
+                  class="status-item ${highTariffActive
+                    ? "active high-tariff"
+                    : "inactive"}"
+                >
+                  <div class="status-title">${t.highTariff}</div>
+                  <div class="status-value">
+                    ${highTariffActive ? t.active : t.inactive}
+                  </div>
+                  ${showTariffPrices && highTariffPrice > 0
+                    ? html`<div class="status-price">
+                        ${highTariffPrice} ${t.currency}
+                      </div>`
+                    : ""}
+                </div>
               </div>
-              <div class="detail-item">
-                <span class="detail-label">${t.vtStart}</span>
-                <span class="detail-value">${highStart}</span>
+            `
+          : ""}
+        ${showTimes || showDuration
+          ? html`
+              <div class="details-container">
+                ${showTimes
+                  ? html`
+                      <div class="detail-item">
+                        <span class="detail-label">${t.ntStart}</span>
+                        <span class="detail-value">${lowStart}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">${t.vtStart}</span>
+                        <span class="detail-value">${highStart}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">${t.ntEnd}</span>
+                        <span class="detail-value">${lowEnd}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">${t.vtEnd}</span>
+                        <span class="detail-value">${highEnd}</span>
+                      </div>
+                    `
+                  : ""}
+                ${showDuration
+                  ? html`
+                      <div class="detail-item">
+                        <span class="detail-label">${t.ntRemaining}</span>
+                        <span class="detail-value">${lowDuration}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">${t.vtRemaining}</span>
+                        <span class="detail-value">${highDuration}</span>
+                      </div>
+                    `
+                  : ""}
               </div>
-              <div class="detail-item">
-                <span class="detail-label">${t.ntEnd}</span>
-                <span class="detail-value">${lowEnd}</span>
+            `
+          : ""}
+        ${showPrice
+          ? html`
+              <div class="price-container">
+                <div class="price-item ${lowTariffActive ? "active" : ""}">
+                  <span class="price-label">${t.currentPrice}</span>
+                  <span class="price-value">${currentPrice} ${t.currency}</span>
+                  <span class="price-tariff"
+                    >${lowTariffActive ? t.lowTariff : t.highTariff}</span
+                  >
+                </div>
               </div>
-              <div class="detail-item">
-                <span class="detail-label">${t.vtEnd}</span>
-                <span class="detail-value">${highEnd}</span>
-              </div>
-            ` : ''}
-            ${showDuration ? html`
-              <div class="detail-item">
-                <span class="detail-label">${t.ntRemaining}</span>
-                <span class="detail-value">${lowDuration}</span>
-              </div>
-              <div class="detail-item">
-                <span class="detail-label">${t.vtRemaining}</span>
-                <span class="detail-value">${highDuration}</span>
-              </div>
-            ` : ''}
-          </div>
-        ` : ''}
-
-        ${showPrice ? html`
-          <div class="price-container">
-            <div class="price-item ${lowTariffActive ? 'active' : ''}">
-              <span class="price-label">${t.currentPrice}</span>
-              <span class="price-value">${currentPrice} ${t.currency}</span>
-              <span class="price-tariff">${lowTariffActive ? t.lowTariff : t.highTariff}</span>
-            </div>
-          </div>
-        ` : ''}
-
+            `
+          : ""}
         ${this._renderSchedule(t)}
       </ha-card>
     `;
@@ -304,8 +349,10 @@ export class CezHdoCard extends LitElement {
   private _renderSchedule(t: TranslationStrings) {
     if (!this.config.show_schedule) return html``;
 
-    const scheduleEntity = this.resolveEntity('schedule');
-    const scheduleState = scheduleEntity ? this.hass.states[scheduleEntity] : undefined;
+    const scheduleEntity = this.resolveEntity("schedule");
+    const scheduleState = scheduleEntity
+      ? this.hass.states[scheduleEntity]
+      : undefined;
 
     if (!scheduleState || !scheduleState.attributes.schedule) {
       return html`<div class="schedule-error">${t.scheduleNotAvailable}</div>`;
@@ -316,16 +363,21 @@ export class CezHdoCard extends LitElement {
 
     // Get locale for date formatting
     const lang = getLanguageFromHass(this.hass);
-    const dateLocale = lang === 'cs' ? 'cs-CZ' : lang === 'sk' ? 'sk-SK' : 'en-US';
+    const dateLocale =
+      lang === "cs" ? "cs-CZ" : lang === "sk" ? "sk-SK" : "en-US";
 
     // Group by days - use local date (not UTC)
     schedule.forEach((item) => {
       const start = new Date(item.start);
       const year = start.getFullYear();
-      const month = String(start.getMonth() + 1).padStart(2, '0');
-      const day = String(start.getDate()).padStart(2, '0');
+      const month = String(start.getMonth() + 1).padStart(2, "0");
+      const day = String(start.getDate()).padStart(2, "0");
       const dayKey = `${year}-${month}-${day}`;
-      const dayLabel = start.toLocaleDateString(dateLocale, { weekday: 'short', day: '2-digit', month: '2-digit' });
+      const dayLabel = start.toLocaleDateString(dateLocale, {
+        weekday: "short",
+        day: "2-digit",
+        month: "2-digit",
+      });
 
       if (!days[dayKey]) {
         days[dayKey] = { label: dayLabel, items: [] };
@@ -339,7 +391,8 @@ export class CezHdoCard extends LitElement {
     const prices = this.getPricesFromSensor();
     const ntPrice = prices.low;
     const vtPrice = prices.high;
-    const showSchedulePrices = this.config.show_schedule_prices === true && (ntPrice > 0 || vtPrice > 0);
+    const showSchedulePrices =
+      this.config.show_schedule_prices === true && (ntPrice > 0 || vtPrice > 0);
 
     return html`
       <div class="schedule-container">
@@ -347,15 +400,24 @@ export class CezHdoCard extends LitElement {
           <span class="schedule-title">${t.hdoSchedule}</span>
           <div class="schedule-legend">
             <span class="legend-item nt">
-              <span class="legend-color"></span>${t.nt}${showSchedulePrices ? html` <span class="legend-price">${ntPrice} ${t.currencyShort}</span>` : ''}
+              <span class="legend-color"></span>${t.nt}${showSchedulePrices
+                ? html` <span class="legend-price"
+                    >${ntPrice} ${t.currencyShort}</span
+                  >`
+                : ""}
             </span>
             <span class="legend-item vt">
-              <span class="legend-color"></span>${t.vt}${showSchedulePrices ? html` <span class="legend-price">${vtPrice} ${t.currencyShort}</span>` : ''}
+              <span class="legend-color"></span>${t.vt}${showSchedulePrices
+                ? html` <span class="legend-price"
+                    >${vtPrice} ${t.currencyShort}</span
+                  >`
+                : ""}
             </span>
           </div>
         </div>
         <div class="schedule-time-axis">
-          <span>0:00</span><span>6:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+          <span>0:00</span><span>6:00</span><span>12:00</span><span>18:00</span
+          ><span>24:00</span>
         </div>
         ${sortedDays.map((dayKey) => {
           const day = days[dayKey];
@@ -371,15 +433,25 @@ export class CezHdoCard extends LitElement {
                   if (endHour === 0) endHour = 24;
                   const left = (startHour / 24) * 100;
                   const width = ((endHour - startHour) / 24) * 100;
-                  const startStr = start.toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit' });
-                  const endStr = end.toLocaleTimeString(dateLocale, { hour: '2-digit', minute: '2-digit' });
+                  const startStr = start.toLocaleTimeString(dateLocale, {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  const endStr = end.toLocaleTimeString(dateLocale, {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
                   return html`
                     <div
                       class="schedule-block ${item.tariff.toLowerCase()}"
                       style="left:${left}%;width:${width}%"
                       title="${startStr}-${endStr}"
                     >
-                      ${width > 8 ? html`<span class="block-time">${startStr}-${endStr}</span>` : ''}
+                      ${width > 8
+                        ? html`<span class="block-time"
+                            >${startStr}-${endStr}</span
+                          >`
+                        : ""}
                     </div>
                   `;
                 })}
@@ -507,7 +579,11 @@ export class CezHdoCard extends LitElement {
       .price-container {
         margin-top: 16px;
         padding: 12px;
-        background: linear-gradient(135deg, var(--primary-color, #03a9f4) 0%, var(--accent-color, #00bcd4) 100%);
+        background: linear-gradient(
+          135deg,
+          var(--primary-color, #03a9f4) 0%,
+          var(--accent-color, #00bcd4) 100%
+        );
         border-radius: 8px;
         text-align: center;
       }
@@ -684,21 +760,26 @@ export class CezHdoCard extends LitElement {
 }
 
 // Register the card
-if (!customElements.get('cez-hdo-card')) {
-  customElements.define('cez-hdo-card', CezHdoCard);
+if (!customElements.get("cez-hdo-card")) {
+  customElements.define("cez-hdo-card", CezHdoCard);
 }
 
 // Register in customCards array for HACS/Lovelace
 declare global {
   interface Window {
-    customCards?: Array<{ type: string; name: string; description: string; preview?: boolean }>;
+    customCards?: Array<{
+      type: string;
+      name: string;
+      description: string;
+      preview?: boolean;
+    }>;
   }
 }
 
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: 'cez-hdo-card',
-  name: 'ČEZ HDO Card',
-  description: 'Custom card for ČEZ HDO integration',
+  type: "cez-hdo-card",
+  name: "ČEZ HDO Card",
+  description: "Custom card for ČEZ HDO integration",
   preview: true,
 });

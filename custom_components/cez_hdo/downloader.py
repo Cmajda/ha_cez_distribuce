@@ -199,7 +199,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
                     _LOGGER.warning("OCR failed - expected 4 chars, got %d: '%s'", len(text), text)
                     return None
 
-                _LOGGER.info("OCR recognized '%s' - ok", text)
+                _LOGGER.debug("OCR recognized '%s' - ok", text)
                 return text
 
             _LOGGER.warning("OCR failed - no parsed results: %s", error_msgs or result)
@@ -412,7 +412,7 @@ def parse_time_periods(casy_string: str) -> list[tuple[time, time]]:
 def get_today_schedule(json_data: dict, preferred_signal: str | None = None) -> list[tuple[time, time]]:
     """Get today's schedule from API response."""
 
-    # Podpora více úrovní vnoření (pro kompatibilitu s různými API odpověďmi)
+    # Support multiple nesting levels (for compatibility with various API responses)
     signals = None
     if not json_data or "data" not in json_data:
         _LOGGER.error("Invalid API response structure: missing 'data'")

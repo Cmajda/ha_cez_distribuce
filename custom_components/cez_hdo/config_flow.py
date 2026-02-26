@@ -561,11 +561,11 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
 
         if coordinator and self._raw_data:
             # Save to cache file
-            await self.hass.async_add_executor_job(coordinator.save_to_cache, self._raw_data)
+            await coordinator.async_save_to_cache(self._raw_data)
             # Update coordinator data
             coordinator.parse_data(self._raw_data)
-            coordinator.data.raw_data = self._raw_data
             coordinator.data.last_update = datetime.now(CEZ_TIMEZONE)
+            coordinator.data.raw_data = self._raw_data
             # Notify listeners
             coordinator.async_set_updated_data(coordinator.data)
             _LOGGER.info(
