@@ -240,56 +240,99 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
     Returns:
         API response dict if successful, None if failed.
     """
+    from .const import mask_ean
+
     max_captcha_attempts = 3
+    ean_masked = mask_ean(ean)
+
+    _LOGGER.debug("Starting auto-CAPTCHA refresh for EAN %s", ean_masked)
 
     for attempt in range(1, max_captcha_attempts + 1):
         try:
             # Step 1: Fetch CAPTCHA
-            _LOGGER.info("Downloading CAPTCHA... (attempt %d/%d)", attempt, max_captcha_attempts)
+            _LOGGER.info("CAPTCHA attempt %d/%d: Downloading image...", attempt, max_captcha_attempts)
             captcha_session = fetch_captcha()
+            _LOGGER.debug(
+                "CAPTCHA attempt %d/%d: Image downloaded, cookies: %d",
+                attempt,
+                max_captcha_attempts,
+                len(captcha_session.cookies),
+            )
 
             # Step 2: Solve CAPTCHA with OCR
+            _LOGGER.debug("CAPTCHA attempt %d/%d: Sending to OCR.space...", attempt, max_captcha_attempts)
             captcha_code = solve_captcha_with_ocr(captcha_session.image_base64, attempt)
 
             if not captcha_code:
                 _LOGGER.warning(
-                    "OCR failed - retrying with new CAPTCHA..." if attempt < max_captcha_attempts else "OCR failed"
+                    "CAPTCHA attempt %d/%d: OCR failed to recognize code%s",
+                    attempt,
+                    max_captcha_attempts,
+                    ", retrying with new image..." if attempt < max_captcha_attempts else "",
                 )
                 if attempt < max_captcha_attempts:
                     continue
+                _LOGGER.error("Auto-CAPTCHA failed: OCR could not recognize any of %d images", max_captcha_attempts)
                 return None
 
             # Step 3: Call API with solved CAPTCHA
-            _LOGGER.debug("CEZ API: EAN %s...%s, CAPTCHA %s", ean[:2], ean[-2:], captcha_code)
+            _LOGGER.debug(
+                "CAPTCHA attempt %d/%d: OCR recognized '%s', calling CEZ API for EAN %s",
+                attempt,
+                max_captcha_attempts,
+                captcha_code,
+                ean_masked,
+            )
 
             response = validate_ean_with_captcha(ean, captcha_code, captcha_session.cookies)
 
             # Check if response is valid
             if response.get("statusCode") == 200 and response.get("data"):
-                _LOGGER.info("CEZ API - call successful!")
+                signals_count = len(response.get("data", {}).get("signals", []))
+                _LOGGER.info(
+                    "Auto-CAPTCHA successful on attempt %d/%d! Got %d signals for EAN %s",
+                    attempt,
+                    max_captcha_attempts,
+                    signals_count,
+                    ean_masked,
+                )
                 return response
 
-            _LOGGER.warning("CEZ API - invalid response (status %s)", response.get("statusCode"))
+            _LOGGER.warning(
+                "CAPTCHA attempt %d/%d: API returned invalid response (status %s)",
+                attempt,
+                max_captcha_attempts,
+                response.get("statusCode"),
+            )
             return None
 
         except OcrRateLimitError:
-            _LOGGER.error("OCR rate limit - stopping refresh")
+            _LOGGER.error("Auto-CAPTCHA failed: OCR.space rate limit (403) - free tier exhausted")
             return None
 
         except ValueError as err:
             if str(err) == "invalid_captcha":
                 if attempt < max_captcha_attempts:
-                    _LOGGER.warning("CEZ API - CAPTCHA incorrect, retrying...")
+                    _LOGGER.warning(
+                        "CAPTCHA attempt %d/%d: Code '%s' rejected by CEZ API, retrying with new image...",
+                        attempt,
+                        max_captcha_attempts,
+                        captcha_code if "captcha_code" in dir() else "?",
+                    )
                     continue
-                _LOGGER.error("CEZ API - all CAPTCHA attempts failed")
+                _LOGGER.error(
+                    "Auto-CAPTCHA failed: All %d attempts rejected by CEZ API (OCR recognized wrong codes)",
+                    max_captcha_attempts,
+                )
                 return None
-            _LOGGER.warning("CEZ API - error: %s", err)
+            _LOGGER.warning("CAPTCHA attempt %d/%d: API error: %s", attempt, max_captcha_attempts, err)
             return None
 
         except Exception as err:
-            _LOGGER.warning("Unexpected error: %s", err)
+            _LOGGER.warning("CAPTCHA attempt %d/%d: Unexpected error: %s", attempt, max_captcha_attempts, err)
             return None
 
+    _LOGGER.error("Auto-CAPTCHA failed: Exhausted all %d attempts", max_captcha_attempts)
     return None
 
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -25,24 +24,12 @@ DATA_COORDINATOR = "coordinator"
 CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXTRA)
 
 
-def get_cache_dir(hass: HomeAssistant) -> Path:
-    """Get path to data directory using hass.config.path().
-
-    Data is stored in .storage/cez_hdo/ to survive integration updates.
-    """
-    return Path(hass.config.path(".storage", "cez_hdo"))
-
-
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Set up the ČEZ HDO component."""
     _LOGGER.info("Setting up ČEZ HDO integration")
 
     # Initialize domain data storage
     hass.data.setdefault(DOMAIN, {})
-
-    # Ensure data directory exists (in .storage/ to survive updates)
-    cache_dir = get_cache_dir(hass)
-    await hass.async_add_executor_job(lambda: cache_dir.mkdir(parents=True, exist_ok=True))
 
     # Register service to reload frontend card
     async def reload_frontend_card(call):

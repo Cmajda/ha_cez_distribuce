@@ -552,8 +552,8 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         # Re-parse data with current time
         self._parse_data(self.data.raw_data)
 
-        # Notify all listeners that data has changed
-        self.async_set_updated_data(self.data)
+        # Notify all listeners that data has changed (without "Manually updated" log)
+        self.async_update_listeners()
 
     async def _async_migrate_old_cache(self) -> None:
         """Migrate cache files from old locations to new Store format.
