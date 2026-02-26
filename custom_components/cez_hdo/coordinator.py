@@ -289,11 +289,12 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         except Exception as err:
             _LOGGER.warning("CezHdoCoordinator: Failed to save refresh state: %s", err)
 
-    async def _async_schedule_auto_refresh(self, min_delay_minutes: int = 0) -> None:
+    async def _async_schedule_auto_refresh(self, min_delay_minutes: int = 0, after_failure: bool = False) -> None:
         """Schedule the next auto-refresh attempt if needed.
 
         Args:
             min_delay_minutes: Minimum delay in minutes before next attempt (used after failure).
+            after_failure: If True, log scheduling as WARNING (visible in default logs).
         """
         if not self._auto_refresh_enabled:
             return
@@ -356,12 +357,21 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         if self._next_attempt_unsub is not None:
             self._next_attempt_unsub()
 
-        _LOGGER.info(
-            "CezHdoCoordinator: Scheduling auto-refresh attempt %d/%d at %s",
-            self._daily_attempts + 1,
-            MAX_DAILY_OCR_ATTEMPTS,
-            next_time.strftime("%H:%M:%S"),
-        )
+        # Log at WARNING level after failure, INFO otherwise
+        if after_failure:
+            _LOGGER.warning(
+                "CezHdoCoordinator: Next auto-refresh attempt %d/%d scheduled at %s",
+                self._daily_attempts + 1,
+                MAX_DAILY_OCR_ATTEMPTS,
+                next_time.strftime("%H:%M:%S"),
+            )
+        else:
+            _LOGGER.info(
+                "CezHdoCoordinator: Next auto-refresh attempt %d/%d scheduled at %s",
+                self._daily_attempts + 1,
+                MAX_DAILY_OCR_ATTEMPTS,
+                next_time.strftime("%H:%M:%S"),
+            )
 
         self._next_attempt_unsub = async_track_point_in_time(
             self.hass,
@@ -413,6 +423,12 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 # Show success notification
                 await self._show_auto_refresh_notification(success=True)
 
+                # Log next refresh info
+                _LOGGER.info(
+                    "CezHdoCoordinator: Next auto-refresh scheduled for tomorrow after %02d:00",
+                    AUTO_REFRESH_START_HOUR,
+                )
+
             else:
                 _LOGGER.warning(
                     "CezHdoCoordinator: Auto-refresh attempt %d/%d failed",
@@ -420,16 +436,16 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                     MAX_DAILY_OCR_ATTEMPTS,
                 )
 
-                # Schedule next attempt with minimum delay
-                await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES)
+                # Schedule next attempt with minimum delay (log as warning)
+                await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
 
         except Exception as err:
             _LOGGER.error(
                 "CezHdoCoordinator: Auto-refresh error: %s",
                 err,
             )
-            # Schedule next attempt with minimum delay
-            await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES)
+            # Schedule next attempt with minimum delay (log as warning)
+            await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
 
         # Save state
         await self._async_save_refresh_state()
