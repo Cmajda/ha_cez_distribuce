@@ -9,17 +9,16 @@
 #### Data přežijí aktualizaci integrace
 
 - **Přesun cache do `.storage/cez_hdo/`** – data (HDO rozvrh, ceny, stav auto-refresh) jsou nyní uložena v bezpečném umístění
-- **Automatická migrace** – při prvním spuštění se data automaticky přesunou ze starého umístění
-- **Opraveno:** Aktualizace přes HACS již nesmaže uložená data
+- **Automatická migrace** – při prvním spuštění se data automaticky přesunou ze starého umístění (pokud existuje)
+- **Opraveno:** Budoucí aktualizace přes HACS již nesmažou uložená data
 
-### ⚠️ Poznámka pro uživatele aktualizující z 3.2.0
+### ⚠️ Důležité pro uživatele přecházející z 3.2.0
 
-Pokud jste aktualizovali na 3.2.0 a přišli o data, bude nutné integraci znovu nakonfigurovat nebo ručně zkopírovat soubory:
+**HACS smaže celou složku integrace při aktualizaci**, takže data z verze 3.2.0 byla ztracena.
 
-```bash
-mkdir -p /config/.storage/cez_hdo
-cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
-```
+**Řešení:**
+- Počkejte na automatický refresh (spustí se automaticky do 1-2 hodin a načte nová data pomocí OCR)
+- Nebo znovu nakonfigurujte integraci
 
 ---
 

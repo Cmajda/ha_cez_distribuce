@@ -9,17 +9,16 @@
 #### Data survives integration updates
 
 - **Cache moved to `.storage/cez_hdo/`** – data (HDO schedule, prices, auto-refresh state) is now stored in a safe location
-- **Automatic migration** – data is automatically migrated from the old location on first start
-- **Fixed:** Updates via HACS no longer delete saved data
+- **Automatic migration** – data is automatically migrated from the old location on first start (if it exists)
+- **Fixed:** Future updates via HACS will no longer delete saved data
 
-### ⚠️ Note for users updating from 3.2.0
+### ⚠️ Important for users updating from 3.2.0
 
-If you updated to 3.2.0 and lost your data, you will need to reconfigure the integration or manually copy the files:
+**HACS deletes the entire integration folder during updates**, so data from version 3.2.0 was lost.
 
-```bash
-mkdir -p /config/.storage/cez_hdo
-cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
-```
+**Solution:**
+- Wait for automatic refresh (runs automatically within 1-2 hours and fetches new data using OCR)
+- Or reconfigure the integration
 
 ---
 
