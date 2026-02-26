@@ -103,6 +103,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self._last_attempt_date: date | None = None
         self._data_fetch_successful_today: bool = False
         self._next_attempt_unsub: Callable[[], None] | None = None
+        self._next_attempt_time: datetime | None = None
 
         # Use hass.config.path() for proper path resolution
         # Cache files use EAN suffix (last 6 digits) to support multiple instances
@@ -237,6 +238,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         if self._next_attempt_unsub is not None:
             self._next_attempt_unsub()
             self._next_attempt_unsub = None
+            self._next_attempt_time = None
             _LOGGER.debug("CezHdoCoordinator: Stopped auto-refresh scheduling")
 
     async def _async_load_refresh_state(self) -> None:
@@ -259,10 +261,19 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 self._daily_attempts = state.get("daily_attempts", 0)
                 self._data_fetch_successful_today = state.get("successful_today", False)
 
+            # Load next attempt time (informational only, not used for scheduling)
+            next_time_str = state.get("next_attempt_time")
+            if next_time_str:
+                try:
+                    self._next_attempt_time = datetime.fromisoformat(next_time_str)
+                except ValueError:
+                    self._next_attempt_time = None
+
             _LOGGER.debug(
-                "CezHdoCoordinator: Loaded refresh state - attempts: %d, successful: %s",
+                "CezHdoCoordinator: Loaded refresh state - attempts: %d, successful: %s, next: %s",
                 self._daily_attempts,
                 self._data_fetch_successful_today,
+                self._next_attempt_time.strftime("%H:%M:%S") if self._next_attempt_time else None,
             )
 
     def _load_refresh_state(self) -> dict[str, Any] | None:
@@ -287,6 +298,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 "last_attempt_date": self._last_attempt_date.isoformat() if self._last_attempt_date else None,
                 "daily_attempts": self._daily_attempts,
                 "successful_today": self._data_fetch_successful_today,
+                "next_attempt_time": self._next_attempt_time.isoformat() if self._next_attempt_time else None,
             }
             with open(self._refresh_state_file, "w", encoding="utf-8") as f:
                 json.dump(state, f)
@@ -378,6 +390,10 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 next_time.strftime("%H:%M:%S"),
             )
 
+        # Store for state file and schedule
+        self._next_attempt_time = next_time
+        await self._async_save_refresh_state()
+
         self._next_attempt_unsub = async_track_point_in_time(
             self.hass,
             self._async_auto_refresh_attempt,
@@ -387,6 +403,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
     async def _async_auto_refresh_attempt(self, _now: datetime | None = None) -> None:
         """Perform an automatic data refresh attempt using OCR."""
         self._next_attempt_unsub = None  # Clear the subscription
+        self._next_attempt_time = None  # Clear scheduled time
         self._daily_attempts += 1
 
         _LOGGER.info(
@@ -419,6 +436,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
                 # Mark as successful
                 self._data_fetch_successful_today = True
+                self._next_attempt_time = None  # No more attempts needed today
                 self._warning_shown = False
                 self._expired_shown = False
 
