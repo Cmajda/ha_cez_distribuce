@@ -11,9 +11,9 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **CAPTCHA OVĚŘENÍ:** Od verze 3.2.0 integrace podporuje automatické obnovování dat.
-> Při konfiguraci zadáte kód z obrázku. Data se obnovují automaticky.
-> Více v [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
+> ℹ️ **AUTOMATICKÉ OBNOVOVÁNÍ DAT:** Od verze 3.2.1 integrace automaticky obnovuje HDO data pomocí OCR.
+> Při konfiguraci zadáte kód z CAPTCHA obrázku. Data se pak obnovují automaticky (max 24× denně).
+> Data jsou uložena v `.storage/cez_hdo/` a přežijí aktualizace přes HACS.
 
 🇬🇧 [English version](README_EN.md)
 

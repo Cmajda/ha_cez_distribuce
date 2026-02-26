@@ -11,9 +11,9 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **CAPTCHA VERIFICATION:** From version 3.2.0, the integration supports automatic data refresh.
-> During configuration, you will enter a code from the image. Data is refreshed automatically.
-> More info in [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
+> ℹ️ **AUTOMATIC DATA REFRESH:** From version 3.2.1, the integration automatically refreshes HDO data using OCR.
+> During configuration, you will enter a code from the CAPTCHA image. Data is then refreshed automatically (max 24× daily).
+> Data is stored in `.storage/cez_hdo/` and survives updates via HACS.
 
 🇨🇿 [Česká verze](README.md)
 

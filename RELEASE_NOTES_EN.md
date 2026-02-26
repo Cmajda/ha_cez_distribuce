@@ -17,6 +17,7 @@
 **HACS deletes the entire integration folder during updates**, so data from version 3.2.0 was lost.
 
 **Solution:**
+
 - Wait for automatic refresh (runs automatically within 1-2 hours and fetches new data using OCR)
 - Or reconfigure the integration
 
