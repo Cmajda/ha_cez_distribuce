@@ -40,8 +40,10 @@ STATE_UPDATE_INTERVAL = timedelta(seconds=5)
 # Update interval for data expiry check
 DATA_CHECK_INTERVAL = timedelta(hours=1)
 
-# Cache directory and file - stored in custom_components/cez_hdo/data/
-CACHE_SUBDIR = "custom_components/cez_hdo/data"
+# Cache directory - stored in .storage/cez_hdo/ (survives integration updates)
+# Previously was in custom_components/cez_hdo/data/ which got deleted on updates
+CACHE_SUBDIR = ".storage/cez_hdo"
+OLD_CACHE_SUBDIR = "custom_components/cez_hdo/data"  # For migration
 # File names are per-EAN: cache_{ean}.json, prices_{ean}.json
 
 
@@ -129,6 +131,9 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         """
         # Ensure cache directory exists
         await self.hass.async_add_executor_job(self._ensure_cache_dir)
+
+        # Migrate data from old location (custom_components/cez_hdo/data/)
+        await self.hass.async_add_executor_job(self._migrate_old_cache)
 
         # Load prices from storage
         await self._async_load_prices()
@@ -487,6 +492,53 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
     def _ensure_cache_dir(self) -> None:
         """Ensure cache directory exists."""
         self._cache_dir.mkdir(parents=True, exist_ok=True)
+
+    def _migrate_old_cache(self) -> None:
+        """Migrate cache files from old location to new location.
+
+        Old location: custom_components/cez_hdo/data/
+        New location: .storage/cez_hdo/
+
+        This ensures data survives integration updates via HACS.
+        """
+        import shutil
+
+        old_cache_dir = Path(self.hass.config.path(OLD_CACHE_SUBDIR))
+        if not old_cache_dir.exists():
+            return
+
+        ean_short = ean_suffix(self.ean)
+        files_to_migrate = [
+            f"cache_{ean_short}.json",
+            f"prices_{ean_short}.json",
+            f"refresh_state_{ean_short}.json",
+        ]
+
+        migrated_count = 0
+        for filename in files_to_migrate:
+            old_file = old_cache_dir / filename
+            new_file = self._cache_dir / filename
+
+            if old_file.exists() and not new_file.exists():
+                try:
+                    shutil.copy2(old_file, new_file)
+                    _LOGGER.info(
+                        "CezHdoCoordinator: Migrated %s to new location",
+                        filename,
+                    )
+                    migrated_count += 1
+                except Exception as err:
+                    _LOGGER.warning(
+                        "CezHdoCoordinator: Failed to migrate %s: %s",
+                        filename,
+                        err,
+                    )
+
+        if migrated_count > 0:
+            _LOGGER.info(
+                "CezHdoCoordinator: Migrated %d files from old cache location",
+                migrated_count,
+            )
 
     async def _async_update_data(self) -> CezHdoData:
         """Check data validity, load from cache, and trigger auto-refresh if needed.
