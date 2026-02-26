@@ -11,9 +11,19 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **AUTOMATICKÉ OBNOVOVÁNÍ DAT:** Od verze 3.2.1 integrace automaticky obnovuje HDO data pomocí OCR.
-> Při konfiguraci zadáte kód z CAPTCHA obrázku. Data se pak obnovují automaticky (max 24× denně).
+> ℹ️ **AUTOMATICKÉ OBNOVOVÁNÍ DAT:** Od verze 3.2.1 integrace automaticky obnovuje HDO data.
+> Při konfiguraci zadáte kód z CAPTCHA obrázku. Data se pak obnovují automaticky.
 > Data jsou uložena v `.storage/cez_hdo/` a přežijí aktualizace přes HACS.
+
+> 🚨 **BREAKING CHANGE v3.2.1:** Změna umístění cache z `custom_components/cez_hdo/data/` na `.storage/cez_hdo/`.
+> Po aktualizaci z verze 3.2.0 nebo starší je nutné:
+> - **Počkat na auto-refresh** (do 1-2 hodin se data načtou automaticky pomocí OCR), nebo
+> - **Znovu nakonfigurovat integraci**, nebo
+> - **Ručně zkopírovat data:**
+>   ```bash
+>   mkdir -p /config/.storage/cez_hdo
+>   cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
+>   ```
 
 🇬🇧 [English version](README_EN.md)
 
