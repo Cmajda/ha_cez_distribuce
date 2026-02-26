@@ -526,9 +526,9 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         coordinator = entry_data.get(DATA_COORDINATOR)
 
         if coordinator:
-            coordinator._auto_refresh_enabled = enabled
+            coordinator.set_auto_refresh_enabled(enabled)
             if enabled:
-                await coordinator._async_schedule_auto_refresh()
+                await coordinator.schedule_auto_refresh()
             else:
                 coordinator.stop_auto_refresh()
 
@@ -547,6 +547,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         from datetime import datetime
 
         from . import DATA_COORDINATOR, DOMAIN
+        from .downloader import CEZ_TIMEZONE
 
         entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
         coordinator = entry_data.get(DATA_COORDINATOR)
@@ -560,11 +561,11 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
 
         if coordinator and self._raw_data:
             # Save to cache file
-            await self.hass.async_add_executor_job(coordinator._save_to_cache, self._raw_data)
+            await self.hass.async_add_executor_job(coordinator.save_to_cache, self._raw_data)
             # Update coordinator data
-            coordinator._parse_data(self._raw_data)
+            coordinator.parse_data(self._raw_data)
             coordinator.data.raw_data = self._raw_data
-            coordinator.data.last_update = datetime.now()
+            coordinator.data.last_update = datetime.now(CEZ_TIMEZONE)
             # Notify listeners
             coordinator.async_set_updated_data(coordinator.data)
             _LOGGER.info(

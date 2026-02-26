@@ -27,6 +27,7 @@ from .const import (
     ean_suffix,
     mask_ean,
 )
+from .downloader import CEZ_TIMEZONE
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -158,7 +159,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             await self.hass.async_add_executor_job(self._save_to_cache, initial_data)
             self._parse_data(initial_data)
             self.data.raw_data = initial_data
-            self.data.last_update = datetime.now()
+            self.data.last_update = datetime.now(CEZ_TIMEZONE)
             # Clean up the temporary data
             self.hass.data.get("cez_hdo_initial_data", {}).pop(self.ean, None)
             _LOGGER.debug("CezHdoCoordinator: Initial data saved to cache")
@@ -196,7 +197,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         valid_until = self.data_valid_until
         if valid_until is None:
             return False
-        return datetime.now() < valid_until
+        return datetime.now(CEZ_TIMEZONE) < valid_until
 
     @property
     def days_until_expiry(self) -> int:
@@ -204,7 +205,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         valid_until = self.data_valid_until
         if valid_until is None:
             return 0
-        delta = valid_until - datetime.now()
+        delta = valid_until - datetime.now(CEZ_TIMEZONE)
         return delta.days
 
     @property
@@ -212,7 +213,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         """Return how many days old the data is."""
         if self.data.last_update is None:
             return 0
-        return (datetime.now() - self.data.last_update).days
+        return (datetime.now(CEZ_TIMEZONE) - self.data.last_update).days
 
     def _start_state_updates(self) -> None:
         """Start periodic state recalculation."""
@@ -240,6 +241,30 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             self._next_attempt_unsub = None
             self._next_attempt_time = None
             _LOGGER.debug("CezHdoCoordinator: Stopped auto-refresh scheduling")
+
+    # --- Public API methods (wrappers for private methods) ---
+
+    def save_to_cache(self, data: dict[str, Any]) -> None:
+        """Save data to cache file (blocking). Public wrapper for _save_to_cache."""
+        self._save_to_cache(data)
+
+    def parse_data(self, raw_data: dict[str, Any]) -> None:
+        """Parse raw API data into structured format. Public wrapper for _parse_data."""
+        self._parse_data(raw_data)
+
+    def set_auto_refresh_enabled(self, enabled: bool) -> None:
+        """Set auto-refresh enabled state.
+
+        Args:
+            enabled: Whether auto-refresh should be enabled.
+        """
+        self._auto_refresh_enabled = enabled
+
+    async def schedule_auto_refresh(self) -> None:
+        """Schedule the next auto-refresh attempt. Public wrapper for _async_schedule_auto_refresh."""
+        await self._async_schedule_auto_refresh()
+
+    # --- End of public API methods ---
 
     async def _async_load_refresh_state(self) -> None:
         """Load auto-refresh state from storage."""
@@ -338,7 +363,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             return
 
         # Calculate next attempt time
-        now = datetime.now()
+        now = datetime.now(CEZ_TIMEZONE)
         current_hour = now.hour
 
         # Only schedule during allowed hours
@@ -432,7 +457,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 # Update data
                 self._parse_data(new_data)
                 self.data.raw_data = new_data
-                self.data.last_update = datetime.now()
+                self.data.last_update = datetime.now(CEZ_TIMEZONE)
 
                 # Mark as successful
                 self._data_fetch_successful_today = True
@@ -596,7 +621,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         if self.data.last_update is None:
             return
 
-        data_age = datetime.now() - self.data.last_update
+        data_age = datetime.now(CEZ_TIMEZONE) - self.data.last_update
         days_old = data_age.days
 
         # Show warning notification at day 5
@@ -702,7 +727,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         try:
             self._cache_dir.mkdir(parents=True, exist_ok=True)
             cache_data = {
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(CEZ_TIMEZONE).isoformat(),
                 "data": data,
             }
             _LOGGER.debug(
@@ -742,7 +767,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 try:
                     self.data.last_update = datetime.fromisoformat(cache_data["timestamp"])
                 except Exception:
-                    self.data.last_update = datetime.now()
+                    self.data.last_update = datetime.now(CEZ_TIMEZONE)
                 _LOGGER.debug(
                     "CezHdoCoordinator._load_from_cache: new format, timestamp=%s",
                     self.data.last_update,
@@ -750,7 +775,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             else:
                 # Old format - data directly
                 raw_data = cache_data
-                self.data.last_update = datetime.now()
+                self.data.last_update = datetime.now(CEZ_TIMEZONE)
                 _LOGGER.debug("CezHdoCoordinator._load_from_cache: old format detected")
 
             self.data.raw_data = raw_data

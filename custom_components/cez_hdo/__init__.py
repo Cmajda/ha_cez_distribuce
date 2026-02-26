@@ -133,6 +133,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
         from . import downloader
         from .const import mask_ean
+        from .downloader import CEZ_TIMEZONE
 
         entry_id = call.data.get("entry_id")
         refreshed_count = 0
@@ -165,11 +166,11 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                 if new_data and new_data.get("statusCode") == 200:
                     # Update coordinator with new data
                     coordinator.data.raw_data = new_data
-                    coordinator.data.last_update = datetime.now()
+                    coordinator.data.last_update = datetime.now(CEZ_TIMEZONE)
                     coordinator.async_set_updated_data(coordinator.data)
 
                     # Save to cache
-                    await hass.async_add_executor_job(coordinator._save_to_cache, new_data)
+                    await hass.async_add_executor_job(coordinator.save_to_cache, new_data)
 
                     _LOGGER.info("CEZ HDO refresh_data: Successfully refreshed data for EAN %s", mask_ean(ean))
                     refreshed_count += 1
