@@ -180,7 +180,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         # Start periodic state recalculation (every 5 seconds)
         self._start_state_updates()
 
-        # Schedule auto-refresh if enabled and data is expiring
+        # Schedule periodic auto-refresh (daily) if enabled
         if self._auto_refresh_enabled:
             await self._async_schedule_auto_refresh()
 
@@ -257,6 +257,26 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
     def parse_data(self, raw_data: dict[str, Any]) -> None:
         """Parse raw API data into structured format. Public wrapper for _parse_data."""
         self._parse_data(raw_data)
+
+    async def async_mark_refresh_successful(self) -> None:
+        """Mark today's refresh as successful and cancel scheduled auto-refresh.
+
+        Call this after a successful manual refresh_data service call to prevent
+        auto-refresh from running later the same day and consuming OCR attempts.
+        """
+        self._data_fetch_successful_today = True
+        self._last_attempt_date = datetime.now(CEZ_TIMEZONE).date()
+
+        # Cancel any scheduled auto-refresh attempt
+        if self._next_attempt_unsub is not None:
+            self._next_attempt_unsub()
+            self._next_attempt_unsub = None
+            self._next_attempt_time = None
+
+        # Persist the state
+        await self._async_save_refresh_state()
+
+        _LOGGER.debug("CezHdoCoordinator: Marked refresh as successful for today, cancelled scheduled attempts")
 
     def set_auto_refresh_enabled(self, enabled: bool) -> None:
         """Set auto-refresh enabled state.

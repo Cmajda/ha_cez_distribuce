@@ -160,6 +160,9 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     # Save to cache
                     await coordinator.async_save_to_cache(new_data)
 
+                    # Mark refresh as successful to prevent auto-refresh from running today
+                    await coordinator.async_mark_refresh_successful()
+
                     _LOGGER.info("CEZ HDO refresh_data: Successfully refreshed data for EAN %s", mask_ean(ean))
                     refreshed_count += 1
                 else:
