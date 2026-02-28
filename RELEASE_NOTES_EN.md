@@ -2,6 +2,18 @@
 
 ---
 
+## v3.2.3 (2026-02-28)
+
+### 🐛 Fixes
+
+#### Fixed daily automatic data refresh
+
+- **Auto-refresh now runs daily** – previous version only scheduled auto-refresh when data was 5+ days old
+- **Fixed:** Data is now automatically refreshed every day (not just before expiration)
+- Method `_async_schedule_auto_refresh` already contains logic for resetting counters for new day
+
+---
+
 ## v3.2.2 (2026-02-26)
 
 ### 🚀 Main Changes

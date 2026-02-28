@@ -2,6 +2,18 @@
 
 ---
 
+## v3.2.3 (2026-02-28)
+
+### 🐛 Opravy
+
+#### Opraveno denní automatické obnovení dat
+
+- **Auto-refresh nyní běží denně** – předchozí verze plánovala auto-refresh pouze když byla data 5+ dnů stará
+- **Opraveno:** Data se nyní automaticky obnovují každý den (ne jen před expirací)
+- Metoda `_async_schedule_auto_refresh` již obsahuje logiku pro reset čítačů pro nový den
+
+---
+
 ## v3.2.2 (2026-02-26)
 
 ### 🚀 Hlavní změny
