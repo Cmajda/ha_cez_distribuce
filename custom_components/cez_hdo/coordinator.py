@@ -640,7 +640,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         This method:
         1. Loads data from cache
         2. Checks data validity and shows notifications when expiring
-        3. Schedules automatic refresh attempts if enabled and data is old
+        3. Schedules daily automatic refresh attempts if enabled
         """
         try:
             # Load data from cache
@@ -652,8 +652,9 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             # Check data age and show notifications
             await self._check_data_validity()
 
-            # Schedule auto-refresh if data is expiring
-            if self._auto_refresh_enabled and self.data_age_days >= DATA_WARNING_DAYS:
+            # Schedule auto-refresh if enabled (runs daily to keep data fresh)
+            # The scheduling method checks if already successful today and resets counters for new day
+            if self._auto_refresh_enabled:
                 await self._async_schedule_auto_refresh()
 
             _LOGGER.debug(
