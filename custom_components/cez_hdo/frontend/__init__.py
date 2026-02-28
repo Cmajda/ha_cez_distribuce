@@ -15,7 +15,7 @@ _LOGGER = logging.getLogger(__name__)
 # Constants for frontend card
 DOMAIN = "cez_hdo"
 URL_BASE = "/cez_hdo_card"
-CEZ_HDO_CARDS = [{"name": "CEZ HDO Card", "filename": "cez-hdo-card.js", "version": "3.2.2"}]
+CEZ_HDO_CARDS = [{"name": "CEZ HDO Card", "filename": "cez-hdo-card.js", "version": "3.2.3"}]
 
 
 class CezHdoCardRegistration:

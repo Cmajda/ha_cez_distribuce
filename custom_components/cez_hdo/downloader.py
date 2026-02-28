@@ -164,19 +164,20 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
     max_ocr_attempts = 10  # Max retries for OCR timeouts
 
     while ocr_attempt <= max_ocr_attempts:
-        _LOGGER.debug("OCR Engine 3, attempt %d/%d", ocr_attempt, max_ocr_attempts)
+        _LOGGER.debug(
+            "OCR Engine 3, CAPTCHA attempt %d, OCR retry %d/%d",
+            attempt,
+            ocr_attempt,
+            max_ocr_attempts,
+        )
 
         req = urllib.request.Request(OCR_SPACE_API_URL, data=data)
         req.add_header("apikey", OCR_SPACE_API_KEY)
 
         try:
             # OCR.space free tier can be slow, use 90s timeout
+            # Note: urlopen raises HTTPError for non-2xx, so 403 is handled in except block
             with urllib.request.urlopen(req, timeout=90) as response:
-                # Check for 403 rate limit
-                if response.status == 403:
-                    _LOGGER.warning("  OCR rate limit reached (403) - free tier exhausted")
-                    raise OcrRateLimitError("OCR.space free tier limit reached")
-
                 result = json.loads(response.read().decode("utf-8"))
 
             # Check for server-side timeout (E101)
