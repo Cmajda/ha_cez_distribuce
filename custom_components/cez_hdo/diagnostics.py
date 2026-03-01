@@ -8,7 +8,7 @@ from homeassistant.components.diagnostics import async_redact_data
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
-from . import DOMAIN, DATA_COORDINATOR
+from . import DATA_COORDINATOR, DOMAIN
 
 # Keys to redact from diagnostics
 TO_REDACT = {"ean", "partner", "vkont", "vstelle", "anlage"}
@@ -107,44 +107,34 @@ def _get_redacted_raw_data(raw_data: dict[str, Any]) -> dict[str, Any]:
 
 
 async def _get_cache_info(hass: HomeAssistant, coordinator) -> dict[str, Any]:
-    """Get cache file information and content."""
-    from datetime import datetime
-    from pathlib import Path
-    import json
-
+    """Get cache storage information and content."""
     cache_info: dict[str, Any] = {}
 
     if coordinator:
-        cache_file = coordinator._cache_file
-        prices_file = coordinator._prices_file
+        # Load cache data from Store (async, no file paths)
+        cache_data = await coordinator._cache_store.async_load()
+        if cache_data:
+            cache_info["cache"] = {
+                "exists": True,
+                "timestamp": cache_data.get("timestamp"),
+                "content": _redact_cache_content(cache_data) if cache_data else None,
+            }
+        else:
+            cache_info["cache"] = {"exists": False}
 
-        def get_file_info(file_path: Path, include_content: bool = False) -> dict[str, Any]:
-            if file_path.exists():
-                stat = file_path.stat()
-                age_seconds = datetime.now().timestamp() - stat.st_mtime
-                info = {
-                    "exists": True,
-                    "size_bytes": stat.st_size,
-                    "age_hours": round(age_seconds / 3600, 2),
-                    "path": str(file_path),
-                }
-                if include_content:
-                    try:
-                        with open(file_path, "r", encoding="utf-8") as f:
-                            info["content"] = json.load(f)
-                    except Exception as err:
-                        info["content_error"] = str(err)
-                return info
-            return {"exists": False, "path": str(file_path)}
+        # Load prices from Store
+        prices_data = await coordinator._prices_store.async_load()
+        cache_info["prices"] = {
+            "exists": prices_data is not None,
+            "content": prices_data,
+        }
 
-        # Cache file - include content but redact it
-        cache_file_info = await hass.async_add_executor_job(get_file_info, cache_file, True)
-        if "content" in cache_file_info:
-            cache_file_info["content"] = _redact_cache_content(cache_file_info["content"])
-        cache_info["cache_file"] = cache_file_info
-
-        # Prices file - include full content (no sensitive data)
-        cache_info["prices_file"] = await hass.async_add_executor_job(get_file_info, prices_file, True)
+        # Load refresh state from Store
+        refresh_state = await coordinator._refresh_state_store.async_load()
+        cache_info["refresh_state"] = {
+            "exists": refresh_state is not None,
+            "content": refresh_state,
+        }
 
     return cache_info
 

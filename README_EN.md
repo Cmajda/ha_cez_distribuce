@@ -11,9 +11,13 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **CAPTCHA VERIFICATION:** From version 3.1.0, the integration supports CAPTCHA verification.
-> During configuration, you will enter a code from the image. Data is valid for 6 days.
-> More info in [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
+> ℹ️ **AUTOMATIC DATA REFRESH:** From version 3.2.X, the integration automatically refreshes HDO data.
+> During configuration, you will enter a code from the CAPTCHA image. Data is then refreshed automatically.
+> New file locations (managed automatically by Home Assistant) in `.storage` survive updates via HACS.
+---
+> 🚨 **BREAKING CHANGE v3.2.X:** Cache location changed from `custom_components/cez_hdo/data/` to `.storage`.
+> After updating from version 3.2.0 or older, you need to: **Reconfigure the integration**
+> and re-enter prices for NT and VT
 
 🇨🇿 [Česká verze](README.md)
 

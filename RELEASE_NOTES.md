@@ -2,6 +2,116 @@
 
 ---
 
+## v3.2.3 (2026-02-28)
+
+### 🐛 Opravy
+
+#### Opraveno denní automatické obnovení dat
+
+- **Auto-refresh nyní běží denně** – předchozí verze plánovala auto-refresh pouze když byla data 5+ dnů stará
+- **Opraveno:** Data se nyní automaticky obnovují každý den (ne jen před expirací)
+- Metoda `_async_schedule_auto_refresh` již obsahuje logiku pro reset čítačů pro nový den
+
+---
+
+## v3.2.2 (2026-02-26)
+
+### 🚀 Hlavní změny
+
+#### Migrace na Home Assistant Store API
+
+- **Nový systém ukládání dat** – integrace nyní používá nativní Home Assistant Store helper
+- **Atomické zápisy** – data jsou ukládána bezpečně bez rizika poškození při výpadku
+- **Automatická správa** – HA se stará o umístění souborů v `.storage/`
+
+#### Vylepšené logování
+
+- **Detailnější logy API** – každý krok procesu je nyní logován s číslem pokusu
+- **Strukturované zprávy** – jasné informace o tom, co se děje (API volání, výsledky)
+- **Odstraněn zavádějící log** – "Manually updated" se již nezobrazuje každých 5 sekund
+
+### 🐛 Opravy
+
+- **Opravena diagnostika** – funguje správně s novým Store API
+- **Odstraněn nepoužívaný kód** – vyčištěny legacy soubory a funkce
+
+### 🌐 Lokalizace
+
+- **Služby přeloženy do angličtiny** – `services.yaml` nyní v angličtině dle HA best practices
+- **Lokalizace služeb** – české překlady služeb přesunuty do `translations/cs.json`
+- **Komentáře v angličtině** – veškeré komentáře v kódu jsou nyní anglicky
+
+### 📁 Změny v ukládání dat
+
+Nová umístění souborů (spravuje Home Assistant automaticky):
+
+| Soubor       | Nové umístění                           |
+| ------------ | --------------------------------------- |
+| Cache dat    | `.storage/cez_hdo.cache_XXXXXX`         |
+| Ceny         | `.storage/cez_hdo.prices_XXXXXX`        |
+| Stav refresh | `.storage/cez_hdo.refresh_state_XXXXXX` |
+
+> **Poznámka:** `XXXXXX` = posledních 6 číslic EAN
+
+---
+
+## v3.2.1 (2026-02-26)
+
+### 🚨 Breaking Changes
+
+- **Změna umístění cache** z `custom_components/cez_hdo/data/` na `.storage/cez_hdo/`
+- Po aktualizaci je nutné:
+
+> - **Znovu nakonfigurovat integraci**, nebo
+> - **Ručně zkopírovat data:** z /config/custom_components/cez_hdo/data/*.json do /config/.storage/cez_hdo
+>
+>   ```bash
+>   mkdir -p /config/.storage/cez_hdo
+>   cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
+>   ```
+
+### 🐛 Opravy
+
+#### Data přežijí aktualizaci integrace
+
+- **Přesun cache do `.storage/cez_hdo/`** – data (HDO rozvrh, ceny, stav auto-refresh) jsou nyní uložena v bezpečném umístění
+- **Opraveno:** Budoucí aktualizace přes HACS již nesmažou uložená data
+
+### ⚠️ Důležité pro uživatele přecházející z 3.2.0
+
+**HACS smaže celou složku integrace při aktualizaci**, takže data z verze 3.2.0 byla ztracena.
+
+**Řešení:**
+
+- Znovu nakonfigurujte integraci, nebo
+- Ručně zkopírujte data:
+
+  ```bash
+  mkdir -p /config/.storage/cez_hdo
+  cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
+  ```
+
+---
+
+## v3.2.0 (2026-02-25)
+
+### 🚀 Hlavní změny
+
+#### Vylepšené automatické obnovování dat
+
+- **Spolehlivější získávání dat** – vylepšená logika pro automatické obnovení HDO dat
+- **Retry mechanismus** – při selhání se systém pokusí znovu získat data (až 3 pokusy)
+- **Lepší error handling** – robustnější zpracování chyb při komunikaci s API
+- **Detailnější logování** – přehlednější informace o průběhu aktualizace dat v logu
+
+### ✨ Vylepšení
+
+- Optimalizovaná komunikace s ČEZ Distribuce API
+- Vylepšené zprávy v logu pro snazší diagnostiku
+- Zvýšená spolehlivost při nestabilním připojení
+
+---
+
 ## v3.1.1 (2026-02-05)
 
 ### 🐛 Opravy

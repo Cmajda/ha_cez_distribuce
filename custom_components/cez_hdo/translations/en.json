@@ -43,14 +43,16 @@
             },
             "prices": {
                 "title": "Tariff Prices Setup",
-                "description": "Set prices for low (NT) and high (VT) tariff. Prices are used for cost calculations in the card.",
+                "description": "Set prices for low (NT) and high (VT) tariff. Prices are used for cost calculations in the card.\n\n**Auto refresh** uses OCR to automatically solve CAPTCHA and refresh data when it's about to expire.",
                 "data": {
                     "low_tariff_price": "NT Price (CZK/kWh)",
-                    "high_tariff_price": "VT Price (CZK/kWh)"
+                    "high_tariff_price": "VT Price (CZK/kWh)",
+                    "auto_refresh": "Auto refresh data"
                 },
                 "data_description": {
                     "low_tariff_price": "Price per kWh in low tariff",
-                    "high_tariff_price": "Price per kWh in high tariff"
+                    "high_tariff_price": "Price per kWh in high tariff",
+                    "auto_refresh": "Enable automatic HDO data refresh (max 24 attempts per day)"
                 }
             }
         },
@@ -102,14 +104,16 @@
             },
             "prices": {
                 "title": "Tariff Prices Setup",
-                "description": "Set prices for low (NT) and high (VT) tariff. Prices are used for cost calculations in the card.",
+                "description": "Set prices for low (NT) and high (VT) tariff. Prices are used for cost calculations in the card.\n\n**Auto refresh** uses OCR to automatically solve CAPTCHA and refresh data when it's about to expire.",
                 "data": {
                     "low_tariff_price": "NT Price (CZK/kWh)",
-                    "high_tariff_price": "VT Price (CZK/kWh)"
+                    "high_tariff_price": "VT Price (CZK/kWh)",
+                    "auto_refresh": "Auto refresh data"
                 },
                 "data_description": {
                     "low_tariff_price": "Price per kWh in low tariff",
-                    "high_tariff_price": "Price per kWh in high tariff"
+                    "high_tariff_price": "Price per kWh in high tariff",
+                    "auto_refresh": "Enable automatic HDO data refresh (max 24 attempts per day)"
                 }
             }
         },
@@ -171,6 +175,46 @@
             },
             "datavalid": {
                 "name": "Data valid"
+            }
+        }
+    },
+    "services": {
+        "refresh_data": {
+            "name": "Refresh HDO data",
+            "description": "Manually refresh HDO data using OCR for CAPTCHA solving. This call does NOT count towards the daily limit of 24 attempts.",
+            "fields": {
+                "entry_id": {
+                    "name": "Entry ID",
+                    "description": "Config entry ID (optional - if not provided, refreshes all)"
+                }
+            }
+        },
+        "list_signals": {
+            "name": "List available signals",
+            "description": "Shows list of available HDO signals for given EAN number in Home Assistant logs",
+            "fields": {
+                "ean": {
+                    "name": "EAN number",
+                    "description": "EAN number of the metering point (found on invoice)"
+                }
+            }
+        },
+        "reload_frontend_card": {
+            "name": "Reload frontend card",
+            "description": "Reloads the ČEZ HDO frontend card (useful during development)"
+        },
+        "set_prices": {
+            "name": "Set tariff prices",
+            "description": "Sets price per kWh for low and high tariff, used in current price sensor",
+            "fields": {
+                "low_tariff_price": {
+                    "name": "Low tariff price",
+                    "description": "Price per kWh in low tariff (NT)"
+                },
+                "high_tariff_price": {
+                    "name": "High tariff price",
+                    "description": "Price per kWh in high tariff (VT)"
+                }
             }
         }
     }

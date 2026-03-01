@@ -2,6 +2,116 @@
 
 ---
 
+## v3.2.3 (2026-02-28)
+
+### 🐛 Fixes
+
+#### Fixed daily automatic data refresh
+
+- **Auto-refresh now runs daily** – previous version only scheduled auto-refresh when data was 5+ days old
+- **Fixed:** Data is now automatically refreshed every day (not just before expiration)
+- Method `_async_schedule_auto_refresh` already contains logic for resetting counters for new day
+
+---
+
+## v3.2.2 (2026-02-26)
+
+### 🚀 Main Changes
+
+#### Migration to Home Assistant Store API
+
+- **New data storage system** – integration now uses native Home Assistant Store helper
+- **Atomic writes** – data is saved safely without risk of corruption during outages
+- **Automatic management** – HA handles file locations in `.storage/`
+
+#### Improved Logging
+
+- **Detailed API logs** – each step of the process is now logged with attempt number
+- **Structured messages** – clear information about what's happening (API calls, results)
+- **Removed misleading log** – "Manually updated" no longer appears every 5 seconds
+
+### 🐛 Fixes
+
+- **Fixed diagnostics** – works correctly with new Store API
+- **Removed unused code** – cleaned up legacy files and functions
+
+### 🌐 Localization
+
+- **Services translated to English** – `services.yaml` now in English per HA best practices
+- **Service localization** – Czech service translations moved to `translations/cs.json`
+- **Comments in English** – all code comments are now in English
+
+### 📁 Data Storage Changes
+
+New file locations (managed automatically by Home Assistant):
+
+| File          | New Location                            |
+| ------------- | --------------------------------------- |
+| Data cache    | `.storage/cez_hdo.cache_XXXXXX`         |
+| Prices        | `.storage/cez_hdo.prices_XXXXXX`        |
+| Refresh state | `.storage/cez_hdo.refresh_state_XXXXXX` |
+
+> **Note:** `XXXXXX` = last 6 digits of EAN
+
+---
+
+## v3.2.1 (2026-02-26)
+
+### 🚨 Breaking Changes
+
+- **Cache location changed** from `custom_components/cez_hdo/data/` to `.storage/cez_hdo/`
+- After update, you need to:
+
+> - **Reconfigure the integration**, or
+> - **Manually copy data:** from /config/custom_components/cez_hdo/data/*.json to /config/.storage/cez_hdo
+>
+>   ```bash
+>   mkdir -p /config/.storage/cez_hdo
+>   cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
+>   ```
+
+### 🐛 Fixes
+
+#### Data survives integration updates
+
+- **Cache moved to `.storage/cez_hdo/`** – data (HDO schedule, prices, auto-refresh state) is now stored in a safe location
+- **Fixed:** Future updates via HACS will no longer delete saved data
+
+### ⚠️ Important for users updating from 3.2.0
+
+**HACS deletes the entire integration folder during updates**, so data from version 3.2.0 was lost.
+
+**Solution:**
+
+- Reconfigure the integration, or
+- Manually copy data:
+
+  ```bash
+  mkdir -p /config/.storage/cez_hdo
+  cp /config/custom_components/cez_hdo/data/*.json /config/.storage/cez_hdo/
+  ```
+
+---
+
+## v3.2.0 (2026-02-25)
+
+### 🚀 Main Changes
+
+#### Improved Automatic Data Refresh
+
+- **More reliable data fetching** – improved logic for automatic HDO data refresh
+- **Retry mechanism** – system will retry fetching data on failure (up to 3 attempts)
+- **Better error handling** – more robust error handling when communicating with API
+- **Detailed logging** – clearer information about data update progress in logs
+
+### ✨ Improvements
+
+- Optimized communication with ČEZ Distribuce API
+- Improved log messages for easier diagnostics
+- Increased reliability with unstable connections
+
+---
+
 ## v3.1.1 (2026-02-05)
 
 ### 🐛 Fixes

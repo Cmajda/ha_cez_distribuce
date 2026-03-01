@@ -4,23 +4,22 @@ from __future__ import annotations
 
 import logging
 
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-
 from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
 )
 from homeassistant.components.sensor import PLATFORM_SCHEMA as BASE_PLATFORM_SCHEMA
 from homeassistant.config_entries import ConfigEntry
-import homeassistant.helpers.config_validation as cv
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from . import DOMAIN, DATA_COORDINATOR
+from . import DATA_COORDINATOR, DOMAIN
+from .const import ean_short, mask_ean, sanitize_signal
 from .coordinator import CezHdoCoordinator, CezHdoData
-from .const import mask_ean, ean_short, sanitize_signal
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -111,7 +110,7 @@ def setup_platform(
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
     """Set up the CEZ HDO binary sensor platform (sync - deprecated)."""
-    _LOGGER.warning("Synchronous setup_platform is deprecated. Use async_setup_platform instead.")
+    _LOGGER.warning("CEZ HDO: Synchronous setup_platform is deprecated. Use async_setup_platform instead.")
 
 
 async def _async_get_coordinator(hass: HomeAssistant, ean: str, signal: str | None) -> CezHdoCoordinator:
@@ -119,7 +118,7 @@ async def _async_get_coordinator(hass: HomeAssistant, ean: str, signal: str | No
     # Check if coordinator already exists (sensor platform usually creates it first)
     if DOMAIN in hass.data and DATA_COORDINATOR in hass.data[DOMAIN]:
         coordinator = hass.data[DOMAIN][DATA_COORDINATOR]
-        _LOGGER.debug("Using existing coordinator")
+        _LOGGER.debug("CEZ HDO: Using existing coordinator")
         return coordinator
 
     # Create new coordinator

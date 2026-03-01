@@ -11,9 +11,13 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **CAPTCHA OVĚŘENÍ:** Od verze 3.1.0 integrace podporuje CAPTCHA ověření.
-> Při konfiguraci zadáte kód z obrázku. Data jsou platná 6 dní.
-> Více v [issue #58](https://github.com/Cmajda/ha_cez_distribuce/issues/58).
+> ℹ️ **AUTOMATICKÉ OBNOVOVÁNÍ DAT:** Od verze 3.2.X integrace automaticky obnovuje HDO data.
+> Při konfiguraci zadáte kód z CAPTCHA obrázku. Data se pak obnovují automaticky.
+> Nová umístění souborů (spravuje Home Assistant automaticky) v `.storage` a přežijí aktualizace přes HACS.
+---
+> 🚨 **BREAKING CHANGE v3.2.X:** Změna umístění cache z `custom_components/cez_hdo/data/` na `.storage`.
+> Po aktualizaci z verze 3.2.0 nebo starší je nutné: **Znovu nakonfigurovat integraci**
+> znovu zadat ceny pro NT a VT
 
 🇬🇧 [English version](README_EN.md)
 

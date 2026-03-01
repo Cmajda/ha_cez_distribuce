@@ -3,15 +3,14 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 
+import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
+from .const import CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH
 from .frontend import CezHdoCardRegistration
 
 _LOGGER = logging.getLogger(__name__)
@@ -21,13 +20,8 @@ DOMAIN = "cez_hdo"
 # Keys for hass.data[DOMAIN]
 DATA_COORDINATOR = "coordinator"
 
-# Configuration schema - integrace se konfiguruje pouze přes platformy
+# Configuration schema - integration is configured only through platforms
 CONFIG_SCHEMA = vol.Schema({DOMAIN: cv.empty_config_schema}, extra=vol.ALLOW_EXTRA)
-
-
-def get_cache_dir(hass: HomeAssistant) -> Path:
-    """Get path to data directory using hass.config.path()."""
-    return Path(hass.config.path("custom_components", "cez_hdo", "data"))
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -36,10 +30,6 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Initialize domain data storage
     hass.data.setdefault(DOMAIN, {})
-
-    # Ensure data directory exists
-    cache_dir = get_cache_dir(hass)
-    await hass.async_add_executor_job(lambda: cache_dir.mkdir(parents=True, exist_ok=True))
 
     # Register service to reload frontend card
     async def reload_frontend_card(call):
@@ -53,11 +43,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         """Service to list available signals for given EAN."""
         ean = call.data.get("ean")
         if not ean:
-            _LOGGER.error("EAN parameter is required for list_signals service")
+            _LOGGER.error("CEZ HDO: EAN parameter is required for list_signals service")
             return
 
-        from . import downloader
         import requests
+
+        from . import downloader
 
         try:
             url = downloader.BASE_URL
@@ -115,6 +106,84 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
         schema=vol.Schema(
             {
                 vol.Required("ean"): cv.string,
+            }
+        ),
+    )
+
+    # Register service to manually refresh HDO data using OCR
+    async def refresh_data(call):
+        """Service to manually refresh HDO data using OCR.
+
+        This does NOT count towards the daily limit of 24 attempts.
+        """
+        from datetime import datetime
+
+        from . import downloader
+        from .const import mask_ean
+        from .downloader import CEZ_TIMEZONE
+
+        entry_id = call.data.get("entry_id")
+        refreshed_count = 0
+        failed_count = 0
+
+        # Collect coordinators to refresh
+        coordinators_to_refresh = []
+
+        if entry_id:
+            # Refresh specific entry
+            entry_data = hass.data[DOMAIN].get(entry_id, {})
+            if isinstance(entry_data, dict) and DATA_COORDINATOR in entry_data:
+                coordinators_to_refresh.append((entry_id, entry_data[DATA_COORDINATOR], entry_data.get("ean", "")))
+            else:
+                _LOGGER.warning("CEZ HDO refresh_data: Entry ID %s not found", entry_id)
+        else:
+            # Refresh all entries
+            for key, value in hass.data[DOMAIN].items():
+                if isinstance(value, dict) and DATA_COORDINATOR in value:
+                    coordinators_to_refresh.append((key, value[DATA_COORDINATOR], value.get("ean", "")))
+
+        # Refresh each coordinator
+        for coord_entry_id, coordinator, ean in coordinators_to_refresh:
+            _LOGGER.info("CEZ HDO refresh_data: Starting manual refresh for EAN %s", mask_ean(ean))
+
+            try:
+                # Call OCR-based refresh
+                new_data = await hass.async_add_executor_job(downloader.fetch_data_with_auto_captcha, ean)
+
+                if new_data and new_data.get("statusCode") == 200:
+                    # Update coordinator with new data
+                    coordinator.parse_data(new_data)
+                    coordinator.data.last_update = datetime.now(CEZ_TIMEZONE)
+                    coordinator.data.raw_data = new_data
+                    coordinator.async_set_updated_data(coordinator.data)
+
+                    # Save to cache
+                    await coordinator.async_save_to_cache(new_data)
+
+                    # Mark refresh as successful to prevent auto-refresh from running today
+                    await coordinator.async_mark_refresh_successful()
+
+                    _LOGGER.info("CEZ HDO refresh_data: Successfully refreshed data for EAN %s", mask_ean(ean))
+                    refreshed_count += 1
+                else:
+                    _LOGGER.warning(
+                        "CEZ HDO refresh_data: Failed to refresh data for EAN %s (OCR or API error)", mask_ean(ean)
+                    )
+                    failed_count += 1
+
+            except Exception as err:
+                _LOGGER.error("CEZ HDO refresh_data: Error refreshing EAN %s: %s", mask_ean(ean), err)
+                failed_count += 1
+
+        _LOGGER.info("CEZ HDO refresh_data: Completed - %d refreshed, %d failed", refreshed_count, failed_count)
+
+    hass.services.async_register(
+        DOMAIN,
+        "refresh_data",
+        refresh_data,
+        schema=vol.Schema(
+            {
+                vol.Optional("entry_id"): cv.string,
             }
         ),
     )
@@ -183,7 +252,7 @@ PLATFORMS = ["sensor", "binary_sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up ČEZ HDO from a config entry."""
-    _LOGGER.debug("async_setup_entry Start for %s", entry.entry_id)
+    _LOGGER.debug("CEZ HDO: async_setup_entry Start for %s", entry.entry_id)
 
     # Register frontend card
     cards = CezHdoCardRegistration(hass)
@@ -193,15 +262,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     ean = entry.data.get("ean")
     signal = entry.data.get("signal")
     entity_suffix = entry.data.get("entity_suffix")
+    auto_refresh = entry.data.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
 
     if not ean:
-        _LOGGER.error("No EAN in config entry")
+        _LOGGER.error("CEZ HDO: No EAN in config entry")
         return False
 
     # Create coordinator
     from .coordinator import CezHdoCoordinator
 
-    coordinator = CezHdoCoordinator(hass, ean, signal)
+    coordinator = CezHdoCoordinator(hass, ean, signal, auto_refresh)
     await coordinator.async_initialize()
 
     # Check for initial prices from config flow
@@ -225,19 +295,20 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Forward setup to platforms
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
-    _LOGGER.debug("async_setup_entry Complete for %s", entry.entry_id)
+    _LOGGER.debug("CEZ HDO: async_setup_entry Complete for %s", entry.entry_id)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    _LOGGER.debug("async_unload_entry for %s", entry.entry_id)
+    _LOGGER.debug("CEZ HDO: async_unload_entry for %s", entry.entry_id)
 
-    # Stop state updates on coordinator before unloading
+    # Stop state updates and auto-refresh on coordinator before unloading
     entry_data = hass.data[DOMAIN].get(entry.entry_id, {})
     coordinator = entry_data.get(DATA_COORDINATOR)
     if coordinator:
         coordinator.stop_state_updates()
+        coordinator.stop_auto_refresh()
 
     # Unload platforms
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
@@ -251,5 +322,5 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         cards = CezHdoCardRegistration(hass)
         await cards.async_unregister()
 
-    _LOGGER.debug("async_unload_entry Done for %s", entry.entry_id)
+    _LOGGER.debug("CEZ HDO: async_unload_entry Done for %s", entry.entry_id)
     return unload_ok

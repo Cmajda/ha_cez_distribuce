@@ -4,19 +4,18 @@ import logging
 import os
 import pathlib
 
-from packaging.version import parse
-
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.event import async_call_later
 from homeassistant.components.http import StaticPathConfig
 from homeassistant.const import __version__
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.event import async_call_later
+from packaging.version import parse
 
 _LOGGER = logging.getLogger(__name__)
 
-# Konstanty pro frontend kartu
+# Constants for frontend card
 DOMAIN = "cez_hdo"
 URL_BASE = "/cez_hdo_card"
-CEZ_HDO_CARDS = [{"name": "CEZ HDO Card", "filename": "cez-hdo-card.js", "version": "3.0.0-RC.2"}]
+CEZ_HDO_CARDS = [{"name": "CEZ HDO Card", "filename": "cez-hdo-card.js", "version": "3.2.3"}]
 
 
 class CezHdoCardRegistration:
@@ -57,7 +56,7 @@ class CezHdoCardRegistration:
     async def async_register_cez_hdo_path(self):
         """Register custom cards path if not already registered."""
         try:
-            # Složka dist obsahuje zkompilovaný JS soubor
+            # dist folder contains the compiled JS file
             dist_path = pathlib.Path(__file__).parent / "dist"
             await self.hass.http.async_register_static_paths([StaticPathConfig(URL_BASE, str(dist_path), False)])
             _LOGGER.debug("Registered CEZ HDO path from %s", dist_path)
