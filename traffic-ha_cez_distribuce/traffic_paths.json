@@ -2,50 +2,50 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 358,
-    "uniques": 213
+    "count": 375,
+    "uniques": 224
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 147,
+    "count": 148,
     "uniques": 68
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/58",
     "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
-    "count": 76,
-    "uniques": 55
+    "count": 71,
+    "uniques": 54
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/67",
     "title": "[Dotaz]: ČEZ HDO - Data vypršela! - rozbité API? · Issue #67 · Cmajda/ha_cez_...",
-    "count": 74,
-    "uniques": 51
+    "count": 69,
+    "uniques": 50
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce",
-    "count": 64,
-    "uniques": 37
+    "count": 63,
+    "uniques": 40
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/68",
     "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
-    "count": 44,
-    "uniques": 28
+    "count": 50,
+    "uniques": 30
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 34,
-    "uniques": 22
+    "count": 32,
+    "uniques": 20
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/64",
     "title": "[Feature]: Možnost načítáni cen ze sensoru místo hodnoty do nastavení cen tar...",
-    "count": 22,
-    "uniques": 17
+    "count": 23,
+    "uniques": 18
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.1.1",
@@ -54,9 +54,9 @@
     "uniques": 7
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
-    "title": "ha_cez_distribuce/docs/cs/known-issues.md at main · Cmajda/ha_cez_distribuce ...",
+    "path": "/Cmajda/ha_cez_distribuce/discussions",
+    "title": "Cmajda/ha_cez_distribuce · Discussions · GitHub",
     "count": 19,
-    "uniques": 16
+    "uniques": 17
   }
 ]
