@@ -2,61 +2,61 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 375,
+    "count": 374,
     "uniques": 224
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 148,
+    "count": 150,
     "uniques": 68
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues/58",
-    "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
-    "count": 71,
-    "uniques": 54
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/67",
     "title": "[Dotaz]: ČEZ HDO - Data vypršela! - rozbité API? · Issue #67 · Cmajda/ha_cez_...",
-    "count": 69,
+    "count": 64,
+    "uniques": 47
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/58",
+    "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
+    "count": 61,
     "uniques": 50
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
-    "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce",
-    "count": 63,
-    "uniques": 40
+    "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
+    "count": 56,
+    "uniques": 37
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/68",
     "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
-    "count": 50,
+    "count": 53,
     "uniques": 30
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 32,
-    "uniques": 20
+    "count": 35,
+    "uniques": 22
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/64",
     "title": "[Feature]: Možnost načítáni cen ze sensoru místo hodnoty do nastavení cen tar...",
-    "count": 23,
-    "uniques": 18
+    "count": 24,
+    "uniques": 19
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
+    "title": "ha_cez_distribuce/custom_components/cez_hdo/downloader.py at main · Cmajda/ha...",
+    "count": 21,
+    "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.1.1",
     "title": "Release v3.1.1 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 22,
-    "uniques": 7
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/discussions",
-    "title": "Cmajda/ha_cez_distribuce · Discussions · GitHub",
-    "count": 19,
-    "uniques": 17
+    "count": 20,
+    "uniques": 5
   }
 ]

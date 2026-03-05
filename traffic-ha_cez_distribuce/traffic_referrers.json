@@ -1,18 +1,18 @@
 [
   {
-    "referrer": "github.com",
-    "count": 95,
-    "uniques": 30
+    "referrer": "Google",
+    "count": 103,
+    "uniques": 37
   },
   {
-    "referrer": "Google",
-    "count": 94,
-    "uniques": 34
+    "referrer": "github.com",
+    "count": 97,
+    "uniques": 32
   },
   {
     "referrer": "statics.teams.cdn.office.net",
-    "count": 82,
-    "uniques": 11
+    "count": 54,
+    "uniques": 9
   },
   {
     "referrer": "email.seznam.cz",
@@ -20,17 +20,17 @@
     "uniques": 1
   },
   {
-    "referrer": "m.facebook.com",
-    "count": 4,
+    "referrer": "l.facebook.com",
+    "count": 2,
     "uniques": 2
   },
   {
-    "referrer": "l.facebook.com",
+    "referrer": "lm.facebook.com",
     "count": 1,
     "uniques": 1
   },
   {
-    "referrer": "lm.facebook.com",
+    "referrer": "m.facebook.com",
     "count": 1,
     "uniques": 1
   }
