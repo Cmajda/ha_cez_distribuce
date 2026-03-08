@@ -2,49 +2,49 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 342,
-    "uniques": 210
+    "count": 322,
+    "uniques": 195
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 131,
-    "uniques": 63
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues/68",
-    "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
-    "count": 53,
-    "uniques": 30
+    "count": 120,
+    "uniques": 61
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
     "count": 52,
-    "uniques": 35
+    "uniques": 37
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/68",
+    "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
+    "count": 46,
+    "uniques": 27
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/58",
     "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
-    "count": 42,
-    "uniques": 34
+    "count": 34,
+    "uniques": 29
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 33,
-    "uniques": 20
+    "count": 31,
+    "uniques": 18
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/67",
     "title": "[Dotaz]: ČEZ HDO - Data vypršela! - rozbité API? · Issue #67 · Cmajda/ha_cez_...",
-    "count": 32,
-    "uniques": 24
+    "count": 25,
+    "uniques": 18
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/64",
     "title": "[Feature]: Možnost načítáni cen ze sensoru místo hodnoty do nastavení cen tar...",
-    "count": 22,
+    "count": 20,
     "uniques": 18
   },
   {
