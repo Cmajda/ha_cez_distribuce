@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 260,
-    "uniques": 153
+    "count": 243,
+    "uniques": 145
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 86,
-    "uniques": 44
+    "count": 81,
+    "uniques": 41
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -18,16 +18,16 @@
     "uniques": 28
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/68",
-    "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
-    "count": 34,
-    "uniques": 17
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "Pull requests · Cmajda/ha_cez_distribuce",
+    "count": 29,
+    "uniques": 16
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/68",
+    "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
     "count": 27,
-    "uniques": 14
+    "uniques": 15
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/compare/v3.2.2...v3.2.3",
@@ -44,19 +44,19 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
     "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 17,
+    "count": 18,
     "uniques": 6
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues/64",
-    "title": "[Feature]: Možnost načítáni cen ze sensoru místo hodnoty do nastavení cen tar...",
-    "count": 16,
-    "uniques": 14
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/v3.2.3",
     "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
+    "count": 16,
+    "uniques": 15
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/pull/70",
+    "title": "Feature/api auth captcha by Cmajda · Pull Request #70 · Cmajda/ha_cez_distrib...",
     "count": 15,
-    "uniques": 14
+    "uniques": 5
   }
 ]
