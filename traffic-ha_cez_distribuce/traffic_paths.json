@@ -1,33 +1,27 @@
 [
   {
     "path": "/Cmajda/ha_cez_distribuce",
-    "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 243,
-    "uniques": 145
+    "title": "Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
+    "count": 231,
+    "uniques": 140
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 81,
-    "uniques": 41
+    "count": 69,
+    "uniques": 38
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 37,
-    "uniques": 28
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/pulls",
-    "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 29,
-    "uniques": 16
+    "count": 34,
+    "uniques": 27
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/68",
     "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
-    "count": 27,
-    "uniques": 15
+    "count": 24,
+    "uniques": 14
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/compare/v3.2.2...v3.2.3",
@@ -36,10 +30,10 @@
     "uniques": 23
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/58",
-    "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
-    "count": 18,
-    "uniques": 14
+    "path": "/Cmajda/ha_cez_distribuce/pulls",
+    "title": "Pull requests · Cmajda/ha_cez_distribuce",
+    "count": 20,
+    "uniques": 15
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
@@ -50,13 +44,19 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/v3.2.3",
     "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 16,
-    "uniques": 15
+    "count": 17,
+    "uniques": 16
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/pull/70",
-    "title": "Feature/api auth captcha by Cmajda · Pull Request #70 · Cmajda/ha_cez_distrib...",
-    "count": 15,
-    "uniques": 5
+    "path": "/Cmajda/ha_cez_distribuce/issues/58",
+    "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
+    "count": 16,
+    "uniques": 12
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/64",
+    "title": "[Feature]: Možnost načítáni cen ze sensoru místo hodnoty do nastavení cen tar...",
+    "count": 12,
+    "uniques": 12
   }
 ]
