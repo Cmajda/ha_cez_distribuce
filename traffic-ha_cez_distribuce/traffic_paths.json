@@ -1,39 +1,39 @@
 [
   {
     "path": "/Cmajda/ha_cez_distribuce",
-    "title": "Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 231,
-    "uniques": 140
+    "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
+    "count": 233,
+    "uniques": 139
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
     "count": 69,
-    "uniques": 38
+    "uniques": 37
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 34,
-    "uniques": 27
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues/68",
-    "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
-    "count": 24,
-    "uniques": 14
+    "count": 32,
+    "uniques": 26
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/compare/v3.2.2...v3.2.3",
     "title": "Comparing v3.2.2...v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 23,
-    "uniques": 23
+    "count": 24,
+    "uniques": 24
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/pulls",
-    "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 20,
-    "uniques": 15
+    "path": "/Cmajda/ha_cez_distribuce/issues/68",
+    "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
+    "count": 22,
+    "uniques": 12
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/releases/v3.2.3",
+    "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
+    "count": 18,
+    "uniques": 17
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
@@ -42,16 +42,16 @@
     "uniques": 6
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/releases/v3.2.3",
-    "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 17,
-    "uniques": 16
+    "path": "/Cmajda/ha_cez_distribuce/pulls",
+    "title": "Pull requests · Cmajda/ha_cez_distribuce",
+    "count": 15,
+    "uniques": 13
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/58",
     "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
-    "count": 16,
-    "uniques": 12
+    "count": 15,
+    "uniques": 11
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/64",
