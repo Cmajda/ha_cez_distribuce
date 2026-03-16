@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 233,
-    "uniques": 139
+    "count": 216,
+    "uniques": 130
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 69,
-    "uniques": 37
+    "count": 64,
+    "uniques": 34
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -24,16 +24,10 @@
     "uniques": 24
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/68",
-    "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
-    "count": 22,
-    "uniques": 12
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/releases/v3.2.3",
     "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 18,
-    "uniques": 17
+    "count": 20,
+    "uniques": 19
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
@@ -42,21 +36,27 @@
     "uniques": 6
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/pulls",
-    "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 15,
-    "uniques": 13
+    "path": "/Cmajda/ha_cez_distribuce/issues/68",
+    "title": "[Feature]: Staticke casy · Issue #68 · Cmajda/ha_cez_distribuce",
+    "count": 14,
+    "uniques": 9
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/58",
-    "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
-    "count": 15,
-    "uniques": 11
+    "path": "/Cmajda/ha_cez_distribuce/pulls",
+    "title": "Pull requests · Cmajda/ha_cez_distribuce · GitHub",
+    "count": 13,
+    "uniques": 12
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/64",
     "title": "[Feature]: Možnost načítáni cen ze sensoru místo hodnoty do nastavení cen tar...",
-    "count": 12,
-    "uniques": 12
+    "count": 11,
+    "uniques": 11
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/58",
+    "title": "[Dotaz]: Zadání EAN · Issue #58 · Cmajda/ha_cez_distribuce",
+    "count": 11,
+    "uniques": 7
   }
 ]
