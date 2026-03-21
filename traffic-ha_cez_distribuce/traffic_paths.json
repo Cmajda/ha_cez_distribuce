@@ -2,38 +2,32 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 157,
-    "uniques": 93
+    "count": 146,
+    "uniques": 84
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 36,
+    "count": 41,
     "uniques": 19
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce",
-    "count": 26,
-    "uniques": 19
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
-    "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 15,
-    "uniques": 5
+    "count": 25,
+    "uniques": 17
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/74",
     "title": "[Dotaz]: Failed to verify EAN. Please check manually on ČEZ Distribuce websit...",
-    "count": 13,
-    "uniques": 6
+    "count": 14,
+    "uniques": 7
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/releases/v3.2.3",
+    "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
     "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 11,
-    "uniques": 10
+    "count": 12,
+    "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
@@ -44,19 +38,25 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
     "title": "Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 9,
-    "uniques": 9
+    "count": 8,
+    "uniques": 8
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/releases/v3.2.3",
+    "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
+    "count": 8,
+    "uniques": 8
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 9,
-    "uniques": 8
+    "count": 8,
+    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/compare/v3.2.2...v3.2.3",
     "title": "Comparing v3.2.2...v3.2.3 · Cmajda/ha_cez_distribuce",
-    "count": 8,
-    "uniques": 8
+    "count": 6,
+    "uniques": 6
   }
 ]
