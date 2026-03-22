@@ -2,20 +2,20 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 146,
-    "uniques": 84
+    "count": 142,
+    "uniques": 82
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 41,
-    "uniques": 19
+    "count": 39,
+    "uniques": 17
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce",
-    "count": 25,
-    "uniques": 17
+    "count": 21,
+    "uniques": 13
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/74",
@@ -26,36 +26,36 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
     "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 12,
+    "count": 11,
     "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.2.3 · Cmajda/ha_cez_distribu...",
-    "count": 11,
-    "uniques": 5
+    "count": 9,
+    "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
     "title": "Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 8,
-    "uniques": 8
+    "count": 7,
+    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/v3.2.3",
     "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 8,
-    "uniques": 8
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/pulls",
-    "title": "Pull requests · Cmajda/ha_cez_distribuce",
-    "count": 8,
+    "count": 7,
     "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/compare/v3.2.2...v3.2.3",
     "title": "Comparing v3.2.2...v3.2.3 · Cmajda/ha_cez_distribuce",
+    "count": 6,
+    "uniques": 6
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/pulls",
+    "title": "Pull requests · Cmajda/ha_cez_distribuce · GitHub",
     "count": 6,
     "uniques": 6
   }
