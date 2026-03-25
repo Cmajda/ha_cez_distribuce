@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 144,
-    "uniques": 84
+    "count": 140,
+    "uniques": 82
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 40,
-    "uniques": 18
+    "count": 41,
+    "uniques": 19
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -24,32 +24,32 @@
     "uniques": 7
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
-    "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 11,
-    "uniques": 4
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.2.3 · Cmajda/ha_cez_distribu...",
     "count": 9,
     "uniques": 4
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
+    "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
+    "count": 8,
+    "uniques": 4
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
     "title": "Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 8,
-    "uniques": 8
+    "count": 7,
+    "uniques": 7
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
+    "count": 7,
+    "uniques": 5
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "Pull requests · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 6,
-    "uniques": 6
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/releases/v3.2.3",
-    "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
     "count": 6,
     "uniques": 6
   },
