@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 146,
-    "uniques": 88
+    "count": 150,
+    "uniques": 92
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 41,
-    "uniques": 19
+    "count": 40,
+    "uniques": 18
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -20,14 +20,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/74",
     "title": "[Dotaz]: Failed to verify EAN. Please check manually on ČEZ Distribuce websit...",
-    "count": 14,
-    "uniques": 7
+    "count": 15,
+    "uniques": 8
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
-    "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 9,
-    "uniques": 4
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
+    "count": 8,
+    "uniques": 8
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
@@ -36,27 +36,27 @@
     "uniques": 6
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
+    "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
+    "count": 8,
+    "uniques": 4
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.2.3 · Cmajda/ha_cez_distribu...",
     "count": 8,
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 7,
-    "uniques": 7
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/pulls",
-    "title": "Pull requests · Cmajda/ha_cez_distribuce · GitHub",
+    "path": "/Cmajda/ha_cez_distribuce/issues/75",
+    "title": "[Feature]: Merge vícero signálů · Issue #75 · Cmajda/ha_cez_distribuce",
     "count": 6,
-    "uniques": 6
+    "uniques": 5
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce",
-    "count": 6,
-    "uniques": 5
+    "count": 5,
+    "uniques": 4
   }
 ]
