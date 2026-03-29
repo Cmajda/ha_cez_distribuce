@@ -2,19 +2,19 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 148,
-    "uniques": 93
+    "count": 140,
+    "uniques": 90
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 41,
-    "uniques": 19
+    "count": 33,
+    "uniques": 17
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 32,
+    "count": 31,
     "uniques": 17
   },
   {
@@ -22,6 +22,12 @@
     "title": "[Dotaz]: Failed to verify EAN. Please check manually on ČEZ Distribuce websit...",
     "count": 16,
     "uniques": 8
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
+    "count": 9,
+    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
@@ -36,22 +42,16 @@
     "uniques": 8
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
-    "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 8,
-    "uniques": 6
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
-    "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.2.3 · Cmajda/ha_cez_distribu...",
-    "count": 7,
-    "uniques": 3
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/issues/75",
     "title": "[Feature]: Merge vícero signálů · Issue #75 · Cmajda/ha_cez_distribuce",
     "count": 6,
     "uniques": 5
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.2.3 · Cmajda/ha_cez_distribu...",
+    "count": 6,
+    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main",
