@@ -2,26 +2,20 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 141,
-    "uniques": 93
+    "count": 142,
+    "uniques": 95
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 27,
+    "count": 26,
     "uniques": 15
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "GitHub · Where software is built",
-    "count": 20,
+    "count": 19,
     "uniques": 11
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues/74",
-    "title": "[Dotaz]: Failed to verify EAN. Please check manually on ČEZ Distribuce websit...",
-    "count": 11,
-    "uniques": 8
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
@@ -30,27 +24,15 @@
     "uniques": 8
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/issues/74",
+    "title": "[Dotaz]: Failed to verify EAN. Please check manually on ČEZ Distribuce websit...",
+    "count": 10,
+    "uniques": 7
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
     "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
-    "count": 7,
-    "uniques": 3
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 6,
-    "uniques": 6
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues/75",
-    "title": "[Feature]: Merge vícero signálů · Issue #75 · Cmajda/ha_cez_distribuce",
-    "count": 6,
-    "uniques": 5
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
-    "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.2.3 · Cmajda/ha_cez_distribu...",
-    "count": 6,
+    "count": 8,
     "uniques": 3
   },
   {
@@ -58,5 +40,23 @@
     "title": "ha_cez_distribuce/custom_components/cez_hdo at main · Cmajda/ha_cez_distribuc...",
     "count": 5,
     "uniques": 5
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
+    "count": 5,
+    "uniques": 5
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/releases/v2.2.0",
+    "title": "Release v2.2.0 · Cmajda/ha_cez_distribuce",
+    "count": 4,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/75",
+    "title": "[Feature]: Merge vícero signálů · Issue #75 · Cmajda/ha_cez_distribuce",
+    "count": 3,
+    "uniques": 3
   }
 ]
