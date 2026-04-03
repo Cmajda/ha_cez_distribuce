@@ -1,61 +1,61 @@
 [
   {
     "path": "/Cmajda/ha_cez_distribuce",
-    "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 140,
-    "uniques": 88
+    "title": "Overview",
+    "count": 136,
+    "uniques": 82
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
-    "title": "ha_cez_distribuce/docs/cs/user-guide.md at main · Cmajda/ha_cez_distribuce · ...",
-    "count": 22,
-    "uniques": 14
+    "title": "/blob/main/docs/cs/user-guide.md",
+    "count": 23,
+    "uniques": 13
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "GitHub · Where software is built",
-    "count": 16,
-    "uniques": 10
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
-    "title": "GitHub - Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff · Git...",
-    "count": 10,
+    "title": "/issues",
+    "count": 14,
     "uniques": 8
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "/tree/main/custom_components/cez_hdo",
+    "count": 9,
+    "uniques": 7
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
-    "title": "Release v3.2.3 · Cmajda/ha_cez_distribuce · GitHub",
+    "title": "/releases/tag/v3.2.3",
     "count": 8,
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/74",
-    "title": "[Dotaz]: Failed to verify EAN. Please check manually on ČEZ Distribuce websit...",
-    "count": 7,
-    "uniques": 6
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
-    "title": "ha_cez_distribuce/custom_components/cez_hdo at main · Cmajda/ha_cez_distribuc...",
-    "count": 5,
-    "uniques": 5
+    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
+    "count": 4,
+    "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "Cmajda/ha_cez_distribuce: ČEZ HDO schedule low and high tariff",
-    "count": 5,
-    "uniques": 5
+    "title": "/blob/main/docs/cs/upgrade-guide.md",
+    "count": 4,
+    "uniques": 4
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/74",
+    "title": "/issues/74",
+    "count": 4,
+    "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/v2.2.0",
-    "title": "Release v2.2.0 · Cmajda/ha_cez_distribuce",
+    "title": "/releases/v2.2.0",
     "count": 4,
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
-    "title": "ha_cez_distribuce/docs/cs/upgrade-guide.md at v3.2.3 · Cmajda/ha_cez_distribu...",
+    "path": "/Cmajda/ha_cez_distribuce/issues/75",
+    "title": "/issues/75",
     "count": 3,
     "uniques": 3
   }
