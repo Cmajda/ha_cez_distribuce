@@ -2,26 +2,20 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 136,
-    "uniques": 82
+    "count": 145,
+    "uniques": 87
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 23,
+    "count": 22,
+    "uniques": 12
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/v3.2.3",
+    "title": "/tree/v3.2.3",
+    "count": 15,
     "uniques": 13
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "/issues",
-    "count": 14,
-    "uniques": 8
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
-    "title": "/tree/main/custom_components/cez_hdo",
-    "count": 9,
-    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
@@ -30,20 +24,26 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
-    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
-    "count": 4,
-    "uniques": 4
+    "path": "/Cmajda/ha_cez_distribuce/issues",
+    "title": "/issues",
+    "count": 7,
+    "uniques": 5
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
     "title": "/blob/main/docs/cs/upgrade-guide.md",
-    "count": 4,
-    "uniques": 4
+    "count": 5,
+    "uniques": 5
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/74",
-    "title": "/issues/74",
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "/tree/main/custom_components/cez_hdo",
+    "count": 5,
+    "uniques": 5
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
+    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
     "count": 4,
     "uniques": 4
   },
@@ -54,8 +54,8 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/75",
-    "title": "/issues/75",
+    "path": "/Cmajda/ha_cez_distribuce/issues/74",
+    "title": "/issues/74",
     "count": 3,
     "uniques": 3
   }
