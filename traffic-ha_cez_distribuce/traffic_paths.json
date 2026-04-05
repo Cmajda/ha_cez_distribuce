@@ -2,7 +2,7 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 145,
+    "count": 143,
     "uniques": 87
   },
   {
@@ -36,14 +36,14 @@
     "uniques": 5
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
-    "title": "/tree/main/custom_components/cez_hdo",
-    "count": 5,
-    "uniques": 5
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
     "title": "/blob/main/custom_components/cez_hdo/downloader.py",
+    "count": 4,
+    "uniques": 4
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "/tree/main/custom_components/cez_hdo",
     "count": 4,
     "uniques": 4
   },
