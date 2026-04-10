@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 161,
-    "uniques": 89
+    "count": 157,
+    "uniques": 86
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -20,14 +20,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 14,
-    "uniques": 8
+    "count": 13,
+    "uniques": 9
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/74",
     "title": "/issues/74",
-    "count": 12,
-    "uniques": 9
+    "count": 11,
+    "uniques": 8
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
@@ -36,10 +36,10 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "/blob/main/docs/cs/upgrade-guide.md",
-    "count": 4,
-    "uniques": 4
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/RELEASE_NOTES.md",
+    "title": "/blob/v3.2.3/RELEASE_NOTES.md",
+    "count": 5,
+    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
@@ -48,14 +48,14 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/releases/v2.2.0",
-    "title": "/releases/v2.2.0",
-    "count": 4,
-    "uniques": 1
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
     "title": "/blob/main/custom_components/cez_hdo/downloader.py",
+    "count": 3,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "/blob/main/docs/cs/upgrade-guide.md",
     "count": 3,
     "uniques": 3
   }
