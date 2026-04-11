@@ -1,12 +1,12 @@
 [
   {
     "referrer": "Google",
-    "count": 80,
-    "uniques": 22
+    "count": 83,
+    "uniques": 24
   },
   {
     "referrer": "github.com",
-    "count": 47,
+    "count": 46,
     "uniques": 17
   },
   {
@@ -16,8 +16,8 @@
   },
   {
     "referrer": "l.facebook.com",
-    "count": 1,
-    "uniques": 1
+    "count": 2,
+    "uniques": 2
   },
   {
     "referrer": "lm.facebook.com",
