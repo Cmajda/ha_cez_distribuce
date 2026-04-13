@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 160,
-    "uniques": 89
+    "count": 152,
+    "uniques": 84
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -30,12 +30,6 @@
     "uniques": 7
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
-    "title": "/tree/main/custom_components/cez_hdo",
-    "count": 6,
-    "uniques": 3
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/RELEASE_NOTES.md",
     "title": "/blob/v3.2.3/RELEASE_NOTES.md",
     "count": 5,
@@ -44,6 +38,12 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
     "title": "/releases/tag/v3.2.3",
+    "count": 5,
+    "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "/tree/main/custom_components/cez_hdo",
     "count": 5,
     "uniques": 2
   },
