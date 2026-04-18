@@ -2,18 +2,12 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 162,
-    "uniques": 82
+    "count": 164,
+    "uniques": 81
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 15,
-    "uniques": 13
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/tree/v3.2.3",
-    "title": "/tree/v3.2.3",
     "count": 15,
     "uniques": 13
   },
@@ -58,5 +52,11 @@
     "title": "/blob/main/docs/cs/known-issues.md",
     "count": 3,
     "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/developer-guide.md",
+    "title": "/blob/main/docs/cs/developer-guide.md",
+    "count": 2,
+    "uniques": 2
   }
 ]
