@@ -2,8 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 161,
-    "uniques": 83
+    "count": 166,
+    "uniques": 79
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues",
+    "title": "/issues",
+    "count": 16,
+    "uniques": 8
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -12,10 +18,10 @@
     "uniques": 11
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "/issues",
-    "count": 12,
-    "uniques": 6
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/img",
+    "title": "/tree/main/img",
+    "count": 9,
+    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/74",
@@ -26,37 +32,31 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
     "title": "/tree/main/custom_components/cez_hdo",
-    "count": 5,
+    "count": 7,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/img/cs",
+    "title": "/tree/main/img/cs",
+    "count": 7,
     "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "count": 4,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo/frontend",
+    "title": "/tree/main/custom_components/cez_hdo/frontend",
+    "count": 4,
+    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/RELEASE_NOTES.md",
     "title": "/blob/v3.2.3/RELEASE_NOTES.md",
     "count": 3,
     "uniques": 3
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/releases/v2.2.0",
-    "title": "/releases/v2.2.0",
-    "count": 3,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/developer-guide.md",
-    "title": "/blob/main/docs/cs/developer-guide.md",
-    "count": 2,
-    "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
-    "title": "/blob/main/docs/cs/known-issues.md",
-    "count": 2,
-    "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "/blob/main/docs/cs/upgrade-guide.md",
-    "count": 2,
-    "uniques": 2
   }
 ]
