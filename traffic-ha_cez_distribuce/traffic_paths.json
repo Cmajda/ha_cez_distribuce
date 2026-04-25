@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 171,
-    "uniques": 75
+    "count": 176,
+    "uniques": 76
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 11,
-    "uniques": 7
+    "count": 15,
+    "uniques": 10
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -36,6 +36,12 @@
     "uniques": 2
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/issues/76",
+    "title": "/issues/76",
+    "count": 4,
+    "uniques": 3
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo/frontend",
     "title": "/tree/main/custom_components/cez_hdo/frontend",
     "count": 4,
@@ -52,11 +58,5 @@
     "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "count": 3,
     "uniques": 3
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/releases/v2.2.0",
-    "title": "/releases/v2.2.0",
-    "count": 3,
-    "uniques": 1
   }
 ]
