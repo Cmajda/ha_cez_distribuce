@@ -2,20 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 176,
-    "uniques": 76
+    "count": 174,
+    "uniques": 78
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 15,
-    "uniques": 10
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
-    "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 9,
-    "uniques": 7
+    "count": 17,
+    "uniques": 11
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/img",
@@ -24,9 +18,15 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
-    "title": "/tree/main/custom_components/cez_hdo",
-    "count": 7,
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
+    "title": "/blob/main/docs/cs/user-guide.md",
+    "count": 8,
+    "uniques": 6
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main",
+    "title": "/tree/main",
+    "count": 8,
     "uniques": 3
   },
   {
@@ -36,14 +36,14 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/76",
-    "title": "/issues/76",
-    "count": 4,
-    "uniques": 3
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "/tree/main/custom_components/cez_hdo",
+    "count": 6,
+    "uniques": 4
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo/frontend",
-    "title": "/tree/main/custom_components/cez_hdo/frontend",
+    "path": "/Cmajda/ha_cez_distribuce/issues/76",
+    "title": "/issues/76",
     "count": 4,
     "uniques": 3
   },
@@ -54,9 +54,9 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
-    "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo/frontend",
+    "title": "/tree/main/custom_components/cez_hdo/frontend",
     "count": 3,
-    "uniques": 3
+    "uniques": 2
   }
 ]
