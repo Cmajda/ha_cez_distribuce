@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 124,
-    "uniques": 58
+    "count": 120,
+    "uniques": 61
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
@@ -14,20 +14,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main",
     "title": "/tree/main",
-    "count": 8,
-    "uniques": 3
+    "count": 7,
+    "uniques": 2
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/img",
     "title": "/tree/main/img",
-    "count": 8,
-    "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/img/cs",
-    "title": "/tree/main/img/cs",
     "count": 7,
-    "uniques": 2
+    "uniques": 1
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -36,14 +30,20 @@
     "uniques": 5
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
-    "title": "/tree/main/custom_components/cez_hdo",
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/img/cs",
+    "title": "/tree/main/img/cs",
     "count": 6,
-    "uniques": 4
+    "uniques": 1
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/76",
     "title": "/issues/76",
+    "count": 5,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "/tree/main/custom_components/cez_hdo",
     "count": 5,
     "uniques": 3
   },
