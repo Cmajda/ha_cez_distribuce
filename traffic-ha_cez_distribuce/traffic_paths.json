@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 120,
-    "uniques": 61
+    "count": 111,
+    "uniques": 58
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
@@ -27,7 +27,7 @@
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
     "count": 6,
-    "uniques": 5
+    "uniques": 6
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/img/cs",
