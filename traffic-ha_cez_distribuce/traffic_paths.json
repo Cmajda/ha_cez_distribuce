@@ -2,38 +2,20 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 67,
-    "uniques": 47
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "/issues",
-    "count": 10,
-    "uniques": 6
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues/76",
-    "title": "/issues/76",
-    "count": 6,
-    "uniques": 4
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main",
-    "title": "/tree/main",
-    "count": 6,
-    "uniques": 1
+    "count": 58,
+    "uniques": 39
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 5,
-    "uniques": 5
+    "count": 7,
+    "uniques": 6
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/pulls",
-    "title": "/pulls",
-    "count": 3,
-    "uniques": 3
+    "path": "/Cmajda/ha_cez_distribuce/issues",
+    "title": "/issues",
+    "count": 6,
+    "uniques": 5
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/64",
@@ -42,21 +24,39 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
-    "title": "/tree/main/custom_components/cez_hdo",
-    "count": 3,
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "count": 2,
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/.github",
-    "title": "/tree/main/.github",
-    "count": 3,
+    "path": "/Cmajda/ha_cez_distribuce/issues/58",
+    "title": "/issues/58",
+    "count": 2,
+    "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/76",
+    "title": "/issues/76",
+    "count": 2,
+    "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/pulls",
+    "title": "/pulls",
+    "count": 2,
+    "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/v2.0.8/docs/user-guide.md",
+    "title": "/blob/v2.0.8/docs/user-guide.md",
+    "count": 2,
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/.vscode",
-    "title": "/tree/main/.vscode",
-    "count": 3,
+    "path": "/Cmajda/ha_cez_distribuce/discussions",
+    "title": "/discussions",
+    "count": 2,
     "uniques": 1
   }
 ]
