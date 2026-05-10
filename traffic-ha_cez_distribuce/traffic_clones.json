@@ -483,14 +483,14 @@
       "uniques": 56
     },
     {
-      "timestamp": "2026-04-25T00:00:00Z",
-      "count": 32,
-      "uniques": 25
-    },
-    {
       "timestamp": "2026-04-26T00:00:00Z",
       "count": 9,
       "uniques": 3
+    },
+    {
+      "timestamp": "2026-04-25T00:00:00Z",
+      "count": 32,
+      "uniques": 25
     },
     {
       "timestamp": "2026-04-27T00:00:00Z",
