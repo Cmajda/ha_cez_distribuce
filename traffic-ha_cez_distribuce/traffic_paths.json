@@ -2,19 +2,25 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 69,
-    "uniques": 45
+    "count": 68,
+    "uniques": 47
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 8,
-    "uniques": 5
+    "count": 7,
+    "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
     "count": 5,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "/blob/main/docs/cs/upgrade-guide.md",
+    "count": 3,
     "uniques": 3
   },
   {
@@ -24,8 +30,8 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "/blob/main/docs/cs/upgrade-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.0.0/docs/cs/upgrade-guide.md",
+    "title": "/blob/v3.0.0/docs/cs/upgrade-guide.md",
     "count": 2,
     "uniques": 2
   },
@@ -42,20 +48,14 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/sensor.py",
-    "title": "/blob/main/custom_components/cez_hdo/sensor.py",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/RELEASE_NOTES.md",
+    "title": "/blob/main/RELEASE_NOTES.md",
     "count": 1,
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.0.0/docs/cs/upgrade-guide.md",
-    "title": "/blob/v3.0.0/docs/cs/upgrade-guide.md",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/README_EN.md",
-    "title": "/blob/v3.2.3/README_EN.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
+    "title": "/blob/main/docs/cs/service-guide.md",
     "count": 1,
     "uniques": 1
   }
