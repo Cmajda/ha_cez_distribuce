@@ -2,21 +2,16 @@
   {
     "referrer": "Google",
     "count": 16,
-    "uniques": 12
+    "uniques": 11
   },
   {
     "referrer": "github.com",
-    "count": 10,
+    "count": 11,
     "uniques": 9
   },
   {
     "referrer": "chatgpt.com",
-    "count": 3,
+    "count": 4,
     "uniques": 2
-  },
-  {
-    "referrer": "statics.teams.cdn.office.net",
-    "count": 1,
-    "uniques": 1
   }
 ]
