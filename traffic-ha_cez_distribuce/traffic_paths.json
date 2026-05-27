@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 64,
-    "uniques": 43
+    "count": 60,
+    "uniques": 40
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 6,
-    "uniques": 6
+    "count": 7,
+    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/58",
@@ -18,20 +18,14 @@
     "uniques": 4
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.0.0/docs/cs/upgrade-guide.md",
-    "title": "/blob/v3.0.0/docs/cs/upgrade-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/issues",
+    "title": "/issues",
     "count": 3,
-    "uniques": 3
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "/blob/main/docs/cs/upgrade-guide.md",
-    "count": 2,
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "/issues",
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.0.0/docs/cs/upgrade-guide.md",
+    "title": "/blob/v3.0.0/docs/cs/upgrade-guide.md",
     "count": 2,
     "uniques": 2
   },
@@ -42,12 +36,6 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/RELEASE_NOTES.md",
-    "title": "/blob/main/RELEASE_NOTES.md",
-    "count": 1,
-    "uniques": 1
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
     "title": "/blob/main/custom_components/cez_hdo/downloader.py",
     "count": 1,
@@ -56,6 +44,18 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/developer-guide.md",
     "title": "/blob/main/docs/cs/developer-guide.md",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "/blob/main/docs/cs/upgrade-guide.md",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/hacs.json",
+    "title": "/blob/main/hacs.json",
     "count": 1,
     "uniques": 1
   }
