@@ -24,6 +24,12 @@
     "uniques": 4
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.2.3",
+    "title": "/releases/tag/v3.2.3",
+    "count": 3,
+    "uniques": 3
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/releases",
     "title": "/releases",
     "count": 3,
@@ -50,12 +56,6 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/developer-guide.md",
     "title": "/blob/main/docs/cs/developer-guide.md",
-    "count": 2,
-    "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.0.0/docs/cs/upgrade-guide.md",
-    "title": "/blob/v3.0.0/docs/cs/upgrade-guide.md",
     "count": 2,
     "uniques": 2
   }
