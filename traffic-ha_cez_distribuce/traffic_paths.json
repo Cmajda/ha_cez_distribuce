@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 73,
-    "uniques": 50
+    "count": 68,
+    "uniques": 45
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/activity",
@@ -14,19 +14,19 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 13,
+    "count": 15,
     "uniques": 6
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 11,
-    "uniques": 9
+    "count": 9,
+    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "/pulls",
-    "count": 5,
+    "count": 6,
     "uniques": 4
   },
   {
@@ -42,6 +42,12 @@
     "uniques": 3
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/issues/64",
+    "title": "/issues/64",
+    "count": 3,
+    "uniques": 2
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/releases",
     "title": "/releases",
     "count": 3,
@@ -51,12 +57,6 @@
     "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
     "title": "/tree/main/custom_components/cez_hdo",
     "count": 3,
-    "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
-    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
-    "count": 2,
     "uniques": 2
   }
 ]
