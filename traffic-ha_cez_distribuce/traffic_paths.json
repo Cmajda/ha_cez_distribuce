@@ -2,31 +2,31 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 87,
-    "uniques": 56
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/activity",
-    "title": "/activity",
-    "count": 17,
-    "uniques": 1
+    "count": 77,
+    "uniques": 50
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 16,
-    "uniques": 9
+    "count": 13,
+    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 7,
-    "uniques": 5
+    "count": 10,
+    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/79",
     "title": "/issues/79",
     "count": 6,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/CZ",
+    "title": "/blob/v3.2.3/CZ",
+    "count": 4,
     "uniques": 3
   },
   {
@@ -42,16 +42,16 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/CZ",
-    "title": "/blob/v3.2.3/CZ",
-    "count": 3,
-    "uniques": 2
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/en/user-guide.md",
+    "title": "/blob/main/docs/en/user-guide.md",
+    "count": 4,
+    "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
-    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
-    "count": 2,
-    "uniques": 2
+    "path": "/Cmajda/ha_cez_distribuce/releases",
+    "title": "/releases",
+    "count": 3,
+    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/developer-guide.md",
