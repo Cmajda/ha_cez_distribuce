@@ -718,14 +718,14 @@
       "uniques": 7
     },
     {
-      "timestamp": "2026-06-11T00:00:00Z",
-      "count": 17,
-      "uniques": 7
-    },
-    {
       "timestamp": "2026-06-12T00:00:00Z",
       "count": 8,
       "uniques": 5
+    },
+    {
+      "timestamp": "2026-06-11T00:00:00Z",
+      "count": 17,
+      "uniques": 7
     },
     {
       "timestamp": "2026-06-13T00:00:00Z",
