@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 58,
-    "uniques": 36
+    "count": 59,
+    "uniques": 35
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 20,
-    "uniques": 10
+    "count": 25,
+    "uniques": 12
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
@@ -26,24 +26,6 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
     "title": "/blob/main/docs/cs/service-guide.md",
-    "count": 3,
-    "uniques": 3
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
-    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
-    "count": 2,
-    "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/developer-guide.md",
-    "title": "/blob/main/docs/cs/developer-guide.md",
-    "count": 2,
-    "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
-    "title": "/blob/main/docs/cs/known-issues.md",
     "count": 2,
     "uniques": 2
   },
@@ -54,9 +36,27 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "/issues",
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/dev/frontend/src/cez-hdo-card.ts",
+    "title": "/blob/v3.2.3/dev/frontend/src/cez-hdo-card.ts",
     "count": 2,
-    "uniques": 2
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/discussions",
+    "title": "/discussions",
+    "count": 2,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/README.md",
+    "title": "/blob/main/README.md",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
+    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
+    "count": 1,
+    "uniques": 1
   }
 ]
