@@ -773,14 +773,14 @@
       "uniques": 14
     },
     {
-      "timestamp": "2026-06-22T00:00:00Z",
-      "count": 27,
-      "uniques": 10
-    },
-    {
       "timestamp": "2026-06-23T00:00:00Z",
       "count": 30,
       "uniques": 9
+    },
+    {
+      "timestamp": "2026-06-22T00:00:00Z",
+      "count": 27,
+      "uniques": 10
     },
     {
       "timestamp": "2026-06-24T00:00:00Z",
