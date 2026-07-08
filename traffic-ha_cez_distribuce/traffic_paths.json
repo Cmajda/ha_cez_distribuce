@@ -2,20 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 49,
-    "uniques": 29
+    "count": 44,
+    "uniques": 25
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 27,
-    "uniques": 12
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
-    "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
-    "count": 5,
-    "uniques": 3
+    "count": 25,
+    "uniques": 11
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/discussions",
@@ -27,6 +21,18 @@
     "path": "/Cmajda/ha_cez_distribuce/tree/main",
     "title": "/tree/main",
     "count": 4,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
+    "title": "/blob/main/docs/cs/service-guide.md",
+    "count": 2,
+    "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "count": 2,
     "uniques": 1
   },
   {
@@ -42,20 +48,14 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
-    "title": "/blob/main/docs/cs/service-guide.md",
-    "count": 1,
-    "uniques": 1
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
     "title": "/blob/main/docs/cs/upgrade-guide.md",
     "count": 1,
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/en/user-guide.md",
-    "title": "/blob/main/docs/en/user-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/CZ",
+    "title": "/blob/v3.2.3/CZ",
     "count": 1,
     "uniques": 1
   }
