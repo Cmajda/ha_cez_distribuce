@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 55,
-    "uniques": 27
+    "count": 54,
+    "uniques": 28
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 32,
-    "uniques": 14
+    "count": 30,
+    "uniques": 13
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/discussions",
@@ -24,16 +24,16 @@
     "uniques": 2
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
+    "title": "/blob/main/docs/cs/service-guide.md",
+    "count": 4,
+    "uniques": 4
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/tree/main",
     "title": "/tree/main",
     "count": 4,
     "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
-    "title": "/blob/main/docs/cs/service-guide.md",
-    "count": 3,
-    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/discussions/52",
