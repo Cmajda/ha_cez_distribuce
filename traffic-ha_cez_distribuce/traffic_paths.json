@@ -2,60 +2,60 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 48,
+    "count": 43,
     "uniques": 23
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 30,
-    "uniques": 13
+    "count": 26,
+    "uniques": 12
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/discussions",
     "title": "/discussions",
-    "count": 9,
-    "uniques": 3
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/discussions/53",
-    "title": "/discussions/53",
-    "count": 5,
+    "count": 6,
     "uniques": 2
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
     "title": "/blob/main/docs/cs/service-guide.md",
     "count": 4,
-    "uniques": 4
+    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main",
     "title": "/tree/main",
-    "count": 4,
-    "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/discussions/52",
-    "title": "/discussions/52",
     "count": 3,
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/discussions/78",
-    "title": "/discussions/78",
-    "count": 2,
-    "uniques": 2
+    "path": "/Cmajda/ha_cez_distribuce/discussions/53",
+    "title": "/discussions/53",
+    "count": 3,
+    "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/64",
-    "title": "/issues/64",
+    "path": "/Cmajda/ha_cez_distribuce/discussions/52",
+    "title": "/discussions/52",
     "count": 2,
-    "uniques": 2
+    "uniques": 1
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/actions/runs/29302137978",
     "title": "/actions/runs/29302137978",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml",
+    "title": "/actions/workflows/hacs.yaml",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blame/main/docs/cs/user-guide.md",
+    "title": "/blame/main/docs/cs/user-guide.md",
     "count": 1,
     "uniques": 1
   }
