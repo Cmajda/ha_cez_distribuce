@@ -2,26 +2,26 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 71,
-    "uniques": 39
+    "count": 67,
+    "uniques": 38
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 21,
-    "uniques": 13
+    "count": 15,
+    "uniques": 12
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues",
+    "title": "/issues",
+    "count": 6,
+    "uniques": 6
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/discussions",
     "title": "/discussions",
     "count": 6,
     "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "/issues",
-    "count": 5,
-    "uniques": 5
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
@@ -48,14 +48,14 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/developer-guide.md",
-    "title": "/blob/main/docs/cs/developer-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml",
+    "title": "/actions/workflows/hacs.yaml",
     "count": 2,
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
-    "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/developer-guide.md",
+    "title": "/blob/main/docs/cs/developer-guide.md",
     "count": 2,
     "uniques": 2
   }
