@@ -873,14 +873,14 @@
       "uniques": 3
     },
     {
-      "timestamp": "2026-07-12T00:00:00Z",
-      "count": 29,
-      "uniques": 5
-    },
-    {
       "timestamp": "2026-07-13T00:00:00Z",
       "count": 8,
       "uniques": 3
+    },
+    {
+      "timestamp": "2026-07-12T00:00:00Z",
+      "count": 29,
+      "uniques": 5
     },
     {
       "timestamp": "2026-07-14T00:00:00Z",
