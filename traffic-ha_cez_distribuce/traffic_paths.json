@@ -8,8 +8,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 12,
-    "uniques": 11
+    "count": 11,
+    "uniques": 10
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
@@ -36,12 +36,6 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml",
-    "title": "/actions/workflows/hacs.yaml",
-    "count": 2,
-    "uniques": 2
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "count": 2,
@@ -58,5 +52,11 @@
     "title": "/tree/main",
     "count": 2,
     "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/actions/runs/30141943524",
+    "title": "/actions/runs/30141943524",
+    "count": 1,
+    "uniques": 1
   }
 ]
