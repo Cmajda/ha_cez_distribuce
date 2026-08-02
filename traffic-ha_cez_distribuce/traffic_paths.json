@@ -2,20 +2,20 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 77,
-    "uniques": 47
+    "count": 79,
+    "uniques": 45
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 10,
-    "uniques": 9
+    "count": 8,
+    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 8,
-    "uniques": 8
+    "count": 7,
+    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases",
@@ -36,14 +36,14 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/79",
-    "title": "/issues/79",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/dev/frontend/src/cez-hdo-card-editor.ts",
+    "title": "/blob/main/dev/frontend/src/cez-hdo-card-editor.ts",
     "count": 2,
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main",
-    "title": "/tree/main",
+    "path": "/Cmajda/ha_cez_distribuce/issues/79",
+    "title": "/issues/79",
     "count": 2,
     "uniques": 2
   },
