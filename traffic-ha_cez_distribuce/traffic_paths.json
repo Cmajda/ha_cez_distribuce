@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 65,
-    "uniques": 43
+    "count": 69,
+    "uniques": 46
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases",
@@ -12,16 +12,28 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
-    "title": "/blob/main/docs/cs/user-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
+    "title": "/blob/main/docs/cs/service-guide.md",
     "count": 4,
     "uniques": 4
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
+    "title": "/blob/main/docs/cs/user-guide.md",
+    "count": 3,
+    "uniques": 3
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 4,
-    "uniques": 4
+    "count": 3,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/dev",
+    "title": "/tree/main/dev",
+    "count": 3,
+    "uniques": 2
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/dev/frontend/src/cez-hdo-card-editor.ts",
@@ -30,16 +42,10 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
-    "title": "/blob/main/docs/cs/service-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "/blob/main/docs/cs/upgrade-guide.md",
     "count": 2,
     "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/dev",
-    "title": "/tree/main/dev",
-    "count": 2,
-    "uniques": 1
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/actions/runs/30141943524",
@@ -50,12 +56,6 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/actions/runs/30141943524/job/89636764998",
     "title": "/actions/runs/30141943524/job/89636764998",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml",
-    "title": "/actions/workflows/hacs.yaml",
     "count": 1,
     "uniques": 1
   }
