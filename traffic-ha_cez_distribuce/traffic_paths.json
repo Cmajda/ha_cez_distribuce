@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 69,
-    "uniques": 46
+    "count": 71,
+    "uniques": 49
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases",
@@ -12,14 +12,14 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
-    "title": "/blob/main/docs/cs/service-guide.md",
-    "count": 4,
-    "uniques": 4
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
+    "count": 5,
+    "uniques": 5
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
+    "title": "/blob/main/docs/cs/service-guide.md",
     "count": 4,
     "uniques": 4
   },
