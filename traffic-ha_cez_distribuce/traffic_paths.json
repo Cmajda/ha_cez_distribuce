@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 71,
-    "uniques": 49
+    "count": 73,
+    "uniques": 50
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases",
@@ -12,22 +12,22 @@
     "uniques": 2
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
+    "title": "/blob/main/docs/cs/service-guide.md",
+    "count": 5,
+    "uniques": 5
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
     "count": 5,
     "uniques": 5
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
-    "title": "/blob/main/docs/cs/service-guide.md",
-    "count": 4,
-    "uniques": 4
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "/issues",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
+    "title": "/blob/main/docs/cs/known-issues.md",
     "count": 3,
-    "uniques": 3
+    "uniques": 2
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/dev",
@@ -48,14 +48,14 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/actions/runs/30141943524",
-    "title": "/actions/runs/30141943524",
-    "count": 1,
-    "uniques": 1
+    "path": "/Cmajda/ha_cez_distribuce/issues",
+    "title": "/issues",
+    "count": 2,
+    "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/actions/runs/30141943524/job/89636764998",
-    "title": "/actions/runs/30141943524/job/89636764998",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
+    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
     "count": 1,
     "uniques": 1
   }
