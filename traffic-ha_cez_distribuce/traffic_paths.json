@@ -2,38 +2,32 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 73,
-    "uniques": 50
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/releases",
-    "title": "/releases",
-    "count": 6,
-    "uniques": 2
+    "count": 71,
+    "uniques": 48
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
     "title": "/blob/main/docs/cs/service-guide.md",
-    "count": 5,
-    "uniques": 5
+    "count": 4,
+    "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 5,
-    "uniques": 5
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
-    "title": "/blob/main/docs/cs/known-issues.md",
-    "count": 3,
-    "uniques": 2
+    "count": 4,
+    "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/dev",
     "title": "/tree/main/dev",
     "count": 3,
     "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
+    "title": "/blob/main/docs/cs/known-issues.md",
+    "count": 3,
+    "uniques": 1
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/dev/frontend/src/cez-hdo-card-editor.ts",
@@ -48,10 +42,16 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "/issues",
+    "path": "/Cmajda/ha_cez_distribuce/releases",
+    "title": "/releases",
     "count": 2,
     "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/fork",
+    "title": "/fork",
+    "count": 2,
+    "uniques": 1
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
