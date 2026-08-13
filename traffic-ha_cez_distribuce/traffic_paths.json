@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 70,
-    "uniques": 47
+    "count": 75,
+    "uniques": 49
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
@@ -36,12 +36,6 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "/blob/main/docs/cs/upgrade-guide.md",
-    "count": 2,
-    "uniques": 2
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/releases",
     "title": "/releases",
     "count": 2,
@@ -56,6 +50,12 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
     "title": "/blob/main/custom_components/cez_hdo/downloader.py",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/dev/deploy.sh",
+    "title": "/blob/main/dev/deploy.sh",
     "count": 1,
     "uniques": 1
   }
