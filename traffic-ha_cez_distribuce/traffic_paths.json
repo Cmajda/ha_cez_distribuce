@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 75,
-    "uniques": 49
+    "count": 73,
+    "uniques": 45
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
     "title": "/blob/main/docs/cs/service-guide.md",
     "count": 4,
-    "uniques": 4
+    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -18,8 +18,8 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/dev",
-    "title": "/tree/main/dev",
+    "path": "/Cmajda/ha_cez_distribuce/issues",
+    "title": "/issues",
     "count": 3,
     "uniques": 2
   },
@@ -30,8 +30,8 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/dev/frontend/src/cez-hdo-card-editor.ts",
-    "title": "/blob/main/dev/frontend/src/cez-hdo-card-editor.ts",
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/RELEASE_NOTES.md",
+    "title": "/blob/v3.2.3/RELEASE_NOTES.md",
     "count": 2,
     "uniques": 2
   },
@@ -54,8 +54,8 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/dev/deploy.sh",
-    "title": "/blob/main/dev/deploy.sh",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/dev/frontend/src/cez-hdo-card-editor.ts",
+    "title": "/blob/main/dev/frontend/src/cez-hdo-card-editor.ts",
     "count": 1,
     "uniques": 1
   }
