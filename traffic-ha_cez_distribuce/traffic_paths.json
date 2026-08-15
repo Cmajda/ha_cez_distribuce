@@ -2,7 +2,7 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 73,
+    "count": 67,
     "uniques": 45
   },
   {
@@ -30,6 +30,12 @@
     "uniques": 1
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "/blob/main/docs/cs/upgrade-guide.md",
+    "count": 2,
+    "uniques": 2
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/RELEASE_NOTES.md",
     "title": "/blob/v3.2.3/RELEASE_NOTES.md",
     "count": 2,
@@ -50,12 +56,6 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
     "title": "/blob/main/custom_components/cez_hdo/downloader.py",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/dev/frontend/src/cez-hdo-card-editor.ts",
-    "title": "/blob/main/dev/frontend/src/cez-hdo-card-editor.ts",
     "count": 1,
     "uniques": 1
   }
