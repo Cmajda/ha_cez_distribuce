@@ -2,8 +2,20 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 67,
+    "count": 63,
     "uniques": 45
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "/tree/main/custom_components/cez_hdo",
+    "count": 5,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
+    "title": "/blob/main/docs/cs/user-guide.md",
+    "count": 4,
+    "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
@@ -12,8 +24,8 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
-    "title": "/blob/main/docs/cs/user-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "/blob/main/docs/cs/upgrade-guide.md",
     "count": 3,
     "uniques": 3
   },
@@ -30,8 +42,8 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "/blob/main/docs/cs/upgrade-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
+    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
     "count": 2,
     "uniques": 2
   },
@@ -46,17 +58,5 @@
     "title": "/releases",
     "count": 2,
     "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/fork",
-    "title": "/fork",
-    "count": 2,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
-    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
-    "count": 1,
-    "uniques": 1
   }
 ]
