@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 65,
-    "uniques": 47
+    "count": 63,
+    "uniques": 41
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -24,16 +24,16 @@
     "uniques": 3
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/issues",
+    "title": "/issues",
+    "count": 4,
+    "uniques": 3
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
     "title": "/blob/main/docs/cs/upgrade-guide.md",
     "count": 3,
     "uniques": 3
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "/issues",
-    "count": 3,
-    "uniques": 2
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
