@@ -2,38 +2,26 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 63,
-    "uniques": 41
+    "count": 59,
+    "uniques": 36
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 6,
+    "count": 7,
     "uniques": 6
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
-    "title": "/tree/main/custom_components/cez_hdo",
-    "count": 5,
-    "uniques": 3
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
-    "title": "/blob/main/docs/cs/service-guide.md",
-    "count": 4,
-    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 4,
-    "uniques": 3
+    "count": 5,
+    "uniques": 4
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "/blob/main/docs/cs/upgrade-guide.md",
-    "count": 3,
-    "uniques": 3
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "/tree/main/custom_components/cez_hdo",
+    "count": 4,
+    "uniques": 2
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
@@ -42,8 +30,14 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/downloader.py",
-    "title": "/blob/main/custom_components/cez_hdo/downloader.py",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
+    "title": "/blob/main/docs/cs/service-guide.md",
+    "count": 2,
+    "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "/blob/main/docs/cs/upgrade-guide.md",
     "count": 2,
     "uniques": 2
   },
@@ -58,5 +52,11 @@
     "title": "/releases",
     "count": 2,
     "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/fork",
+    "title": "/fork",
+    "count": 2,
+    "uniques": 1
   }
 ]
