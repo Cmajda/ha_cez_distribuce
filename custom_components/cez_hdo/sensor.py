@@ -20,7 +20,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from . import DATA_COORDINATOR, DOMAIN, downloader
-from .const import ean_short, mask_ean, sanitize_signal
+from .const import ean_short, mask_ean, sanitize_signal, sanitize_suffix
 from .coordinator import CezHdoCoordinator, CezHdoData
 
 _LOGGER = logging.getLogger(__name__)
@@ -220,9 +220,12 @@ class CezHdoSensor(CoordinatorEntity[CezHdoCoordinator], SensorEntity):
 
         # Build object_id using entity_suffix from config or auto-generate
         base_object_id = meta.get("object_id", f"cez_hdo_{name.lower()}")
-        if entity_suffix:
+        # Slugify the user-defined suffix - it is raw config-flow input and may
+        # contain uppercase letters or other characters invalid in an entity ID.
+        suffix_safe = sanitize_suffix(entity_suffix)
+        if suffix_safe:
             # Use user-defined suffix
-            self._object_id = f"{base_object_id}_{entity_suffix}"
+            self._object_id = f"{base_object_id}_{suffix_safe}"
         else:
             # Auto-generate suffix from EAN and signal (fallback for YAML config)
             ean4 = ean_short(ean)

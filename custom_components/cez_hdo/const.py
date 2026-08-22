@@ -1,5 +1,7 @@
 """Constants for ČEZ HDO integration."""
 
+from homeassistant.util import slugify
+
 DOMAIN = "cez_hdo"
 
 # Configuration keys
@@ -58,3 +60,19 @@ def sanitize_signal(signal: str) -> str:
     for char in '|/\\:*?"<>':
         sanitized = sanitized.replace(char, "_")
     return sanitized
+
+
+def sanitize_suffix(suffix: str | None) -> str:
+    """Sanitize the user-defined entity suffix for use in entity IDs.
+
+    The suffix comes straight from free-text user input in the config flow,
+    so it may contain uppercase letters, spaces or diacritics - none of which
+    are valid in an entity ID. Slugify is the same helper Home Assistant uses
+    when it builds entity IDs itself, so the result is exactly what HA would
+    have coerced the value to anyway.
+
+    Example: CEZ -> cez, "Můj dům" -> muj_dum
+    """
+    if not suffix:
+        return ""
+    return slugify(suffix)
