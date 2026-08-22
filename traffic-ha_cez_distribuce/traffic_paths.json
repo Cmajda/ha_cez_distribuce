@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 59,
-    "uniques": 36
+    "count": 60,
+    "uniques": 37
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -48,8 +48,8 @@
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/releases",
-    "title": "/releases",
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "count": 2,
     "uniques": 2
   },
