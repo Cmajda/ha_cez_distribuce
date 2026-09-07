@@ -1083,14 +1083,14 @@
       "uniques": 7
     },
     {
-      "timestamp": "2026-08-23T00:00:00Z",
-      "count": 16,
-      "uniques": 10
-    },
-    {
       "timestamp": "2026-08-24T00:00:00Z",
       "count": 6,
       "uniques": 3
+    },
+    {
+      "timestamp": "2026-08-23T00:00:00Z",
+      "count": 16,
+      "uniques": 10
     },
     {
       "timestamp": "2026-08-25T00:00:00Z",
