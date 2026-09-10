@@ -2,61 +2,61 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 77,
-    "uniques": 53
+    "count": 81,
+    "uniques": 54
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 11,
-    "uniques": 9
+    "count": 13,
+    "uniques": 10
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
     "title": "/blob/main/docs/cs/known-issues.md",
+    "count": 5,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
+    "title": "/tree/main/custom_components/cez_hdo",
     "count": 4,
     "uniques": 2
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/58",
     "title": "/issues/58",
+    "count": 3,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/img",
+    "title": "/tree/main/img",
     "count": 2,
     "uniques": 2
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/README_EN.md",
-    "title": "/blob/main/README_EN.md",
-    "count": 1,
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/img/cs",
+    "title": "/tree/main/img/cs",
+    "count": 2,
+    "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/frontend/dist/cez-hdo-card.js",
+    "title": "/blob/main/custom_components/cez_hdo/frontend/dist/cez-hdo-card.js",
+    "count": 2,
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
-    "title": "/blob/main/docs/cs/service-guide.md",
-    "count": 1,
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/manifest.json",
+    "title": "/blob/main/custom_components/cez_hdo/manifest.json",
+    "count": 2,
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
-    "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/commit/4ff55ed45663162b12740f3d54c7bbf1798a01f5",
-    "title": "/commit/4ff55ed45663162b12740f3d54c7bbf1798a01f5",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/commit/7b04d49ffdea169eae7f3a6d9dd559e7e18edfaf",
-    "title": "/commit/7b04d49ffdea169eae7f3a6d9dd559e7e18edfaf",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/edit/main/README.md",
-    "title": "/edit/main/README.md",
-    "count": 1,
+    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo/frontend",
+    "title": "/tree/main/custom_components/cez_hdo/frontend",
+    "count": 2,
     "uniques": 1
   }
 ]
