@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 81,
-    "uniques": 54
+    "count": 86,
+    "uniques": 56
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
@@ -12,10 +12,16 @@
     "uniques": 10
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/issues",
+    "title": "/issues",
+    "count": 4,
+    "uniques": 3
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
     "title": "/blob/main/docs/cs/known-issues.md",
-    "count": 5,
-    "uniques": 3
+    "count": 4,
+    "uniques": 2
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo",
@@ -27,7 +33,7 @@
     "path": "/Cmajda/ha_cez_distribuce/issues/58",
     "title": "/issues/58",
     "count": 3,
-    "uniques": 3
+    "uniques": 2
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/img",
@@ -50,12 +56,6 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/manifest.json",
     "title": "/blob/main/custom_components/cez_hdo/manifest.json",
-    "count": 2,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/tree/main/custom_components/cez_hdo/frontend",
-    "title": "/tree/main/custom_components/cez_hdo/frontend",
     "count": 2,
     "uniques": 1
   }
