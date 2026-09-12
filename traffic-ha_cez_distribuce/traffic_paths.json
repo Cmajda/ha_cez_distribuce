@@ -2,7 +2,7 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 86,
+    "count": 85,
     "uniques": 56
   },
   {
@@ -36,6 +36,12 @@
     "uniques": 2
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/discussions",
+    "title": "/discussions",
+    "count": 2,
+    "uniques": 2
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/tree/main/img",
     "title": "/tree/main/img",
     "count": 2,
@@ -50,12 +56,6 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/frontend/dist/cez-hdo-card.js",
     "title": "/blob/main/custom_components/cez_hdo/frontend/dist/cez-hdo-card.js",
-    "count": 2,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/custom_components/cez_hdo/manifest.json",
-    "title": "/blob/main/custom_components/cez_hdo/manifest.json",
     "count": 2,
     "uniques": 1
   }
