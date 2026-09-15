@@ -2,14 +2,14 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 101,
-    "uniques": 65
+    "count": 105,
+    "uniques": 68
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 17,
-    "uniques": 14
+    "count": 18,
+    "uniques": 16
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
@@ -18,8 +18,14 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
-    "title": "/blob/main/docs/cs/known-issues.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "/blob/main/docs/cs/upgrade-guide.md",
+    "count": 4,
+    "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/58",
+    "title": "/issues/58",
     "count": 4,
     "uniques": 2
   },
@@ -36,27 +42,21 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/58",
-    "title": "/issues/58",
-    "count": 3,
-    "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "/blob/main/docs/cs/upgrade-guide.md",
-    "count": 3,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/img/cs/entity_card_edit_cz.png",
-    "title": "/blob/main/img/cs/entity_card_edit_cz.png",
-    "count": 2,
-    "uniques": 2
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/discussions",
     "title": "/discussions",
-    "count": 2,
+    "count": 3,
+    "uniques": 3
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
+    "title": "/blob/main/docs/cs/known-issues.md",
+    "count": 3,
     "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/discussions/35",
+    "title": "/discussions/35",
+    "count": 3,
+    "uniques": 1
   }
 ]
