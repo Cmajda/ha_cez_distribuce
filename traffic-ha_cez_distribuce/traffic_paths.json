@@ -2,61 +2,61 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 86,
-    "uniques": 58
+    "count": 76,
+    "uniques": 53
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 16,
-    "uniques": 14
+    "count": 18,
+    "uniques": 16
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 8,
-    "uniques": 6
+    "count": 6,
+    "uniques": 5
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/58",
-    "title": "/issues/58",
-    "count": 4,
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
+    "title": "/blob/main/docs/cs/known-issues.md",
+    "count": 3,
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
-    "title": "/blob/main/docs/cs/upgrade-guide.md",
-    "count": 4,
+    "path": "/Cmajda/ha_cez_distribuce/tree/main",
+    "title": "/tree/main",
+    "count": 3,
     "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/img/cs/graph_cz.png",
-    "title": "/blob/main/img/cs/graph_cz.png",
-    "count": 3,
-    "uniques": 3
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/discussions",
-    "title": "/discussions",
-    "count": 3,
-    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/84",
     "title": "/issues/84",
-    "count": 3,
-    "uniques": 3
+    "count": 2,
+    "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/64",
+    "title": "/issues/64",
+    "count": 2,
+    "uniques": 1
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml",
     "title": "/actions/workflows/hacs.yaml",
-    "count": 3,
-    "uniques": 2
+    "count": 1,
+    "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/discussions/35",
-    "title": "/discussions/35",
-    "count": 3,
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/README.md",
+    "title": "/blob/main/README.md",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
+    "title": "/blob/main/docs/cs/service-guide.md",
+    "count": 1,
     "uniques": 1
   }
 ]
