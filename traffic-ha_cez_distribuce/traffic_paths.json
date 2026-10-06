@@ -2,13 +2,13 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 86,
-    "uniques": 62
+    "count": 88,
+    "uniques": 64
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 17,
+    "count": 16,
     "uniques": 16
   },
   {
@@ -48,14 +48,14 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
-    "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/img/cs/entity_card_cz.png",
+    "title": "/blob/main/img/cs/entity_card_cz.png",
     "count": 1,
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/branches",
-    "title": "/branches",
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
+    "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "count": 1,
     "uniques": 1
   }
