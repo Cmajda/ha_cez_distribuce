@@ -2,20 +2,26 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 102,
-    "uniques": 64
+    "count": 98,
+    "uniques": 61
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 11,
-    "uniques": 11
+    "count": 9,
+    "uniques": 9
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 6,
-    "uniques": 6
+    "count": 5,
+    "uniques": 5
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/custom_components/cez_hdo/downloader.py",
+    "title": "/blob/v3.2.3/custom_components/cez_hdo/downloader.py",
+    "count": 4,
+    "uniques": 1
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/tree/v3.2.3/custom_components/cez_hdo",
@@ -30,12 +36,6 @@
     "uniques": 3
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/custom_components/cez_hdo/downloader.py",
-    "title": "/blob/v3.2.3/custom_components/cez_hdo/downloader.py",
-    "count": 3,
-    "uniques": 1
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/issues/84",
     "title": "/issues/84",
     "count": 2,
@@ -48,14 +48,14 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/known-issues.md",
-    "title": "/blob/main/docs/cs/known-issues.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
+    "title": "/blob/main/docs/cs/service-guide.md",
     "count": 1,
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/service-guide.md",
-    "title": "/blob/main/docs/cs/service-guide.md",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
+    "title": "/blob/main/docs/cs/upgrade-guide.md",
     "count": 1,
     "uniques": 1
   }
