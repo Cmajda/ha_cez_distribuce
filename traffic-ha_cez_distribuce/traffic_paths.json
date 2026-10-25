@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 110,
-    "uniques": 77
+    "count": 121,
+    "uniques": 87
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
@@ -18,6 +18,24 @@
     "uniques": 6
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/custom_components/cez_hdo/downloader.py",
+    "title": "/blob/v3.2.3/custom_components/cez_hdo/downloader.py",
+    "count": 3,
+    "uniques": 1
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml",
+    "title": "/actions/workflows/hacs.yaml",
+    "count": 2,
+    "uniques": 2
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/service-guide.md",
+    "title": "/blob/main/docs/service-guide.md",
+    "count": 2,
+    "uniques": 2
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "count": 2,
@@ -30,32 +48,14 @@
     "uniques": 1
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/custom_components/cez_hdo/downloader.py",
-    "title": "/blob/v3.2.3/custom_components/cez_hdo/downloader.py",
-    "count": 2,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml",
-    "title": "/actions/workflows/hacs.yaml",
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/README.md",
+    "title": "/blob/main/README.md",
     "count": 1,
     "uniques": 1
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/upgrade-guide.md",
     "title": "/blob/main/docs/cs/upgrade-guide.md",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/service-guide.md",
-    "title": "/blob/main/docs/service-guide.md",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/img/cs/add_card_1_cz.png",
-    "title": "/blob/main/img/cs/add_card_1_cz.png",
     "count": 1,
     "uniques": 1
   }
