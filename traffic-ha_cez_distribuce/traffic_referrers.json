@@ -1,21 +1,21 @@
 [
   {
     "referrer": "Google",
-    "count": 30,
-    "uniques": 15
+    "count": 35,
+    "uniques": 18
   },
   {
     "referrer": "github.com",
-    "count": 15,
-    "uniques": 14
-  },
-  {
-    "referrer": "hasti.app",
-    "count": 1,
-    "uniques": 1
+    "count": 17,
+    "uniques": 16
   },
   {
     "referrer": "l.facebook.com",
+    "count": 2,
+    "uniques": 2
+  },
+  {
+    "referrer": "hasti.app",
     "count": 1,
     "uniques": 1
   }
