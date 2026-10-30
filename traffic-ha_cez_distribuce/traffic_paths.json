@@ -2,26 +2,32 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 141,
-    "uniques": 102
+    "count": 145,
+    "uniques": 105
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 19,
-    "uniques": 11
+    "count": 20,
+    "uniques": 12
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 7,
-    "uniques": 5
+    "count": 8,
+    "uniques": 6
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "title": "/blob/v3.2.3/docs/cs/upgrade-guide.md",
     "count": 5,
     "uniques": 5
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/pulls",
+    "title": "/pulls",
+    "count": 3,
+    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/pyproject.toml",
@@ -36,6 +42,12 @@
     "uniques": 2
   },
   {
+    "path": "/Cmajda/ha_cez_distribuce/pull/54",
+    "title": "/pull/54",
+    "count": 2,
+    "uniques": 2
+  },
+  {
     "path": "/Cmajda/ha_cez_distribuce/releases",
     "title": "/releases",
     "count": 2,
@@ -46,17 +58,5 @@
     "title": "/releases/tag/v3.2.3",
     "count": 2,
     "uniques": 2
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml",
-    "title": "/actions/workflows/hacs.yaml",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/README.cs.md",
-    "title": "/blob/main/README.cs.md",
-    "count": 1,
-    "uniques": 1
   }
 ]
