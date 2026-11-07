@@ -146,6 +146,16 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
         # Refresh each coordinator
         for coord_entry_id, coordinator, ean in coordinators_to_refresh:
+            backoff_until = coordinator.ocr_backoff_until
+            if backoff_until is not None:
+                _LOGGER.warning(
+                    "CEZ HDO refresh_data: Skipping EAN %s until OCR rate limit expires at %s",
+                    mask_ean(ean),
+                    backoff_until.strftime("%H:%M:%S"),
+                )
+                failed_count += 1
+                continue
+
             _LOGGER.info("CEZ HDO refresh_data: Starting manual refresh for EAN %s", mask_ean(ean))
 
             try:
@@ -172,6 +182,20 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                         "CEZ HDO refresh_data: Failed to refresh data for EAN %s (OCR or API error)", mask_ean(ean)
                     )
                     failed_count += 1
+
+            except downloader.OcrRateLimitError as err:
+                # OCR.space rate limits apply to the HA host, not just this EAN.
+                for _, other_coordinator, _ in coordinators_to_refresh:
+                    await other_coordinator.async_handle_ocr_rate_limit(err.retry_after)
+
+                _LOGGER.warning(
+                    "CEZ HDO refresh_data: OCR rate limit for EAN %s (HTTP %s%s)",
+                    mask_ean(ean),
+                    err.http_status or "error",
+                    f", retry after {err.retry_after}s" if err.retry_after is not None else "",
+                )
+                failed_count += 1
+                break
 
             except Exception as err:
                 _LOGGER.error("CEZ HDO refresh_data: Error refreshing EAN %s: %s", mask_ean(ean), err)

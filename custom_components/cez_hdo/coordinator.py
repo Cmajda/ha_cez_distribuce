@@ -478,6 +478,25 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
         return self._ocr_backoff_until
 
+    @property
+    def ocr_backoff_until(self) -> datetime | None:
+        """Return the provider's OCR retry deadline, if one is active."""
+        deadline = self._ocr_backoff_until
+        if deadline is not None and deadline <= datetime.now(CEZ_TIMEZONE):
+            self._ocr_backoff_until = None
+            return None
+        return deadline
+
+    async def async_handle_ocr_rate_limit(self, retry_after: int | None) -> datetime | None:
+        """Persist an OCR rate limit before scheduling any further work."""
+        deadline = self._apply_ocr_backoff(retry_after)
+        await self._async_save_refresh_state()
+        await self._async_schedule_auto_refresh(
+            min_delay_minutes=MIN_RETRY_DELAY_MINUTES,
+            after_failure=False,
+        )
+        return deadline
+
     async def _async_auto_refresh_attempt(self, _now: datetime | None = None) -> None:
         """Perform an automatic data refresh attempt using OCR."""
         self._next_attempt_unsub = None  # Clear the subscription
@@ -550,7 +569,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
 
         except downloader.OcrRateLimitError as err:
-            retry_at = self._apply_ocr_backoff(err.retry_after)
+            retry_at = await self.async_handle_ocr_rate_limit(err.retry_after)
             if retry_at is not None:
                 retry_info = f"next attempt not before {retry_at:%H:%M}"
             else:
@@ -565,13 +584,9 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 retry_info,
             )
 
-            # The backoff is persisted by the scheduler and survives restarts.
-            # after_failure=False keeps this to one WARNING per failed refresh.
+            # The deadline was persisted before scheduling, even at the daily limit.
+            # Keep scheduler logging quiet; the rate-limit warning above is enough.
             await self._check_auto_refresh_failure_notification()
-            await self._async_schedule_auto_refresh(
-                min_delay_minutes=MIN_RETRY_DELAY_MINUTES,
-                after_failure=False,
-            )
 
         except Exception as err:
             _LOGGER.error(
