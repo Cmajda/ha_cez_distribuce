@@ -23,6 +23,7 @@ export interface TranslationStrings {
   showTimes: string;
   showDuration: string;
   showCurrentPrice: string;
+  showManualRefresh: string;
   showHdoSchedule: string;
   showSchedulePrices: string;
   compactMode: string;
@@ -39,11 +40,15 @@ export interface TranslationStrings {
   manualRefresh: string;
   loadingCaptcha: string;
   captchaCode: string;
+  signalLabel: string;
+  loadSignals: string;
   refreshNow: string;
   newCaptcha: string;
   cancel: string;
   refreshSuccess: string;
   manualRefreshUnavailable: string;
+  lastUpdated: string;
+  lastUpdatedUnknown: string;
 }
 
 const translations: Record<string, TranslationStrings> = {
@@ -72,6 +77,7 @@ const translations: Record<string, TranslationStrings> = {
     showTimes: "Zobrazit časy (začátek/konec)",
     showDuration: "Zobrazit zbývající čas",
     showCurrentPrice: "Zobrazit aktuální cenu",
+    showManualRefresh: "Zobrazit manuální obnovu",
     showHdoSchedule: "Zobrazit HDO rozvrh",
     showSchedulePrices: "Zobrazit ceny v legendě rozvrhu",
     compactMode: "Kompaktní režim",
@@ -88,12 +94,16 @@ const translations: Record<string, TranslationStrings> = {
     manualRefresh: "Manuálně obnovit",
     loadingCaptcha: "Načítám CAPTCHA…",
     captchaCode: "Opište kód z obrázku",
+    signalLabel: "HDO signál",
+    loadSignals: "Načíst signály",
     refreshNow: "Obnovit data",
     newCaptcha: "Nový obrázek",
     cancel: "Zavřít",
     refreshSuccess: "Data byla úspěšně obnovena.",
     manualRefreshUnavailable:
       "Vyberte senzor rozvrhu pro tuto instanci ČEZ HDO.",
+    lastUpdated: "Data aktualizována",
+    lastUpdatedUnknown: "neznámý čas",
   },
   en: {
     lowTariff: "Low tariff",
@@ -120,6 +130,7 @@ const translations: Record<string, TranslationStrings> = {
     showTimes: "Show times (start/end)",
     showDuration: "Show remaining time",
     showCurrentPrice: "Show current price",
+    showManualRefresh: "Show manual refresh",
     showHdoSchedule: "Show HDO schedule",
     showSchedulePrices: "Show prices in schedule legend",
     compactMode: "Compact mode",
@@ -136,12 +147,16 @@ const translations: Record<string, TranslationStrings> = {
     manualRefresh: "Refresh manually",
     loadingCaptcha: "Loading CAPTCHA…",
     captchaCode: "Enter the code from the image",
+    signalLabel: "HDO signal",
+    loadSignals: "Load signals",
     refreshNow: "Refresh data",
     newCaptcha: "New image",
     cancel: "Close",
     refreshSuccess: "Data refreshed successfully.",
     manualRefreshUnavailable:
       "Select the schedule sensor for this ČEZ HDO instance.",
+    lastUpdated: "Data updated",
+    lastUpdatedUnknown: "unknown time",
   },
   sk: {
     lowTariff: "Nízka tarifa",
@@ -168,6 +183,7 @@ const translations: Record<string, TranslationStrings> = {
     showTimes: "Zobraziť časy (začiatok/koniec)",
     showDuration: "Zobraziť zostávajúci čas",
     showCurrentPrice: "Zobraziť aktuálnu cenu",
+    showManualRefresh: "Zobraziť manuálne obnovenie",
     showHdoSchedule: "Zobraziť HDO rozvrh",
     showSchedulePrices: "Zobraziť ceny v legende rozvrhu",
     compactMode: "Kompaktný režim",
@@ -184,12 +200,16 @@ const translations: Record<string, TranslationStrings> = {
     manualRefresh: "Manuálne obnoviť",
     loadingCaptcha: "Načítavam CAPTCHA…",
     captchaCode: "Prepíšte kód z obrázka",
+    signalLabel: "HDO signál",
+    loadSignals: "Načítať signály",
     refreshNow: "Obnoviť údaje",
     newCaptcha: "Nový obrázok",
     cancel: "Zavrieť",
     refreshSuccess: "Údaje boli úspešne obnovené.",
     manualRefreshUnavailable:
       "Vyberte senzor rozvrhu pre túto inštanciu ČEZ HDO.",
+    lastUpdated: "Údaje aktualizované",
+    lastUpdatedUnknown: "neznámy čas",
   },
 };
 

@@ -58,7 +58,7 @@ async def validate_input_with_captcha(
             raise InvalidEan("No signals found for this EAN")
 
         # Get available signal names
-        available_signals = list(set(s.get("signal", "") for s in signals if s.get("signal")))
+        available_signals = sorted({s.get("signal", "") for s in signals if s.get("signal")})
 
         _LOGGER.debug("EAN %s validated, found signals: %s", mask_ean(ean), available_signals)
 
@@ -424,8 +424,8 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
 
         # Get current signal as default (if same EAN)
         current_signal = self._config_entry.data.get(CONF_SIGNAL, "")
-        if self._ean != self._config_entry.data.get(CONF_EAN):
-            # EAN changed, use first signal as default
+        if self._ean != self._config_entry.data.get(CONF_EAN) or current_signal not in self._available_signals:
+            # Use the first sorted available signal if the current one is no longer returned.
             current_signal = self._available_signals[0] if self._available_signals else ""
 
         # Build signal options

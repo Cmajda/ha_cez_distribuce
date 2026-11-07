@@ -88,7 +88,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     )
 
                 # Log results - simplified
-                signal_names = list(signal_groups.keys())
+                signal_names = sorted(signal_groups)
                 _LOGGER.debug("CEZ HDO: Found signals: %s", ", ".join(signal_names))
 
             else:

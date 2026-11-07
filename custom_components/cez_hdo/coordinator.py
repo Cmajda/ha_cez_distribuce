@@ -526,6 +526,26 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             )
 
             if new_data and new_data.get("data"):
+                returned_signals = sorted(
+                    {
+                        item["signal"]
+                        for item in downloader._extract_signals(new_data)
+                        if isinstance(item, dict)
+                        and isinstance(item.get("signal"), str)
+                        and item["signal"]
+                    }
+                )
+                if not returned_signals or (self.signal and self.signal not in returned_signals):
+                    _LOGGER.warning(
+                        "CezHdoCoordinator: Auto-refresh response signal mismatch for EAN %s: "
+                        "configured_signal=%s, returned_signals=%s",
+                        mask_ean(self.ean),
+                        self.signal or "<none>",
+                        returned_signals[:20],
+                    )
+                    new_data = None
+
+            if new_data and new_data.get("data"):
                 _LOGGER.info(
                     "CezHdoCoordinator: Auto-refresh successful for EAN %s!",
                     mask_ean(self.ean),

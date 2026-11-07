@@ -98,7 +98,7 @@ def _get_redacted_raw_data(raw_data: dict[str, Any]) -> dict[str, Any]:
         # Include signal names (not sensitive)
         signals = data.get("signals", [])
         if signals:
-            result["data"]["signal_names"] = list(set(s.get("signal", "") for s in signals))
+            result["data"]["signal_names"] = sorted({s.get("signal", "") for s in signals if s.get("signal")})
             result["data"]["signal_dates"] = [s.get("datum", "") for s in signals[:3]]  # First 3 dates
 
     result["statusCode"] = raw_data.get("statusCode")

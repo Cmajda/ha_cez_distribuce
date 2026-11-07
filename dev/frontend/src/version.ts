@@ -5,4 +5,4 @@
  * Update this file when releasing a new version.
  */
 
-export const VERSION = "3.2.4";
+export const VERSION = "3.2.9";

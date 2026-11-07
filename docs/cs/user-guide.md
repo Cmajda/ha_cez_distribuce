@@ -240,7 +240,7 @@ Každá instance má vlastní zařízení a entity s unikátní příponou.
 
 ### Proč data vyprší?
 
-ČEZ Distribuce používá CAPTCHA ochranu na svém API. Data jsou platná **6 dní**. Pokud je automatické obnovování povolené, integrace se je pokusí obnovit automaticky. Ruční obnovu můžete spustit kdykoli tlačítkem **Manuálně obnovit** na kartě; zobrazí se CAPTCHA, kterou opíšete do formuláře.
+ČEZ Distribuce používá CAPTCHA ochranu na svém API. Data jsou platná **6 dní**. Pokud je automatické obnovování povolené, integrace se je pokusí obnovit automaticky. Ruční obnovu můžete spustit kdykoli tlačítkem **Manuálně obnovit** na kartě. Po ověření CAPTCHA vyberete signál z abecedně seřazeného seznamu vráceného ČEZ; tento výběr se uloží jako signál instance.
 
 ### Sledování platnosti dat
 
@@ -286,7 +286,8 @@ Nová data můžete načíst kdykoli, například před vypršením platnosti:
 
 1. Otevřete Lovelace kartu **ČEZ HDO** pro požadovaný signál
 2. Klikněte na **Manuálně obnovit**
-3. Opište CAPTCHA a potvrďte **Obnovit data**
+3. Opište CAPTCHA a načtěte signály
+4. Vyberte požadovaný signál a potvrďte **Obnovit data**
 
 Automatické obnovování zůstane zapnuté podle nastavení integrace. Neúspěšné ruční obnovení nemaže dosud uložená data.
 

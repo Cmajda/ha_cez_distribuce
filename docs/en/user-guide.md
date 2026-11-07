@@ -244,7 +244,7 @@ Each instance has its own device and entities with a unique suffix.
 
 ### Why Does Data Expire?
 
-ČEZ Distribuce uses CAPTCHA protection on its API. Data is valid for **6 days**. When automatic refresh is enabled, the integration will try to renew it automatically. You can start a manual renewal at any time with **Manually refresh** on the card, then enter the CAPTCHA shown in the form.
+ČEZ Distribuce uses CAPTCHA protection on its API. Data is valid for **6 days**. When automatic refresh is enabled, the integration will try to renew it automatically. You can start a manual renewal at any time with **Manually refresh** on the card. After CAPTCHA verification, choose a signal from the alphabetically sorted list returned by ČEZ; the selection is saved as the instance's configured signal.
 
 ### Tracking Data Validity
 
@@ -290,7 +290,8 @@ You can fetch new data at any time, for example before it expires:
 
 1. Open the **ČEZ HDO** Lovelace card for the signal you want to refresh
 2. Click **Manually refresh**
-3. Enter the CAPTCHA and confirm with **Refresh data**
+3. Enter the CAPTCHA and load the available signals
+4. Select the desired signal and confirm with **Refresh data**
 
 Automatic refresh remains enabled according to the integration settings. A failed manual refresh does not delete the previously stored data.
 

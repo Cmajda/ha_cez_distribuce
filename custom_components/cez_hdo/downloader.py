@@ -12,6 +12,8 @@ import urllib.request
 from datetime import datetime, time, timedelta
 from typing import Any, NamedTuple
 
+from .const import mask_ean
+
 import requests
 
 try:
@@ -117,19 +119,31 @@ def validate_ean_with_captcha(ean: str, captcha_code: str, cookies: dict[str, st
 
     json_data = response.json()
 
-    # Check for CAPTCHA error in flashMessages
+    # Keep only provider error keys for logs; API bodies can contain identifying data.
     flash_messages = json_data.get("flashMessages", [])
-    for msg in flash_messages:
-        if msg.get("key") == "CPT-002":
-            raise ValueError("invalid_captcha")
+    error_codes = [
+        msg.get("key")
+        for msg in flash_messages
+        if isinstance(msg, dict) and isinstance(msg.get("key"), str)
+    ]
+    if "CPT-002" in error_codes:
+        _LOGGER.warning(
+            "CEZ API rejected CAPTCHA for EAN %s (code=CPT-002)",
+            mask_ean(ean),
+        )
+        raise ValueError("invalid_captcha")
 
-    # Status 400 usually means invalid CAPTCHA even without CPT-002
+    # Status 400 also indicates a rejected CAPTCHA when the API omits CPT-002.
     if response.status_code == 400:
-        _LOGGER.debug("API 400 response: %s", json_data)
+        _LOGGER.warning(
+            "CEZ API rejected CAPTCHA for EAN %s (HTTP 400, codes=%s)",
+            mask_ean(ean),
+            ",".join(error_codes) if error_codes else "none",
+        )
         raise ValueError("invalid_captcha")
 
     if response.status_code != 200:
-        _LOGGER.warning("API unexpected status %d: %s", response.status_code, json_data)
+        _LOGGER.warning("CEZ API returned HTTP %d for EAN %s", response.status_code, mask_ean(ean))
         raise ValueError(f"API returned status {response.status_code}")
 
     return json_data
