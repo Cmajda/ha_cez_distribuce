@@ -110,6 +110,8 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self._data_fetch_successful_today: bool = False
         self._next_attempt_unsub: Callable[[], None] | None = None
         self._next_attempt_time: datetime | None = None
+        # Provider-provided "not before" time for OCR requests (HTTP 429 retryAfter)
+        self._ocr_backoff_until: datetime | None = None
 
         # Use Home Assistant's Store helper for atomic writes and proper storage
         # Storage keys use EAN suffix (last 6 digits) to support multiple instances
@@ -266,6 +268,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         """
         self._data_fetch_successful_today = True
         self._last_attempt_date = datetime.now(CEZ_TIMEZONE).date()
+        self._ocr_backoff_until = None
 
         # Cancel any scheduled auto-refresh attempt
         if self._next_attempt_unsub is not None:
@@ -326,11 +329,24 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 except ValueError:
                     self._next_attempt_time = None
 
+            # Load the provider backoff so a restart does not retry before it expires
+            backoff_str = state.get("ocr_backoff_until")
+            if backoff_str:
+                try:
+                    parsed_backoff = datetime.fromisoformat(backoff_str)
+                    if parsed_backoff.tzinfo is None:
+                        parsed_backoff = parsed_backoff.replace(tzinfo=CEZ_TIMEZONE)
+                    if parsed_backoff > datetime.now(CEZ_TIMEZONE):
+                        self._ocr_backoff_until = parsed_backoff
+                except ValueError:
+                    self._ocr_backoff_until = None
+
             _LOGGER.debug(
-                "CezHdoCoordinator: Loaded refresh state - attempts: %d, successful: %s, next: %s",
+                "CezHdoCoordinator: Loaded refresh state - attempts: %d, successful: %s, next: %s, ocr backoff: %s",
                 self._daily_attempts,
                 self._data_fetch_successful_today,
                 self._next_attempt_time.strftime("%H:%M:%S") if self._next_attempt_time else None,
+                self._ocr_backoff_until.strftime("%H:%M:%S") if self._ocr_backoff_until else None,
             )
 
     async def _async_save_refresh_state(self) -> None:
@@ -340,6 +356,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             "daily_attempts": self._daily_attempts,
             "successful_today": self._data_fetch_successful_today,
             "next_attempt_time": self._next_attempt_time.isoformat() if self._next_attempt_time else None,
+            "ocr_backoff_until": self._ocr_backoff_until.isoformat() if self._ocr_backoff_until else None,
         }
         await self._refresh_state_store.async_save(state)
         _LOGGER.debug("CezHdoCoordinator: Saved refresh state")
@@ -408,6 +425,16 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             if next_time < min_next_time:
                 next_time = min_next_time
 
+        # Never retry OCR before the provider's retryAfter deadline. This clamp
+        # lives here because the hourly data check also calls this method and used
+        # to overwrite a later failure schedule.
+        if self._ocr_backoff_until is not None:
+            if self._ocr_backoff_until > now:
+                if next_time < self._ocr_backoff_until:
+                    next_time = self._ocr_backoff_until
+            else:
+                self._ocr_backoff_until = None
+
         # Cancel any existing scheduled attempt
         if self._next_attempt_unsub is not None:
             self._next_attempt_unsub()
@@ -438,10 +465,31 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             next_time,
         )
 
+    def _apply_ocr_backoff(self, retry_after: int | None) -> datetime | None:
+        """Record the provider's retryAfter deadline and return the effective deadline."""
+        now = datetime.now(CEZ_TIMEZONE)
+        if self._ocr_backoff_until is not None and self._ocr_backoff_until <= now:
+            self._ocr_backoff_until = None
+
+        if retry_after is not None:
+            candidate = now + timedelta(seconds=retry_after)
+            if self._ocr_backoff_until is None or candidate > self._ocr_backoff_until:
+                self._ocr_backoff_until = candidate
+
+        return self._ocr_backoff_until
+
     async def _async_auto_refresh_attempt(self, _now: datetime | None = None) -> None:
         """Perform an automatic data refresh attempt using OCR."""
         self._next_attempt_unsub = None  # Clear the subscription
         self._next_attempt_time = None  # Clear scheduled time
+
+        # A backoff deadline can cross midnight, so reset the daily budget here too
+        today = datetime.now(CEZ_TIMEZONE).date()
+        if self._last_attempt_date != today:
+            self._daily_attempts = 0
+            self._data_fetch_successful_today = False
+            self._last_attempt_date = today
+
         self._daily_attempts += 1
 
         _LOGGER.info(
@@ -475,6 +523,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 # Mark as successful
                 self._data_fetch_successful_today = True
                 self._next_attempt_time = None  # No more attempts needed today
+                self._ocr_backoff_until = None
                 self._warning_shown = False
                 self._expired_shown = False
 
@@ -499,6 +548,30 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
                 # Schedule next attempt with minimum delay (log as warning)
                 await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
+
+        except downloader.OcrRateLimitError as err:
+            retry_at = self._apply_ocr_backoff(err.retry_after)
+            if retry_at is not None:
+                retry_info = f"next attempt not before {retry_at:%H:%M}"
+            else:
+                retry_info = "using the normal retry delay"
+
+            _LOGGER.warning(
+                "CezHdoCoordinator: Auto-refresh attempt %d/%d stopped by OCR.space rate limit (HTTP %s%s) - %s",
+                self._daily_attempts,
+                MAX_DAILY_OCR_ATTEMPTS,
+                err.http_status or "error",
+                f", {err.error_code}" if err.error_code else "",
+                retry_info,
+            )
+
+            # The backoff is persisted by the scheduler and survives restarts.
+            # after_failure=False keeps this to one WARNING per failed refresh.
+            await self._check_auto_refresh_failure_notification()
+            await self._async_schedule_auto_refresh(
+                min_delay_minutes=MIN_RETRY_DELAY_MINUTES,
+                after_failure=False,
+            )
 
         except Exception as err:
             _LOGGER.error(
