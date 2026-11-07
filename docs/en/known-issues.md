@@ -14,8 +14,9 @@ This file contains a list of known issues and their resolution status.
 as high tariff (VT). This is caused by ČEZ API limitation – due to CAPTCHA,
 data cannot be automatically updated daily.
 
-**Workaround:** Reconfigure the integration (Settings → Devices & Services → ČEZ HDO →
-Configure), enter a new CAPTCHA code. Current data will be loaded.
+**Workaround:** Automatic refresh remains available. In this development version,
+you can also click **Manually refresh** on the Lovelace card and enter a new CAPTCHA
+at any time to load current data.
 
 ### 2. Compatibility with Home Assistant 2026.02+ (v3.1.0)
 

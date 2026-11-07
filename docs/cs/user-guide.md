@@ -73,7 +73,7 @@ Pro ověření přístupu k API ČEZ Distribuce je nutné zadat **kód z obrázk
 3. Klikněte na **Odeslat**
 
 > **⚠️ Důležité:** Pokud zadáte špatný kód, zobrazí se nový obrázek CAPTCHA.
-> Data z API jsou platná **6 dní**. Po této době bude nutné integraci překonfigurovat.
+> Data z API jsou platná **6 dní**. Automatické obnovování se je pokusí obnovit; kdykoli je můžete obnovit také tlačítkem **Manuálně obnovit** na kartě ČEZ HDO.
 
 ### Krok 3: Výběr signálu
 
@@ -240,7 +240,7 @@ Každá instance má vlastní zařízení a entity s unikátní příponou.
 
 ### Proč data vyprší?
 
-ČEZ Distribuce používá CAPTCHA ochranu na svém API. Data se načítají **pouze při konfiguraci integrace** a jsou platná **6 dní**. Po této době je nutné integraci překonfigurovat.
+ČEZ Distribuce používá CAPTCHA ochranu na svém API. Data jsou platná **6 dní**. Pokud je automatické obnovování povolené, integrace se je pokusí obnovit automaticky. Ruční obnovu můžete spustit kdykoli tlačítkem **Manuálně obnovit** na kartě; zobrazí se CAPTCHA, kterou opíšete do formuláře.
 
 ### Sledování platnosti dat
 
@@ -282,12 +282,13 @@ automation:
 
 ### Obnovení dat
 
-Pro načtení nových dat:
+Nová data můžete načíst kdykoli, například před vypršením platnosti:
 
-1. Přejděte do **Nastavení → Zařízení a služby**
-2. Najděte integraci **ČEZ HDO**
-3. Klikněte na **Konfigurovat**
-4. Projděte všechny kroky včetně zadání CAPTCHA
+1. Otevřete Lovelace kartu **ČEZ HDO** pro požadovaný signál
+2. Klikněte na **Manuálně obnovit**
+3. Opište CAPTCHA a potvrďte **Obnovit data**
+
+Automatické obnovování zůstane zapnuté podle nastavení integrace. Neúspěšné ruční obnovení nemaže dosud uložená data.
 
 ---
 

@@ -77,7 +77,7 @@ To verify access to the ČEZ Distribuce API, you need to enter the **CAPTCHA cod
 3. Click **Submit**
 
 > **⚠️ Important:** If you enter the wrong code, a new CAPTCHA image will be displayed.
-> Data from the API is valid for **6 days**. After this period, you will need to reconfigure the integration.
+> Data from the API is valid for **6 days**. Automatic refresh will try to renew it; you can also renew it at any time using **Manually refresh** on the ČEZ HDO card.
 
 ### Step 3: Select Signal
 
@@ -244,7 +244,7 @@ Each instance has its own device and entities with a unique suffix.
 
 ### Why Does Data Expire?
 
-ČEZ Distribuce uses CAPTCHA protection on their API. Data is fetched **only during integration configuration** and is valid for **6 days**. After this period, you need to reconfigure the integration.
+ČEZ Distribuce uses CAPTCHA protection on its API. Data is valid for **6 days**. When automatic refresh is enabled, the integration will try to renew it automatically. You can start a manual renewal at any time with **Manually refresh** on the card, then enter the CAPTCHA shown in the form.
 
 ### Tracking Data Validity
 
@@ -286,12 +286,13 @@ automation:
 
 ### Renewing Data
 
-To fetch new data:
+You can fetch new data at any time, for example before it expires:
 
-1. Go to **Settings → Devices & Services**
-2. Find the **ČEZ HDO** integration
-3. Click **Configure**
-4. Complete all steps including CAPTCHA verification
+1. Open the **ČEZ HDO** Lovelace card for the signal you want to refresh
+2. Click **Manually refresh**
+3. Enter the CAPTCHA and confirm with **Refresh data**
+
+Automatic refresh remains enabled according to the integration settings. A failed manual refresh does not delete the previously stored data.
 
 ---
 

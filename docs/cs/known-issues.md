@@ -38,9 +38,9 @@ Objekt již nemá atribut `mode`, což způsobovalo chybu při spuštění integ
 **Popis:** ČEZ Distribuce zavedl CAPTCHA ochranu na svém API, což způsobovalo
 nefunkčnost integrace pro nové instalace.
 
-**Řešení:** Integrace nyní zobrazuje CAPTCHA obrázek během konfigurace.
-Data jsou načtena jednorázově a uložena do cache. Platnost dat je **6 dní**,
-poté je nutné integraci překonfigurovat.
+**Řešení:** Integrace zobrazuje CAPTCHA během konfigurace a data ukládá do cache.
+Automatické obnovování zůstává dostupné. V této vývojové verzi lze data obnovit
+kdykoli také tlačítkem **Manuálně obnovit** na Lovelace kartě a zadáním CAPTCHA.
 
 **Sledování platnosti:** Nové senzory `data_valid`, `days_until_expiry`,
 `data_age_days` a `data_valid_until` umožňují sledovat platnost dat

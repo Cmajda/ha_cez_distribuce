@@ -127,6 +127,7 @@ coverage/
 # dotenv environment variables file
 .env.test
 .env.production
+/.env.ha
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -175,6 +176,7 @@ deploy_*.log
 test2.py
 *.test.py
 .pytest_cache/
+/local/
 
 # Backup files
 *.bak
@@ -185,6 +187,9 @@ test2.py
 *package.json
 __*
 !__init__.py
+!dev/frontend/package.json
+!dev/frontend/package-lock.json
+!dev/frontend/src/localization.ts
 
 # Example/reference code
 SOURCE_EXAMPLE/

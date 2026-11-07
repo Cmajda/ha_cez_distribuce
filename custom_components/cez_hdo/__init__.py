@@ -12,6 +12,7 @@ from homeassistant.helpers.typing import ConfigType
 
 from .const import CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH
 from .frontend import CezHdoCardRegistration
+from .manual_refresh import async_register_websocket_commands
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Initialize domain data storage
     hass.data.setdefault(DOMAIN, {})
+    async_register_websocket_commands(hass)
 
     # Register service to reload frontend card
     async def reload_frontend_card(call):
