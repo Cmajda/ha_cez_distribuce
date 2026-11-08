@@ -2,6 +2,46 @@
 
 ---
 
+## v3.3.0 (2026-11-08)
+
+### 🚀 Main Changes
+
+#### Manual CAPTCHA Data Renewal
+
+- Start a manual data refresh at any time from the Lovelace card.
+- After CAPTCHA verification, the integration displays the alphabetically sorted signals returned by ČEZ and lets the user choose one.
+- The selected signal is saved to the config entry; an empty device for the previous signal is removed after a successful reload.
+- Automatic OCR refresh remains available.
+
+#### Prices from Home Assistant Entities
+
+- Optionally select price sensors or `input_number` helpers for the low and high tariffs.
+- Prices update when the source entity changes; the last valid price is retained if a source is unavailable or invalid.
+- Manual price entry remains available as a fallback.
+
+#### More Resilient Automatic Refresh
+
+- OCR.space HTTP 403/429 responses stop further requests and honor `retryAfter`.
+- The backoff deadline is persisted so the rate limit is respected after a Home Assistant restart.
+- Automatic refresh rejects data when the ČEZ response does not contain the configured HDO signal.
+
+### 🐛 Fixes and Other Changes
+
+- Signals in the configuration flow and diagnostics are sorted alphabetically.
+- Entities are reloaded for the selected signal after a manual signal change.
+- Python, Ruff, Mypy and pre-commit tooling is aligned, including CI on Python 3.14.2.
+
+### ✅ Closed Issues
+
+- [#47](https://github.com/Cmajda/ha_cez_distribuce/issues/47) – consistent development tooling and environment.
+- [#64](https://github.com/Cmajda/ha_cez_distribuce/issues/64) – load prices from Home Assistant entities.
+- [#77](https://github.com/Cmajda/ha_cez_distribuce/issues/77) – keep signal data separate during refresh.
+- [#83](https://github.com/Cmajda/ha_cez_distribuce/issues/83) – sort signals and select the first signal.
+
+Issue [#56](https://github.com/Cmajda/ha_cez_distribuce/issues/56) was closed as **not planned**; optional entity suffixes were not implemented in this release.
+
+---
+
 ## v3.2.3 (2026-02-28)
 
 ### 🐛 Fixes

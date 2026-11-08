@@ -2,6 +2,46 @@
 
 ---
 
+## v3.3.0 (2026-11-08)
+
+### 🚀 Hlavní změny
+
+#### Ruční obnovení dat pomocí CAPTCHA
+
+- Na Lovelace kartě lze kdykoli spustit ruční obnovení dat.
+- Po zadání CAPTCHA integrace zobrazí abecedně seřazené signály vrácené ČEZ a uživatel vybere, který chce použít.
+- Nový signál se uloží do konfigurace instance; prázdné zařízení se starým signálem se po úspěšném reloadu odstraní.
+- Automatické OCR obnovování zůstává zachováno.
+
+#### Ceny z entit Home Assistantu
+
+- Pro nízký a vysoký tarif lze volitelně vybrat cenový senzor nebo číselného pomocníka `input_number`.
+- Ceny se aktualizují při změně zdrojové entity; při nedostupné nebo neplatné hodnotě zůstane poslední platná cena.
+- Ruční zadání cen zůstává jako záložní možnost.
+
+#### Odolnější automatické obnovení
+
+- Při OCR.space HTTP 403/429 se další požadavky zastaví a respektují `retryAfter`.
+- Čas blokace se ukládá, takže se limit dodrží i po restartu Home Assistantu.
+- Automatická obnova nepřijme data, pokud odpověď ČEZ neobsahuje nakonfigurovaný HDO signál.
+
+### 🐛 Opravy a další změny
+
+- Signály v konfiguračním flow a diagnostice jsou řazeny abecedně.
+- Po změně signálu při ruční obnově se entity znovu načtou pro nový signál.
+- Sjednoceno vývojové prostředí Pythonu, Ruffu, Mypy a pre-commit včetně CI na Pythonu 3.14.2.
+
+### ✅ Uzavřená issues
+
+- [#47](https://github.com/Cmajda/ha_cez_distribuce/issues/47) – sjednocení vývojových nástrojů a prostředí.
+- [#64](https://github.com/Cmajda/ha_cez_distribuce/issues/64) – načítání cen z entit Home Assistantu.
+- [#77](https://github.com/Cmajda/ha_cez_distribuce/issues/77) – zachování oddělených signálů při obnově dat.
+- [#83](https://github.com/Cmajda/ha_cez_distribuce/issues/83) – řazení signálů a výběr prvního signálu.
+
+Issue [#56](https://github.com/Cmajda/ha_cez_distribuce/issues/56) byla uzavřena jako **not planned**; volitelný suffix entity nebyl v této verzi implementován.
+
+---
+
 ## v3.2.3 (2026-02-28)
 
 ### 🐛 Opravy
