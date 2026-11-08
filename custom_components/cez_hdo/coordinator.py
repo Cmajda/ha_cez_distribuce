@@ -4,13 +4,18 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import random
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any, Callable
 
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.event import async_track_point_in_time, async_track_time_interval
+from homeassistant.helpers.event import (
+    async_track_point_in_time,
+    async_track_state_change_event,
+    async_track_time_interval,
+)
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
@@ -100,6 +105,8 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self.ean = ean
         self.signal = signal
         self._state_update_unsub: Callable[[], None] | None = None
+        self._price_entity_unsub: Callable[[], None] | None = None
+        self._price_entities: dict[str, str | None] = {"low": None, "high": None}
         self._warning_shown: bool = False
         self._expired_shown: bool = False
 
@@ -235,6 +242,11 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             self._state_update_unsub()
             self._state_update_unsub = None
             _LOGGER.debug("CezHdoCoordinator: Stopped state updates")
+
+        if self._price_entity_unsub is not None:
+            self._price_entity_unsub()
+            self._price_entity_unsub = None
+            _LOGGER.debug("CezHdoCoordinator: Stopped tariff price entity tracking")
 
     def stop_auto_refresh(self) -> None:
         """Stop scheduled auto-refresh attempts."""
@@ -1018,6 +1030,69 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             low_price,
             high_price,
         )
+
+    async def async_set_price_entities(
+        self,
+        low_price_entity: str | None,
+        high_price_entity: str | None,
+    ) -> None:
+        """Track optional Home Assistant entities as tariff price sources."""
+        if self._price_entity_unsub is not None:
+            self._price_entity_unsub()
+            self._price_entity_unsub = None
+
+        self._price_entities = {
+            "low": low_price_entity,
+            "high": high_price_entity,
+        }
+        entity_ids = {entity_id for entity_id in self._price_entities.values() if entity_id}
+        if entity_ids:
+            self._price_entity_unsub = async_track_state_change_event(
+                self.hass,
+                entity_ids,
+                self._handle_price_entity_change,
+            )
+
+        await self._async_update_prices_from_entities()
+
+    @callback
+    def _handle_price_entity_change(self, _event: Any) -> None:
+        """Schedule a price refresh when a selected source entity changes."""
+        self.hass.async_create_task(self._async_update_prices_from_entities())
+
+    async def _async_update_prices_from_entities(self) -> None:
+        """Read configured price entities, retaining prior values if unavailable."""
+        low_price = self.data.low_tariff_price
+        high_price = self.data.high_tariff_price
+        changed = False
+
+        for tariff, entity_id in self._price_entities.items():
+            if not entity_id:
+                continue
+
+            state = self.hass.states.get(entity_id)
+            if state is None or state.state in ("unknown", "unavailable"):
+                continue
+
+            try:
+                price = float(state.state)
+            except (TypeError, ValueError):
+                _LOGGER.warning("Ignoring non-numeric price state from %s", entity_id)
+                continue
+
+            if not math.isfinite(price) or price < 0:
+                _LOGGER.warning("Ignoring invalid price state from %s", entity_id)
+                continue
+
+            if tariff == "low" and price != low_price:
+                low_price = price
+                changed = True
+            elif tariff == "high" and price != high_price:
+                high_price = price
+                changed = True
+
+        if changed:
+            await self.async_set_prices(low_price, high_price)
 
     @property
     def current_price(self) -> float:

@@ -6,6 +6,8 @@ DOMAIN = "cez_hdo"
 
 # Configuration keys
 CONF_AUTO_REFRESH = "auto_refresh"
+CONF_LOW_TARIFF_PRICE_ENTITY = "low_tariff_price_entity"
+CONF_HIGH_TARIFF_PRICE_ENTITY = "high_tariff_price_entity"
 
 # Auto-refresh configuration
 DEFAULT_AUTO_REFRESH = True

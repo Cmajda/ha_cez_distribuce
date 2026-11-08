@@ -307,7 +307,9 @@ Prices are set **in the integration**, not in the card.
 2. Find the **ČEZ HDO** integration and click on it
 3. Click **Configure**
 4. Navigate through steps to **Tariff Prices Setup**
-5. Change prices and save
+5. Change the manual prices or select NT and VT price sensors, then save
+
+When a price sensor is selected, its numeric state is used as the price and updates whenever the sensor changes. The manually entered price remains in use when no sensor is selected or its state is unavailable or non-numeric.
 
 ### set_prices Service
 

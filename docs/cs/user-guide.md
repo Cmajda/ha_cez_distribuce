@@ -303,7 +303,9 @@ Ceny se nastavují **v integraci**, ne v kartě.
 2. Najděte integraci **ČEZ HDO** a klikněte na ni
 3. Klikněte na **Konfigurovat**
 4. Projděte kroky až ke **Nastavení cen tarifů**
-5. Změňte ceny a uložte
+5. Změňte ruční ceny nebo vyberte senzory pro NT a VT a uložte
+
+Pokud vyberete cenový senzor, jeho číselný stav se použije jako cena a aktualizuje se při každé změně. Ručně zadaná cena zůstane použita, pokud senzor není vybrán nebo je jeho stav nedostupný či nečíselný.
 
 ### Služba set_prices
 

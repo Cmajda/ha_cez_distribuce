@@ -47,11 +47,15 @@
                 "data": {
                     "low_tariff_price": "NT Price (CZK/kWh)",
                     "high_tariff_price": "VT Price (CZK/kWh)",
+                    "low_tariff_price_entity": "NT price sensor or number helper (optional)",
+                    "high_tariff_price_entity": "VT price sensor or number helper (optional)",
                     "auto_refresh": "Auto refresh data"
                 },
                 "data_description": {
                     "low_tariff_price": "Price per kWh in low tariff",
                     "high_tariff_price": "Price per kWh in high tariff",
+                    "low_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
+                    "high_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
                     "auto_refresh": "Enable automatic HDO data refresh (max 24 attempts per day)"
                 }
             }
@@ -108,11 +112,15 @@
                 "data": {
                     "low_tariff_price": "NT Price (CZK/kWh)",
                     "high_tariff_price": "VT Price (CZK/kWh)",
+                    "low_tariff_price_entity": "NT price sensor or number helper (optional)",
+                    "high_tariff_price_entity": "VT price sensor or number helper (optional)",
                     "auto_refresh": "Auto refresh data"
                 },
                 "data_description": {
                     "low_tariff_price": "Price per kWh in low tariff",
                     "high_tariff_price": "Price per kWh in high tariff",
+                    "low_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
+                    "high_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
                     "auto_refresh": "Enable automatic HDO data refresh (max 24 attempts per day)"
                 }
             }

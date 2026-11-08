@@ -11,9 +11,16 @@ from homeassistant import config_entries
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import selector
 
 from . import downloader
-from .const import CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH, mask_ean
+from .const import (
+    CONF_AUTO_REFRESH,
+    CONF_HIGH_TARIFF_PRICE_ENTITY,
+    CONF_LOW_TARIFF_PRICE_ENTITY,
+    DEFAULT_AUTO_REFRESH,
+    mask_ean,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -250,6 +257,8 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
             high_price = user_input.get(CONF_HIGH_TARIFF_PRICE, 0.0)
             auto_refresh = user_input.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
+            low_price_entity = user_input.get(CONF_LOW_TARIFF_PRICE_ENTITY)
+            high_price_entity = user_input.get(CONF_HIGH_TARIFF_PRICE_ENTITY)
 
             # Ensure EAN is set (should always be at this point)
             if self._ean is None:
@@ -286,6 +295,8 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                     CONF_SIGNAL: self._signal,
                     CONF_ENTITY_SUFFIX: self._entity_suffix,
                     CONF_AUTO_REFRESH: auto_refresh,
+                    CONF_LOW_TARIFF_PRICE_ENTITY: low_price_entity,
+                    CONF_HIGH_TARIFF_PRICE_ENTITY: high_price_entity,
                 },
             )
 
@@ -296,6 +307,12 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                     vol.Optional(CONF_LOW_TARIFF_PRICE, default=0.0): vol.Coerce(float),
                     vol.Optional(CONF_HIGH_TARIFF_PRICE, default=0.0): vol.Coerce(float),
                     vol.Optional(CONF_AUTO_REFRESH, default=DEFAULT_AUTO_REFRESH): cv.boolean,
+                    vol.Optional(CONF_LOW_TARIFF_PRICE_ENTITY): selector.EntitySelector(
+                        selector.EntitySelectorConfig(domain=["sensor", "input_number"])
+                    ),
+                    vol.Optional(CONF_HIGH_TARIFF_PRICE_ENTITY): selector.EntitySelector(
+                        selector.EntitySelectorConfig(domain=["sensor", "input_number"])
+                    ),
                 }
             ),
         )
@@ -458,10 +475,21 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                 return self.async_abort(reason="missing_ean")
 
             # Update config entry data
+            low_price_entity = user_input.get(
+                CONF_LOW_TARIFF_PRICE_ENTITY,
+                self._config_entry.data.get(CONF_LOW_TARIFF_PRICE_ENTITY),
+            )
+            high_price_entity = user_input.get(
+                CONF_HIGH_TARIFF_PRICE_ENTITY,
+                self._config_entry.data.get(CONF_HIGH_TARIFF_PRICE_ENTITY),
+            )
             new_data = {
+                **self._config_entry.data,
                 CONF_EAN: self._ean,
                 CONF_SIGNAL: self._signal,
                 CONF_AUTO_REFRESH: auto_refresh,
+                CONF_LOW_TARIFF_PRICE_ENTITY: low_price_entity,
+                CONF_HIGH_TARIFF_PRICE_ENTITY: high_price_entity,
             }
 
             # Update unique_id if EAN changed
@@ -490,6 +518,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
 
             # Update auto_refresh setting in coordinator
             await self._update_auto_refresh(auto_refresh)
+            await self._update_price_entities(low_price_entity, high_price_entity)
 
             # Return empty options - all config is in data
             return self.async_create_entry(title="", data={})
@@ -498,6 +527,8 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         current_low_price = 0.0
         current_high_price = 0.0
         current_auto_refresh = self._config_entry.data.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
+        current_low_price_entity = self._config_entry.data.get(CONF_LOW_TARIFF_PRICE_ENTITY)
+        current_high_price_entity = self._config_entry.data.get(CONF_HIGH_TARIFF_PRICE_ENTITY)
 
         from . import DATA_COORDINATOR, DOMAIN
 
@@ -507,6 +538,17 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             current_low_price = coordinator.data.low_tariff_price
             current_high_price = coordinator.data.high_tariff_price
 
+        low_price_entity_field = (
+            vol.Optional(CONF_LOW_TARIFF_PRICE_ENTITY, default=current_low_price_entity)
+            if current_low_price_entity
+            else vol.Optional(CONF_LOW_TARIFF_PRICE_ENTITY)
+        )
+        high_price_entity_field = (
+            vol.Optional(CONF_HIGH_TARIFF_PRICE_ENTITY, default=current_high_price_entity)
+            if current_high_price_entity
+            else vol.Optional(CONF_HIGH_TARIFF_PRICE_ENTITY)
+        )
+
         return self.async_show_form(
             step_id="prices",
             data_schema=vol.Schema(
@@ -514,6 +556,12 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                     vol.Optional(CONF_LOW_TARIFF_PRICE, default=current_low_price): vol.Coerce(float),
                     vol.Optional(CONF_HIGH_TARIFF_PRICE, default=current_high_price): vol.Coerce(float),
                     vol.Optional(CONF_AUTO_REFRESH, default=current_auto_refresh): cv.boolean,
+                    low_price_entity_field: selector.EntitySelector(
+                        selector.EntitySelectorConfig(domain=["sensor", "input_number"])
+                    ),
+                    high_price_entity_field: selector.EntitySelector(
+                        selector.EntitySelectorConfig(domain=["sensor", "input_number"])
+                    ),
                 }
             ),
         )
@@ -531,6 +579,21 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                 await coordinator.schedule_auto_refresh()
             else:
                 coordinator.stop_auto_refresh()
+
+    async def _update_price_entities(
+        self,
+        low_price_entity: str | None,
+        high_price_entity: str | None,
+    ) -> None:
+        """Update coordinator price source entities."""
+        from . import DATA_COORDINATOR, DOMAIN
+
+        entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
+        entry_data[CONF_LOW_TARIFF_PRICE_ENTITY] = low_price_entity
+        entry_data[CONF_HIGH_TARIFF_PRICE_ENTITY] = high_price_entity
+        coordinator = entry_data.get(DATA_COORDINATOR)
+        if coordinator:
+            await coordinator.async_set_price_entities(low_price_entity, high_price_entity)
 
     async def _save_prices(self, low_price: float, high_price: float) -> None:
         """Save prices to coordinator."""

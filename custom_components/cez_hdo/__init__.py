@@ -10,7 +10,12 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 
-from .const import CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH
+from .const import (
+    CONF_AUTO_REFRESH,
+    CONF_HIGH_TARIFF_PRICE_ENTITY,
+    CONF_LOW_TARIFF_PRICE_ENTITY,
+    DEFAULT_AUTO_REFRESH,
+)
 from .frontend import CezHdoCardRegistration
 from .manual_refresh import async_register_websocket_commands
 
@@ -289,6 +294,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     signal = entry.data.get("signal")
     entity_suffix = entry.data.get("entity_suffix")
     auto_refresh = entry.data.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
+    low_price_entity = entry.data.get(CONF_LOW_TARIFF_PRICE_ENTITY)
+    high_price_entity = entry.data.get(CONF_HIGH_TARIFF_PRICE_ENTITY)
 
     if not ean:
         _LOGGER.error("CEZ HDO: No EAN in config entry")
@@ -309,6 +316,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         _LOGGER.debug("Set initial prices from config flow: %s", initial_prices)
 
+    await coordinator.async_set_price_entities(low_price_entity, high_price_entity)
+
     # Store coordinator in hass.data
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {
@@ -316,6 +325,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "ean": ean,
         "signal": signal,
         "entity_suffix": entity_suffix,
+        CONF_LOW_TARIFF_PRICE_ENTITY: low_price_entity,
+        CONF_HIGH_TARIFF_PRICE_ENTITY: high_price_entity,
     }
 
     # Forward setup to platforms
