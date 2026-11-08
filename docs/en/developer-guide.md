@@ -4,6 +4,25 @@ A brief overview for development/contribution.
 
 ## Requirements
 
+### Local Python Development
+
+The project requires Python **3.14.2 through 3.15.0** and uses `uv` to create
+the `.venv` virtual environment and install tools declared in `pyproject.toml`.
+
+```bash
+uv sync --group dev
+uv run pre-commit install
+uv run pre-commit run --all-files
+```
+
+VS Code uses `${workspaceFolder}/.venv/bin/python`; `uv sync` creates the
+environment at that path. Before committing, verify that `uv.lock` matches the
+project:
+
+```bash
+uv lock --check
+```
+
 ### Home Assistant
 
 For development deployment via [dev/deploy.sh](../dev/deploy.sh),

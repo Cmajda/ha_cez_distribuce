@@ -4,6 +4,24 @@ Stručný přehled pro vývoj/přispívání.
 
 ## Požadavky
 
+### Lokální Python vývoj
+
+Projekt vyžaduje Python **3.14.2 až 3.15.0** a používá `uv` pro vytvoření
+virtuálního prostředí `.venv` a instalaci nástrojů z `pyproject.toml`.
+
+```bash
+uv sync --group dev
+uv run pre-commit install
+uv run pre-commit run --all-files
+```
+
+VS Code používá `${workspaceFolder}/.venv/bin/python`; po `uv sync` se prostředí
+vytvoří na této cestě. Před commitem ověřte, že `uv.lock` odpovídá projektu:
+
+```bash
+uv lock --check
+```
+
 ### Home Assistant
 
 Pro vývojový deploy přes [dev/deploy.sh](../dev/deploy.sh) je nejjednodušší

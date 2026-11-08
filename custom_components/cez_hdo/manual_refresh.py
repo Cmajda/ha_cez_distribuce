@@ -114,9 +114,7 @@ def async_register_websocket_commands(hass: HomeAssistant) -> None:
         signal = entry_data.get("signal")
         captcha_code = msg["captcha_code"].strip()
         if coordinator is None or not ean or not captcha_code:
-            _LOGGER.warning(
-                "Manual CAPTCHA submission rejected: missing coordinator, EAN, or CAPTCHA code"
-            )
+            _LOGGER.warning("Manual CAPTCHA submission rejected: missing coordinator, EAN, or CAPTCHA code")
             connection.send_error(msg["id"], websocket_api.ERR_INVALID_FORMAT, "Chybí koordinátor nebo CAPTCHA kód")
             return
 
@@ -148,7 +146,11 @@ def async_register_websocket_commands(hass: HomeAssistant) -> None:
         except InvalidEan:
             sessions.pop(msg["captcha_id"], None)
             _LOGGER.warning("Manual refresh returned no signals for EAN %s", mask_ean(ean))
-            connection.send_error(msg["id"], websocket_api.ERR_UNKNOWN_ERROR, "Odpověď ČEZ neobsahuje žádné HDO signály")
+            connection.send_error(
+                msg["id"],
+                websocket_api.ERR_UNKNOWN_ERROR,
+                "Odpověď ČEZ neobsahuje žádné HDO signály",
+            )
             return
         except CannotConnect as err:
             sessions.pop(msg["captcha_id"], None)
@@ -220,12 +222,7 @@ def async_register_websocket_commands(hass: HomeAssistant) -> None:
         ean = entry_data.get("ean")
         selected_signal = msg["signal"]
         raw_data = session.raw_data
-        if (
-            coordinator is None
-            or not ean
-            or raw_data is None
-            or selected_signal not in session.available_signals
-        ):
+        if coordinator is None or not ean or raw_data is None or selected_signal not in session.available_signals:
             connection.send_error(msg["id"], websocket_api.ERR_INVALID_FORMAT, "Vybraný HDO signál není dostupný")
             return
 

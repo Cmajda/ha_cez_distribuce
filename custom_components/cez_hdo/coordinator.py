@@ -542,9 +542,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                     {
                         item["signal"]
                         for item in downloader._extract_signals(new_data)
-                        if isinstance(item, dict)
-                        and isinstance(item.get("signal"), str)
-                        and item["signal"]
+                        if isinstance(item, dict) and isinstance(item.get("signal"), str) and item["signal"]
                     }
                 )
                 if not returned_signals or (self.signal and self.signal not in returned_signals):

@@ -121,11 +121,13 @@ def validate_ean_with_captcha(ean: str, captcha_code: str, cookies: dict[str, st
 
     # Keep only provider error keys for logs; API bodies can contain identifying data.
     flash_messages = json_data.get("flashMessages", [])
-    error_codes = [
-        msg.get("key")
-        for msg in flash_messages
-        if isinstance(msg, dict) and isinstance(msg.get("key"), str)
-    ]
+    error_codes: list[str] = []
+    for message in flash_messages:
+        if not isinstance(message, dict):
+            continue
+        error_code = message.get("key")
+        if isinstance(error_code, str):
+            error_codes.append(error_code)
     if "CPT-002" in error_codes:
         _LOGGER.warning(
             "CEZ API rejected CAPTCHA for EAN %s (code=CPT-002)",
