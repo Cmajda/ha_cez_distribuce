@@ -35,6 +35,8 @@ CONF_CAPTCHA = "captcha"
 
 CONF_LOW_TARIFF_PRICE = "low_tariff_price"
 CONF_HIGH_TARIFF_PRICE = "high_tariff_price"
+CONF_USE_LOW_TARIFF_PRICE_ENTITY = "use_low_tariff_price_entity"
+CONF_USE_HIGH_TARIFF_PRICE_ENTITY = "use_high_tariff_price_entity"
 
 
 async def validate_input_with_captcha(
@@ -475,14 +477,16 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                 return self.async_abort(reason="missing_ean")
 
             # Update config entry data
-            low_price_entity = user_input.get(
-                CONF_LOW_TARIFF_PRICE_ENTITY,
-                self._config_entry.data.get(CONF_LOW_TARIFF_PRICE_ENTITY),
+            low_entity_enabled = user_input.get(
+                CONF_USE_LOW_TARIFF_PRICE_ENTITY,
+                bool(self._config_entry.data.get(CONF_LOW_TARIFF_PRICE_ENTITY)),
             )
-            high_price_entity = user_input.get(
-                CONF_HIGH_TARIFF_PRICE_ENTITY,
-                self._config_entry.data.get(CONF_HIGH_TARIFF_PRICE_ENTITY),
+            high_entity_enabled = user_input.get(
+                CONF_USE_HIGH_TARIFF_PRICE_ENTITY,
+                bool(self._config_entry.data.get(CONF_HIGH_TARIFF_PRICE_ENTITY)),
             )
+            low_price_entity = user_input.get(CONF_LOW_TARIFF_PRICE_ENTITY) if low_entity_enabled else None
+            high_price_entity = user_input.get(CONF_HIGH_TARIFF_PRICE_ENTITY) if high_entity_enabled else None
             new_data = {
                 **self._config_entry.data,
                 CONF_EAN: self._ean,
@@ -556,6 +560,14 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                     vol.Optional(CONF_LOW_TARIFF_PRICE, default=current_low_price): vol.Coerce(float),
                     vol.Optional(CONF_HIGH_TARIFF_PRICE, default=current_high_price): vol.Coerce(float),
                     vol.Optional(CONF_AUTO_REFRESH, default=current_auto_refresh): cv.boolean,
+                    vol.Optional(
+                        CONF_USE_LOW_TARIFF_PRICE_ENTITY,
+                        default=bool(current_low_price_entity),
+                    ): cv.boolean,
+                    vol.Optional(
+                        CONF_USE_HIGH_TARIFF_PRICE_ENTITY,
+                        default=bool(current_high_price_entity),
+                    ): cv.boolean,
                     low_price_entity_field: selector.EntitySelector(
                         selector.EntitySelectorConfig(domain=["sensor", "input_number"])
                     ),
