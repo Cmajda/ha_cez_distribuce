@@ -244,7 +244,10 @@ Each instance has its own device and entities with a unique suffix.
 
 ### Why Does Data Expire?
 
-ČEZ Distribuce uses CAPTCHA protection on its API. Data is valid for **6 days**. When automatic refresh is enabled, the integration will try to renew it automatically. You can start a manual renewal at any time with **Manually refresh** on the card. After CAPTCHA verification, choose a signal from the alphabetically sorted list returned by ČEZ; the selection is saved as the instance's configured signal.
+ČEZ Distribuce uses CAPTCHA protection on its API. Data is valid for **6 days**. When automatic refresh is enabled, the
+integration will try to renew it automatically. You can start a manual renewal at any time with **Manually refresh** on
+the card. After CAPTCHA verification, choose a signal from the alphabetically sorted list returned by ČEZ; the selection
+is saved as the instance's configured signal.
 
 ### Tracking Data Validity
 
@@ -309,7 +312,8 @@ Prices are set **in the integration**, not in the card.
 4. Navigate through steps to **Tariff Prices Setup**
 5. Change the manual prices or select NT and VT price sensors, then save
 
-When a price sensor is selected, its numeric state is used as the price and updates whenever the sensor changes. The manually entered price remains in use when no sensor is selected or its state is unavailable or non-numeric.
+When a price sensor is selected, its numeric state is used as the price and updates whenever the sensor changes. The
+manually entered price remains in use when no sensor is selected or its state is unavailable or non-numeric.
 
 ### set_prices Service
 

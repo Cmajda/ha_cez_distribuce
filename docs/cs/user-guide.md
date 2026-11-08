@@ -240,7 +240,9 @@ Každá instance má vlastní zařízení a entity s unikátní příponou.
 
 ### Proč data vyprší?
 
-ČEZ Distribuce používá CAPTCHA ochranu na svém API. Data jsou platná **6 dní**. Pokud je automatické obnovování povolené, integrace se je pokusí obnovit automaticky. Ruční obnovu můžete spustit kdykoli tlačítkem **Manuálně obnovit** na kartě. Po ověření CAPTCHA vyberete signál z abecedně seřazeného seznamu vráceného ČEZ; tento výběr se uloží jako signál instance.
+ČEZ Distribuce používá CAPTCHA ochranu na svém API. Data jsou platná **6 dní**. Pokud je automatické obnovování povolené,
+integrace se je pokusí obnovit automaticky. Ruční obnovu můžete spustit kdykoli tlačítkem **Manuálně obnovit** na kartě.
+Po ověření CAPTCHA vyberete signál z abecedně seřazeného seznamu vráceného ČEZ; tento výběr se uloží jako signál instance.
 
 ### Sledování platnosti dat
 
