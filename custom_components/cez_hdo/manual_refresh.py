@@ -303,7 +303,7 @@ def _cleanup_old_signal_device(
         )
         return
 
-    device_registry.async_update_device(old_device.id, remove_config_entry_id=entry_id)
+    device_registry.async_remove_device(old_device.id)
     _LOGGER.info(
         "Removed empty previous signal device for EAN %s (signal %s)",
         mask_ean(ean),
