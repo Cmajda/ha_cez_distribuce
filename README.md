@@ -1,4 +1,6 @@
-# ⚡️ČEZ HDO (Home Assistant) ⚡️
+# ⚡️ČEZ HDO pro Home Assistant ⚡️
+
+[English](README_EN.md) · [Kompletní dokumentace ve Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki)
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![Release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?label=stable&logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases/latest)
@@ -11,171 +13,74 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **AUTOMATICKÉ OBNOVOVÁNÍ DAT:** Od verze 3.2.X integrace automaticky obnovuje HDO data.
-> Při konfiguraci zadáte kód z CAPTCHA obrázku. Data se pak obnovují automaticky.
-> Nová umístění souborů (spravuje Home Assistant automaticky) v `.storage` a přežijí aktualizace přes HACS.
----
-> ℹ️ **Migrace úložiště v3.2.X:** Umístění cache se změnilo na Home Assistantem spravované `.storage`.
-> Integrace se pokusí starou cache a ceny převést automaticky. Po aktualizaci ověřte nastavení cen; pokud se nepřevedly, doplňte je v konfiguraci integrace.
+## Spolupracovníci
 
-🇬🇧 [English version](README_EN.md)
-
-> 🔴 **UPOZORNĚNÍ PRO UŽIVATELE VERZE 2.x:**
-> Před upgradem z verze 2.x si přečtěte [**Upgrade Guide**](docs/cs/upgrade-guide.md)!
-> Přechod na verzi 3.x přináší zásadní změny a vyžaduje manuální kroky.
-
-Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif)
-z API ČEZ Distribuce a vytváří entity + Lovelace kartu.
-
-> ⚠️ **Neoficiální integrace** – Tento projekt není oficiálním produktem
-> společnosti ČEZ Distribuce a.s. Jedná se o komunitní projekt vytvořený
-> pro potřeby uživatelů Home Assistantu. Autor nemá žádnou vazbu na ČEZ.
-
-Pokud mě chcete podpořit můžete zde
-
-[![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=FF813F&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/cmajda)
-
-## 🤝 Spolupracovníci
-
-Děkuji všem spoluautorům, kteří se aktivně podílejí na vývoji kódu této integrace:
+Děkuji všem, kteří se podílejí na vývoji integrace:
 
 <!-- readme: collaborators -start -->
 <table>
-    <tbody>
-        <tr>
-            <td align="center">
-                <a href="https://github.com/pokornyIt">
-                    <img src="https://github.com/pokornyIt.png" width="96;" alt="pokornyIt"/>
-                    <br />
-                    <sub><b>pokornyIt</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/VojtechJurcik">
-                    <img src="https://github.com/VojtechJurcik.png" width="96;" alt="VojtechJurcik"/>
-                    <br />
-                    <sub><b>VojtechJurcik</b></sub>
-                </a>
-            </td>
-        </tr>
-    </tbody>
+   <tbody>
+      <tr>
+         <td align="center">
+            <a href="https://github.com/pokornyIt">
+               <img src="https://github.com/pokornyIt.png" width="96;" alt="pokornyIt"/>
+               <br />
+               <sub><b>pokornyIt</b></sub>
+            </a>
+         </td>
+         <td align="center">
+            <a href="https://github.com/VojtechJurcik">
+               <img src="https://github.com/VojtechJurcik.png" width="96;" alt="VojtechJurcik"/>
+               <br />
+               <sub><b>VojtechJurcik</b></sub>
+            </a>
+         </td>
+      </tr>
+   </tbody>
 </table>
 <!-- readme: collaborators -end -->
 
-## 🚀 Rychlý start
+> **Neoficiální komunitní integrace.** Nejde o produkt společnosti ČEZ Distribuce.
 
-### 1. Instalace přes HACS
+Integrace načítá HDO rozvrhy ČEZ Distribuce do Home Assistantu a nabízí senzory
+tarifů i Lovelace kartu.
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
+## Rychlý start
 
-### 2. Restart Home Assistant
+1. V HACS otevřete **Integrations → Custom repositories** a přidejte
+   `Cmajda/ha_cez_distribuce` jako integraci.
+2. Nainstalujte **ČEZ HDO** a restartujte Home Assistant.
+3. V **Nastavení → Zařízení a služby → Přidat integraci** vyhledejte
+   **ČEZ HDO** a projděte nastavením EANu, CAPTCHA, signálu a cen.
 
-### 3. Přidání integrace
+[![Otevřít repozitář ČEZ HDO v HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-1. **Nastavení → Zařízení a služby → + Přidat integraci**
-2. Vyhledejte **ČEZ HDO**
-3. Zadejte **EAN** (18 číslic z faktury)
-4. Zadejte **kód CAPTCHA** z obrázku
-5. Vyberte **signál** (pokud je více možností)
-6. Zadejte příponu entit
-7. Zadejte **ceny** NT a VT (Kč/kWh), případně vyberte cenové entity
+[Podrobný návod k instalaci a konfiguraci](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS)
 
-### 4. Přidání karty
+## Přidání karty
 
-V Lovelace přidejte kartu **ČEZ HDO Card** (nebo `custom:cez-hdo-card`).
+1. Otevřete dashboard a zvolte **Upravit dashboard → Přidat kartu**.
+2. Vyhledejte **ČEZ HDO Card**, nastavte kartu a uložte ji.
 
-> **Poznámka:** Po instalaci může být potřeba stisknout `Ctrl+F5`
-> pro vyčištění cache.
+![Přidání karty ČEZ HDO](img/cs/add_card_1_cz.png)
 
-## 🎴 Lovelace karta
+Editor umožňuje zvolit zobrazené entity, ceny, časy, zbývající čas i kompaktní
+režim. Rozvrh a ceny v jeho legendě lze zapnout podle potřeby.
 
-Karta má vizuální editor s možnostmi zobrazení:
+![Nastavení karty ČEZ HDO](img/cs/add_card_2_cz.png)
 
-- Stavy tarifů (NT/VT aktivní)
-- Časy začátku/konce tarifů
-- Zbývající čas do změny
-- Aktuální cena
-- 7denní HDO rozvrh
+## Lovelace karta
+
+Karta zobrazuje stav nízkého a vysokého tarifu, začátky a konce tarifů,
+zbývající čas, aktuální cenu a volitelný sedmidenní HDO rozvrh. Data lze obnovit
+ručně přímo z karty.
 
 ![ČEZ HDO karta](img/cs/entity_card_cz.png) ![HDO rozvrh](img/cs/graph_cz.png)
 
-### Nastavení cen
+## Dokumentace a podpora
 
-Ceny se nastavují v **integraci**
-(Nastavení → Zařízení a služby → ČEZ HDO → Konfigurovat), ne v kartě.
-
-> **Pro změnu ceny:** Projděte všechny kroky konfigurace – nastavení ceny je až na konci.
-
-### Energy Dashboard
-
-Senzor `sensor.cez_hdo_currentprice_*` lze použít jako zdroj ceny v Energy Dashboard.
-
-## 📦 Vytvářené entity
-
-| Typ    | Entita                          | Popis                  |
-| ------ | ------------------------------- | ---------------------- |
-| Binary | `cez_hdo_lowtariffactive_*`     | NT je aktivní          |
-| Binary | `cez_hdo_hightariffactive_*`    | VT je aktivní          |
-| Binary | `cez_hdo_data_valid_*`          | Data jsou platná       |
-| Sensor | `cez_hdo_lowtariffstart_*`      | Čas začátku NT         |
-| Sensor | `cez_hdo_lowtariffend_*`        | Čas konce NT           |
-| Sensor | `cez_hdo_lowtariffduration_*`   | Zbývající čas NT       |
-| Sensor | `cez_hdo_hightariffstart_*`     | Čas začátku VT         |
-| Sensor | `cez_hdo_hightariffend_*`       | Čas konce VT           |
-| Sensor | `cez_hdo_hightariffduration_*`  | Zbývající čas VT       |
-| Sensor | `cez_hdo_currentprice_*`        | Aktuální cena (Kč/kWh) |
-| Sensor | `cez_hdo_schedule_*`            | 7denní HDO rozvrh      |
-| Sensor | `cez_hdo_raw_data_*`            | Surová data a čas poslední aktualizace |
-| Sensor | `cez_hdo_data_valid_until_*`    | Datum vypršení dat     |
-| Sensor | `cez_hdo_data_age_days_*`       | Stáří dat (dny)        |
-| Sensor | `cez_hdo_days_until_expiry_*`   | Dní do vypršení        |
-
-> **Poznámka:** `*` označuje vaši zvolenou příponu (např. `doma` nebo `7606_a1b4dp04`).
-
-## ⚠️ Upgrade z v2.x
-
-Verze 3.0.0 přináší **zásadní změny**:
-
-1. **Smazat YAML konfiguraci** z `configuration.yaml`
-2. **Aktualizovat** přes HACS
-3. **Restart** Home Assistant
-4. **Smazat staré entity** (Nastavení → Entity → smazat vše obsahující `cez_hdo`)
-5. **Přidat integraci** přes GUI
-6. **Smazat složku** `www/cez_hdo/`
-
-Detailní postup: [docs/cs/upgrade-guide.md](docs/cs/upgrade-guide.md)
-
-## 🔧 Řešení problémů
-
-1. **Ctrl+F5** – vyčistit cache prohlížeče
-2. **Reload integrace** – Nastavení → Zařízení a služby → ČEZ HDO → Znovu načíst
-3. **Zkontrolovat logy** – Nastavení → Systém → Protokoly
-
-### Diagnostika
-
-Pro nahlášení chyby exportujte diagnostiku:
-
-1. Nastavení → Zařízení a služby → ČEZ HDO
-2. Klikněte na zařízení → ⋮ → **Stáhnout diagnostiku**
-3. Přiložte k [GitHub Issue](https://github.com/Cmajda/ha_cez_distribuce/issues)
-
-## 📚 Dokumentace
-
-- [Uživatelský návod (CZ)](docs/cs/user-guide.md) – kompletní dokumentace
-- [User Guide (EN)](docs/en/user-guide.md) – complete documentation (English)
-- [Upgrade Guide (CZ)](docs/cs/upgrade-guide.md) – přechod z v2.x na v3.x
-- [Upgrade Guide (EN)](docs/en/upgrade-guide.md) – migration from v2.x to v3.x
-- [Service Guide (CZ)](docs/cs/service-guide.md) – dostupné služby
-- [Service Guide (EN)](docs/en/service-guide.md) – available services
-- [Developer Guide (CZ)](docs/cs/developer-guide.md) – pro vývojáře
-- [Developer Guide (EN)](docs/en/developer-guide.md) – for developers
-- [Známé problémy (CZ)](docs/cs/known-issues.md) – seznam známých problémů
-- [Known Issues (EN)](docs/en/known-issues.md) – list of known issues
-
-## 📝 Release Notes
-
-Viz [RELEASE_NOTES.md](RELEASE_NOTES.md)
-
-## 📄 Licence
-
-Apache 2.0 + Commons Clause (nekomerční použití) | Podpora: [GitHub Issues](https://github.com/Cmajda/ha_cez_distribuce/issues)
+- [Česká Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki)
+- [Anglická Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki/English-Home)
+- [Vydání a testovací verze](https://github.com/Cmajda/ha_cez_distribuce/releases)
+- [Nahlásit problém](https://github.com/Cmajda/ha_cez_distribuce/issues)
+- [Licence](LICENSE)

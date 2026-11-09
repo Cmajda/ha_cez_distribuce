@@ -1,0 +1,68 @@
+name: 📚 Wiki Validation
+
+on:
+    gollum:
+    workflow_dispatch:
+    schedule:
+        - cron: "0 2 * * *"
+
+permissions:
+    contents: read
+
+jobs:
+    validate-wiki:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: "22"
+
+            - name: Checkout GitHub Wiki
+              run: git clone --depth 1 "https://github.com/${GITHUB_REPOSITORY}.wiki.git" "$RUNNER_TEMP/wiki"
+
+            - name: Lint Wiki Markdown
+              run: npx --yes --package markdownlint-cli@0.42.0 markdownlint --config .markdownlint-wiki.json "$RUNNER_TEMP/wiki"/*.md
+
+            - name: Check Wiki page and image links
+              env:
+                  WIKI_DIR: ${{ runner.temp }}/wiki
+              run: |
+                  python3 - <<'PY'
+                  import os
+                  import re
+                  import sys
+                  from pathlib import Path
+                  from urllib.parse import unquote
+
+                  wiki = Path(os.environ["WIKI_DIR"])
+                  link_pattern = re.compile(r"!?\[[^\]]*\]\(([^)]+)\)")
+                  missing = []
+
+                  for markdown_file in wiki.glob("*.md"):
+                      text = markdown_file.read_text(encoding="utf-8")
+                      for match in link_pattern.finditer(text):
+                          target = match.group(1).split()[0].strip("<>")
+                          if target.startswith(("http://", "https://", "mailto:")):
+                              continue
+
+                          path = unquote(target.split("#", 1)[0])
+                          if not path:
+                              continue
+
+                          destination = wiki / path
+                          if destination.is_file():
+                              continue
+                          if not destination.suffix:
+                              destination = destination.with_suffix(".md")
+                          if not destination.is_file():
+                              missing.append(f"{markdown_file.name}: {target}")
+
+                  if missing:
+                      print("Broken local Wiki links:")
+                      print("\n".join(missing))
+                      sys.exit(1)
+
+                  print("All local Wiki page and image links resolve.")
+                  PY
