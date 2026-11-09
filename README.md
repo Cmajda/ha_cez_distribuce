@@ -13,9 +13,39 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-## Spolupracovníci
+> **Neoficiální komunitní integrace.** Nejde o produkt společnosti ČEZ Distribuce.
 
-Děkuji všem, kteří se podílejí na vývoji integrace:
+Integrace načítá HDO rozvrhy ČEZ Distribuce do Home Assistantu a nabízí senzory
+tarifů i Lovelace kartu.
+
+## ⚙️ Co integrace dělá
+
+Pro zadané odběrné místo (EAN) a HDO signál načítá časy spínání nízkého a
+vysokého tarifu. V Home Assistantu poskytuje:
+
+- senzory aktuálního tarifu, začátků a konců tarifů a času do další změny;
+- aktuální cenu z pevného nastavení nebo vybraného cenového senzoru;
+- sedmidenní HDO rozvrh a senzory platnosti načtených dat;
+- entity použitelné v automatizacích, například pro spínání spotřebičů podle tarifu;
+- automatické a ruční obnovení HDO dat.
+
+Senzor aktuální ceny lze přidat do Energy Dashboard pro přehled nákladů;
+pro výpočet je potřeba také senzor spotřeby elektřiny.
+
+## 📚 Wiki
+
+Wiki je hlavním zdrojem podrobné dokumentace. Obsahuje návody k instalaci a
+nastavení, přehled entit, příklady automatizací, práci s cenami a Energy
+Dashboardem, řešení problémů i vývojářské informace.
+
+[Otevřít českou Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki) ·
+[English Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki/English-Home)
+
+## 🤝 Spolupracovníci a přispěvatelé
+
+### 👥 Spolupracovníci
+
+Děkuji všem, kteří se dlouhodobě podílejí na vývoji integrace:
 
 <!-- readme: collaborators -start -->
 <table>
@@ -40,12 +70,18 @@ Děkuji všem, kteří se podílejí na vývoji integrace:
 </table>
 <!-- readme: collaborators -end -->
 
-> **Neoficiální komunitní integrace.** Nejde o produkt společnosti ČEZ Distribuce.
+### 🌱 Přispěvatelé
 
-Integrace načítá HDO rozvrhy ČEZ Distribuce do Home Assistantu a nabízí senzory
-tarifů i Lovelace kartu.
+- [@jandado](https://github.com/jandado) – návrh omezení opakování OCR při HTTP 429
+   a respektování `retryAfter` v [PR #86](https://github.com/Cmajda/ha_cez_distribuce/pull/86).
 
-## Rychlý start
+## 🍺 Podpořit vývoj
+
+Pokud vám integrace pomáhá, můžete podpořit její další vývoj:
+
+[![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=FF813F&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/cmajda)
+
+## 🚀 Rychlý start
 
 1. V HACS otevřete **Integrations → Custom repositories** a přidejte
    `Cmajda/ha_cez_distribuce` jako integraci.
@@ -57,7 +93,7 @@ tarifů i Lovelace kartu.
 
 [Podrobný návod k instalaci a konfiguraci](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS)
 
-## Přidání karty
+## 🎴 Přidání karty
 
 1. Otevřete dashboard a zvolte **Upravit dashboard → Přidat kartu**.
 2. Vyhledejte **ČEZ HDO Card**, nastavte kartu a uložte ji.
@@ -69,7 +105,7 @@ režim. Rozvrh a ceny v jeho legendě lze zapnout podle potřeby.
 
 ![Nastavení karty ČEZ HDO](img/cs/add_card_2_cz.png)
 
-## Lovelace karta
+## 🏠 Lovelace karta
 
 Karta zobrazuje stav nízkého a vysokého tarifu, začátky a konce tarifů,
 zbývající čas, aktuální cenu a volitelný sedmidenní HDO rozvrh. Data lze obnovit
@@ -77,7 +113,7 @@ ručně přímo z karty.
 
 ![ČEZ HDO karta](img/cs/entity_card_cz.png) ![HDO rozvrh](img/cs/graph_cz.png)
 
-## Dokumentace a podpora
+## 📚 Dokumentace a podpora
 
 - [Česká Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki)
 - [Anglická Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki/English-Home)
