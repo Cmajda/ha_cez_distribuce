@@ -13,6 +13,26 @@
 The integration brings ČEZ Distribuce HDO schedules into Home Assistant with
 tariff sensors and a Lovelace card.
 
+## 📑 Contents
+
+- [⚙️ What the integration does](#what-the-integration-does-section)
+- [📚 Wiki](#-wiki)
+- [🐛 Report a bug or request an improvement](#-report-a-bug-or-request-an-improvement)
+  - [🐛 Report a bug](#-report-a-bug)
+  - [💡 Request an improvement](#-request-an-improvement)
+  - [❓ Ask a question](#-ask-a-question)
+- [🤝 Collaborators and Contributors](#-collaborators-and-contributors)
+  - [👥 Collaborators](#-collaborators)
+  - [🌱 Contributors](#-contributors)
+- [🍺 Support Development](#-support-development)
+- [🚀 Installation](#-installation)
+- [🎴 Add the card](#-add-the-card)
+- [🏠 Lovelace card](#-lovelace-card)
+- [📡 Created entities](#-created-entities)
+- [📚 Documentation and support](#-documentation-and-support)
+
+<a id="what-the-integration-does-section"></a>
+
 ## ⚙️ What the integration does
 
 For a configured metering point (EAN) and HDO signal, the integration fetches
@@ -36,6 +56,24 @@ troubleshooting, services, upgrades, and development.
 
 [Open the English Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki/English-Home) ·
 [Česká Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki)
+
+[Tariff-based automation examples](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#-tariff-based-automations)
+
+## 🐛 Report a bug or request an improvement
+
+### 🐛 Report a bug
+
+[Create a bug report](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=bug_report.yml) ·
+[Guide to debug logs and diagnostics](https://github.com/Cmajda/ha_cez_distribuce/wiki/Known-Issues-EN#how-to-report-an-issue)
+
+### 💡 Request an improvement
+
+[Create a feature request](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=feature_request.yml)
+
+### ❓ Ask a question
+
+[Create a question](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=question.yml) ·
+[GitHub Discussions](https://github.com/Cmajda/ha_cez_distribuce/discussions)
 
 ## 🤝 Collaborators and Contributors
 
@@ -94,12 +132,12 @@ If you find the integration useful, you can support its continued development:
 1. Open a dashboard and select **Edit dashboard → Add card**.
 2. Search for **ČEZ HDO Card**, configure it, and save.
 
-![Add ČEZ HDO card](img/en/add_card_1.png)
+[![Add ČEZ HDO card](img/en/add_card_1.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#step-2-add-card)
 
 The editor lets you choose entities, prices, displayed times, remaining time,
 and compact mode. Enable the schedule and its price legend as needed.
 
-![Configure ČEZ HDO card](img/en/add_card_2.png)
+[![Configure ČEZ HDO card](img/en/add_card_2.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#step-3-configure-card)
 
 ## 🏠 Lovelace card
 
@@ -107,12 +145,37 @@ The card can show low/high tariff status, start and end times, remaining time,
 the current price, and an optional seven-day HDO schedule. Data can also be
 refreshed manually from the card.
 
-![ČEZ HDO card](img/en/entity_card.png) ![HDO schedule](img/en/graph.png)
+[![ČEZ HDO card](img/en/entity_card.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#result) [![HDO schedule](img/en/graph.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#result)
+
+## 📡 Created entities
+
+Each integration instance creates entities for its EAN and HDO signal. `*` is
+the suffix selected during setup. Icons match the Material Design Icons used in
+the code; the data-validity icons change with the entity state.
+
+| Icon | Type | Entity | Description |
+| --- | --- | --- | --- |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/power.svg" width="18" height="18" alt="mdi:power"> | Binary sensor | [`binary_sensor.cez_hdo_lowtariffactive_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#lowtariffactive) | Low tariff is active |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/power.svg" width="18" height="18" alt="mdi:power"> | Binary sensor | [`binary_sensor.cez_hdo_hightariffactive_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#hightariffactive) | High tariff is active |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/check-circle.svg" width="18" height="18" alt="mdi:check-circle"> / <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/alert-circle.svg" width="18" height="18" alt="mdi:alert-circle"> | Binary sensor | [`binary_sensor.cez_hdo_data_valid_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#datavalid) | Data is valid |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock.svg" width="18" height="18" alt="mdi:home-clock"> | Sensor | [`sensor.cez_hdo_lowtariffstart_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#lowtariffstart) | NT start time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock-outline.svg" width="18" height="18" alt="mdi:home-clock-outline"> | Sensor | [`sensor.cez_hdo_lowtariffend_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#lowtariffend) | NT end time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/timer.svg" width="18" height="18" alt="mdi:timer"> | Sensor | [`sensor.cez_hdo_lowtariffduration_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#lowtariffduration) | NT remaining time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock.svg" width="18" height="18" alt="mdi:home-clock"> | Sensor | [`sensor.cez_hdo_hightariffstart_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#hightariffstart) | VT start time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock-outline.svg" width="18" height="18" alt="mdi:home-clock-outline"> | Sensor | [`sensor.cez_hdo_hightariffend_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#hightariffend) | VT end time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/timer.svg" width="18" height="18" alt="mdi:timer"> | Sensor | [`sensor.cez_hdo_hightariffduration_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#hightariffduration) | VT remaining time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/currency-usd.svg" width="18" height="18" alt="mdi:currency-usd"> | Sensor | [`sensor.cez_hdo_currentprice_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#currentprice) | Current price (CZK/kWh) |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/chart-timeline-variant.svg" width="18" height="18" alt="mdi:chart-timeline-variant"> | Sensor | [`sensor.cez_hdo_schedule_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#schedule) | 7-day HDO schedule |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock.svg" width="18" height="18" alt="mdi:home-clock"> | Sensor | [`sensor.cez_hdo_raw_data_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#rawdata) | Last update time and raw data |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-clock.svg" width="18" height="18" alt="mdi:calendar-clock"> | Sensor | [`sensor.cez_hdo_data_valid_until_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#datavaliduntil) | Data valid until |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-question.svg" width="18" height="18" alt="mdi:calendar-question"> | Sensor | [`sensor.cez_hdo_data_age_days_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#dataagedays) | Data age in days |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-check.svg" width="18" height="18" alt="mdi:calendar-check"> / <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-alert.svg" width="18" height="18" alt="mdi:calendar-alert"> / <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-remove.svg" width="18" height="18" alt="mdi:calendar-remove"> | Sensor | [`sensor.cez_hdo_days_until_expiry_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#daysuntilexpiry) | Days until expiry |
+
+For example, the suffix `home` creates the ID `sensor.cez_hdo_lowtariffstart_home`.
 
 ## 📚 Documentation and support
 
 - [English Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki/English-Home)
 - [Česká Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki)
 - [Releases and pre-releases](https://github.com/Cmajda/ha_cez_distribuce/releases)
-- [Report an issue](https://github.com/Cmajda/ha_cez_distribuce/issues)
 - [License](LICENSE)

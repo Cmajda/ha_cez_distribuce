@@ -3,131 +3,131 @@ description: Nahlásit chybu nebo neočekávané chování
 title: "[Bug]: "
 labels: ["bug"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Děkujeme za nahlášení chyby! Vyplňte prosím co nejvíce informací.
+    - type: markdown
+      attributes:
+          value: |
+              Děkujeme za nahlášení chyby! Vyplňte prosím co nejvíce informací.
 
-  - type: textarea
-    id: description
-    attributes:
-      label: Popis problému
-      description: Jasný a stručný popis chyby
-      placeholder: Co se stalo?
-    validations:
-      required: true
+    - type: textarea
+      id: description
+      attributes:
+          label: Popis problému
+          description: Jasný a stručný popis chyby
+          placeholder: Co se stalo?
+      validations:
+          required: true
 
-  - type: textarea
-    id: steps
-    attributes:
-      label: Kroky k reprodukci
-      description: Jak lze chybu zopakovat?
-      placeholder: |
-        1. Otevřete '...'
-        2. Klikněte na '...'
-        3. Zobrazí se chyba
-    validations:
-      required: true
+    - type: textarea
+      id: steps
+      attributes:
+          label: Kroky k reprodukci
+          description: Jak lze chybu zopakovat?
+          placeholder: |
+              1. Otevřete '...'
+              2. Klikněte na '...'
+              3. Zobrazí se chyba
+      validations:
+          required: true
 
-  - type: textarea
-    id: expected
-    attributes:
-      label: Očekávané chování
-      description: Co jste očekávali, že se stane?
-      placeholder: Mělo by se zobrazit...
-    validations:
-      required: true
+    - type: textarea
+      id: expected
+      attributes:
+          label: Očekávané chování
+          description: Co jste očekávali, že se stane?
+          placeholder: Mělo by se zobrazit...
+      validations:
+          required: true
 
-  - type: input
-    id: version
-    attributes:
-      label: Verze integrace
-      description: Jakou verzi ČEZ HDO používáte?
-      placeholder: "např. 2.2.0"
-    validations:
-      required: true
+    - type: input
+      id: version
+      attributes:
+          label: Verze integrace
+          description: Jakou verzi ČEZ HDO používáte?
+          placeholder: "např. 2.2.0"
+      validations:
+          required: true
 
-  - type: input
-    id: ha_version
-    attributes:
-      label: Verze Home Assistant
-      description: Jakou verzi Home Assistant používáte?
-      placeholder: "např. 2025.1.0"
-    validations:
-      required: true
+    - type: input
+      id: ha_version
+      attributes:
+          label: Verze Home Assistant
+          description: Jakou verzi Home Assistant používáte?
+          placeholder: "např. 2025.1.0"
+      validations:
+          required: true
 
-  - type: dropdown
-    id: installation
-    attributes:
-      label: Typ instalace Home Assistant
-      options:
-        - Home Assistant OS
-        - Home Assistant Container
-        - Home Assistant Supervised
-        - Home Assistant Core
-    validations:
-      required: true
+    - type: dropdown
+      id: installation
+      attributes:
+          label: Typ instalace Home Assistant
+          options:
+              - Home Assistant OS
+              - Home Assistant Container
+              - Home Assistant Supervised
+              - Home Assistant Core
+      validations:
+          required: true
 
-  - type: textarea
-    id: logs
-    attributes:
-      label: Debug logy
-      description: |
-        **Jak získat debug logy:**
-        1. Nastavení → Zařízení a služby → ČEZ HDO
-        2. Klikněte na ⋮ (tři tečky) → **Povolit logování ladících informací**
-        3. Proveďte kroky vedoucí k chybě
-        4. Klikněte na informační banner "Logování ladících informací povoleno" → **Zakázat**
-        5. Home Assistant automaticky vygeneruje a nabídne ke stažení soubor s logy
-        6. Přiložte stažený soubor k tomuto issue
+    - type: textarea
+      id: logs
+      attributes:
+          label: Debug logy
+          description: |
+              **Jak získat debug logy:**
+              1. Nastavení → Zařízení a služby → ČEZ HDO
+              2. Klikněte na ⋮ (tři tečky) → **Povolit logování ladících informací**
+              3. Proveďte kroky vedoucí k chybě
+              4. Klikněte na informační banner "Logování ladících informací povoleno" → **Zakázat**
+              5. Home Assistant automaticky vygeneruje a nabídne ke stažení soubor s logy
+              6. Přiložte stažený soubor k tomuto issue
 
-        📖 [Podrobný návod](https://github.com/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md#-debug-logování)
-      render: shell
-      placeholder: |
-        Přiložte stažený soubor s debug logy jako přílohu tohoto issue.
+              📖 [Podrobný návod](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS#-debug-logov%C3%A1n%C3%AD)
+          render: shell
+          placeholder: |
+              Přiložte stažený soubor s debug logy jako přílohu tohoto issue.
 
-  - type: textarea
-    id: diagnostics
-    attributes:
-      label: Diagnostická data
-      description: |
-        **Jak exportovat diagnostiku:**
-        1. Nastavení → Zařízení a služby → ČEZ HDO
-        2. Klikněte na zařízení "ČEZ HDO XXXXXX"
-        3. Klikněte na ⋮ (tři tečky) vpravo nahoře
-        4. Vyberte **Stáhnout diagnostiku**
-        5. Přiložte stažený JSON soubor k tomuto issue
+    - type: textarea
+      id: diagnostics
+      attributes:
+          label: Diagnostická data
+          description: |
+              **Jak exportovat diagnostiku:**
+              1. Nastavení → Zařízení a služby → ČEZ HDO
+              2. Klikněte na zařízení "ČEZ HDO XXXXXX"
+              3. Klikněte na ⋮ (tři tečky) vpravo nahoře
+              4. Vyberte **Stáhnout diagnostiku**
+              5. Přiložte stažený JSON soubor k tomuto issue
 
-        **Citlivá data jsou automaticky maskována** (EAN, partner, vkont atd.)
+              **Citlivá data jsou automaticky maskována** (EAN, partner, vkont atd.)
 
-        📖 [Podrobný návod](https://github.com/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md#-diagnostika)
-      render: json
-      placeholder: |
-        Přiložte stažený JSON soubor s diagnostikou jako přílohu tohoto issue.
+              📖 [Podrobný návod](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS#diagnostika)
+          render: json
+          placeholder: |
+              Přiložte stažený JSON soubor s diagnostikou jako přílohu tohoto issue.
 
-  - type: textarea
-    id: diagnostics
-    attributes:
-      label: Diagnostická data
-      description: |
-        **Jak exportovat diagnostiku:**
-        1. Settings → Devices & Services → ČEZ HDO
-        2. Klikněte na zařízení "ČEZ HDO XXXXXX"
-        3. Klikněte na ⋮ (tři tečky) vpravo nahoře
-        4. Vyberte "Download diagnostics"
-        5. Přiložte obsah JSON souboru sem
+    - type: textarea
+      id: diagnostics
+      attributes:
+          label: Diagnostická data
+          description: |
+              **Jak exportovat diagnostiku:**
+              1. Settings → Devices & Services → ČEZ HDO
+              2. Klikněte na zařízení "ČEZ HDO XXXXXX"
+              3. Klikněte na ⋮ (tři tečky) vpravo nahoře
+              4. Vyberte "Download diagnostics"
+              5. Přiložte obsah JSON souboru sem
 
-        **Citlivá data jsou automaticky maskována** (EAN, partner, vkont atd.)
-      render: json
-      placeholder: |
-        {
-          "entry": { ... },
-          "coordinator_data": { ... },
-          "cache_content": { ... }
-        }
+              **Citlivá data jsou automaticky maskována** (EAN, partner, vkont atd.)
+          render: json
+          placeholder: |
+              {
+                "entry": { ... },
+                "coordinator_data": { ... },
+                "cache_content": { ... }
+              }
 
-  - type: textarea
-    id: additional
-    attributes:
-      label: Další informace
-      description: Screenshoty, konfigurace, nebo cokoliv dalšího
+    - type: textarea
+      id: additional
+      attributes:
+          label: Další informace
+          description: Screenshoty, konfigurace, nebo cokoliv dalšího
