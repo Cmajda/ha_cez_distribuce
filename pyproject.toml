@@ -31,7 +31,7 @@ line-length = 120
 target-version = "py314"
 
 # Treat this as the project root for module resolution.
-src = ["custom_components/ha_cez_distribuce"]
+src = ["custom_components"]
 
 # Recommended: avoid linting common generated/virtualenv directories.
 exclude = [".git", ".venv", "__pycache__", "build", "dist"]

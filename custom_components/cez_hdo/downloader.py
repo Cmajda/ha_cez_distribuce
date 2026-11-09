@@ -5,11 +5,14 @@ from __future__ import annotations
 import base64
 import json
 import logging
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, time, timedelta
 from typing import Any, NamedTuple
+
+from .const import mask_ean
 
 import requests
 
@@ -28,7 +31,8 @@ CEZ_TIMEZONE = ZoneInfo("Europe/Prague")
 
 # OCR.space API configuration
 OCR_SPACE_API_URL = "https://api.ocr.space/parse/image"
-OCR_SPACE_API_KEY = "helloworld"  # Free demo key
+# Shared OCR.space demo key. The provider rate limits it aggressively.
+OCR_SPACE_API_KEY = "helloworld"
 
 # HTTP headers for CEZ API requests
 CEZ_HEADERS = {
@@ -115,26 +119,94 @@ def validate_ean_with_captcha(ean: str, captcha_code: str, cookies: dict[str, st
 
     json_data = response.json()
 
-    # Check for CAPTCHA error in flashMessages
+    # Keep only provider error keys for logs; API bodies can contain identifying data.
     flash_messages = json_data.get("flashMessages", [])
-    for msg in flash_messages:
-        if msg.get("key") == "CPT-002":
-            raise ValueError("invalid_captcha")
+    error_codes: list[str] = []
+    for message in flash_messages:
+        if not isinstance(message, dict):
+            continue
+        error_code = message.get("key")
+        if isinstance(error_code, str):
+            error_codes.append(error_code)
+    if "CPT-002" in error_codes:
+        _LOGGER.warning(
+            "CEZ API rejected CAPTCHA for EAN %s (code=CPT-002)",
+            mask_ean(ean),
+        )
+        raise ValueError("invalid_captcha")
 
-    # Status 400 usually means invalid CAPTCHA even without CPT-002
+    # Status 400 also indicates a rejected CAPTCHA when the API omits CPT-002.
     if response.status_code == 400:
-        _LOGGER.debug("API 400 response: %s", json_data)
+        _LOGGER.warning(
+            "CEZ API rejected CAPTCHA for EAN %s (HTTP 400, codes=%s)",
+            mask_ean(ean),
+            ",".join(error_codes) if error_codes else "none",
+        )
         raise ValueError("invalid_captcha")
 
     if response.status_code != 200:
-        _LOGGER.warning("API unexpected status %d: %s", response.status_code, json_data)
+        _LOGGER.warning("CEZ API returned HTTP %d for EAN %s", response.status_code, mask_ean(ean))
         raise ValueError(f"API returned status {response.status_code}")
 
     return json_data
 
 
 class OcrRateLimitError(Exception):
-    """Raised when OCR.space rate limit (403) is reached."""
+    """Raised when OCR.space rejects a request due to rate limiting."""
+
+    def __init__(
+        self,
+        message: str,
+        http_status: int | None = None,
+        error_code: str | None = None,
+        retry_after: int | None = None,
+    ) -> None:
+        """Initialize the error.
+
+        Args:
+            message: Human-readable error description.
+            http_status: HTTP status returned by OCR.space.
+            error_code: Provider error code (for example E581).
+            retry_after: Seconds to wait before the next request, if provided.
+        """
+        super().__init__(message)
+        self.http_status = http_status
+        self.error_code = error_code
+        self.retry_after = retry_after
+
+
+def _parse_ocr_rate_limit_error(err: urllib.error.HTTPError) -> tuple[str | None, int | None]:
+    """Read the provider error code and retryAfter from an OCR.space error body.
+
+    The rate-limit response carries its delay in the JSON body, not in a
+    Retry-After header. Reading the body here is safe because the response is
+    discarded on this path.
+    """
+    try:
+        payload = json.loads(err.read().decode("utf-8", "replace"))
+    except (OSError, ValueError):
+        payload = None
+
+    error_code: str | None = None
+    retry_after: int | None = None
+
+    if isinstance(payload, dict):
+        message = payload.get("error")
+        if isinstance(message, str):
+            match = re.match(r"\s*(E\d+)", message)
+            if match:
+                error_code = match.group(1)
+
+        raw_retry_after = payload.get("retryAfter")
+        if isinstance(raw_retry_after, (int, float)) and not isinstance(raw_retry_after, bool):
+            retry_after = max(0, int(raw_retry_after))
+
+    if retry_after is None:
+        header_value = err.headers.get("Retry-After") if err.headers else None
+        if header_value and header_value.isdigit():
+            retry_after = int(header_value)
+
+    return error_code, retry_after
 
 
 def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
@@ -148,7 +220,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
         Recognized 4-letter uppercase code or None if failed.
 
     Raises:
-        OcrRateLimitError: When OCR.space returns 403 (free tier exhausted).
+        OcrRateLimitError: When OCR.space rejects the request due to rate limiting.
     """
     payload = {
         "base64Image": f"data:image/png;base64,{captcha_base64}",
@@ -176,7 +248,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
 
         try:
             # OCR.space free tier can be slow, use 90s timeout
-            # Note: urlopen raises HTTPError for non-2xx, so 403 is handled in except block
+            # Note: urlopen raises HTTPError for non-2xx, so rate limits are handled in the except block
             with urllib.request.urlopen(req, timeout=90) as response:
                 result = json.loads(response.read().decode("utf-8"))
 
@@ -207,9 +279,19 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
             return None
 
         except urllib.error.HTTPError as err:
-            if err.code == 403:
-                _LOGGER.warning("OCR rate limit (403) - free tier exhausted")
-                raise OcrRateLimitError("OCR.space free tier limit reached") from err
+            if err.code in (403, 429):
+                error_code, retry_after = _parse_ocr_rate_limit_error(err)
+                message = f"OCR.space rate limit reached (HTTP {err.code})"
+                if error_code:
+                    message += f", {error_code}"
+                if retry_after is not None:
+                    message += f", retry after {retry_after} s"
+                raise OcrRateLimitError(
+                    message,
+                    http_status=err.code,
+                    error_code=error_code,
+                    retry_after=retry_after,
+                ) from err
             _LOGGER.warning("OCR HTTP error %d: %s", err.code, err.reason)
             ocr_attempt += 1
 
@@ -240,6 +322,10 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
 
     Returns:
         API response dict if successful, None if failed.
+
+    Raises:
+        OcrRateLimitError: When OCR.space rejects the request due to rate limiting.
+            No further CAPTCHA attempts are made in that case.
     """
     from .const import mask_ean
 
@@ -308,8 +394,9 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
             return None
 
         except OcrRateLimitError:
-            _LOGGER.error("Auto-CAPTCHA failed: OCR.space rate limit (403) - free tier exhausted")
-            return None
+            # Retrying a rate-limited request only extends the rate limit.
+            # The caller handles the provider's retryAfter once for the whole refresh.
+            raise
 
         except ValueError as err:
             if str(err) == "invalid_captcha":

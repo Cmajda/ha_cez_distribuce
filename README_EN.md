@@ -1,180 +1,181 @@
-# ⚡️ ČEZ HDO (Home Assistant) ⚡️
+# ČEZ HDO for Home Assistant
 
-[![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
-[![Release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?label=stable&logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases/latest)
-[![Pre-release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?include_prereleases&label=pre-release&logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases)
+[Čeština](README.md) · [Full documentation on the Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki/English-Home)
+
+[![HACS](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
+[![Stable release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?label=stable)](https://github.com/Cmajda/ha_cez_distribuce/releases/latest)
+[![Pre-release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?include_prereleases&label=pre-release)](https://github.com/Cmajda/ha_cez_distribuce/releases)
 [![Validate](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml/badge.svg?branch=main)](https://github.com/Cmajda/ha_cez_distribuce/actions/workflows/hacs.yaml)
 [![License](https://img.shields.io/badge/License-Apache%202.0%20%2B%20Commons%20Clause-blue)](./LICENSE)
 
-[![Downloads](https://img.shields.io/github/downloads/Cmajda/ha_cez_distribuce/total)](https://github.com/Cmajda/ha_cez_distribuce/releases)
-![Unique Views](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/views_unique.svg)
-![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
-[![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
+> **Unofficial community integration.** This is not a ČEZ Distribuce product.
 
-> ℹ️ **AUTOMATIC DATA REFRESH:** From version 3.2.X, the integration automatically refreshes HDO data.
-> During configuration, you will enter a code from the CAPTCHA image. Data is then refreshed automatically.
-> New file locations (managed automatically by Home Assistant) in `.storage` survive updates via HACS.
----
-> 🚨 **BREAKING CHANGE v3.2.X:** Cache location changed from `custom_components/cez_hdo/data/` to `.storage`.
-> After updating from version 3.2.0 or older, you need to: **Reconfigure the integration**
-> and re-enter prices for NT and VT
+The integration brings ČEZ Distribuce HDO schedules into Home Assistant with
+tariff sensors and a Lovelace card.
 
-🇨🇿 [Česká verze](README.md)
+## 📑 Contents
 
-> 🔴 **WARNING FOR v2.x USERS:**
-> Before upgrading to v3.0.0, read the [**Upgrade Guide**](docs/en/upgrade-guide.md)!
-> Version 3.0.0 brings major changes and requires manual steps.
+- [⚙️ What the integration does](#what-the-integration-does-section)
+- [📚 Wiki](#-wiki)
+- [🐛 Report a bug or request an improvement](#-report-a-bug-or-request-an-improvement)
+  - [🐛 Report a bug](#-report-a-bug)
+  - [💡 Request an improvement](#-request-an-improvement)
+  - [❓ Ask a question](#-ask-a-question)
+- [🤝 Collaborators and Contributors](#-collaborators-and-contributors)
+  - [👥 Collaborators](#-collaborators)
+  - [🌱 Contributors](#-contributors)
+- [🍺 Support Development](#-support-development)
+- [🚀 Installation](#-installation)
+- [🎴 Add the card](#-add-the-card)
+- [🏠 Lovelace card](#-lovelace-card)
+- [📡 Created entities](#-created-entities)
+- [📚 Documentation and support](#-documentation-and-support)
 
-Home Assistant integration that fetches HDO (low/high tariff) data
-from ČEZ Distribuce API and creates entities + Lovelace card.
+<a id="what-the-integration-does-section"></a>
 
-> ⚠️ **Unofficial integration** – This project is not an official product
-> of ČEZ Distribuce a.s. It is a community project created
-> for Home Assistant users. The author has no affiliation with ČEZ.
+## ⚙️ What the integration does
 
-If you want to support me, you can do so here:
+For a configured metering point (EAN) and HDO signal, the integration fetches
+the switching schedule for low and high tariffs. It provides:
 
-[![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=FF813F&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/cmajda)
+- sensors for the active tariff, tariff start/end times, and time until change;
+- the current price from a fixed value or a selected price sensor;
+- a seven-day HDO schedule and data-validity sensors;
+- entities that can be used in automations, for example to switch appliances
+   based on the active tariff;
+- automatic and manual HDO data refresh.
 
-## 🤝 Contributors
+Add the current-price sensor to the Energy Dashboard for cost tracking; an
+electricity consumption sensor is also required.
 
-Thanks to all co-authors who actively contribute to the development of this integration:
+## 📚 Wiki
+
+The Wiki is the main source of detailed documentation. It covers installation
+and setup, entities, automation examples, prices and the Energy Dashboard,
+troubleshooting, services, upgrades, and development.
+
+[Open the English Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki/English-Home) ·
+[Česká Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki)
+
+[Tariff-based automation examples](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#-tariff-based-automations)
+
+## 🐛 Report a bug or request an improvement
+
+### 🐛 Report a bug
+
+[Create a bug report](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=bug_report.yml) ·
+[Guide to debug logs and diagnostics](https://github.com/Cmajda/ha_cez_distribuce/wiki/Known-Issues-EN#how-to-report-an-issue)
+
+### 💡 Request an improvement
+
+[Create a feature request](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=feature_request.yml)
+
+### ❓ Ask a question
+
+[Create a question](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=question.yml) ·
+[GitHub Discussions](https://github.com/Cmajda/ha_cez_distribuce/discussions)
+
+## 🤝 Collaborators and Contributors
+
+### 👥 Collaborators
+
+Thanks to everyone who contributes to the integration:
 
 <!-- readme: collaborators -start -->
 <table>
-    <tbody>
-        <tr>
-            <td align="center">
-                <a href="https://github.com/pokornyIt">
-                    <img src="https://github.com/pokornyIt.png" width="96;" alt="pokornyIt"/>
-                    <br />
-                    <sub><b>pokornyIt</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/VojtechJurcik">
-                    <img src="https://github.com/VojtechJurcik.png" width="96;" alt="VojtechJurcik"/>
-                    <br />
-                    <sub><b>VojtechJurcik</b></sub>
-                </a>
-            </td>
-        </tr>
-    </tbody>
+   <tbody>
+      <tr>
+         <td align="center">
+            <a href="https://github.com/pokornyIt">
+               <img src="https://github.com/pokornyIt.png" width="96;" alt="pokornyIt"/>
+               <br />
+               <sub><b>pokornyIt</b></sub>
+            </a>
+         </td>
+         <td align="center">
+            <a href="https://github.com/VojtechJurcik">
+               <img src="https://github.com/VojtechJurcik.png" width="96;" alt="VojtechJurcik"/>
+               <br />
+               <sub><b>VojtechJurcik</b></sub>
+            </a>
+         </td>
+      </tr>
+   </tbody>
 </table>
 <!-- readme: collaborators -end -->
 
-## 🚀 Quick Start
+### 🌱 Contributors
 
-### 1. Install via HACS
+- [@jandado](https://github.com/jandado) – proposed limiting OCR retries on HTTP 429
+   and honoring `retryAfter` in [PR #86](https://github.com/Cmajda/ha_cez_distribuce/pull/86).
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
+## 🍺 Support Development
 
-### 2. Restart Home Assistant
+If you find the integration useful, you can support its continued development:
 
-### 3. Add Integration
+[![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=FF813F&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/cmajda)
 
-1. **Settings → Devices & Services → + Add Integration**
-2. Search for **ČEZ HDO**
-3. Enter your **EAN** (18-digit number from your electricity bill)
-4. Enter the **CAPTCHA code** from the image
-5. Select **signal** (if multiple options available)
-6. Enter **prices** for NT and VT (CZK/kWh)
+## 🚀 Installation
 
-### 4. Add Card
+1. In HACS, open **Integrations → Custom repositories** and add
+   `Cmajda/ha_cez_distribuce` as an integration.
+2. Install **ČEZ HDO** and restart Home Assistant.
+3. Go to **Settings → Devices & Services → Add Integration**, search for
+   **ČEZ HDO**, and enter your EAN, CAPTCHA, signal, and tariff prices.
 
-In Lovelace, add the **ČEZ HDO Card** (or `custom:cez-hdo-card`).
+[![Open the ČEZ HDO repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-> **Note:** After installation, you may need to press `Ctrl+F5`
-> to clear the browser cache.
+[Detailed installation and setup guide](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN)
 
-## 🎴 Lovelace Card
+## 🎴 Add the card
 
-The card has a visual editor with display options:
+1. Open a dashboard and select **Edit dashboard → Add card**.
+2. Search for **ČEZ HDO Card**, configure it, and save.
 
-- Tariff states (NT/VT active)
-- Tariff start/end times
-- Remaining time until change
-- Current price
-- 7-day HDO schedule
+[![Add ČEZ HDO card](img/en/add_card_1.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#step-2-add-card)
 
-![ČEZ HDO card](img/en/entity_card.png) ![HDO schedule](img/en/graph.png)
+The editor lets you choose entities, prices, displayed times, remaining time,
+and compact mode. Enable the schedule and its price legend as needed.
 
-### Price Settings
+[![Configure ČEZ HDO card](img/en/add_card_2.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#step-3-configure-card)
 
-Prices are configured in the **integration**
-(Settings → Devices & Services → ČEZ HDO → Configure), not in the card.
+## 🏠 Lovelace card
 
-> **To change prices:** Go through all configuration steps – price settings are at the end.
+The card can show low/high tariff status, start and end times, remaining time,
+the current price, and an optional seven-day HDO schedule. Data can also be
+refreshed manually from the card.
 
-### Energy Dashboard
+[![ČEZ HDO card](img/en/entity_card.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#result) [![HDO schedule](img/en/graph.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#result)
 
-The sensor `sensor.cez_hdo_currentprice_*` can be used as a price source in the Energy Dashboard.
+## 📡 Created entities
 
-## 📦 Created Entities
+Each integration instance creates entities for its EAN and HDO signal. `*` is
+the suffix selected during setup. Icons match the Material Design Icons used in
+the code; the data-validity icons change with the entity state.
 
-| Type   | Entity                          | Description                |
-| ------ | ------------------------------- | -------------------------- |
-| Binary | `cez_hdo_lowtariffactive_*`     | NT (low tariff) is active  |
-| Binary | `cez_hdo_hightariffactive_*`    | VT (high tariff) is active |
-| Binary | `cez_hdo_data_valid_*`          | Data is valid              |
-| Sensor | `cez_hdo_lowtariffstart_*`      | NT start time              |
-| Sensor | `cez_hdo_lowtariffend_*`        | NT end time                |
-| Sensor | `cez_hdo_lowtariffremaining_*`  | NT remaining time          |
-| Sensor | `cez_hdo_hightariffstart_*`     | VT start time              |
-| Sensor | `cez_hdo_hightariffend_*`       | VT end time                |
-| Sensor | `cez_hdo_hightariffremaining_*` | VT remaining time          |
-| Sensor | `cez_hdo_currentprice_*`        | Current price (CZK/kWh)    |
-| Sensor | `cez_hdo_schedule_*`            | 7-day HDO schedule         |
-| Sensor | `cez_hdo_data_valid_until_*`    | Data expiration date       |
-| Sensor | `cez_hdo_data_age_days_*`       | Data age (days)            |
-| Sensor | `cez_hdo_days_until_expiry_*`   | Days until expiry          |
+| Icon | Type | Entity | Description |
+| --- | --- | --- | --- |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/power.svg" width="18" height="18" alt="mdi:power"> | Binary sensor | [`binary_sensor.cez_hdo_lowtariffactive_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#lowtariffactive) | Low tariff is active |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/power.svg" width="18" height="18" alt="mdi:power"> | Binary sensor | [`binary_sensor.cez_hdo_hightariffactive_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#hightariffactive) | High tariff is active |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/check-circle.svg" width="18" height="18" alt="mdi:check-circle"> / <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/alert-circle.svg" width="18" height="18" alt="mdi:alert-circle"> | Binary sensor | [`binary_sensor.cez_hdo_data_valid_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#datavalid) | Data is valid |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock.svg" width="18" height="18" alt="mdi:home-clock"> | Sensor | [`sensor.cez_hdo_lowtariffstart_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#lowtariffstart) | NT start time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock-outline.svg" width="18" height="18" alt="mdi:home-clock-outline"> | Sensor | [`sensor.cez_hdo_lowtariffend_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#lowtariffend) | NT end time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/timer.svg" width="18" height="18" alt="mdi:timer"> | Sensor | [`sensor.cez_hdo_lowtariffduration_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#lowtariffduration) | NT remaining time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock.svg" width="18" height="18" alt="mdi:home-clock"> | Sensor | [`sensor.cez_hdo_hightariffstart_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#hightariffstart) | VT start time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock-outline.svg" width="18" height="18" alt="mdi:home-clock-outline"> | Sensor | [`sensor.cez_hdo_hightariffend_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#hightariffend) | VT end time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/timer.svg" width="18" height="18" alt="mdi:timer"> | Sensor | [`sensor.cez_hdo_hightariffduration_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#hightariffduration) | VT remaining time |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/currency-usd.svg" width="18" height="18" alt="mdi:currency-usd"> | Sensor | [`sensor.cez_hdo_currentprice_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#currentprice) | Current price (CZK/kWh) |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/chart-timeline-variant.svg" width="18" height="18" alt="mdi:chart-timeline-variant"> | Sensor | [`sensor.cez_hdo_schedule_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#schedule) | 7-day HDO schedule |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock.svg" width="18" height="18" alt="mdi:home-clock"> | Sensor | [`sensor.cez_hdo_raw_data_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#rawdata) | Last update time and raw data |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-clock.svg" width="18" height="18" alt="mdi:calendar-clock"> | Sensor | [`sensor.cez_hdo_data_valid_until_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#datavaliduntil) | Data valid until |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-question.svg" width="18" height="18" alt="mdi:calendar-question"> | Sensor | [`sensor.cez_hdo_data_age_days_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#dataagedays) | Data age in days |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-check.svg" width="18" height="18" alt="mdi:calendar-check"> / <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-alert.svg" width="18" height="18" alt="mdi:calendar-alert"> / <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-remove.svg" width="18" height="18" alt="mdi:calendar-remove"> | Sensor | [`sensor.cez_hdo_days_until_expiry_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-EN#daysuntilexpiry) | Days until expiry |
 
-> **Note:** `*` represents your chosen suffix (e.g., `home` or `7606_a1b4dp04`).
+For example, the suffix `home` creates the ID `sensor.cez_hdo_lowtariffstart_home`.
 
-## ⚠️ Upgrade from v2.x
+## 📚 Documentation and support
 
-Version 3.0.0 brings **major changes**:
-
-1. **Delete YAML configuration** from `configuration.yaml`
-2. **Update** via HACS
-3. **Restart** Home Assistant
-4. **Delete old entities** (Settings → Entities)
-5. **Add integration** via GUI
-6. **Delete folder** `www/cez_hdo/`
-
-Detailed guide: [docs/en/upgrade-guide.md](docs/en/upgrade-guide.md)
-
-## 🔧 Troubleshooting
-
-1. **Ctrl+F5** – clear browser cache
-2. **Reload integration** – Settings → Devices & Services → ČEZ HDO → Reload
-3. **Check logs** – Settings → System → Logs
-
-### Diagnostics
-
-To report a bug, export diagnostics:
-
-1. Settings → Devices & Services → ČEZ HDO
-2. Click on device → ⋮ → **Download diagnostics**
-3. Attach to [GitHub Issue](https://github.com/Cmajda/ha_cez_distribuce/issues)
-
-## 📚 Documentation
-
-- [User Guide (CS)](docs/cs/user-guide.md) – complete documentation (Czech)
-- [User Guide (EN)](docs/en/user-guide.md) – complete documentation (English)
-- [Upgrade Guide (CS)](docs/cs/upgrade-guide.md) – migration from v2.x to v3.0.0 (Czech)
-- [Upgrade Guide (EN)](docs/en/upgrade-guide.md) – migration from v2.x to v3.0.0
-- [Service Guide (CS)](docs/cs/service-guide.md) – available services (Czech)
-- [Service Guide (EN)](docs/en/service-guide.md) – available services
-- [Developer Guide (CS)](docs/cs/developer-guide.md) – for developers (Czech)
-- [Developer Guide (EN)](docs/en/developer-guide.md) – for developers
-- [Known Issues (CS)](docs/cs/known-issues.md) – list of known issues (Czech)
-- [Known Issues (EN)](docs/en/known-issues.md) – list of known issues
-
-## 📝 Release Notes
-
-See [RELEASE_NOTES.md](RELEASE_NOTES.md)
-
-## 📄 License
-
-Apache 2.0 + Commons Clause (non-commercial use) | Support: [GitHub Issues](https://github.com/Cmajda/ha_cez_distribuce/issues)
+- [English Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki/English-Home)
+- [Česká Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki)
+- [Releases and pre-releases](https://github.com/Cmajda/ha_cez_distribuce/releases)
+- [License](LICENSE)

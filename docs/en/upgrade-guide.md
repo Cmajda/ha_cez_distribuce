@@ -4,24 +4,24 @@ This document describes the procedure for upgrading the integration to a new ver
 
 ---
 
-## ⚠️ Upgrade to v3.0.0 (from v2.x) – IMPORTANT CHANGES
+## ⚠️ Upgrade to v3.x (from v2.x) – IMPORTANT CHANGES
 
-Version 3.0.0 brings **major changes** to the integration architecture.
+Version 3.x brings **major changes** to the integration architecture.
 Please read the entire procedure carefully.
 
-### What's New in v3.0.0
+### Changes from v2.x
 
-| Feature | v2.x | v3.0.0 |
+| Feature | v2.x | v3.x |
 |---------|------|--------|
 | **Configuration** | YAML (`configuration.yaml`) | GUI (Settings → Integrations) |
 | **Entity Management** | Individual entities | Device Registry (grouped under device) |
-| **Data Storage** | `www/cez_hdo/` | `custom_components/cez_hdo/data/` |
+| **Data Storage** | `www/cez_hdo/` | Home Assistant `.storage` |
 | **Price Settings** | Card editor | Options Flow integration |
-| **Cache** | Shared file | Per-EAN files |
+| **Cache** | Shared file | Per-EAN files in `.storage` |
 | **Diagnostics** | Manual logs | UI export |
 | **Multiple EAN** | Complicated | Fully supported |
 | **Multiple signals per EAN** | Not supported | Fully supported |
-| **Entity names** | Automatic | User configurable |
+| **Entity IDs** | Automatic | User-configurable suffix |
 
 ### Upgrade Procedure
 
@@ -46,7 +46,7 @@ binary_sensor:
 
 #### Step 3: Update the Integration
 
-- **HACS:** Open HACS → ČEZ HDO → Update to v3.0.0
+- **HACS:** Open HACS → ČEZ HDO → Update to the latest 3.x version
 - **Manually:** Download and overwrite `custom_components/cez_hdo/`
 
 #### Step 4: Restart Home Assistant
@@ -65,23 +65,20 @@ After the update, perform a **full restart** of Home Assistant (not just reload)
 1. **Settings → Devices & Services**
 2. Click **+ Add Integration**
 3. Search for **ČEZ HDO**
-4. **Step 1 - EAN:** Enter your EAN number
-5. **Step 2 - Signal:** Select signal from the list
-6. **Step 3 - Suffix:** Enter suffix for entities
-   (default: `{EAN4}_{signal}`)
-7. **Step 4 - Prices:** Enter prices for NT and VT in CZK/kWh
-8. Click **Finish**
+4. Complete the current configuration steps: EAN, CAPTCHA, signal, suffix, and prices.
+5. In price settings, keep fixed prices or optionally select price entities.
+6. Finish setup using the [user guide](user-guide.md).
 
-#### Step 7: Delete Old Folder
+#### Step 7: Remove the Legacy Folder if Present
 
-After successfully adding the integration, delete the old folder:
+If it remains from v2.x, delete the old `www/cez_hdo/` folder; the current version does not use it:
 
 ```bash
 # Via SSH or File Editor addon
 rm -rf /config/www/cez_hdo
 ```
 
-Data is now stored in `custom_components/cez_hdo/data/`.
+The current version stores its cache in Home Assistant-managed `.storage`.
 
 #### Step 8: Update Card
 
@@ -95,7 +92,7 @@ Data is now stored in `custom_components/cez_hdo/data/`.
 After upgrade, you should see:
 
 1. **Settings → Devices & Services → ČEZ HDO**
-   - Device "ČEZ HDO XXXXXX" (last 6 digits of EAN)
+   - Device "ČEZ HDO ({signal})"
    - All entities grouped under this device
 
 2. **Entities with new names:**
@@ -114,7 +111,7 @@ After upgrade, you should see:
 
 1. **Settings → Devices & Services → ČEZ HDO**
 2. Click on **Configure**
-3. Go through 4 steps: EAN → Signal → Suffix → Prices
+3. Go through the EAN → CAPTCHA → Signal → Suffix → Prices steps
 4. Save changes
 
 ### Multiple EAN (Multiple Delivery Points)
@@ -144,7 +141,7 @@ If you have one EAN with multiple signals (e.g., for different circuits):
 ### Card Not Displaying
 
 1. Press `Ctrl+F5`
-2. Check that URL `/cez_hdo/cez-hdo-card.js` returns 200
+2. Check that URL `/cez_hdo_card/cez-hdo-card.js?v=3.3.1` returns 200
 
 ### Entities Not Available
 
@@ -157,7 +154,7 @@ If you have one EAN with multiple signals (e.g., for different circuits):
 If nothing helps:
 
 1. Settings → Devices & Services → ČEZ HDO → Delete
-2. Delete folder `custom_components/cez_hdo/data/`
+2. Cache, price, and refresh-state files are in Home Assistant-managed `.storage`; they normally do not need to be removed manually.
 3. Restart Home Assistant
 4. Add the integration again
 

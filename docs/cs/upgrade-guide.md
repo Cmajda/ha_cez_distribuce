@@ -4,24 +4,24 @@ Tento dokument popisuje postup pro upgrade integrace na novou verzi.
 
 ---
 
-## ⚠️ Upgrade na v3.0.0 (z v2.x) – DŮLEŽITÉ ZMĚNY
+## ⚠️ Upgrade na v3.x (z v2.x) – DŮLEŽITÉ ZMĚNY
 
-Verze 3.0.0 přináší **zásadní změny** v architektuře integrace.
+Verze 3.x přináší **zásadní změny** v architektuře integrace.
 Přečtěte si pozorně celý postup.
 
-### Co je nového v v3.0.0
+### Změny oproti v2.x
 
-| Funkce | v2.x | v3.0.0 |
+| Funkce | v2.x | v3.x |
 |--------|------|--------|
 | **Konfigurace** | YAML (`configuration.yaml`) | GUI (Settings → Integrations) |
 | **Správa entit** | Jednotlivé entity | Device Registry (seskupeno pod zařízení) |
-| **Úložiště dat** | `www/cez_hdo/` | `custom_components/cez_hdo/data/` |
+| **Úložiště dat** | `www/cez_hdo/` | Home Assistant `.storage` |
 | **Nastavení cen** | Editor karty | Options Flow integrace |
-| **Cache** | Sdílený soubor | Per-EAN soubory |
+| **Cache** | Sdílený soubor | Soubory pro každé EAN v `.storage` |
 | **Diagnostika** | Manuální logy | Export přes UI |
 | **Více EAN** | Komplikované | Plně podporováno |
 | **Více signálů/EAN** | Nepodporováno | Plně podporováno |
-| **Názvy entit** | Automatické | Uživatelsky konfigurovatelné |
+| **Entity ID** | Automatické | Uživatelsky konfigurovatelná přípona |
 
 ### Postup upgradu
 
@@ -46,7 +46,7 @@ binary_sensor:
 
 #### Krok 3: Aktualizovat integraci
 
-- **HACS:** Otevřete HACS → ČEZ HDO → Aktualizovat na v3.0.0
+- **HACS:** Otevřete HACS → ČEZ HDO → Aktualizovat na nejnovější verzi 3.x
 - **Manuálně:** Stáhněte a přepište `custom_components/cez_hdo/`
 
 #### Krok 4: Restartovat Home Assistant
@@ -65,23 +65,20 @@ Po aktualizaci proveďte **plný restart** Home Assistantu (ne jen reload).
 1. **Settings → Devices & Services**
 2. Klikněte **+ Add Integration**
 3. Vyhledejte **ČEZ HDO**
-4. **Krok 1 - EAN:** Zadejte vaše EAN číslo
-5. **Krok 2 - Signál:** Vyberte signál ze seznamu
-6. **Krok 3 - Přípona:** Zadejte příponu pro entity
-   (výchozí: `{EAN4}_{signál}`)
-7. **Krok 4 - Ceny:** Zadejte ceny za NT a VT v Kč/kWh
-8. Klikněte **Finish**
+4. Projděte aktuální kroky konfigurace: EAN, CAPTCHA, signál, přípona a ceny.
+5. V nastavení cen můžete ponechat pevné ceny nebo volitelně vybrat cenové entity.
+6. Dokončete konfiguraci podle [uživatelského návodu](user-guide.md).
 
-#### Krok 7: Smazat starou složku
+#### Krok 7: Odstranit případnou starou složku
 
-Po úspěšném přidání integrace smažte starou složku:
+Pokud zůstala po verzi 2.x, smažte starou složku `www/cez_hdo/`; aktuální verze ji nepoužívá:
 
 ```bash
 # Přes SSH nebo File Editor addon
 rm -rf /config/www/cez_hdo
 ```
 
-Data se nyní ukládají do `custom_components/cez_hdo/data/`.
+Aktuální verze ukládá cache do Home Assistantem spravované složky `.storage`.
 
 #### Krok 8: Aktualizovat kartu
 
@@ -95,12 +92,12 @@ Data se nyní ukládají do `custom_components/cez_hdo/data/`.
 Po upgradu byste měli vidět:
 
 1. **Settings → Devices & Services → ČEZ HDO**
-   - Zařízení "ČEZ HDO XXXXXX" (posledních 6 číslic EAN)
+   - Zařízení „ČEZ HDO ({signál})“
    - Všechny entity seskupené pod tímto zařízením
 
 2. **Entity s novými názvy:**
-   - `sensor.cez_hdo_nizky_tarif_zacatek_{pripona}`
-   - `binary_sensor.cez_hdo_nizky_tarif_aktivni_{pripona}`
+   - `sensor.cez_hdo_lowtariffstart_{pripona}`
+   - `binary_sensor.cez_hdo_lowtariffactive_{pripona}`
    - atd. (kde `{pripona}` je vaše zvolená přípona)
 
 3. **Diagnostika dostupná:**
@@ -114,7 +111,7 @@ Po upgradu byste měli vidět:
 
 1. **Settings → Devices & Services → ČEZ HDO**
 2. Klikněte na **Configure**
-3. Projděte 4 kroky: EAN → Signál → Přípona → Ceny
+3. Projděte kroky EAN → CAPTCHA → Signál → Přípona → Ceny
 4. Uložte změny
 
 ### Více EAN (více odběrných míst)
@@ -144,7 +141,7 @@ Pokud máte jedno EAN s více signály (např. pro různé okruhy):
 ### Karta se nezobrazuje
 
 1. Stiskněte `Ctrl+F5`
-2. Zkontrolujte, že URL `/cez_hdo/cez-hdo-card.js` vrací 200
+2. Zkontrolujte, že URL `/cez_hdo_card/cez-hdo-card.js?v=3.3.1` vrací 200
 
 ### Entity nejsou k dispozici
 
@@ -157,7 +154,7 @@ Pokud máte jedno EAN s více signály (např. pro různé okruhy):
 Pokud nic nepomáhá:
 
 1. Settings → Devices & Services → ČEZ HDO → Delete
-2. Smažte složku `custom_components/cez_hdo/data/`
+2. Soubory cache, cen a stavu obnovování jsou v Home Assistantem spravované složce `.storage`; běžně je není nutné mazat ručně.
 3. Restart Home Assistant
 4. Přidejte integraci znovu
 

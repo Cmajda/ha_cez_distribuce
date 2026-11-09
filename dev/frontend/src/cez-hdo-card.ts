@@ -10,9 +10,9 @@
 import { css, CSSResultGroup, html, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import {
-    getLanguageFromHass,
-    getTranslations,
-    TranslationStrings,
+  getLanguageFromHass,
+  getTranslations,
+  TranslationStrings,
 } from "./localization";
 
 // Type definitions
@@ -23,6 +23,7 @@ interface HassEntity {
 
 interface HomeAssistant {
   states: Record<string, HassEntity>;
+  callWS: <T = unknown>(message: Record<string, unknown>) => Promise<T>;
   callService: (
     domain: string,
     service: string,
@@ -58,6 +59,7 @@ interface CardConfig {
   show_price?: boolean;
   show_schedule?: boolean;
   show_schedule_prices?: boolean;
+  show_manual_refresh?: boolean;
   compact_mode?: boolean;
 }
 
@@ -102,6 +104,17 @@ const DEFAULT_ENTITIES: Required<EntityConfig> = {
 export class CezHdoCard extends LitElement {
   @property({ attribute: false }) hass!: HomeAssistant;
   @state() private config!: CardConfig;
+  @state() private _manualRefreshOpen = false;
+  @state() private _manualRefreshBusy = false;
+  @state() private _manualRefreshMessage = "";
+  @state() private _captchaId = "";
+  @state() private _captchaImage = "";
+  @state() private _captchaCode = "";
+  @state() private _availableSignals: string[] = [];
+  @state() private _selectedSignal = "";
+  @state() private _manualRefreshStep: "captcha" | "signal" = "captcha";
+  @state() private _manualRefreshSucceeded = false;
+  private _manualRefreshEntityId = "";
 
   static getConfigElement(): HTMLElement {
     return document.createElement("cez-hdo-card-editor");
@@ -237,6 +250,7 @@ export class CezHdoCard extends LitElement {
     const showTimes = this.config.show_times !== false;
     const showDuration = this.config.show_duration !== false;
     const compactMode = this.config.compact_mode === true;
+    const showManualRefresh = this.config.show_manual_refresh !== false;
     const showPrice = this.config.show_price !== false;
 
     // Get prices from sensor attributes (set via Options Flow)
@@ -248,6 +262,11 @@ export class CezHdoCard extends LitElement {
     const showTariffPrices = this.config.show_tariff_prices === true;
     const showTitle = this.config.show_title !== false;
     const showTariffStatus = this.config.show_tariff_status !== false;
+    const scheduleState = resolvedEntities.schedule
+      ? this.hass.states[resolvedEntities.schedule]
+      : undefined;
+    const lastUpdated = scheduleState?.attributes.last_update;
+    const lastUpdatedText = this._formatLastUpdated(lastUpdated, lang);
 
     return html`
       <ha-card class="${compactMode ? "compact" : ""}">
@@ -342,8 +361,285 @@ export class CezHdoCard extends LitElement {
             `
           : ""}
         ${this._renderSchedule(t)}
+        ${showManualRefresh
+          ? html`<div class="manual-refresh">
+              <button
+                class="manual-refresh-button"
+                ?disabled=${!resolvedEntities.schedule ||
+                this._manualRefreshBusy}
+                @click=${() =>
+                  this._openManualRefresh(resolvedEntities.schedule)}
+              >
+                <ha-icon icon="mdi:refresh"></ha-icon>
+                ${t.manualRefresh}
+              </button>
+              <span class="manual-refresh-last-updated">
+                ${t.lastUpdated}: ${lastUpdatedText ?? t.lastUpdatedUnknown}
+              </span>
+              ${!resolvedEntities.schedule
+                ? html`<div class="manual-refresh-message">
+                    ${t.manualRefreshUnavailable}
+                  </div>`
+                : ""}
+            </div>`
+          : ""}
+        ${this._manualRefreshOpen
+          ? html`
+              <ha-dialog
+                class="manual-refresh-dialog"
+                .open=${this._manualRefreshOpen}
+                .headerTitle=${t.manualRefresh}
+                .width=${"medium"}
+                @closed=${this._closeManualRefresh}
+              >
+                <form
+                  id="manual-refresh-form"
+                  class="manual-refresh-form"
+                  @submit=${this._submitManualRefresh}
+                >
+                  ${this._manualRefreshStep === "captcha" && this._captchaImage
+                    ? html`<img
+                        class="captcha-image"
+                        src="data:image/png;base64,${this._captchaImage}"
+                        alt="CAPTCHA"
+                      />`
+                    : ""}
+                  ${this._manualRefreshStep === "captcha" &&
+                  this._manualRefreshBusy &&
+                  !this._captchaImage
+                    ? html`<div class="manual-refresh-message">
+                        ${t.loadingCaptcha}
+                      </div>`
+                    : ""}
+                  ${this._manualRefreshMessage
+                    ? html`<div class="manual-refresh-message">
+                        ${this._manualRefreshMessage}
+                      </div>`
+                    : ""}
+                  ${!this._manualRefreshMessage &&
+                  this._manualRefreshStep === "captcha"
+                    ? html`
+                        <label class="captcha-label">
+                          ${t.captchaCode}
+                          <input
+                            class="captcha-input"
+                            type="text"
+                            autocomplete="off"
+                            maxlength="12"
+                            .value=${this._captchaCode}
+                            ?disabled=${this._manualRefreshBusy ||
+                            !this._captchaImage ||
+                            this._manualRefreshStep !== "captcha"}
+                            @input=${(event: Event) => {
+                              this._captchaCode = (
+                                event.target as HTMLInputElement
+                              ).value;
+                            }}
+                          />
+                        </label>
+                      `
+                    : ""}
+                  ${!this._manualRefreshMessage &&
+                  this._manualRefreshStep === "signal"
+                    ? html`
+                        <label class="captcha-label">
+                          ${t.signalLabel}
+                          <ha-selector
+                            .hass=${this.hass}
+                            .selector=${{
+                              select: {
+                                options: this._availableSignals.map(
+                                  (signal) => ({
+                                    label: signal,
+                                    value: signal,
+                                  }),
+                                ),
+                              },
+                            }}
+                            .value=${this._selectedSignal}
+                            ?disabled=${this._manualRefreshBusy}
+                            @value-changed=${(event: CustomEvent) => {
+                              this._selectedSignal = event.detail.value;
+                            }}
+                          ></ha-selector>
+                        </label>
+                      `
+                    : ""}
+                </form>
+                <div slot="footer" class="manual-refresh-actions">
+                  ${this._manualRefreshMessage && !this._manualRefreshSucceeded
+                    ? html`
+                        <button
+                          type="button"
+                          class="manual-refresh-cancel"
+                          @click=${() =>
+                            this._openManualRefresh(
+                              this._manualRefreshEntityId,
+                            )}
+                        >
+                          ${t.newCaptcha}
+                        </button>
+                      `
+                    : ""}
+                  ${!this._manualRefreshMessage
+                    ? html`
+                        <button
+                          type="submit"
+                          form="manual-refresh-form"
+                          class="manual-refresh-button"
+                          ?disabled=${this._manualRefreshBusy ||
+                          (this._manualRefreshStep === "captcha"
+                            ? !this._captchaCode.trim()
+                            : !this._selectedSignal)}
+                        >
+                          ${this._manualRefreshBusy
+                            ? t.loadingCaptcha
+                            : this._manualRefreshStep === "captcha"
+                              ? t.loadSignals
+                              : t.refreshNow}
+                        </button>
+                      `
+                    : ""}
+                  <button
+                    type="button"
+                    class="manual-refresh-cancel"
+                    ?disabled=${this._manualRefreshBusy}
+                    @click=${this._closeManualRefresh}
+                  >
+                    ${t.cancel}
+                  </button>
+                </div>
+              </ha-dialog>
+            `
+          : ""}
       </ha-card>
     `;
+  }
+
+  private async _openManualRefresh(
+    entityId: string | undefined,
+  ): Promise<void> {
+    if (!entityId) return;
+    this._manualRefreshEntityId = entityId;
+    this._manualRefreshOpen = true;
+    this._manualRefreshBusy = true;
+    this._manualRefreshMessage = "";
+    this._captchaCode = "";
+    this._captchaImage = "";
+    this._availableSignals = [];
+    this._selectedSignal = "";
+    this._manualRefreshStep = "captcha";
+    this._manualRefreshSucceeded = false;
+    try {
+      const result = await this.hass.callWS<{
+        captcha_id: string;
+        image_base64: string;
+      }>({
+        type: "cez_hdo/manual_refresh/captcha",
+        entity_id: entityId,
+      });
+      this._captchaId = result.captcha_id;
+      this._captchaImage = result.image_base64;
+    } catch (error) {
+      this._manualRefreshMessage = this._getErrorMessage(
+        error,
+        "CAPTCHA se nepodařilo načíst",
+      );
+    } finally {
+      this._manualRefreshBusy = false;
+    }
+  }
+
+  private _formatLastUpdated(
+    value: unknown,
+    language: string,
+  ): string | undefined {
+    if (typeof value !== "string") return undefined;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return undefined;
+    const locale =
+      language === "cs" ? "cs-CZ" : language === "sk" ? "sk-SK" : "en-US";
+    return date.toLocaleString(locale, {
+      dateStyle: "short",
+      timeStyle: "short",
+    });
+  }
+
+  private async _submitManualRefresh(event: Event): Promise<void> {
+    event.preventDefault();
+    if (!this._captchaId || !this._manualRefreshEntityId) return;
+    if (this._manualRefreshStep === "captcha" && !this._captchaCode.trim())
+      return;
+    if (this._manualRefreshStep === "signal" && !this._selectedSignal) return;
+
+    this._manualRefreshBusy = true;
+    this._manualRefreshMessage = "";
+    try {
+      if (this._manualRefreshStep === "captcha") {
+        const result = await this.hass.callWS<{
+          available_signals: string[];
+          configured_signal: string | null;
+        }>({
+          type: "cez_hdo/manual_refresh/submit",
+          entity_id: this._manualRefreshEntityId,
+          captcha_id: this._captchaId,
+          captcha_code: this._captchaCode.trim(),
+        });
+        this._availableSignals = result.available_signals;
+        this._selectedSignal =
+          result.configured_signal ?? result.available_signals[0] ?? "";
+        this._captchaImage = "";
+        this._captchaCode = "";
+        this._manualRefreshStep = "signal";
+      } else {
+        await this.hass.callWS({
+          type: "cez_hdo/manual_refresh/select_signal",
+          entity_id: this._manualRefreshEntityId,
+          captcha_id: this._captchaId,
+          signal: this._selectedSignal,
+        });
+        this._captchaId = "";
+        this._captchaImage = "";
+        this._captchaCode = "";
+        this._availableSignals = [];
+        this._selectedSignal = "";
+        this._manualRefreshMessage = getTranslations(
+          getLanguageFromHass(this.hass),
+        ).refreshSuccess;
+        this._manualRefreshSucceeded = true;
+      }
+    } catch (error) {
+      this._manualRefreshMessage = this._getErrorMessage(
+        error,
+        "Obnovu se nepodařilo dokončit",
+      );
+      this._manualRefreshSucceeded = false;
+      if (this._manualRefreshStep === "captcha") {
+        this._captchaId = "";
+        this._captchaImage = "";
+        this._captchaCode = "";
+      }
+    } finally {
+      this._manualRefreshBusy = false;
+    }
+  }
+
+  private _getErrorMessage(error: unknown, fallback: string): string {
+    if (error instanceof Error && error.message) return error.message;
+    if (typeof error === "object" && error !== null && "message" in error) {
+      const message = (error as { message?: unknown }).message;
+      if (typeof message === "string" && message.trim()) return message;
+    }
+    return fallback;
+  }
+
+  private _closeManualRefresh(): void {
+    this._manualRefreshOpen = false;
+    this._manualRefreshMessage = "";
+    this._captchaId = "";
+    this._captchaImage = "";
+    this._captchaCode = "";
+    this._manualRefreshSucceeded = false;
   }
 
   private _renderSchedule(t: TranslationStrings) {
@@ -373,11 +669,14 @@ export class CezHdoCard extends LitElement {
       const month = String(start.getMonth() + 1).padStart(2, "0");
       const day = String(start.getDate()).padStart(2, "0");
       const dayKey = `${year}-${month}-${day}`;
-      const dayLabel = start.toLocaleDateString(dateLocale, {
-        weekday: "short",
-        day: "2-digit",
-        month: "2-digit",
-      });
+      const dayLabel =
+        lang === "en"
+          ? `${start.toLocaleDateString(dateLocale, { weekday: "short" })} ${start.toLocaleDateString(dateLocale, { month: "2-digit", day: "2-digit" })}`
+          : start.toLocaleDateString(dateLocale, {
+              weekday: "short",
+              day: "2-digit",
+              month: "2-digit",
+            });
 
       if (!days[dayKey]) {
         days[dayKey] = { label: dayLabel, items: [] };
@@ -693,6 +992,7 @@ export class CezHdoCard extends LitElement {
         font-size: 11px;
         color: var(--primary-text-color);
         flex-shrink: 0;
+        white-space: nowrap;
       }
 
       .schedule-bar {
@@ -741,6 +1041,117 @@ export class CezHdoCard extends LitElement {
         text-align: center;
         color: var(--secondary-text-color);
         font-size: 12px;
+      }
+
+      .manual-refresh {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .manual-refresh-button,
+      .manual-refresh-cancel {
+        min-height: 40px;
+        padding: 0 14px;
+        border: 0;
+        border-radius: 6px;
+        cursor: pointer;
+        font: inherit;
+      }
+
+      .manual-refresh-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 32px;
+        padding: 0 10px;
+        background: var(--primary-color);
+        color: var(--text-primary-color, white);
+        font-size: 13px;
+      }
+
+      .manual-refresh-button ha-icon {
+        --mdc-icon-size: 16px;
+      }
+
+      .manual-refresh-last-updated {
+        margin-left: auto;
+        color: var(--secondary-text-color);
+        font-size: 12px;
+      }
+
+      .manual-refresh-button:disabled,
+      .manual-refresh-cancel:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .manual-refresh-cancel {
+        background: var(--secondary-background-color);
+        color: var(--primary-text-color);
+      }
+
+      .manual-refresh-form {
+        display: grid;
+        gap: 12px;
+        max-width: 420px;
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid var(--divider-color);
+        border-radius: 6px;
+      }
+
+      .manual-refresh-dialog {
+        width: min(420px, calc(100vw - 48px));
+        max-height: calc(100vh - 48px);
+        overflow: auto;
+        padding: 0;
+        border: 0;
+        border-radius: 6px;
+        background: var(--card-background-color);
+        color: var(--primary-text-color);
+        box-shadow: var(--ha-card-box-shadow, 0 8px 24px rgba(0, 0, 0, 0.24));
+      }
+
+      .manual-refresh-dialog::backdrop {
+        background: rgba(0, 0, 0, 0.42);
+      }
+
+      .captcha-image {
+        width: min(100%, 300px);
+        height: auto;
+        image-rendering: auto;
+      }
+
+      .captcha-label {
+        display: grid;
+        gap: 6px;
+        color: var(--primary-text-color);
+        font-size: 14px;
+      }
+
+      .captcha-input {
+        min-height: 40px;
+        padding: 0 10px;
+        border: 1px solid var(--divider-color);
+        border-radius: 4px;
+        background: var(--card-background-color);
+        color: var(--primary-text-color);
+        font: inherit;
+      }
+
+      .manual-refresh-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .manual-refresh-message {
+        color: var(--secondary-text-color);
+        font-size: 13px;
       }
 
       .compact .schedule-container {

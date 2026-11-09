@@ -1,4 +1,6 @@
-# ⚡️ČEZ HDO (Home Assistant) ⚡️
+# ⚡️ČEZ HDO pro Home Assistant ⚡️
+
+[English](README_EN.md) · [Kompletní dokumentace ve Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki)
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://github.com/hacs/integration)
 [![Release](https://img.shields.io/github/v/release/Cmajda/ha_cez_distribuce?label=stable&logo=github)](https://github.com/Cmajda/ha_cez_distribuce/releases/latest)
@@ -11,170 +13,173 @@
 ![Unique Clones](https://raw.githubusercontent.com/Cmajda/ha_cez_distribuce/traffic/clones_unique.svg)
 [![GitHub Last Commit](https://img.shields.io/github/last-commit/Cmajda/ha_cez_distribuce)](https://github.com/Cmajda/ha_cez_distribuce/commits/main)
 
-> ℹ️ **AUTOMATICKÉ OBNOVOVÁNÍ DAT:** Od verze 3.2.X integrace automaticky obnovuje HDO data.
-> Při konfiguraci zadáte kód z CAPTCHA obrázku. Data se pak obnovují automaticky.
-> Nová umístění souborů (spravuje Home Assistant automaticky) v `.storage` a přežijí aktualizace přes HACS.
----
-> 🚨 **BREAKING CHANGE v3.2.X:** Změna umístění cache z `custom_components/cez_hdo/data/` na `.storage`.
-> Po aktualizaci z verze 3.2.0 nebo starší je nutné: **Znovu nakonfigurovat integraci**
-> znovu zadat ceny pro NT a VT
+> **Neoficiální komunitní integrace.** Nejde o produkt společnosti ČEZ Distribuce.
 
-🇬🇧 [English version](README_EN.md)
+Integrace načítá HDO rozvrhy ČEZ Distribuce do Home Assistantu a nabízí senzory
+tarifů i Lovelace kartu.
 
-> 🔴 **UPOZORNĚNÍ PRO UŽIVATELE VERZE 2.x:**
-> Před upgradem na v3.0.0 si přečtěte [**Upgrade Guide**](docs/cs/upgrade-guide.md)!
-> Verze 3.0.0 přináší zásadní změny a vyžaduje manuální kroky.
+## 📑 Obsah
 
-Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif)
-z API ČEZ Distribuce a vytváří entity + Lovelace kartu.
+- [⚙️ Co integrace dělá](#co-integrace-dela)
+- [📚 Wiki](#-wiki)
+- [🐛 Nahlášení chyby nebo vylepšení](#-nahlášení-chyby-nebo-vylepšení)
+  - [🐛 Nahlásit chybu](#-nahlásit-chybu)
+  - [💡 Navrhnout vylepšení](#-navrhnout-vylepšení)
+  - [❓ Položit dotaz](#-položit-dotaz)
+- [🤝 Spolupracovníci a přispěvatelé](#-spolupracovníci-a-přispěvatelé)
+  - [👥 Spolupracovníci](#-spolupracovníci)
+  - [🌱 Přispěvatelé](#-přispěvatelé)
+- [🍺 Podpořit vývoj](#-podpořit-vývoj)
+- [🚀 Rychlý start](#-rychlý-start)
+- [🎴 Přidání karty](#-přidání-karty)
+- [🏠 Lovelace karta](#-lovelace-karta)
+- [📡 Vytvářené entity](#-vytvářené-entity)
+- [📚 Dokumentace a podpora](#-dokumentace-a-podpora)
 
-> ⚠️ **Neoficiální integrace** – Tento projekt není oficiálním produktem
-> společnosti ČEZ Distribuce a.s. Jedná se o komunitní projekt vytvořený
-> pro potřeby uživatelů Home Assistantu. Autor nemá žádnou vazbu na ČEZ.
+<a id="co-integrace-dela"></a>
 
-Pokud mě chcete podpořit můžete zde
+## ⚙️ Co integrace dělá
 
-[![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=FF813F&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/cmajda)
+Pro zadané odběrné místo (EAN) a HDO signál načítá časy spínání nízkého a
+vysokého tarifu. V Home Assistantu poskytuje:
 
-## 🤝 Spolupracovníci
+- senzory aktuálního tarifu, začátků a konců tarifů a času do další změny;
+- aktuální cenu z pevného nastavení nebo vybraného cenového senzoru;
+- sedmidenní HDO rozvrh a senzory platnosti načtených dat;
+- entity použitelné v automatizacích, například pro spínání spotřebičů podle tarifu;
+- automatické a ruční obnovení HDO dat.
 
-Děkuji všem spoluautorům, kteří se aktivně podílejí na vývoji kódu této integrace:
+Senzor aktuální ceny lze přidat do Energy Dashboard pro přehled nákladů;
+pro výpočet je potřeba také senzor spotřeby elektřiny.
+
+## 📚 Wiki
+
+Wiki je hlavním zdrojem podrobné dokumentace. Obsahuje návody k instalaci a
+nastavení, přehled entit, příklady automatizací, práci s cenami a Energy
+Dashboardem, řešení problémů i vývojářské informace.
+
+[Otevřít českou Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki) ·
+[English Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki/English-Home)
+
+[Příklady automatizací podle tarifu](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS#-automatizace-podle-tarifu)
+
+## 🐛 Nahlášení chyby nebo vylepšení
+
+### 🐛 Nahlásit chybu
+
+[Vytvořit bug report](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=bug_report.yml) ·
+[Postup včetně debug logů a diagnostiky](https://github.com/Cmajda/ha_cez_distribuce/wiki/Known-Issues-CS#jak-nahlásit-problém)
+
+### 💡 Navrhnout vylepšení
+
+[Vytvořit návrh vylepšení](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=feature_request.yml)
+
+### ❓ Položit dotaz
+
+[Vytvořit dotaz](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=question.yml) ·
+[GitHub Discussions](https://github.com/Cmajda/ha_cez_distribuce/discussions)
+
+## 🤝 Spolupracovníci a přispěvatelé
+
+### 👥 Spolupracovníci
+
+Děkuji všem, kteří se dlouhodobě podílejí na vývoji integrace:
 
 <!-- readme: collaborators -start -->
 <table>
-    <tbody>
-        <tr>
-            <td align="center">
-                <a href="https://github.com/pokornyIt">
-                    <img src="https://github.com/pokornyIt.png" width="96;" alt="pokornyIt"/>
-                    <br />
-                    <sub><b>pokornyIt</b></sub>
-                </a>
-            </td>
-            <td align="center">
-                <a href="https://github.com/VojtechJurcik">
-                    <img src="https://github.com/VojtechJurcik.png" width="96;" alt="VojtechJurcik"/>
-                    <br />
-                    <sub><b>VojtechJurcik</b></sub>
-                </a>
-            </td>
-        </tr>
-    </tbody>
+   <tbody>
+      <tr>
+         <td align="center">
+            <a href="https://github.com/pokornyIt">
+               <img src="https://github.com/pokornyIt.png" width="96;" alt="pokornyIt"/>
+               <br />
+               <sub><b>pokornyIt</b></sub>
+            </a>
+         </td>
+         <td align="center">
+            <a href="https://github.com/VojtechJurcik">
+               <img src="https://github.com/VojtechJurcik.png" width="96;" alt="VojtechJurcik"/>
+               <br />
+               <sub><b>VojtechJurcik</b></sub>
+            </a>
+         </td>
+      </tr>
+   </tbody>
 </table>
 <!-- readme: collaborators -end -->
 
+### 🌱 Přispěvatelé
+
+- [@jandado](https://github.com/jandado) – návrh omezení opakování OCR při HTTP 429
+   a respektování `retryAfter` v [PR #86](https://github.com/Cmajda/ha_cez_distribuce/pull/86).
+
+## 🍺 Podpořit vývoj
+
+Pokud vám integrace pomáhá, můžete podpořit její další vývoj:
+
+[![Buy me a beer](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20beer&emoji=%F0%9F%8D%BA&slug=cmajda&button_colour=FF813F&font_colour=ffffff&font_family=Cookie&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/cmajda)
+
 ## 🚀 Rychlý start
 
-### 1. Instalace přes HACS
+1. V HACS otevřete **Integrations → Custom repositories** a přidejte
+   `Cmajda/ha_cez_distribuce` jako integraci.
+2. Nainstalujte **ČEZ HDO** a restartujte Home Assistant.
+3. V **Nastavení → Zařízení a služby → Přidat integraci** vyhledejte
+   **ČEZ HDO** a projděte nastavením EANu, CAPTCHA, signálu a cen.
 
-[![Open your Home Assistant instance and open a repository inside the Home Assistant Community Store.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
+[![Otevřít repozitář ČEZ HDO v HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?category=Integration&owner=Cmajda&repository=ha_cez_distribuce)
 
-### 2. Restart Home Assistant
+[Podrobný návod k instalaci a konfiguraci](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS)
 
-### 3. Přidání integrace
+## 🎴 Přidání karty
 
-1. **Nastavení → Zařízení a služby → + Přidat integraci**
-2. Vyhledejte **ČEZ HDO**
-3. Zadejte **EAN** (18 číslic z faktury)
-4. Zadejte **kód CAPTCHA** z obrázku
-5. Vyberte **signál** (pokud je více možností)
-6. Zadejte **ceny** NT a VT (Kč/kWh)
+1. Otevřete dashboard a zvolte **Upravit dashboard → Přidat kartu**.
+2. Vyhledejte **ČEZ HDO Card**, nastavte kartu a uložte ji.
 
-### 4. Přidání karty
+[![Přidání karty ČEZ HDO](img/cs/add_card_1_cz.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS#krok-2-p%C5%99id%C3%A1n%C3%AD-karty)
 
-V Lovelace přidejte kartu **ČEZ HDO Card** (nebo `custom:cez-hdo-card`).
+Editor umožňuje zvolit zobrazené entity, ceny, časy, zbývající čas i kompaktní
+režim. Rozvrh a ceny v jeho legendě lze zapnout podle potřeby.
 
-> **Poznámka:** Po instalaci může být potřeba stisknout `Ctrl+F5`
-> pro vyčištění cache.
+[![Nastavení karty ČEZ HDO](img/cs/add_card_2_cz.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS#krok-3-nastaven%C3%AD-karty)
 
-## 🎴 Lovelace karta
+## 🏠 Lovelace karta
 
-Karta má vizuální editor s možnostmi zobrazení:
+Karta zobrazuje stav nízkého a vysokého tarifu, začátky a konce tarifů,
+zbývající čas, aktuální cenu a volitelný sedmidenní HDO rozvrh. Data lze obnovit
+ručně přímo z karty.
 
-- Stavy tarifů (NT/VT aktivní)
-- Časy začátku/konce tarifů
-- Zbývající čas do změny
-- Aktuální cena
-- 7denní HDO rozvrh
+[![ČEZ HDO karta](img/cs/entity_card_cz.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS#v%C3%BDsledek) [![HDO rozvrh](img/cs/graph_cz.png)](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS#v%C3%BDsledek)
 
-![ČEZ HDO karta](img/cs/entity_card_cz.png) ![HDO rozvrh](img/cs/graph_cz.png)
+## 📡 Vytvářené entity
 
-### Nastavení cen
+Každá instance vytváří entity pro své EAN a HDO signál. `*` označuje příponu
+zvolenou při konfiguraci. Ikony odpovídají Material Design Icons použitým v kódu;
+u platnosti dat se mění podle stavu.
 
-Ceny se nastavují v **integraci**
-(Nastavení → Zařízení a služby → ČEZ HDO → Konfigurovat), ne v kartě.
+| Ikona | Typ | Entita | Popis |
+| --- | --- | --- | --- |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/power.svg" width="18" height="18" alt="mdi:power"> | Binary sensor | [`binary_sensor.cez_hdo_lowtariffactive_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#lowtariffactive) | Nízký tarif je aktivní |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/power.svg" width="18" height="18" alt="mdi:power"> | Binary sensor | [`binary_sensor.cez_hdo_hightariffactive_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#hightariffactive) | Vysoký tarif je aktivní |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/check-circle.svg" width="18" height="18" alt="mdi:check-circle"> / <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/alert-circle.svg" width="18" height="18" alt="mdi:alert-circle"> | Binary sensor | [`binary_sensor.cez_hdo_data_valid_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#datavalid) | Data jsou platná |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock.svg" width="18" height="18" alt="mdi:home-clock"> | Sensor | [`sensor.cez_hdo_lowtariffstart_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#lowtariffstart) | Začátek NT |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock-outline.svg" width="18" height="18" alt="mdi:home-clock-outline"> | Sensor | [`sensor.cez_hdo_lowtariffend_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#lowtariffend) | Konec NT |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/timer.svg" width="18" height="18" alt="mdi:timer"> | Sensor | [`sensor.cez_hdo_lowtariffduration_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#lowtariffduration) | Zbývající čas NT |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock.svg" width="18" height="18" alt="mdi:home-clock"> | Sensor | [`sensor.cez_hdo_hightariffstart_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#hightariffstart) | Začátek VT |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock-outline.svg" width="18" height="18" alt="mdi:home-clock-outline"> | Sensor | [`sensor.cez_hdo_hightariffend_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#hightariffend) | Konec VT |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/timer.svg" width="18" height="18" alt="mdi:timer"> | Sensor | [`sensor.cez_hdo_hightariffduration_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#hightariffduration) | Zbývající čas VT |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/currency-usd.svg" width="18" height="18" alt="mdi:currency-usd"> | Sensor | [`sensor.cez_hdo_currentprice_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#currentprice) | Aktuální cena (Kč/kWh) |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/chart-timeline-variant.svg" width="18" height="18" alt="mdi:chart-timeline-variant"> | Sensor | [`sensor.cez_hdo_schedule_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#schedule) | 7denní HDO rozvrh |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/home-clock.svg" width="18" height="18" alt="mdi:home-clock"> | Sensor | [`sensor.cez_hdo_raw_data_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#rawdata) | Čas poslední aktualizace a surová data |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-clock.svg" width="18" height="18" alt="mdi:calendar-clock"> | Sensor | [`sensor.cez_hdo_data_valid_until_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#datavaliduntil) | Platnost dat do |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-question.svg" width="18" height="18" alt="mdi:calendar-question"> | Sensor | [`sensor.cez_hdo_data_age_days_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#dataagedays) | Stáří dat ve dnech |
+| <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-check.svg" width="18" height="18" alt="mdi:calendar-check"> / <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-alert.svg" width="18" height="18" alt="mdi:calendar-alert"> / <img src="https://cdn.jsdelivr.net/npm/@mdi/svg@7.4.47/svg/calendar-remove.svg" width="18" height="18" alt="mdi:calendar-remove"> | Sensor | [`sensor.cez_hdo_days_until_expiry_*`](https://github.com/Cmajda/ha_cez_distribuce/wiki/Entities-CS#daysuntilexpiry) | Dní do vypršení platnosti |
 
-> **Pro změnu ceny:** Projděte všechny kroky konfigurace – nastavení ceny je až na konci.
+Například přípona `doma` vytvoří ID `sensor.cez_hdo_lowtariffstart_doma`.
 
-### Energy Dashboard
+## 📚 Dokumentace a podpora
 
-Senzor `sensor.cez_hdo_currentprice_*` lze použít jako zdroj ceny v Energy Dashboard.
-
-## 📦 Vytvářené entity
-
-| Typ    | Entita                          | Popis                  |
-| ------ | ------------------------------- | ---------------------- |
-| Binary | `cez_hdo_lowtariffactive_*`     | NT je aktivní          |
-| Binary | `cez_hdo_hightariffactive_*`    | VT je aktivní          |
-| Binary | `cez_hdo_data_valid_*`          | Data jsou platná       |
-| Sensor | `cez_hdo_lowtariffstart_*`      | Čas začátku NT         |
-| Sensor | `cez_hdo_lowtariffend_*`        | Čas konce NT           |
-| Sensor | `cez_hdo_lowtariffremaining_*`  | Zbývající čas NT       |
-| Sensor | `cez_hdo_hightariffstart_*`     | Čas začátku VT         |
-| Sensor | `cez_hdo_hightariffend_*`       | Čas konce VT           |
-| Sensor | `cez_hdo_hightariffremaining_*` | Zbývající čas VT       |
-| Sensor | `cez_hdo_currentprice_*`        | Aktuální cena (Kč/kWh) |
-| Sensor | `cez_hdo_schedule_*`            | 7denní HDO rozvrh      |
-| Sensor | `cez_hdo_data_valid_until_*`    | Datum vypršení dat     |
-| Sensor | `cez_hdo_data_age_days_*`       | Stáří dat (dny)        |
-| Sensor | `cez_hdo_days_until_expiry_*`   | Dní do vypršení        |
-
-> **Poznámka:** `*` označuje vaši zvolenou příponu (např. `doma` nebo `7606_a1b4dp04`).
-
-## ⚠️ Upgrade z v2.x
-
-Verze 3.0.0 přináší **zásadní změny**:
-
-1. **Smazat YAML konfiguraci** z `configuration.yaml`
-2. **Aktualizovat** přes HACS
-3. **Restart** Home Assistant
-4. **Smazat staré entity** (Nastavení → Entity → smazat vše obsahující `cez_hdo`)
-5. **Přidat integraci** přes GUI
-6. **Smazat složku** `www/cez_hdo/`
-
-Detailní postup: [docs/cs/upgrade-guide.md](docs/cs/upgrade-guide.md)
-
-## 🔧 Řešení problémů
-
-1. **Ctrl+F5** – vyčistit cache prohlížeče
-2. **Reload integrace** – Nastavení → Zařízení a služby → ČEZ HDO → Znovu načíst
-3. **Zkontrolovat logy** – Nastavení → Systém → Protokoly
-
-### Diagnostika
-
-Pro nahlášení chyby exportujte diagnostiku:
-
-1. Nastavení → Zařízení a služby → ČEZ HDO
-2. Klikněte na zařízení → ⋮ → **Stáhnout diagnostiku**
-3. Přiložte k [GitHub Issue](https://github.com/Cmajda/ha_cez_distribuce/issues)
-
-## 📚 Dokumentace
-
-- [Uživatelský návod (CZ)](docs/cs/user-guide.md) – kompletní dokumentace
-- [User Guide (EN)](docs/en/user-guide.md) – complete documentation (English)
-- [Upgrade Guide (CZ)](docs/cs/upgrade-guide.md) – přechod z v2.x na v3.0.0
-- [Upgrade Guide (EN)](docs/en/upgrade-guide.md) – migration from v2.x to v3.0.0
-- [Service Guide (CZ)](docs/cs/service-guide.md) – dostupné služby
-- [Service Guide (EN)](docs/en/service-guide.md) – available services
-- [Developer Guide (CZ)](docs/cs/developer-guide.md) – pro vývojáře
-- [Developer Guide (EN)](docs/en/developer-guide.md) – for developers
-- [Známé problémy (CZ)](docs/cs/known-issues.md) – seznam známých problémů
-- [Known Issues (EN)](docs/en/known-issues.md) – list of known issues
-
-## 📝 Release Notes
-
-Viz [RELEASE_NOTES.md](RELEASE_NOTES.md)
-
-## 📄 Licence
-
-Apache 2.0 + Commons Clause (nekomerční použití) | Podpora: [GitHub Issues](https://github.com/Cmajda/ha_cez_distribuce/issues)
+- [Česká Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki)
+- [Anglická Wiki](https://github.com/Cmajda/ha_cez_distribuce/wiki/English-Home)
+- [Vydání a testovací verze](https://github.com/Cmajda/ha_cez_distribuce/releases)
+- [Licence](LICENSE)

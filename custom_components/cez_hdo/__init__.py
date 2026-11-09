@@ -10,8 +10,14 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 
-from .const import CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH
+from .const import (
+    CONF_AUTO_REFRESH,
+    CONF_HIGH_TARIFF_PRICE_ENTITY,
+    CONF_LOW_TARIFF_PRICE_ENTITY,
+    DEFAULT_AUTO_REFRESH,
+)
 from .frontend import CezHdoCardRegistration
+from .manual_refresh import async_register_websocket_commands
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,6 +36,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
     # Initialize domain data storage
     hass.data.setdefault(DOMAIN, {})
+    async_register_websocket_commands(hass)
 
     # Register service to reload frontend card
     async def reload_frontend_card(call):
@@ -86,7 +93,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     )
 
                 # Log results - simplified
-                signal_names = list(signal_groups.keys())
+                signal_names = sorted(signal_groups)
                 _LOGGER.debug("CEZ HDO: Found signals: %s", ", ".join(signal_names))
 
             else:
@@ -144,6 +151,16 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
         # Refresh each coordinator
         for coord_entry_id, coordinator, ean in coordinators_to_refresh:
+            backoff_until = coordinator.ocr_backoff_until
+            if backoff_until is not None:
+                _LOGGER.warning(
+                    "CEZ HDO refresh_data: Skipping EAN %s until OCR rate limit expires at %s",
+                    mask_ean(ean),
+                    backoff_until.strftime("%H:%M:%S"),
+                )
+                failed_count += 1
+                continue
+
             _LOGGER.info("CEZ HDO refresh_data: Starting manual refresh for EAN %s", mask_ean(ean))
 
             try:
@@ -170,6 +187,20 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                         "CEZ HDO refresh_data: Failed to refresh data for EAN %s (OCR or API error)", mask_ean(ean)
                     )
                     failed_count += 1
+
+            except downloader.OcrRateLimitError as err:
+                # OCR.space rate limits apply to the HA host, not just this EAN.
+                for _, other_coordinator, _ in coordinators_to_refresh:
+                    await other_coordinator.async_handle_ocr_rate_limit(err.retry_after)
+
+                _LOGGER.warning(
+                    "CEZ HDO refresh_data: OCR rate limit for EAN %s (HTTP %s%s)",
+                    mask_ean(ean),
+                    err.http_status or "error",
+                    f", retry after {err.retry_after}s" if err.retry_after is not None else "",
+                )
+                failed_count += 1
+                break
 
             except Exception as err:
                 _LOGGER.error("CEZ HDO refresh_data: Error refreshing EAN %s: %s", mask_ean(ean), err)
@@ -263,6 +294,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     signal = entry.data.get("signal")
     entity_suffix = entry.data.get("entity_suffix")
     auto_refresh = entry.data.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
+    low_price_entity = entry.data.get(CONF_LOW_TARIFF_PRICE_ENTITY)
+    high_price_entity = entry.data.get(CONF_HIGH_TARIFF_PRICE_ENTITY)
 
     if not ean:
         _LOGGER.error("CEZ HDO: No EAN in config entry")
@@ -283,6 +316,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
         _LOGGER.debug("Set initial prices from config flow: %s", initial_prices)
 
+    await coordinator.async_set_price_entities(low_price_entity, high_price_entity)
+
     # Store coordinator in hass.data
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {
@@ -290,6 +325,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "ean": ean,
         "signal": signal,
         "entity_suffix": entity_suffix,
+        CONF_LOW_TARIFF_PRICE_ENTITY: low_price_entity,
+        CONF_HIGH_TARIFF_PRICE_ENTITY: high_price_entity,
     }
 
     # Forward setup to platforms

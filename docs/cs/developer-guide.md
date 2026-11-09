@@ -4,9 +4,27 @@ Stručný přehled pro vývoj/přispívání.
 
 ## Požadavky
 
+### Lokální Python vývoj
+
+Projekt vyžaduje Python **3.14.2 až 3.15.0** a používá `uv` pro vytvoření
+virtuálního prostředí `.venv` a instalaci nástrojů z `pyproject.toml`.
+
+```bash
+uv sync --group dev
+uv run pre-commit install
+uv run pre-commit run --all-files
+```
+
+VS Code používá `${workspaceFolder}/.venv/bin/python`; po `uv sync` se prostředí
+vytvoří na této cestě. Před commitem ověřte, že `uv.lock` odpovídá projektu:
+
+```bash
+uv lock --check
+```
+
 ### Home Assistant
 
-Pro vývojový deploy přes [dev/deploy.sh](../dev/deploy.sh) je nejjednodušší
+Pro vývojový deploy přes [dev/deploy.sh](../../dev/deploy.sh) je nejjednodušší
 mít v HA dostupný SMB share `/config`.
 
 - Home Assistant OS / Supervised: nainstalujte a spusťte
@@ -23,12 +41,11 @@ nastavte `HA_CONFIG_DIR` na cestu k HA configu na stejném stroji
 
 - `bash`, `sudo`
 - CIFS klient: balíček `cifs-utils` (kvůli `mount -t cifs`)
-- (volitelné) `npm` pouze pokud používáte separátní build frontendu
-  v `dev/frontend` (v tomto repu typicky není)
+- Node.js 18+ a `npm`, pokud chcete sestavit frontend; deploy skript při dostupném `npm` frontend také sestaví
 
 ## Proměnné prostředí a argumenty
 
-Skript [dev/deploy.sh](../dev/deploy.sh) umí deployovat buď do lokálního
+Skript [dev/deploy.sh](../../dev/deploy.sh) umí deployovat buď do lokálního
 adresáře, nebo si sám připojí SMB share z HA.
 
 ### Environment variables
@@ -39,14 +56,12 @@ adresáře, nebo si sám připojí SMB share z HA.
 - `HA_USERNAME` – SMB uživatel (default: aktuální uživatel v OS)
 - `HA_PASSWORD` – SMB heslo (pokud není předané jako argument;
   jinak se skript zeptá interaktivně)
-- `DEPLOY_WWW` – `1` = navíc zkopíruje kartu do `/config/www/cez_hdo`
-  jako fallback pro `/local/...` (default: `0`)
 
 ### Argumenty
 
 - `./deploy.sh` – deploy do `HA_CONFIG_DIR` (pokud je už přimountováno)
 - `./deploy.sh IP PASSWORD` – přimountuje `//IP/config` a deployne
-- `./deploy.sh clean [IP] [PASSWORD]` – odstraní integraci + volitelně i `www/cez_hdo`
+- `./deploy.sh clean [IP] [PASSWORD]` – odstraní integraci
 
 ## Struktura repozitáře
 
@@ -59,14 +74,13 @@ custom_components/cez_hdo/        # integrace pro Home Assistant
   base_entity.py                  # sdílené načítání/cache
   frontend/dist/cez-hdo-card.js   # buildnutý JS bundle karty
 
-www/cez_hdo/cez-hdo-card.js       # kopie JS (pomocné / fallback)
 dev/deploy.sh                     # vývojový deploy do HA
 docs/                             # dokumentace
 ```
 
 ## Deploy do HA
 
-Použijte skript [dev/deploy.sh](../dev/deploy.sh).
+Použijte skript [dev/deploy.sh](../../dev/deploy.sh).
 
 Příklady:
 
@@ -77,20 +91,16 @@ Příklady:
 # 2) Deploy s jiným SMB uživatelem
 HA_USERNAME=homeassistant ./dev/deploy.sh 192.168.1.50 mojeheslo
 
-# 3) Deploy do /config/www jako fallback pro /local
-DEPLOY_WWW=1 ./dev/deploy.sh 192.168.1.50 mojeheslo
-
-# 4) Lokální deploy (když máte HA config na disku)
+# 3) Lokální deploy (když máte HA config na disku)
 HA_CONFIG_DIR=/path/to/ha-config ./dev/deploy.sh
 
-# 5) Clean
+# 4) Clean
 ./dev/deploy.sh clean 192.168.1.50 mojeheslo
 ```
 
 Poznámka k frontendu:
 
-- Preferovaná URL pro zdroj karty je `/cez_hdo/cez-hdo-card.js` (servírované z integrace).
-- Existuje i fallback kopie do `config/www/cez_hdo`.
+- Integrace servíruje kartu z `/cez_hdo_card/cez-hdo-card.js`.
 
 ## Debug
 
@@ -104,5 +114,5 @@ logger:
 
 Rychlá kontrola pro kartu:
 
-- `http://IP_HA:8123/cez_hdo/cez-hdo-card.js` musí vracet `200`
+- `http://IP_HA:8123/cez_hdo_card/cez-hdo-card.js?v=3.3.1` musí vracet `200`
 - po update může být potřeba `Ctrl+F5`

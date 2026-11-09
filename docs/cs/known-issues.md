@@ -4,18 +4,16 @@ Tento soubor obsahuje seznam známých problémů a jejich stav řešení.
 
 ---
 
-## Aktuální problémy (v3.1.1)
+## Aktuální problémy (v3.3.1)
 
-### 1. HDO rozvrh nezobrazuje správně poslední dny
+### 1. Automatické obnovení může selhat při nedostupnosti OCR nebo API
 
-**Stav:** ⚠️ Známé omezení (CAPTCHA)
+**Stav:** ⚠️ Závislost na externích službách
 
-**Popis:** Po 1 dnu od konfigurace může HDO rozvrh zobrazovat poslední dny
-jako vysoký tarif (VT). To je způsobeno omezením API ČEZ – kvůli CAPTCHA nelze
-data automaticky aktualizovat denně.
+**Popis:** Automatické obnovení používá OCR pro řešení CAPTCHA a závisí na dostupnosti OCR služby i API ČEZ Distribuce.
+Při výpadku nebo omezení požadavků se data nemusí obnovit včas; jejich platnost je 6 dní.
 
-**Dočasné řešení:** Překonfigurujte integraci (Nastavení → Zařízení a služby → ČEZ HDO →
-Konfigurovat), opište nový CAPTCHA kód. Data se načtou aktuální
+**Řešení:** Spusťte **Manuálně obnovit** na Lovelace kartě, zadejte CAPTCHA a vyberte signál. Dosud uložená data zůstanou dostupná, pokud ruční obnova selže.
 
 ### 2. Kompatibilita s Home Assistant 2026.02+ (v3.1.0)
 
@@ -38,9 +36,9 @@ Objekt již nemá atribut `mode`, což způsobovalo chybu při spuštění integ
 **Popis:** ČEZ Distribuce zavedl CAPTCHA ochranu na svém API, což způsobovalo
 nefunkčnost integrace pro nové instalace.
 
-**Řešení:** Integrace nyní zobrazuje CAPTCHA obrázek během konfigurace.
-Data jsou načtena jednorázově a uložena do cache. Platnost dat je **6 dní**,
-poté je nutné integraci překonfigurovat.
+**Řešení:** Integrace zobrazuje CAPTCHA během konfigurace a ukládá přijatá data do cache.
+Automatické obnovení se pokouší řešit CAPTCHA pomocí OCR; data lze obnovit také
+tlačítkem **Manuálně obnovit** na Lovelace kartě.
 
 **Sledování platnosti:** Nové senzory `data_valid`, `days_until_expiry`,
 `data_age_days` a `data_valid_until` umožňují sledovat platnost dat
@@ -145,7 +143,7 @@ Názvy cache/price souborů používají pouze suffix EAN (posledních 6 čísli
 
 - Výchozí přípona: `{EAN4}_{signál}` (např. `7606_a1b4dp04`)
 - **Uživatel může zadat vlastní příponu** (např. `chalupa`, `byt`, `dum`)
-- Entity mají ID: `sensor.cez_hdo_nizky_tarif_zacatek_{pripona}`
+- Entity mají ID: `sensor.cez_hdo_lowtariffstart_{pripona}`
 - Device: `ČEZ HDO 967606 (a1b4dp04)`
 - Stejné EAN lze přidat vícekrát s různými signály
 

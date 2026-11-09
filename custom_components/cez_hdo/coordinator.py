@@ -4,13 +4,18 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import random
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
 from typing import Any, Callable
 
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.event import async_track_point_in_time, async_track_time_interval
+from homeassistant.helpers.event import (
+    async_track_point_in_time,
+    async_track_state_change_event,
+    async_track_time_interval,
+)
 from homeassistant.helpers.storage import Store
 from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
@@ -100,6 +105,8 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self.ean = ean
         self.signal = signal
         self._state_update_unsub: Callable[[], None] | None = None
+        self._price_entity_unsub: Callable[[], None] | None = None
+        self._price_entities: dict[str, str | None] = {"low": None, "high": None}
         self._warning_shown: bool = False
         self._expired_shown: bool = False
 
@@ -110,6 +117,8 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self._data_fetch_successful_today: bool = False
         self._next_attempt_unsub: Callable[[], None] | None = None
         self._next_attempt_time: datetime | None = None
+        # Provider-provided "not before" time for OCR requests (HTTP 429 retryAfter)
+        self._ocr_backoff_until: datetime | None = None
 
         # Use Home Assistant's Store helper for atomic writes and proper storage
         # Storage keys use EAN suffix (last 6 digits) to support multiple instances
@@ -234,6 +243,11 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             self._state_update_unsub = None
             _LOGGER.debug("CezHdoCoordinator: Stopped state updates")
 
+        if self._price_entity_unsub is not None:
+            self._price_entity_unsub()
+            self._price_entity_unsub = None
+            _LOGGER.debug("CezHdoCoordinator: Stopped tariff price entity tracking")
+
     def stop_auto_refresh(self) -> None:
         """Stop scheduled auto-refresh attempts."""
         if self._next_attempt_unsub is not None:
@@ -266,6 +280,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         """
         self._data_fetch_successful_today = True
         self._last_attempt_date = datetime.now(CEZ_TIMEZONE).date()
+        self._ocr_backoff_until = None
 
         # Cancel any scheduled auto-refresh attempt
         if self._next_attempt_unsub is not None:
@@ -326,11 +341,24 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 except ValueError:
                     self._next_attempt_time = None
 
+            # Load the provider backoff so a restart does not retry before it expires
+            backoff_str = state.get("ocr_backoff_until")
+            if backoff_str:
+                try:
+                    parsed_backoff = datetime.fromisoformat(backoff_str)
+                    if parsed_backoff.tzinfo is None:
+                        parsed_backoff = parsed_backoff.replace(tzinfo=CEZ_TIMEZONE)
+                    if parsed_backoff > datetime.now(CEZ_TIMEZONE):
+                        self._ocr_backoff_until = parsed_backoff
+                except ValueError:
+                    self._ocr_backoff_until = None
+
             _LOGGER.debug(
-                "CezHdoCoordinator: Loaded refresh state - attempts: %d, successful: %s, next: %s",
+                "CezHdoCoordinator: Loaded refresh state - attempts: %d, successful: %s, next: %s, ocr backoff: %s",
                 self._daily_attempts,
                 self._data_fetch_successful_today,
                 self._next_attempt_time.strftime("%H:%M:%S") if self._next_attempt_time else None,
+                self._ocr_backoff_until.strftime("%H:%M:%S") if self._ocr_backoff_until else None,
             )
 
     async def _async_save_refresh_state(self) -> None:
@@ -340,6 +368,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             "daily_attempts": self._daily_attempts,
             "successful_today": self._data_fetch_successful_today,
             "next_attempt_time": self._next_attempt_time.isoformat() if self._next_attempt_time else None,
+            "ocr_backoff_until": self._ocr_backoff_until.isoformat() if self._ocr_backoff_until else None,
         }
         await self._refresh_state_store.async_save(state)
         _LOGGER.debug("CezHdoCoordinator: Saved refresh state")
@@ -408,6 +437,16 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             if next_time < min_next_time:
                 next_time = min_next_time
 
+        # Never retry OCR before the provider's retryAfter deadline. This clamp
+        # lives here because the hourly data check also calls this method and used
+        # to overwrite a later failure schedule.
+        if self._ocr_backoff_until is not None:
+            if self._ocr_backoff_until > now:
+                if next_time < self._ocr_backoff_until:
+                    next_time = self._ocr_backoff_until
+            else:
+                self._ocr_backoff_until = None
+
         # Cancel any existing scheduled attempt
         if self._next_attempt_unsub is not None:
             self._next_attempt_unsub()
@@ -438,10 +477,50 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             next_time,
         )
 
+    def _apply_ocr_backoff(self, retry_after: int | None) -> datetime | None:
+        """Record the provider's retryAfter deadline and return the effective deadline."""
+        now = datetime.now(CEZ_TIMEZONE)
+        if self._ocr_backoff_until is not None and self._ocr_backoff_until <= now:
+            self._ocr_backoff_until = None
+
+        if retry_after is not None:
+            candidate = now + timedelta(seconds=retry_after)
+            if self._ocr_backoff_until is None or candidate > self._ocr_backoff_until:
+                self._ocr_backoff_until = candidate
+
+        return self._ocr_backoff_until
+
+    @property
+    def ocr_backoff_until(self) -> datetime | None:
+        """Return the provider's OCR retry deadline, if one is active."""
+        deadline = self._ocr_backoff_until
+        if deadline is not None and deadline <= datetime.now(CEZ_TIMEZONE):
+            self._ocr_backoff_until = None
+            return None
+        return deadline
+
+    async def async_handle_ocr_rate_limit(self, retry_after: int | None) -> datetime | None:
+        """Persist an OCR rate limit before scheduling any further work."""
+        deadline = self._apply_ocr_backoff(retry_after)
+        await self._async_save_refresh_state()
+        await self._async_schedule_auto_refresh(
+            min_delay_minutes=MIN_RETRY_DELAY_MINUTES,
+            after_failure=False,
+        )
+        return deadline
+
     async def _async_auto_refresh_attempt(self, _now: datetime | None = None) -> None:
         """Perform an automatic data refresh attempt using OCR."""
         self._next_attempt_unsub = None  # Clear the subscription
         self._next_attempt_time = None  # Clear scheduled time
+
+        # A backoff deadline can cross midnight, so reset the daily budget here too
+        today = datetime.now(CEZ_TIMEZONE).date()
+        if self._last_attempt_date != today:
+            self._daily_attempts = 0
+            self._data_fetch_successful_today = False
+            self._last_attempt_date = today
+
         self._daily_attempts += 1
 
         _LOGGER.info(
@@ -457,6 +536,24 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 downloader.fetch_data_with_auto_captcha,
                 self.ean,
             )
+
+            if new_data and new_data.get("data"):
+                returned_signals = sorted(
+                    {
+                        item["signal"]
+                        for item in downloader._extract_signals(new_data)
+                        if isinstance(item, dict) and isinstance(item.get("signal"), str) and item["signal"]
+                    }
+                )
+                if not returned_signals or (self.signal and self.signal not in returned_signals):
+                    _LOGGER.warning(
+                        "CezHdoCoordinator: Auto-refresh response signal mismatch for EAN %s: "
+                        "configured_signal=%s, returned_signals=%s",
+                        mask_ean(self.ean),
+                        self.signal or "<none>",
+                        returned_signals[:20],
+                    )
+                    new_data = None
 
             if new_data and new_data.get("data"):
                 _LOGGER.info(
@@ -475,6 +572,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 # Mark as successful
                 self._data_fetch_successful_today = True
                 self._next_attempt_time = None  # No more attempts needed today
+                self._ocr_backoff_until = None
                 self._warning_shown = False
                 self._expired_shown = False
 
@@ -499,6 +597,26 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
                 # Schedule next attempt with minimum delay (log as warning)
                 await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
+
+        except downloader.OcrRateLimitError as err:
+            retry_at = await self.async_handle_ocr_rate_limit(err.retry_after)
+            if retry_at is not None:
+                retry_info = f"next attempt not before {retry_at:%H:%M}"
+            else:
+                retry_info = "using the normal retry delay"
+
+            _LOGGER.warning(
+                "CezHdoCoordinator: Auto-refresh attempt %d/%d stopped by OCR.space rate limit (HTTP %s%s) - %s",
+                self._daily_attempts,
+                MAX_DAILY_OCR_ATTEMPTS,
+                err.http_status or "error",
+                f", {err.error_code}" if err.error_code else "",
+                retry_info,
+            )
+
+            # The deadline was persisted before scheduling, even at the daily limit.
+            # Keep scheduler logging quiet; the rate-limit warning above is enough.
+            await self._check_auto_refresh_failure_notification()
 
         except Exception as err:
             _LOGGER.error(
@@ -910,6 +1028,69 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             low_price,
             high_price,
         )
+
+    async def async_set_price_entities(
+        self,
+        low_price_entity: str | None,
+        high_price_entity: str | None,
+    ) -> None:
+        """Track optional Home Assistant entities as tariff price sources."""
+        if self._price_entity_unsub is not None:
+            self._price_entity_unsub()
+            self._price_entity_unsub = None
+
+        self._price_entities = {
+            "low": low_price_entity,
+            "high": high_price_entity,
+        }
+        entity_ids = {entity_id for entity_id in self._price_entities.values() if entity_id}
+        if entity_ids:
+            self._price_entity_unsub = async_track_state_change_event(
+                self.hass,
+                entity_ids,
+                self._handle_price_entity_change,
+            )
+
+        await self._async_update_prices_from_entities()
+
+    @callback
+    def _handle_price_entity_change(self, _event: Any) -> None:
+        """Schedule a price refresh when a selected source entity changes."""
+        self.hass.async_create_task(self._async_update_prices_from_entities())
+
+    async def _async_update_prices_from_entities(self) -> None:
+        """Read configured price entities, retaining prior values if unavailable."""
+        low_price = self.data.low_tariff_price
+        high_price = self.data.high_tariff_price
+        changed = False
+
+        for tariff, entity_id in self._price_entities.items():
+            if not entity_id:
+                continue
+
+            state = self.hass.states.get(entity_id)
+            if state is None or state.state in ("unknown", "unavailable"):
+                continue
+
+            try:
+                price = float(state.state)
+            except (TypeError, ValueError):
+                _LOGGER.warning("Ignoring non-numeric price state from %s", entity_id)
+                continue
+
+            if not math.isfinite(price) or price < 0:
+                _LOGGER.warning("Ignoring invalid price state from %s", entity_id)
+                continue
+
+            if tariff == "low" and price != low_price:
+                low_price = price
+                changed = True
+            elif tariff == "high" and price != high_price:
+                high_price = price
+                changed = True
+
+        if changed:
+            await self.async_set_prices(low_price, high_price)
 
     @property
     def current_price(self) -> float:
