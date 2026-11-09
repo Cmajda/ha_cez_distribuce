@@ -22,10 +22,7 @@ tarifů i Lovelace kartu.
 
 - [⚙️ Co integrace dělá](#co-integrace-dela)
 - [📚 Wiki](#-wiki)
-- [🐛 Nahlášení chyby nebo vylepšení](#-nahlášení-chyby-nebo-vylepšení)
-  - [🐛 Nahlásit chybu](#-nahlásit-chybu)
-  - [💡 Navrhnout vylepšení](#-navrhnout-vylepšení)
-  - [❓ Položit dotaz](#-položit-dotaz)
+- [🐛 Nahlášení chyby, návrhu nebo dotazu](#-nahlášení-chyby-návrhu-nebo-dotazu)
 - [🤝 Spolupracovníci a přispěvatelé](#-spolupracovníci-a-přispěvatelé)
   - [👥 Spolupracovníci](#-spolupracovníci)
   - [🌱 Přispěvatelé](#-přispěvatelé)
@@ -63,21 +60,13 @@ Dashboardem, řešení problémů i vývojářské informace.
 
 [Příklady automatizací podle tarifu](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS#-automatizace-podle-tarifu)
 
-## 🐛 Nahlášení chyby nebo vylepšení
+## 🐛 Nahlášení chyby, návrhu nebo dotazu
 
-### 🐛 Nahlásit chybu
+Pro nahlášení chyby, návrh vylepšení nebo dotaz otevřete
+[výběr issue šablony na GitHubu](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose)
+a zvolte odpovídající formulář.
 
-[Výběr šablony](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose) ·
-[Postup včetně debug logů a diagnostiky](https://github.com/Cmajda/ha_cez_distribuce/wiki/Known-Issues-CS#jak-nahlásit-problém)
-
-### 💡 Navrhnout vylepšení
-
-[Výběr šablony](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose)
-
-### ❓ Položit dotaz
-
-[Výběr šablony](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose) ·
-[GitHub Discussions](https://github.com/Cmajda/ha_cez_distribuce/discussions)
+Při hlášení chyby postupujte podle [návodu k debug logům a diagnostice](https://github.com/Cmajda/ha_cez_distribuce/wiki/Known-Issues-CS#jak-nahlásit-problém).
 
 ## 🤝 Spolupracovníci a přispěvatelé
 

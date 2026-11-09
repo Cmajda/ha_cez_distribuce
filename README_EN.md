@@ -17,10 +17,7 @@ tariff sensors and a Lovelace card.
 
 - [⚙️ What the integration does](#what-the-integration-does-section)
 - [📚 Wiki](#-wiki)
-- [🐛 Report a bug or request an improvement](#-report-a-bug-or-request-an-improvement)
-  - [🐛 Report a bug](#-report-a-bug)
-  - [💡 Request an improvement](#-request-an-improvement)
-  - [❓ Ask a question](#-ask-a-question)
+- [🐛 Report a bug, suggest an improvement, or ask a question](#-report-a-bug-suggest-an-improvement-or-ask-a-question)
 - [🤝 Collaborators and Contributors](#-collaborators-and-contributors)
   - [👥 Collaborators](#-collaborators)
   - [🌱 Contributors](#-contributors)
@@ -59,21 +56,13 @@ troubleshooting, services, upgrades, and development.
 
 [Tariff-based automation examples](https://github.com/Cmajda/ha_cez_distribuce/wiki/User-Guide-EN#-tariff-based-automations)
 
-## 🐛 Report a bug or request an improvement
+## 🐛 Report a bug, suggest an improvement, or ask a question
 
-### 🐛 Report a bug
+To report a bug, suggest an improvement, or ask a question, open the
+[GitHub issue template chooser](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose)
+and select the appropriate form.
 
-[Template chooser](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose) ·
-[Guide to debug logs and diagnostics](https://github.com/Cmajda/ha_cez_distribuce/wiki/Known-Issues-EN#how-to-report-an-issue)
-
-### 💡 Request an improvement
-
-[Template chooser](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose)
-
-### ❓ Ask a question
-
-[Template chooser](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose) ·
-[GitHub Discussions](https://github.com/Cmajda/ha_cez_distribuce/discussions)
+For bug reports, follow the [debug logging and diagnostics guide](https://github.com/Cmajda/ha_cez_distribuce/wiki/Known-Issues-EN#how-to-report-an-issue).
 
 ## 🤝 Collaborators and Contributors
 
