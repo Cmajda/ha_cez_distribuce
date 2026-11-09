@@ -25,7 +25,7 @@ uv lock --check
 
 ### Home Assistant
 
-For development deployment via [dev/deploy.sh](../dev/deploy.sh),
+For development deployment via [dev/deploy.sh](../../dev/deploy.sh),
 the easiest approach is to have an SMB share `/config` available in HA.
 
 - Home Assistant OS / Supervised: install and start
@@ -42,12 +42,11 @@ set `HA_CONFIG_DIR` to the path of HA config on the same machine
 
 - `bash`, `sudo`
 - CIFS client: `cifs-utils` package (for `mount -t cifs`)
-- (optional) `npm` only if using separate frontend build
-  in `dev/frontend` (typically not used in this repo)
+- Node.js 18+ and `npm` when rebuilding the frontend; the deploy script also builds it when `npm` is available
 
 ## Environment Variables and Arguments
 
-The [dev/deploy.sh](../dev/deploy.sh) script can deploy either to a local
+The [dev/deploy.sh](../../dev/deploy.sh) script can deploy either to a local
 directory or mount an SMB share from HA.
 
 ### Environment Variables
@@ -82,7 +81,7 @@ docs/                             # documentation
 
 ## Deploy to HA
 
-Use the [dev/deploy.sh](../dev/deploy.sh) script.
+Use the [dev/deploy.sh](../../dev/deploy.sh) script.
 
 Examples:
 

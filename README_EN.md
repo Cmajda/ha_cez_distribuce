@@ -15,15 +15,14 @@
 > During configuration, you will enter a code from the CAPTCHA image. Data is then refreshed automatically.
 > New file locations (managed automatically by Home Assistant) in `.storage` survive updates via HACS.
 ---
-> 🚨 **BREAKING CHANGE v3.2.X:** Cache location changed from `custom_components/cez_hdo/data/` to `.storage`.
-> After updating from version 3.2.0 or older, you need to: **Reconfigure the integration**
-> and re-enter prices for NT and VT
+> ℹ️ **v3.2.X storage migration:** The cache moved to Home Assistant-managed `.storage`.
+> The integration attempts to migrate the old cache and prices automatically. After updating, verify your prices and re-enter them in integration settings if they were not migrated.
 
 🇨🇿 [Česká verze](README.md)
 
 > 🔴 **WARNING FOR v2.x USERS:**
-> Before upgrading to v3.0.0, read the [**Upgrade Guide**](docs/en/upgrade-guide.md)!
-> Version 3.0.0 brings major changes and requires manual steps.
+> Before upgrading from v2.x, read the [**Upgrade Guide**](docs/en/upgrade-guide.md)!
+> The migration to v3.x brings major changes and requires manual steps.
 
 Home Assistant integration that fetches HDO (low/high tariff) data
 from ČEZ Distribuce API and creates entities + Lovelace card.
@@ -78,7 +77,8 @@ Thanks to all co-authors who actively contribute to the development of this inte
 3. Enter your **EAN** (18-digit number from your electricity bill)
 4. Enter the **CAPTCHA code** from the image
 5. Select **signal** (if multiple options available)
-6. Enter **prices** for NT and VT (CZK/kWh)
+6. Enter an entity suffix
+7. Set **prices** for NT and VT (CZK/kWh), or optionally select price entities
 
 ### 4. Add Card
 
@@ -119,12 +119,13 @@ The sensor `sensor.cez_hdo_currentprice_*` can be used as a price source in the 
 | Binary | `cez_hdo_data_valid_*`          | Data is valid              |
 | Sensor | `cez_hdo_lowtariffstart_*`      | NT start time              |
 | Sensor | `cez_hdo_lowtariffend_*`        | NT end time                |
-| Sensor | `cez_hdo_lowtariffremaining_*`  | NT remaining time          |
+| Sensor | `cez_hdo_lowtariffduration_*`   | NT remaining time          |
 | Sensor | `cez_hdo_hightariffstart_*`     | VT start time              |
 | Sensor | `cez_hdo_hightariffend_*`       | VT end time                |
-| Sensor | `cez_hdo_hightariffremaining_*` | VT remaining time          |
+| Sensor | `cez_hdo_hightariffduration_*`  | VT remaining time          |
 | Sensor | `cez_hdo_currentprice_*`        | Current price (CZK/kWh)    |
 | Sensor | `cez_hdo_schedule_*`            | 7-day HDO schedule         |
+| Sensor | `cez_hdo_raw_data_*`            | Raw data and last update timestamp |
 | Sensor | `cez_hdo_data_valid_until_*`    | Data expiration date       |
 | Sensor | `cez_hdo_data_age_days_*`       | Data age (days)            |
 | Sensor | `cez_hdo_days_until_expiry_*`   | Days until expiry          |
@@ -162,8 +163,8 @@ To report a bug, export diagnostics:
 
 - [User Guide (CS)](docs/cs/user-guide.md) – complete documentation (Czech)
 - [User Guide (EN)](docs/en/user-guide.md) – complete documentation (English)
-- [Upgrade Guide (CS)](docs/cs/upgrade-guide.md) – migration from v2.x to v3.0.0 (Czech)
-- [Upgrade Guide (EN)](docs/en/upgrade-guide.md) – migration from v2.x to v3.0.0
+- [Upgrade Guide (CS)](docs/cs/upgrade-guide.md) – migration from v2.x to v3.x (Czech)
+- [Upgrade Guide (EN)](docs/en/upgrade-guide.md) – migration from v2.x to v3.x
 - [Service Guide (CS)](docs/cs/service-guide.md) – available services (Czech)
 - [Service Guide (EN)](docs/en/service-guide.md) – available services
 - [Developer Guide (CS)](docs/cs/developer-guide.md) – for developers (Czech)
@@ -173,7 +174,7 @@ To report a bug, export diagnostics:
 
 ## 📝 Release Notes
 
-See [RELEASE_NOTES.md](RELEASE_NOTES.md)
+See [RELEASE_NOTES_EN.md](RELEASE_NOTES_EN.md)
 
 ## 📄 License
 

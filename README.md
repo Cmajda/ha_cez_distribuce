@@ -15,15 +15,14 @@
 > Při konfiguraci zadáte kód z CAPTCHA obrázku. Data se pak obnovují automaticky.
 > Nová umístění souborů (spravuje Home Assistant automaticky) v `.storage` a přežijí aktualizace přes HACS.
 ---
-> 🚨 **BREAKING CHANGE v3.2.X:** Změna umístění cache z `custom_components/cez_hdo/data/` na `.storage`.
-> Po aktualizaci z verze 3.2.0 nebo starší je nutné: **Znovu nakonfigurovat integraci**
-> znovu zadat ceny pro NT a VT
+> ℹ️ **Migrace úložiště v3.2.X:** Umístění cache se změnilo na Home Assistantem spravované `.storage`.
+> Integrace se pokusí starou cache a ceny převést automaticky. Po aktualizaci ověřte nastavení cen; pokud se nepřevedly, doplňte je v konfiguraci integrace.
 
 🇬🇧 [English version](README_EN.md)
 
 > 🔴 **UPOZORNĚNÍ PRO UŽIVATELE VERZE 2.x:**
-> Před upgradem na v3.0.0 si přečtěte [**Upgrade Guide**](docs/cs/upgrade-guide.md)!
-> Verze 3.0.0 přináší zásadní změny a vyžaduje manuální kroky.
+> Před upgradem z verze 2.x si přečtěte [**Upgrade Guide**](docs/cs/upgrade-guide.md)!
+> Přechod na verzi 3.x přináší zásadní změny a vyžaduje manuální kroky.
 
 Integrace pro Home Assistant, která načítá HDO (nízký/vysoký tarif)
 z API ČEZ Distribuce a vytváří entity + Lovelace kartu.
@@ -78,7 +77,8 @@ Děkuji všem spoluautorům, kteří se aktivně podílejí na vývoji kódu té
 3. Zadejte **EAN** (18 číslic z faktury)
 4. Zadejte **kód CAPTCHA** z obrázku
 5. Vyberte **signál** (pokud je více možností)
-6. Zadejte **ceny** NT a VT (Kč/kWh)
+6. Zadejte příponu entit
+7. Zadejte **ceny** NT a VT (Kč/kWh), případně vyberte cenové entity
 
 ### 4. Přidání karty
 
@@ -119,12 +119,13 @@ Senzor `sensor.cez_hdo_currentprice_*` lze použít jako zdroj ceny v Energy Das
 | Binary | `cez_hdo_data_valid_*`          | Data jsou platná       |
 | Sensor | `cez_hdo_lowtariffstart_*`      | Čas začátku NT         |
 | Sensor | `cez_hdo_lowtariffend_*`        | Čas konce NT           |
-| Sensor | `cez_hdo_lowtariffremaining_*`  | Zbývající čas NT       |
+| Sensor | `cez_hdo_lowtariffduration_*`   | Zbývající čas NT       |
 | Sensor | `cez_hdo_hightariffstart_*`     | Čas začátku VT         |
 | Sensor | `cez_hdo_hightariffend_*`       | Čas konce VT           |
-| Sensor | `cez_hdo_hightariffremaining_*` | Zbývající čas VT       |
+| Sensor | `cez_hdo_hightariffduration_*`  | Zbývající čas VT       |
 | Sensor | `cez_hdo_currentprice_*`        | Aktuální cena (Kč/kWh) |
 | Sensor | `cez_hdo_schedule_*`            | 7denní HDO rozvrh      |
+| Sensor | `cez_hdo_raw_data_*`            | Surová data a čas poslední aktualizace |
 | Sensor | `cez_hdo_data_valid_until_*`    | Datum vypršení dat     |
 | Sensor | `cez_hdo_data_age_days_*`       | Stáří dat (dny)        |
 | Sensor | `cez_hdo_days_until_expiry_*`   | Dní do vypršení        |
@@ -162,8 +163,8 @@ Pro nahlášení chyby exportujte diagnostiku:
 
 - [Uživatelský návod (CZ)](docs/cs/user-guide.md) – kompletní dokumentace
 - [User Guide (EN)](docs/en/user-guide.md) – complete documentation (English)
-- [Upgrade Guide (CZ)](docs/cs/upgrade-guide.md) – přechod z v2.x na v3.0.0
-- [Upgrade Guide (EN)](docs/en/upgrade-guide.md) – migration from v2.x to v3.0.0
+- [Upgrade Guide (CZ)](docs/cs/upgrade-guide.md) – přechod z v2.x na v3.x
+- [Upgrade Guide (EN)](docs/en/upgrade-guide.md) – migration from v2.x to v3.x
 - [Service Guide (CZ)](docs/cs/service-guide.md) – dostupné služby
 - [Service Guide (EN)](docs/en/service-guide.md) – available services
 - [Developer Guide (CZ)](docs/cs/developer-guide.md) – pro vývojáře

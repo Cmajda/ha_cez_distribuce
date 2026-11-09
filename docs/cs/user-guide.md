@@ -101,10 +101,15 @@ Zadejte **příponu**, která bude použita v názvech všech entit.
 
 | Přípona         | Výsledné entity ID                                 |
 | --------------- | -------------------------------------------------- |
-| `7606_a1b4dp04` | `sensor.cez_hdo_nizky_tarif_zacatek_7606_a1b4dp04` |
-| `chalupa`       | `sensor.cez_hdo_nizky_tarif_zacatek_chalupa`       |
+| `7606_a1b4dp04` | `sensor.cez_hdo_lowtariffstart_7606_a1b4dp04`      |
+| `chalupa`       | `sensor.cez_hdo_lowtariffstart_chalupa`            |
 
 > **Tip:** Použijte intuitivní názvy pro snadnější orientaci v automatizacích, zejména pokud máte více odběrných míst.
+
+**Jazyk názvů entit:** Home Assistant určí jejich jazyk podle jazyka jádra při prvním vytvoření.
+Jazyk jádra nastavíte v **Nastavení → Systém → Informace o domově → Region → Jazyk**.
+Profil uživatele ovlivňuje rozhraní a texty karty, ale již vytvořené názvy entit nepřeloží.
+Chcete-li nové entity v angličtině, nastavte jazyk jádra na English před přidáním integrace.
 
 Klikněte na **Odeslat**.
 
@@ -118,6 +123,9 @@ Zadejte ceny elektřiny pro nízký a vysoký tarif.
 | -------------------- | ----------------------------- |
 | **Cena NT (Kč/kWh)** | Cena za kWh v nízkém tarifu   |
 | **Cena VT (Kč/kWh)** | Cena za kWh ve vysokém tarifu |
+| **Automatické obnovení dat** | Povolit automatické obnovování HDO dat |
+| **Použít cenu z entity NT/VT** | Použít cenu z vybraného senzoru nebo pomocníka místo pevné ceny |
+| **Senzor nebo číselný pomocník ceny NT/VT** | Volitelný zdroj ceny; použije se jen při zapnutí příslušného přepínače |
 
 Ceny najdete na faktuře nebo v ceníku od vašeho dodavatele elektřiny. Tyto ceny se používají pro výpočet nákladů v kartě a pro integraci s Energy Dashboard.
 
@@ -134,7 +142,7 @@ Home Assistant se zeptá, do které oblasti chcete zařízení umístit.
 
 🎉 **Gratulujeme!** Integrace je nyní nakonfigurována a vytvoří:
 
-- Zařízení "ČEZ HDO XXXXXX" (posledních 6 číslic EAN)
+- Zařízení "ČEZ HDO ({signál})"
 - Všechny senzory a binární senzory
 
 ---
@@ -212,13 +220,13 @@ Integrace vytváří následující entity:
 | -------------------------------------- | ---------------------------------- |
 | `sensor.cez_hdo_lowtariffstart_*`      | Čas začátku NT (např. `01:10`)     |
 | `sensor.cez_hdo_lowtariffend_*`        | Čas konce NT (např. `08:30`)       |
-| `sensor.cez_hdo_lowtariffremaining_*`  | Zbývající čas do změny tarifu      |
+| `sensor.cez_hdo_lowtariffduration_*`   | Zbývající čas do změny tarifu      |
 | `sensor.cez_hdo_hightariffstart_*`     | Čas začátku VT                     |
 | `sensor.cez_hdo_hightariffend_*`       | Čas konce VT                       |
-| `sensor.cez_hdo_hightariffremaining_*` | Zbývající čas do změny tarifu      |
+| `sensor.cez_hdo_hightariffduration_*`  | Zbývající čas do změny tarifu      |
 | `sensor.cez_hdo_currentprice_*`        | Aktuální cena v Kč/kWh             |
 | `sensor.cez_hdo_schedule_*`            | 7denní HDO rozvrh                  |
-| `sensor.cez_hdo_rawdata_*`             | Timestamp poslední aktualizace     |
+| `sensor.cez_hdo_raw_data_*`           | Timestamp poslední aktualizace     |
 | `sensor.cez_hdo_data_valid_until_*`    | Datum a čas vypršení platnosti dat |
 | `sensor.cez_hdo_data_age_days_*`       | Stáří dat ve dnech                 |
 | `sensor.cez_hdo_days_until_expiry_*`   | Počet dnů do vypršení platnosti    |
@@ -307,7 +315,9 @@ Ceny se nastavují **v integraci**, ne v kartě.
 4. Projděte kroky až ke **Nastavení cen tarifů**
 5. Změňte ruční ceny nebo vyberte senzory pro NT a VT a uložte
 
-Pokud vyberete cenový senzor, jeho číselný stav se použije jako cena a aktualizuje se při každé změně. Ručně zadaná cena zůstane použita, pokud senzor není vybrán nebo je jeho stav nedostupný či nečíselný.
+Pokud vyberete cenový senzor a zapnete přepínač **Použít cenu z entity**, jeho číselný stav
+se použije jako cena a aktualizuje se při každé změně. Ruční cena platí, pokud je přepínač
+vypnutý nebo je stav senzoru nedostupný či nečíselný.
 
 ### Služba set_prices
 
@@ -332,7 +342,7 @@ Senzor `sensor.cez_hdo_currentprice_*` lze použít v Energy Dashboard pro sledo
 1. Přejděte do **Nastavení → Dashboardy → Energie**
 2. V sekci "Elektrická síť" klikněte na **Přidat spotřebu**
 3. Vyberte váš měřič spotřeby elektřiny
-4. V poli "Použít entitu s aktuální cenou" vyberte `sensor.cez_hdo_*_aktualni_cena`
+4. V poli "Použít entitu s aktuální cenou" vyberte `sensor.cez_hdo_currentprice_{přípona}`
 
 ![Energy Dashboard](../../img/cs/integration_energy_ha_cz.png)
 
@@ -380,9 +390,12 @@ Karta obsahuje vizualizaci 7denního HDO rozvrhu:
 ### Kompletní reset
 
 1. Přejděte do **Nastavení → Zařízení a služby → ČEZ HDO → Smazat**
-2. Smažte složku `custom_components/cez_hdo/data/`
-3. Restartujte Home Assistant
-4. Přidejte integraci znovu
+2. Restartujte Home Assistant a přidejte integraci znovu.
+
+Data cache, ceny a stav automatického obnovování spravuje Home Assistant v `.storage`;
+složka `custom_components/cez_hdo/data/` se už nepoužívá. Pro úplné smazání dat
+vytvořte zálohu, zastavte Home Assistant a odstraňte pouze soubory `cez_hdo.cache_*`,
+`cez_hdo.prices_*` a `cez_hdo.refresh_state_*` z `/config/.storage/`.
 
 ---
 

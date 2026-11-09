@@ -52,8 +52,6 @@ Starting from version 3.0.0, the integration is configured exclusively through t
 3. Type **ČEZ HDO** in the search field
 4. Select the integration from the list
 
-![Add integration](../../img/en/card_add_integration_1.png)
-
 ### Step 1: Enter EAN
 
 Enter your **EAN number** (18 digits) and click **Submit**.
@@ -110,6 +108,11 @@ Enter a **suffix** that will be used in all entity names.
 
 > **Tip:** Use intuitive names for easier navigation in automations, especially if you have multiple metering points.
 
+**Entity name language:** Home Assistant determines entity names using the Core language
+when they are first created. Set it under **Settings → System → Home information → Region → Language**.
+Your profile language affects the interface and card text, but does not translate existing names.
+To create new entities in English, set the Core language to English before adding the integration.
+
 Click **Submit**.
 
 ### Step 5: Price Settings
@@ -122,6 +125,9 @@ Enter electricity prices for low and high tariff.
 | ---------------------- | ---------------------------- |
 | **NT Price (CZK/kWh)** | Price per kWh in low tariff  |
 | **VT Price (CZK/kWh)** | Price per kWh in high tariff |
+| **Auto refresh data** | Enable automatic HDO data refresh |
+| **Use NT/VT price from entity** | Use the selected sensor or helper instead of the fixed price |
+| **NT/VT price sensor or number helper** | Optional price source; used only when its toggle is enabled |
 
 You can find prices on your invoice or in the price list from your electricity provider. These prices are used for cost calculations in the card and for integration with Energy Dashboard.
 
@@ -138,7 +144,7 @@ Home Assistant will ask which area you want to place the device in.
 
 🎉 **Congratulations!** The integration is now configured and will create:
 
-- Device "ČEZ HDO XXXXXX" (last 6 digits of EAN)
+- Device "ČEZ HDO ({signal})"
 - All sensors and binary sensors
 
 ---
@@ -216,13 +222,13 @@ The integration creates the following entities:
 | -------------------------------------- | -------------------------------------- |
 | `sensor.cez_hdo_lowtariffstart_*`      | NT start time (e.g., `01:10`)          |
 | `sensor.cez_hdo_lowtariffend_*`        | NT end time (e.g., `08:30`)            |
-| `sensor.cez_hdo_lowtariffremaining_*`  | Remaining time until tariff change     |
+| `sensor.cez_hdo_lowtariffduration_*`   | Remaining time until tariff change     |
 | `sensor.cez_hdo_hightariffstart_*`     | VT start time                          |
 | `sensor.cez_hdo_hightariffend_*`       | VT end time                            |
-| `sensor.cez_hdo_hightariffremaining_*` | Remaining time until tariff change     |
+| `sensor.cez_hdo_hightariffduration_*`  | Remaining time until tariff change     |
 | `sensor.cez_hdo_currentprice_*`        | Current price in CZK/kWh               |
 | `sensor.cez_hdo_schedule_*`            | 7-day HDO schedule                     |
-| `sensor.cez_hdo_rawdata_*`             | Last update timestamp                  |
+| `sensor.cez_hdo_raw_data_*`           | Last update timestamp                  |
 | `sensor.cez_hdo_data_valid_until_*`    | Data validity expiration date and time |
 | `sensor.cez_hdo_data_age_days_*`       | Data age in days                       |
 | `sensor.cez_hdo_days_until_expiry_*`   | Days until data expires                |
@@ -312,8 +318,9 @@ Prices are set **in the integration**, not in the card.
 4. Navigate through steps to **Tariff Prices Setup**
 5. Change the manual prices or select NT and VT price sensors, then save
 
-When a price sensor is selected, its numeric state is used as the price and updates whenever the sensor changes. The
-manually entered price remains in use when no sensor is selected or its state is unavailable or non-numeric.
+When a price sensor is selected and its **Use price from entity** toggle is enabled, its
+numeric state is used as the price and updates whenever the sensor changes. The manual
+price remains in use when the toggle is disabled or the sensor state is unavailable or non-numeric.
 
 ### set_prices Service
 
@@ -333,12 +340,12 @@ data:
 
 ## 📊 Energy Dashboard
 
-The `sensor.cez_hdo_*_currentprice` sensor can be used in Energy Dashboard for cost tracking:
+The `sensor.cez_hdo_currentprice_{suffix}` sensor can be used in Energy Dashboard for cost tracking:
 
 1. Go to **Settings → Dashboards → Energy**
 2. In the "Electricity grid" section, click **Add consumption**
 3. Select your electricity consumption meter
-4. In the "Use an entity with current price" field, select `sensor.cez_hdo_*_currentprice`
+4. In the "Use an entity with current price" field, select `sensor.cez_hdo_currentprice_{suffix}`
 
 ![Energy Dashboard](../../img/en/integration_energy_ha.png)
 
@@ -386,9 +393,12 @@ The card includes a 7-day HDO schedule visualization:
 ### Complete Reset
 
 1. Go to **Settings → Devices & Services → ČEZ HDO → Delete**
-2. Delete the `custom_components/cez_hdo/data/` folder
-3. Restart Home Assistant
-4. Add the integration again
+2. Restart Home Assistant and add the integration again.
+
+Home Assistant manages the cache, prices, and auto-refresh state in `.storage`;
+`custom_components/cez_hdo/data/` is no longer used. To fully clear saved data, first
+create a backup, stop Home Assistant, and delete only the `cez_hdo.cache_*`,
+`cez_hdo.prices_*`, and `cez_hdo.refresh_state_*` files from `/config/.storage/`.
 
 ---
 

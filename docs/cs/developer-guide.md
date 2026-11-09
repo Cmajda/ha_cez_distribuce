@@ -24,7 +24,7 @@ uv lock --check
 
 ### Home Assistant
 
-Pro vývojový deploy přes [dev/deploy.sh](../dev/deploy.sh) je nejjednodušší
+Pro vývojový deploy přes [dev/deploy.sh](../../dev/deploy.sh) je nejjednodušší
 mít v HA dostupný SMB share `/config`.
 
 - Home Assistant OS / Supervised: nainstalujte a spusťte
@@ -41,12 +41,11 @@ nastavte `HA_CONFIG_DIR` na cestu k HA configu na stejném stroji
 
 - `bash`, `sudo`
 - CIFS klient: balíček `cifs-utils` (kvůli `mount -t cifs`)
-- (volitelné) `npm` pouze pokud používáte separátní build frontendu
-  v `dev/frontend` (v tomto repu typicky není)
+- Node.js 18+ a `npm`, pokud chcete sestavit frontend; deploy skript při dostupném `npm` frontend také sestaví
 
 ## Proměnné prostředí a argumenty
 
-Skript [dev/deploy.sh](../dev/deploy.sh) umí deployovat buď do lokálního
+Skript [dev/deploy.sh](../../dev/deploy.sh) umí deployovat buď do lokálního
 adresáře, nebo si sám připojí SMB share z HA.
 
 ### Environment variables
@@ -81,7 +80,7 @@ docs/                             # dokumentace
 
 ## Deploy do HA
 
-Použijte skript [dev/deploy.sh](../dev/deploy.sh).
+Použijte skript [dev/deploy.sh](../../dev/deploy.sh).
 
 Příklady:
 

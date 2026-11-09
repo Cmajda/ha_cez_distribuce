@@ -16,11 +16,13 @@ npm install
 
 ## Vývoj
 
-Pro sledování změn a automatickou rekompilaci:
+Pro jednorázový build během vývoje:
 
 ```bash
-npm run dev
+npm run build
 ```
+
+Projekt nemá watch/dev server skript; po změně zdrojů spusťte build znovu.
 
 ## Build
 
@@ -37,7 +39,7 @@ Výsledný soubor bude v `dist/cez-hdo-card.js`.
 Po buildu zkopírujte výsledný soubor do integrace:
 
 ```bash
-cp dist/cez-hdo-card.js ../../custom_components/cez_hdo/frontend/
+cp dist/cez-hdo-card.js ../../custom_components/cez_hdo/frontend/dist/
 ```
 
 Nebo použijte deploy skript z kořenového adresáře:

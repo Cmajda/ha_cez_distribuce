@@ -37,12 +37,11 @@ Parameters:
 - `low_tariff_price` – price per kWh in low tariff (NT) in CZK
 - `high_tariff_price` – price per kWh in high tariff (VT) in CZK
 
-After setting, the `sensor.cez_hdo_currentprice` sensor is automatically updated.
+After setting, the `sensor.cez_hdo_currentprice_{suffix}` sensor is automatically updated. The service applies prices to all active integration instances.
 
 ## `cez_hdo.reload_frontend_card`
 
-Redeploys/refreshes the frontend card file.
-Useful during development or when the card doesn't load.
+Re-registers the Lovelace card path and resource. It does not build or copy the card bundle; use the frontend build/deploy procedure for that.
 
 Usage:
 

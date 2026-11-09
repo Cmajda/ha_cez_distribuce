@@ -4,19 +4,16 @@ This file contains a list of known issues and their resolution status.
 
 ---
 
-## Current Issues (v3.1.1)
+## Current Issues (v3.3.1)
 
-### 1. HDO schedule doesn't display last days correctly
+### 1. Automatic refresh may fail when OCR or the API is unavailable
 
-**Status:** ⚠️ Known limitation (CAPTCHA)
+**Status:** ⚠️ External-service dependency
 
-**Description:** After 1 day from configuration, the HDO schedule may display last days
-as high tariff (VT). This is caused by ČEZ API limitation – due to CAPTCHA,
-data cannot be automatically updated daily.
+**Description:** Automatic refresh uses OCR to solve CAPTCHA and depends on the availability of both the OCR service and ČEZ Distribuce API.
+Outages or rate limits may delay refresh; data is valid for 6 days.
 
-**Workaround:** Automatic refresh remains available. In this development version,
-you can also click **Manually refresh** on the Lovelace card and enter a new CAPTCHA
-at any time to load current data.
+**Workaround:** Click **Manually refresh** on the Lovelace card, enter the CAPTCHA, and select the signal. Previously stored data remains available if manual refresh fails.
 
 ### 2. Compatibility with Home Assistant 2026.02+ (v3.1.0)
 
@@ -39,9 +36,9 @@ The object no longer has a `mode` attribute, which caused an error during integr
 **Description:** ČEZ Distribuce introduced CAPTCHA protection on their API, which
 caused the integration to stop working for new installations.
 
-**Resolution:** The integration now displays a CAPTCHA image during configuration.
-Data is fetched once and stored in cache. Data validity is **6 days**,
-after which reconfiguration is required.
+**Resolution:** The integration displays a CAPTCHA image during configuration and stores fetched data in cache.
+Automatic refresh attempts to solve CAPTCHA with OCR; data can also be refreshed
+from the Lovelace card using **Manually refresh**.
 
 **Validity tracking:** New sensors `data_valid`, `days_until_expiry`,
 `data_age_days`, and `data_valid_until` allow tracking data validity

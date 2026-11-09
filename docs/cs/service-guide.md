@@ -37,12 +37,11 @@ Parametry:
 - `low_tariff_price` – cena za kWh v nízkém tarifu (NT) v Kč
 - `high_tariff_price` – cena za kWh ve vysokém tarifu (VT) v Kč
 
-Po nastavení se automaticky aktualizuje senzor `sensor.cez_hdo_aktualni_cena`.
+Po nastavení se automaticky aktualizuje senzor `sensor.cez_hdo_currentprice_{přípona}`. Služba nastaví ceny pro všechny aktivní instance integrace.
 
 ## `cez_hdo.reload_frontend_card`
 
-Znovu nasadí/obnoví frontend soubor karty.
-Užitečné při vývoji nebo když se karta nenačítá.
+Znovu zaregistruje cestu a zdroj Lovelace karty. Sama kartu nesestavuje ani nekopíruje; k tomu použijte build/deploy postup pro frontend.
 
 Použití:
 
