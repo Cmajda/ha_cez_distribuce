@@ -6,7 +6,7 @@
 
 ### 🐛 Opravy
 
-- Anglické popisky dnů v rozvrhu jsou bez čárky a zůstávají na jednom řádku.
+- [#80](https://github.com/Cmajda/ha_cez_distribuce/issues/80) – anglické popisky dnů v rozvrhu jsou bez čárky a zůstávají na jednom řádku.
 - Informace o poslední aktualizaci je zarovnaná doprava.
 - Zvýšena verze zdroje Lovelace karty, aby Home Assistant načetl nový bundle.
 

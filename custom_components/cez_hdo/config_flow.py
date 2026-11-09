@@ -259,8 +259,10 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
             high_price = user_input.get(CONF_HIGH_TARIFF_PRICE, 0.0)
             auto_refresh = user_input.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
-            low_price_entity = user_input.get(CONF_LOW_TARIFF_PRICE_ENTITY)
-            high_price_entity = user_input.get(CONF_HIGH_TARIFF_PRICE_ENTITY)
+            low_entity_enabled = user_input.get(CONF_USE_LOW_TARIFF_PRICE_ENTITY, False)
+            high_entity_enabled = user_input.get(CONF_USE_HIGH_TARIFF_PRICE_ENTITY, False)
+            low_price_entity = user_input.get(CONF_LOW_TARIFF_PRICE_ENTITY) if low_entity_enabled else None
+            high_price_entity = user_input.get(CONF_HIGH_TARIFF_PRICE_ENTITY) if high_entity_enabled else None
 
             # Ensure EAN is set (should always be at this point)
             if self._ean is None:
@@ -309,6 +311,8 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                     vol.Optional(CONF_LOW_TARIFF_PRICE, default=0.0): vol.Coerce(float),
                     vol.Optional(CONF_HIGH_TARIFF_PRICE, default=0.0): vol.Coerce(float),
                     vol.Optional(CONF_AUTO_REFRESH, default=DEFAULT_AUTO_REFRESH): cv.boolean,
+                    vol.Optional(CONF_USE_LOW_TARIFF_PRICE_ENTITY, default=False): cv.boolean,
+                    vol.Optional(CONF_USE_HIGH_TARIFF_PRICE_ENTITY, default=False): cv.boolean,
                     vol.Optional(CONF_LOW_TARIFF_PRICE_ENTITY): selector.EntitySelector(
                         selector.EntitySelectorConfig(domain=["sensor", "input_number"])
                     ),

@@ -6,7 +6,7 @@
 
 ### 🐛 Fixes
 
-- English schedule day labels omit the comma and stay on one line.
+- [#80](https://github.com/Cmajda/ha_cez_distribuce/issues/80) – English schedule day labels omit the comma and stay on one line.
 - The last-updated information is right-aligned.
 - Bumped the Lovelace card resource version so Home Assistant loads the new bundle.
 
