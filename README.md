@@ -67,18 +67,15 @@ Dashboardem, řešení problémů i vývojářské informace.
 
 ### 🐛 Nahlásit chybu
 
-[Přímý formulář](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=bug_report.yml) ·
 [Výběr šablony](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose) ·
 [Postup včetně debug logů a diagnostiky](https://github.com/Cmajda/ha_cez_distribuce/wiki/Known-Issues-CS#jak-nahlásit-problém)
 
 ### 💡 Navrhnout vylepšení
 
-[Přímý formulář](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=feature_request.yml) ·
 [Výběr šablony](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose)
 
 ### ❓ Položit dotaz
 
-[Přímý formulář](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=question.yml) ·
 [Výběr šablony](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose) ·
 [GitHub Discussions](https://github.com/Cmajda/ha_cez_distribuce/discussions)
 
