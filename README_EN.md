@@ -63,16 +63,19 @@ troubleshooting, services, upgrades, and development.
 
 ### 🐛 Report a bug
 
-[Create a bug report](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=bug_report.yml) ·
+[Direct form](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=bug_report.yml) ·
+[Template chooser](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose) ·
 [Guide to debug logs and diagnostics](https://github.com/Cmajda/ha_cez_distribuce/wiki/Known-Issues-EN#how-to-report-an-issue)
 
 ### 💡 Request an improvement
 
-[Create a feature request](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=feature_request.yml)
+[Direct form](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=feature_request.yml) ·
+[Template chooser](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose)
 
 ### ❓ Ask a question
 
-[Create a question](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=question.yml) ·
+[Direct form](https://github.com/Cmajda/ha_cez_distribuce/issues/new?template=question.yml) ·
+[Template chooser](https://github.com/Cmajda/ha_cez_distribuce/issues/new/choose) ·
 [GitHub Discussions](https://github.com/Cmajda/ha_cez_distribuce/discussions)
 
 ## 🤝 Collaborators and Contributors
