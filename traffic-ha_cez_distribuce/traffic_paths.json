@@ -2,61 +2,61 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 183,
-    "uniques": 110
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
-    "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 39,
-    "uniques": 21
+    "count": 181,
+    "uniques": 100
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 31,
+    "count": 39,
     "uniques": 13
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
+    "title": "/blob/main/docs/cs/user-guide.md",
+    "count": 35,
+    "uniques": 20
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "/pulls",
-    "count": 8,
+    "count": 18,
     "uniques": 6
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/releases",
+    "title": "/releases",
+    "count": 14,
+    "uniques": 3
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/84",
     "title": "/issues/84",
+    "count": 7,
+    "uniques": 5
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/64",
+    "title": "/issues/64",
+    "count": 6,
+    "uniques": 6
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues/80",
+    "title": "/issues/80",
     "count": 6,
     "uniques": 4
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/pull/87",
+    "title": "/pull/87",
+    "count": 6,
+    "uniques": 2
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/discussions",
     "title": "/discussions",
     "count": 5,
     "uniques": 5
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues/83",
-    "title": "/issues/83",
-    "count": 5,
-    "uniques": 4
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/upgrade-guide.md",
-    "title": "/blob/main/docs/upgrade-guide.md",
-    "count": 4,
-    "uniques": 4
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/releases",
-    "title": "/releases",
-    "count": 4,
-    "uniques": 4
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues/80",
-    "title": "/issues/80",
-    "count": 4,
-    "uniques": 3
   }
 ]
