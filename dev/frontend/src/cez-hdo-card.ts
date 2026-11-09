@@ -10,9 +10,9 @@
 import { css, CSSResultGroup, html, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import {
-    getLanguageFromHass,
-    getTranslations,
-    TranslationStrings,
+  getLanguageFromHass,
+  getTranslations,
+  TranslationStrings,
 } from "./localization";
 
 // Type definitions
@@ -669,11 +669,14 @@ export class CezHdoCard extends LitElement {
       const month = String(start.getMonth() + 1).padStart(2, "0");
       const day = String(start.getDate()).padStart(2, "0");
       const dayKey = `${year}-${month}-${day}`;
-      const dayLabel = start.toLocaleDateString(dateLocale, {
-        weekday: "short",
-        day: "2-digit",
-        month: "2-digit",
-      });
+      const dayLabel =
+        lang === "en"
+          ? `${start.toLocaleDateString(dateLocale, { weekday: "short" })} ${start.toLocaleDateString(dateLocale, { month: "2-digit", day: "2-digit" })}`
+          : start.toLocaleDateString(dateLocale, {
+              weekday: "short",
+              day: "2-digit",
+              month: "2-digit",
+            });
 
       if (!days[dayKey]) {
         days[dayKey] = { label: dayLabel, items: [] };
@@ -989,6 +992,7 @@ export class CezHdoCard extends LitElement {
         font-size: 11px;
         color: var(--primary-text-color);
         flex-shrink: 0;
+        white-space: nowrap;
       }
 
       .schedule-bar {
@@ -1074,6 +1078,7 @@ export class CezHdoCard extends LitElement {
       }
 
       .manual-refresh-last-updated {
+        margin-left: auto;
         color: var(--secondary-text-color);
         font-size: 12px;
       }

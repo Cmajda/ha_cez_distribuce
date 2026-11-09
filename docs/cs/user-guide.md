@@ -362,7 +362,7 @@ Karta obsahuje vizualizaci 7denního HDO rozvrhu:
 ### Karta se nezobrazuje
 
 1. Stiskněte `Ctrl+F5` pro vyčištění cache prohlížeče
-2. Zkontrolujte, že URL `http://IP_HA:8123/cez_hdo/cez-hdo-card.js` vrací odpověď (status 200)
+2. Zkontrolujte, že URL `http://IP_HA:8123/cez_hdo_card/cez-hdo-card.js?v=3.3.1` vrací odpověď (status 200)
 3. Zkontrolujte konzoli prohlížeče (F12) pro případné chyby
 
 ### Entity nejsou k dispozici

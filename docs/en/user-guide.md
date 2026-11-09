@@ -368,7 +368,7 @@ The card includes a 7-day HDO schedule visualization:
 ### Card Not Displaying
 
 1. Press `Ctrl+F5` to clear browser cache
-2. Check that URL `http://HA_IP:8123/cez_hdo/cez-hdo-card.js` returns a response (status 200)
+2. Check that URL `http://HA_IP:8123/cez_hdo_card/cez-hdo-card.js?v=3.3.1` returns a response (status 200)
 3. Check browser console (F12) for any errors
 
 ### Entities Not Available

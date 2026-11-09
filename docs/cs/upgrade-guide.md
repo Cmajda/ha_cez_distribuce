@@ -144,7 +144,7 @@ Pokud máte jedno EAN s více signály (např. pro různé okruhy):
 ### Karta se nezobrazuje
 
 1. Stiskněte `Ctrl+F5`
-2. Zkontrolujte, že URL `/cez_hdo/cez-hdo-card.js` vrací 200
+2. Zkontrolujte, že URL `/cez_hdo_card/cez-hdo-card.js?v=3.3.1` vrací 200
 
 ### Entity nejsou k dispozici
 

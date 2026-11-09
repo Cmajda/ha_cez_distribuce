@@ -58,14 +58,12 @@ directory or mount an SMB share from HA.
 - `HA_USERNAME` – SMB username (default: current OS user)
 - `HA_PASSWORD` – SMB password (if not passed as argument;
   otherwise the script will prompt interactively)
-- `DEPLOY_WWW` – `1` = also copy the card to `/config/www/cez_hdo`
-  as fallback for `/local/...` (default: `0`)
 
 ### Arguments
 
 - `./deploy.sh` – deploy to `HA_CONFIG_DIR` (if already mounted)
 - `./deploy.sh IP PASSWORD` – mount `//IP/config` and deploy
-- `./deploy.sh clean [IP] [PASSWORD]` – remove integration + optionally `www/cez_hdo`
+- `./deploy.sh clean [IP] [PASSWORD]` – remove the integration
 
 ## Repository Structure
 
@@ -78,7 +76,6 @@ custom_components/cez_hdo/        # Home Assistant integration
   base_entity.py                  # shared loading/cache
   frontend/dist/cez-hdo-card.js   # built JS bundle for card
 
-www/cez_hdo/cez-hdo-card.js       # JS copy (helper / fallback)
 dev/deploy.sh                     # development deploy to HA
 docs/                             # documentation
 ```
@@ -96,20 +93,16 @@ Examples:
 # 2) Deploy with different SMB user
 HA_USERNAME=homeassistant ./dev/deploy.sh 192.168.1.50 mypassword
 
-# 3) Deploy to /config/www as fallback for /local
-DEPLOY_WWW=1 ./dev/deploy.sh 192.168.1.50 mypassword
-
-# 4) Local deploy (when you have HA config on disk)
+# 3) Local deploy (when you have HA config on disk)
 HA_CONFIG_DIR=/path/to/ha-config ./dev/deploy.sh
 
-# 5) Clean
+# 4) Clean
 ./dev/deploy.sh clean 192.168.1.50 mypassword
 ```
 
 Note on frontend:
 
-- Preferred URL for card source is `/cez_hdo/cez-hdo-card.js` (served from integration).
-- There's also a fallback copy to `config/www/cez_hdo`.
+- The integration serves the card from `/cez_hdo_card/cez-hdo-card.js`.
 
 ## Debug
 
@@ -123,5 +116,5 @@ logger:
 
 Quick check for card:
 
-- `http://HA_IP:8123/cez_hdo/cez-hdo-card.js` should return `200`
+- `http://HA_IP:8123/cez_hdo_card/cez-hdo-card.js?v=3.3.1` should return `200`
 - After update, you may need to press `Ctrl+F5`

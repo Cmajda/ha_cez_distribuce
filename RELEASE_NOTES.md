@@ -2,6 +2,16 @@
 
 ---
 
+## v3.3.1 (2026-11-09)
+
+### 🐛 Opravy
+
+- Anglické popisky dnů v rozvrhu jsou bez čárky a zůstávají na jednom řádku.
+- Informace o poslední aktualizaci je zarovnaná doprava.
+- Zvýšena verze zdroje Lovelace karty, aby Home Assistant načetl nový bundle.
+
+---
+
 ## v3.3.0 (2026-11-08)
 
 ### 🚀 Hlavní změny

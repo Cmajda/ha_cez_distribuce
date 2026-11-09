@@ -144,7 +144,7 @@ If you have one EAN with multiple signals (e.g., for different circuits):
 ### Card Not Displaying
 
 1. Press `Ctrl+F5`
-2. Check that URL `/cez_hdo/cez-hdo-card.js` returns 200
+2. Check that URL `/cez_hdo_card/cez-hdo-card.js?v=3.3.1` returns 200
 
 ### Entities Not Available
 

@@ -2,6 +2,16 @@
 
 ---
 
+## v3.3.1 (2026-11-09)
+
+### 🐛 Fixes
+
+- English schedule day labels omit the comma and stay on one line.
+- The last-updated information is right-aligned.
+- Bumped the Lovelace card resource version so Home Assistant loads the new bundle.
+
+---
+
 ## v3.3.0 (2026-11-08)
 
 ### 🚀 Main Changes
