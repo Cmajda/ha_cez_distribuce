@@ -13,11 +13,11 @@ jobs:
     validate-wiki:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v7.0.1
 
-            - uses: actions/setup-node@v4
+            - uses: actions/setup-node@v7.1.0
               with:
-                  node-version: "22"
+                  node-version: "24"
 
             - name: Checkout GitHub Wiki
               run: git clone --depth 1 "https://github.com/${GITHUB_REPOSITORY}.wiki.git" "$RUNNER_TEMP/wiki"
