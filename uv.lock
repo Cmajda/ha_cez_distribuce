@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.14.2, <=3.15.0"
 
 [[package]]
@@ -858,7 +858,7 @@ wheels = [
 
 [[package]]
 name = "ha-cez-distribuce"
-version = "3.0.0"
+version = "3.3.1"
 source = { virtual = "." }
 dependencies = [
     { name = "homeassistant" },

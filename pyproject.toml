@@ -1,6 +1,6 @@
 [project]
 name = "ha_cez_distribuce"
-version = "3.0.0"
+version = "3.3.1"
 description = "HomeAssistant integration for CEZ Distribution HDO."
 license-files = ["LICENSE*"]
 authors = [
