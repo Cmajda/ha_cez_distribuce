@@ -11,7 +11,7 @@ from homeassistant.core import HomeAssistant
 from . import DATA_COORDINATOR, DOMAIN
 
 # Keys to redact from diagnostics
-TO_REDACT = {"ean", "partner", "vkont", "vstelle", "anlage"}
+TO_REDACT = {"ean", "partner", "vkont", "vstelle", "anlage", "ocr_api_key"}
 
 
 async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: ConfigEntry) -> dict[str, Any]:

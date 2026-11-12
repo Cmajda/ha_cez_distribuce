@@ -14,6 +14,7 @@ This file contains a list of known issues and their resolution status.
 Outages or rate limits may delay refresh; data is valid for 6 days.
 
 **Workaround:** Click **Manually refresh** on the Lovelace card, enter the CAPTCHA, and select the signal. Previously stored data remains available if manual refresh fails.
+A personal OCR.space API key in the integration options avoids the shared demo key limits, see [OCR API Key](user-guide.md#ocr-api-key).
 
 ### 2. Compatibility with Home Assistant 2026.02+ (v3.1.0)
 

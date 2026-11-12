@@ -14,6 +14,7 @@ Tento soubor obsahuje seznam známých problémů a jejich stav řešení.
 Při výpadku nebo omezení požadavků se data nemusí obnovit včas; jejich platnost je 6 dní.
 
 **Řešení:** Spusťte **Manuálně obnovit** na Lovelace kartě, zadejte CAPTCHA a vyberte signál. Dosud uložená data zůstanou dostupná, pokud ruční obnova selže.
+Vlastní OCR.space API klíč v nastavení integrace obejde limity sdíleného demo klíče, viz [OCR API klíč](user-guide.md#ocr-api-klíč).
 
 ### 2. Kompatibilita s Home Assistant 2026.02+ (v3.1.0)
 

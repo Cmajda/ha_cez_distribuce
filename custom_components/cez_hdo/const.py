@@ -8,6 +8,11 @@ DOMAIN = "cez_hdo"
 CONF_AUTO_REFRESH = "auto_refresh"
 CONF_LOW_TARIFF_PRICE_ENTITY = "low_tariff_price_entity"
 CONF_HIGH_TARIFF_PRICE_ENTITY = "high_tariff_price_entity"
+CONF_OCR_API_KEY = "ocr_api_key"
+
+# Free OCR.space key signup. Shown as a description placeholder in the config
+# flow because hassfest rejects URLs inside translation strings.
+OCR_SPACE_FREE_KEY_URL = "https://ocr.space/ocrapi/freekey"
 
 # Auto-refresh configuration
 DEFAULT_AUTO_REFRESH = True

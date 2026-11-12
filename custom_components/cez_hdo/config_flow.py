@@ -18,7 +18,9 @@ from .const import (
     CONF_AUTO_REFRESH,
     CONF_HIGH_TARIFF_PRICE_ENTITY,
     CONF_LOW_TARIFF_PRICE_ENTITY,
+    CONF_OCR_API_KEY,
     DEFAULT_AUTO_REFRESH,
+    OCR_SPACE_FREE_KEY_URL,
     mask_ean,
 )
 
@@ -259,6 +261,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
             low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
             high_price = user_input.get(CONF_HIGH_TARIFF_PRICE, 0.0)
             auto_refresh = user_input.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
+            ocr_api_key = (user_input.get(CONF_OCR_API_KEY) or "").strip() or None
             low_entity_enabled = user_input.get(CONF_USE_LOW_TARIFF_PRICE_ENTITY, False)
             high_entity_enabled = user_input.get(CONF_USE_HIGH_TARIFF_PRICE_ENTITY, False)
             low_price_entity = user_input.get(CONF_LOW_TARIFF_PRICE_ENTITY) if low_entity_enabled else None
@@ -299,6 +302,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                     CONF_SIGNAL: self._signal,
                     CONF_ENTITY_SUFFIX: self._entity_suffix,
                     CONF_AUTO_REFRESH: auto_refresh,
+                    CONF_OCR_API_KEY: ocr_api_key,
                     CONF_LOW_TARIFF_PRICE_ENTITY: low_price_entity,
                     CONF_HIGH_TARIFF_PRICE_ENTITY: high_price_entity,
                 },
@@ -311,6 +315,7 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                     vol.Optional(CONF_LOW_TARIFF_PRICE, default=0.0): vol.Coerce(float),
                     vol.Optional(CONF_HIGH_TARIFF_PRICE, default=0.0): vol.Coerce(float),
                     vol.Optional(CONF_AUTO_REFRESH, default=DEFAULT_AUTO_REFRESH): cv.boolean,
+                    vol.Optional(CONF_OCR_API_KEY, default=""): cv.string,
                     vol.Optional(CONF_USE_LOW_TARIFF_PRICE_ENTITY, default=False): cv.boolean,
                     vol.Optional(CONF_USE_HIGH_TARIFF_PRICE_ENTITY, default=False): cv.boolean,
                     vol.Optional(CONF_LOW_TARIFF_PRICE_ENTITY): selector.EntitySelector(
@@ -321,6 +326,9 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                     ),
                 }
             ),
+            description_placeholders={
+                "ocr_key_url": OCR_SPACE_FREE_KEY_URL,
+            },
         )
 
     @staticmethod
@@ -475,6 +483,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
             low_price = user_input.get(CONF_LOW_TARIFF_PRICE, 0.0)
             high_price = user_input.get(CONF_HIGH_TARIFF_PRICE, 0.0)
             auto_refresh = user_input.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
+            ocr_api_key = (user_input.get(CONF_OCR_API_KEY) or "").strip() or None
 
             # Ensure EAN is set (should always be at this point)
             if self._ean is None:
@@ -496,6 +505,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                 CONF_EAN: self._ean,
                 CONF_SIGNAL: self._signal,
                 CONF_AUTO_REFRESH: auto_refresh,
+                CONF_OCR_API_KEY: ocr_api_key,
                 CONF_LOW_TARIFF_PRICE_ENTITY: low_price_entity,
                 CONF_HIGH_TARIFF_PRICE_ENTITY: high_price_entity,
             }
@@ -526,6 +536,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
 
             # Update auto_refresh setting in coordinator
             await self._update_auto_refresh(auto_refresh)
+            await self._update_ocr_api_key(ocr_api_key)
             await self._update_price_entities(low_price_entity, high_price_entity)
 
             # Return empty options - all config is in data
@@ -535,6 +546,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
         current_low_price = 0.0
         current_high_price = 0.0
         current_auto_refresh = self._config_entry.data.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
+        current_ocr_api_key = self._config_entry.data.get(CONF_OCR_API_KEY) or ""
         current_low_price_entity = self._config_entry.data.get(CONF_LOW_TARIFF_PRICE_ENTITY)
         current_high_price_entity = self._config_entry.data.get(CONF_HIGH_TARIFF_PRICE_ENTITY)
 
@@ -564,6 +576,7 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                     vol.Optional(CONF_LOW_TARIFF_PRICE, default=current_low_price): vol.Coerce(float),
                     vol.Optional(CONF_HIGH_TARIFF_PRICE, default=current_high_price): vol.Coerce(float),
                     vol.Optional(CONF_AUTO_REFRESH, default=current_auto_refresh): cv.boolean,
+                    vol.Optional(CONF_OCR_API_KEY, default=current_ocr_api_key): cv.string,
                     vol.Optional(
                         CONF_USE_LOW_TARIFF_PRICE_ENTITY,
                         default=bool(current_low_price_entity),
@@ -580,6 +593,9 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                     ),
                 }
             ),
+            description_placeholders={
+                "ocr_key_url": OCR_SPACE_FREE_KEY_URL,
+            },
         )
 
     async def _update_auto_refresh(self, enabled: bool) -> None:
@@ -595,6 +611,16 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                 await coordinator.schedule_auto_refresh()
             else:
                 coordinator.stop_auto_refresh()
+
+    async def _update_ocr_api_key(self, api_key: str | None) -> None:
+        """Pass the OCR.space API key to the running coordinator."""
+        from . import DATA_COORDINATOR, DOMAIN
+
+        entry_data = self.hass.data.get(DOMAIN, {}).get(self._config_entry.entry_id, {})
+        coordinator = entry_data.get(DATA_COORDINATOR)
+
+        if coordinator:
+            coordinator.set_ocr_api_key(api_key)
 
     async def _update_price_entities(
         self,

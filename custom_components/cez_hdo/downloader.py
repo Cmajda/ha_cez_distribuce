@@ -31,8 +31,13 @@ CEZ_TIMEZONE = ZoneInfo("Europe/Prague")
 
 # OCR.space API configuration
 OCR_SPACE_API_URL = "https://api.ocr.space/parse/image"
-# Shared OCR.space demo key. The provider rate limits it aggressively.
+# Fallback OCR.space demo key, used when the user has not configured a personal
+# key in the integration options. The provider rate limits it aggressively.
 OCR_SPACE_API_KEY = "helloworld"
+
+# OCR.space flags results made with the shared demo key in a top-level
+# "Notice" field. The flag is logged once per process.
+_ocr_notice_logged = False
 
 # HTTP headers for CEZ API requests
 CEZ_HEADERS = {
@@ -175,7 +180,28 @@ class OcrRateLimitError(Exception):
         self.retry_after = retry_after
 
 
-def _parse_ocr_rate_limit_error(err: urllib.error.HTTPError) -> tuple[str | None, int | None]:
+class OcrAuthError(Exception):
+    """Raised when OCR.space rejects the configured API key."""
+
+    def __init__(
+        self,
+        message: str,
+        http_status: int | None = None,
+        error_code: str | None = None,
+    ) -> None:
+        """Initialize the error.
+
+        Args:
+            message: Human-readable error description.
+            http_status: HTTP status returned by OCR.space.
+            error_code: Provider error code (for example E555).
+        """
+        super().__init__(message)
+        self.http_status = http_status
+        self.error_code = error_code
+
+
+def _parse_ocr_error_details(err: urllib.error.HTTPError) -> tuple[str | None, int | None]:
     """Read the provider error code and retryAfter from an OCR.space error body.
 
     The rate-limit response carries its delay in the JSON body, not in a
@@ -209,17 +235,38 @@ def _parse_ocr_rate_limit_error(err: urllib.error.HTTPError) -> tuple[str | None
     return error_code, retry_after
 
 
-def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
+def _log_ocr_provider_notice(result: dict[str, Any]) -> None:
+    """Log OCR.space's demo-key notice once per process.
+
+    The notice repeats on every response, so logging it each time would flood
+    the log on every refresh. The provider text itself is only useful in debug.
+    """
+    global _ocr_notice_logged
+
+    notice = result.get("Notice")
+    if _ocr_notice_logged or not isinstance(notice, str) or not notice.strip():
+        return
+    _ocr_notice_logged = True
+    _LOGGER.warning(
+        "OCR.space is serving the shared demo key, which is rate limited and testing-only; "
+        "add a personal API key in the integration options"
+    )
+    _LOGGER.debug("OCR.space provider notice: %s", notice.strip())
+
+
+def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1, api_key: str | None = None) -> str | None:
     """Solve CAPTCHA using OCR.space Engine 3 with retry logic.
 
     Args:
         captcha_base64: Base64 encoded CAPTCHA image (PNG).
         attempt: Current attempt number (for logging).
+        api_key: Personal OCR.space API key. Falls back to the shared demo key.
 
     Returns:
         Recognized 4-letter uppercase code or None if failed.
 
     Raises:
+        OcrAuthError: When OCR.space rejects the configured API key.
         OcrRateLimitError: When OCR.space rejects the request due to rate limiting.
     """
     payload = {
@@ -232,6 +279,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
     }
 
     data = urllib.parse.urlencode(payload).encode("utf-8")
+    request_api_key = api_key or OCR_SPACE_API_KEY
     ocr_attempt = 1
     max_ocr_attempts = 10  # Max retries for OCR timeouts
 
@@ -244,7 +292,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
         )
 
         req = urllib.request.Request(OCR_SPACE_API_URL, data=data)
-        req.add_header("apikey", OCR_SPACE_API_KEY)
+        req.add_header("apikey", request_api_key)
 
         try:
             # OCR.space free tier can be slow, use 90s timeout
@@ -260,14 +308,17 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
                 continue
 
             if result.get("ParsedResults"):
-                raw_text = result["ParsedResults"][0].get("ParsedText", "").strip()
+                _log_ocr_provider_notice(result)
+
+                raw_text = (result["ParsedResults"][0].get("ParsedText") or "").strip()
 
                 # Filter: only uppercase letters A-Z, no numbers, no special chars
                 text = "".join(c for c in raw_text.upper() if c.isalpha() and c.isascii())
 
                 _LOGGER.debug("OCR: raw='%s' → filtered='%s'", raw_text, text)
 
-                # CAPTCHA must be exactly 4 characters
+                # CAPTCHA must be exactly 4 characters. A demo-key response fails
+                # here because the provider prepends its notice to the parsed text.
                 if len(text) != 4:
                     _LOGGER.warning("OCR failed - expected 4 chars, got %d: '%s'", len(text), text)
                     return None
@@ -279,19 +330,30 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
             return None
 
         except urllib.error.HTTPError as err:
-            if err.code in (403, 429):
-                error_code, retry_after = _parse_ocr_rate_limit_error(err)
-                message = f"OCR.space rate limit reached (HTTP {err.code})"
-                if error_code:
-                    message += f", {error_code}"
-                if retry_after is not None:
-                    message += f", retry after {retry_after} s"
-                raise OcrRateLimitError(
-                    message,
-                    http_status=err.code,
-                    error_code=error_code,
-                    retry_after=retry_after,
-                ) from err
+            if err.code in (401, 403, 429):
+                error_code, retry_after = _parse_ocr_error_details(err)
+
+                # A rejected key is a configuration problem: retrying it only
+                # burns the daily attempt budget and hides the real cause.
+                if err.code == 401 or error_code == "E555":
+                    raise OcrAuthError(
+                        "OCR.space rejected the API key",
+                        http_status=err.code,
+                        error_code=error_code,
+                    ) from err
+
+                if err.code in (403, 429):
+                    message = f"OCR.space rate limit reached (HTTP {err.code})"
+                    if error_code:
+                        message += f", {error_code}"
+                    if retry_after is not None:
+                        message += f", retry after {retry_after} s"
+                    raise OcrRateLimitError(
+                        message,
+                        http_status=err.code,
+                        error_code=error_code,
+                        retry_after=retry_after,
+                    ) from err
             _LOGGER.warning("OCR HTTP error %d: %s", err.code, err.reason)
             ocr_attempt += 1
 
@@ -308,7 +370,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
     return None
 
 
-def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
+def fetch_data_with_auto_captcha(ean: str, api_key: str | None = None) -> dict[str, Any] | None:
     """Fetch HDO data with automatic CAPTCHA solving using OCR.
 
     This function attempts to:
@@ -319,11 +381,14 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
 
     Args:
         ean: EAN number to fetch data for.
+        api_key: Personal OCR.space API key. Falls back to the shared demo key.
 
     Returns:
         API response dict if successful, None if failed.
 
     Raises:
+        OcrAuthError: When OCR.space rejects the configured API key.
+            No further CAPTCHA attempts are made in that case.
         OcrRateLimitError: When OCR.space rejects the request due to rate limiting.
             No further CAPTCHA attempts are made in that case.
     """
@@ -348,7 +413,7 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
 
             # Step 2: Solve CAPTCHA with OCR
             _LOGGER.debug("CAPTCHA attempt %d/%d: Sending to OCR.space...", attempt, max_captcha_attempts)
-            captcha_code = solve_captcha_with_ocr(captcha_session.image_base64, attempt)
+            captcha_code = solve_captcha_with_ocr(captcha_session.image_base64, attempt, api_key)
 
             if not captcha_code:
                 _LOGGER.warning(
@@ -396,6 +461,10 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
         except OcrRateLimitError:
             # Retrying a rate-limited request only extends the rate limit.
             # The caller handles the provider's retryAfter once for the whole refresh.
+            raise
+
+        except OcrAuthError:
+            # A rejected key is a configuration problem; a new image cannot fix it.
             raise
 
         except ValueError as err:

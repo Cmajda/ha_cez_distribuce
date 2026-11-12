@@ -94,6 +94,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         ean: str,
         signal: str | None = None,
         auto_refresh: bool = DEFAULT_AUTO_REFRESH,
+        ocr_api_key: str | None = None,
     ) -> None:
         """Initialize the coordinator."""
         super().__init__(
@@ -104,6 +105,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         )
         self.ean = ean
         self.signal = signal
+        self._ocr_api_key: str | None = ocr_api_key or None
         self._state_update_unsub: Callable[[], None] | None = None
         self._price_entity_unsub: Callable[[], None] | None = None
         self._price_entities: dict[str, str | None] = {"low": None, "high": None}
@@ -131,10 +133,11 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         self.data = CezHdoData()
 
         _LOGGER.debug(
-            "CezHdoCoordinator initialized: ean=%s, signal=%s, auto_refresh=%s",
+            "CezHdoCoordinator initialized: ean=%s, signal=%s, auto_refresh=%s, custom_ocr_key=%s",
             mask_ean(self.ean),
             self.signal,
             self._auto_refresh_enabled,
+            self._ocr_api_key is not None,
         )
 
     async def async_initialize(self) -> None:
@@ -509,6 +512,10 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
         )
         return deadline
 
+    def set_ocr_api_key(self, api_key: str | None) -> None:
+        """Update the OCR.space API key used for automatic refresh."""
+        self._ocr_api_key = api_key or None
+
     async def _async_auto_refresh_attempt(self, _now: datetime | None = None) -> None:
         """Perform an automatic data refresh attempt using OCR."""
         self._next_attempt_unsub = None  # Clear the subscription
@@ -535,6 +542,7 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
             new_data = await self.hass.async_add_executor_job(
                 downloader.fetch_data_with_auto_captcha,
                 self.ean,
+                self._ocr_api_key,
             )
 
             if new_data and new_data.get("data"):
@@ -597,6 +605,16 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
 
                 # Schedule next attempt with minimum delay (log as warning)
                 await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
+
+        except downloader.OcrAuthError as err:
+            _LOGGER.error(
+                "CezHdoCoordinator: OCR.space rejected the configured API key (HTTP %s%s); "
+                "check the key in the integration options",
+                err.http_status or "error",
+                f", {err.error_code}" if err.error_code else "",
+            )
+            await self._check_auto_refresh_failure_notification()
+            await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
 
         except downloader.OcrRateLimitError as err:
             retry_at = await self.async_handle_ocr_rate_limit(err.retry_after)

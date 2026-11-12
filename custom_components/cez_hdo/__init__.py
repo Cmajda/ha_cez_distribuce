@@ -14,6 +14,7 @@ from .const import (
     CONF_AUTO_REFRESH,
     CONF_HIGH_TARIFF_PRICE_ENTITY,
     CONF_LOW_TARIFF_PRICE_ENTITY,
+    CONF_OCR_API_KEY,
     DEFAULT_AUTO_REFRESH,
 )
 from .frontend import CezHdoCardRegistration
@@ -163,9 +164,12 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
 
             _LOGGER.info("CEZ HDO refresh_data: Starting manual refresh for EAN %s", mask_ean(ean))
 
+            config_entry = hass.config_entries.async_get_entry(coord_entry_id)
+            ocr_api_key = config_entry.data.get(CONF_OCR_API_KEY) if config_entry else None
+
             try:
                 # Call OCR-based refresh
-                new_data = await hass.async_add_executor_job(downloader.fetch_data_with_auto_captcha, ean)
+                new_data = await hass.async_add_executor_job(downloader.fetch_data_with_auto_captcha, ean, ocr_api_key)
 
                 if new_data and new_data.get("statusCode") == 200:
                     # Update coordinator with new data
@@ -187,6 +191,17 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                         "CEZ HDO refresh_data: Failed to refresh data for EAN %s (OCR or API error)", mask_ean(ean)
                     )
                     failed_count += 1
+
+            except downloader.OcrAuthError as err:
+                _LOGGER.error(
+                    "CEZ HDO refresh_data: OCR.space rejected the API key for EAN %s (HTTP %s%s); "
+                    "check the key in the integration options",
+                    mask_ean(ean),
+                    err.http_status or "error",
+                    f", {err.error_code}" if err.error_code else "",
+                )
+                failed_count += 1
+                continue
 
             except downloader.OcrRateLimitError as err:
                 # OCR.space rate limits apply to the HA host, not just this EAN.
@@ -294,6 +309,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     signal = entry.data.get("signal")
     entity_suffix = entry.data.get("entity_suffix")
     auto_refresh = entry.data.get(CONF_AUTO_REFRESH, DEFAULT_AUTO_REFRESH)
+    ocr_api_key = entry.data.get(CONF_OCR_API_KEY)
     low_price_entity = entry.data.get(CONF_LOW_TARIFF_PRICE_ENTITY)
     high_price_entity = entry.data.get(CONF_HIGH_TARIFF_PRICE_ENTITY)
 
@@ -304,7 +320,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Create coordinator
     from .coordinator import CezHdoCoordinator
 
-    coordinator = CezHdoCoordinator(hass, ean, signal, auto_refresh)
+    coordinator = CezHdoCoordinator(hass, ean, signal, auto_refresh, ocr_api_key)
     await coordinator.async_initialize()
 
     # Check for initial prices from config flow
