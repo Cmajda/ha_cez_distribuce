@@ -264,6 +264,7 @@ poskytovatel výrazně omezuje a označuje jako testovací. Vlastní klíč je z
    **OCR.space API klíč** v kroku nastavení cen
 
 Pokud pole necháte prázdné, používá se nadále sdílený demo klíč. Klíč se ukládá do konfigurace integrace.
+Pokud OCR.space klíč odmítne, automatické obnovení zapíše do logu jasnou chybu a bude dál zkoušet obnovu; po zadání platného klíče se obnovení rozběhne.
 
 ### Sledování platnosti dat
 

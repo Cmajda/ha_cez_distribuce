@@ -267,6 +267,7 @@ limits and marks as testing-only. A personal key is free and is not shared with 
    **OCR.space API key** on the price settings step
 
 Leave the field empty to keep using the shared demo key. The key is stored in the integration configuration entry.
+If OCR.space rejects the key, automatic refresh logs a clear error and keeps retrying; enter a valid key to resume.
 
 ### Tracking Data Validity
 

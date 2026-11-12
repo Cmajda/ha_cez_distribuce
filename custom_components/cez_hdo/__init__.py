@@ -192,6 +192,17 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     )
                     failed_count += 1
 
+            except downloader.OcrAuthError as err:
+                _LOGGER.error(
+                    "CEZ HDO refresh_data: OCR.space rejected the API key for EAN %s (HTTP %s%s); "
+                    "check the key in the integration options",
+                    mask_ean(ean),
+                    err.http_status or "error",
+                    f", {err.error_code}" if err.error_code else "",
+                )
+                failed_count += 1
+                continue
+
             except downloader.OcrRateLimitError as err:
                 # OCR.space rate limits apply to the HA host, not just this EAN.
                 for _, other_coordinator, _ in coordinators_to_refresh:

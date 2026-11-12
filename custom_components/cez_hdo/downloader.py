@@ -180,7 +180,28 @@ class OcrRateLimitError(Exception):
         self.retry_after = retry_after
 
 
-def _parse_ocr_rate_limit_error(err: urllib.error.HTTPError) -> tuple[str | None, int | None]:
+class OcrAuthError(Exception):
+    """Raised when OCR.space rejects the configured API key."""
+
+    def __init__(
+        self,
+        message: str,
+        http_status: int | None = None,
+        error_code: str | None = None,
+    ) -> None:
+        """Initialize the error.
+
+        Args:
+            message: Human-readable error description.
+            http_status: HTTP status returned by OCR.space.
+            error_code: Provider error code (for example E555).
+        """
+        super().__init__(message)
+        self.http_status = http_status
+        self.error_code = error_code
+
+
+def _parse_ocr_error_details(err: urllib.error.HTTPError) -> tuple[str | None, int | None]:
     """Read the provider error code and retryAfter from an OCR.space error body.
 
     The rate-limit response carries its delay in the JSON body, not in a
@@ -245,6 +266,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1, api_key: str |
         Recognized 4-letter uppercase code or None if failed.
 
     Raises:
+        OcrAuthError: When OCR.space rejects the configured API key.
         OcrRateLimitError: When OCR.space rejects the request due to rate limiting.
     """
     payload = {
@@ -308,19 +330,30 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1, api_key: str |
             return None
 
         except urllib.error.HTTPError as err:
-            if err.code in (403, 429):
-                error_code, retry_after = _parse_ocr_rate_limit_error(err)
-                message = f"OCR.space rate limit reached (HTTP {err.code})"
-                if error_code:
-                    message += f", {error_code}"
-                if retry_after is not None:
-                    message += f", retry after {retry_after} s"
-                raise OcrRateLimitError(
-                    message,
-                    http_status=err.code,
-                    error_code=error_code,
-                    retry_after=retry_after,
-                ) from err
+            if err.code in (401, 403, 429):
+                error_code, retry_after = _parse_ocr_error_details(err)
+
+                # A rejected key is a configuration problem: retrying it only
+                # burns the daily attempt budget and hides the real cause.
+                if err.code == 401 or error_code == "E555":
+                    raise OcrAuthError(
+                        "OCR.space rejected the API key",
+                        http_status=err.code,
+                        error_code=error_code,
+                    ) from err
+
+                if err.code in (403, 429):
+                    message = f"OCR.space rate limit reached (HTTP {err.code})"
+                    if error_code:
+                        message += f", {error_code}"
+                    if retry_after is not None:
+                        message += f", retry after {retry_after} s"
+                    raise OcrRateLimitError(
+                        message,
+                        http_status=err.code,
+                        error_code=error_code,
+                        retry_after=retry_after,
+                    ) from err
             _LOGGER.warning("OCR HTTP error %d: %s", err.code, err.reason)
             ocr_attempt += 1
 
@@ -354,6 +387,8 @@ def fetch_data_with_auto_captcha(ean: str, api_key: str | None = None) -> dict[s
         API response dict if successful, None if failed.
 
     Raises:
+        OcrAuthError: When OCR.space rejects the configured API key.
+            No further CAPTCHA attempts are made in that case.
         OcrRateLimitError: When OCR.space rejects the request due to rate limiting.
             No further CAPTCHA attempts are made in that case.
     """
@@ -426,6 +461,10 @@ def fetch_data_with_auto_captcha(ean: str, api_key: str | None = None) -> dict[s
         except OcrRateLimitError:
             # Retrying a rate-limited request only extends the rate limit.
             # The caller handles the provider's retryAfter once for the whole refresh.
+            raise
+
+        except OcrAuthError:
+            # A rejected key is a configuration problem; a new image cannot fix it.
             raise
 
         except ValueError as err:

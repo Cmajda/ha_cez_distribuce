@@ -606,6 +606,16 @@ class CezHdoCoordinator(DataUpdateCoordinator[CezHdoData]):
                 # Schedule next attempt with minimum delay (log as warning)
                 await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
 
+        except downloader.OcrAuthError as err:
+            _LOGGER.error(
+                "CezHdoCoordinator: OCR.space rejected the configured API key (HTTP %s%s); "
+                "check the key in the integration options",
+                err.http_status or "error",
+                f", {err.error_code}" if err.error_code else "",
+            )
+            await self._check_auto_refresh_failure_notification()
+            await self._async_schedule_auto_refresh(min_delay_minutes=MIN_RETRY_DELAY_MINUTES, after_failure=True)
+
         except downloader.OcrRateLimitError as err:
             retry_at = await self.async_handle_ocr_rate_limit(err.retry_after)
             if retry_at is not None:
