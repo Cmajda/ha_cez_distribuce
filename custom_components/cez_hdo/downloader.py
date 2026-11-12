@@ -34,6 +34,10 @@ OCR_SPACE_API_URL = "https://api.ocr.space/parse/image"
 # Shared OCR.space demo key. The provider rate limits it aggressively.
 OCR_SPACE_API_KEY = "helloworld"
 
+# OCR.space flags results made with the shared demo key in a top-level
+# "Notice" field. The flag is logged once per process.
+_ocr_notice_logged = False
+
 # HTTP headers for CEZ API requests
 CEZ_HEADERS = {
     "Accept": "application/json, text/plain, */*",
@@ -209,6 +213,25 @@ def _parse_ocr_rate_limit_error(err: urllib.error.HTTPError) -> tuple[str | None
     return error_code, retry_after
 
 
+def _log_ocr_provider_notice(result: dict[str, Any]) -> None:
+    """Log OCR.space's demo-key notice once per process.
+
+    The notice repeats on every response, so logging it each time would flood
+    the log on every refresh. The provider text itself is only useful in debug.
+    """
+    global _ocr_notice_logged
+
+    notice = result.get("Notice")
+    if _ocr_notice_logged or not isinstance(notice, str) or not notice.strip():
+        return
+    _ocr_notice_logged = True
+    _LOGGER.warning(
+        "OCR.space is serving the shared demo key, which is rate limited and testing-only; "
+        "add a personal API key in the integration options"
+    )
+    _LOGGER.debug("OCR.space provider notice: %s", notice.strip())
+
+
 def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
     """Solve CAPTCHA using OCR.space Engine 3 with retry logic.
 
@@ -260,14 +283,17 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
                 continue
 
             if result.get("ParsedResults"):
-                raw_text = result["ParsedResults"][0].get("ParsedText", "").strip()
+                _log_ocr_provider_notice(result)
+
+                raw_text = (result["ParsedResults"][0].get("ParsedText") or "").strip()
 
                 # Filter: only uppercase letters A-Z, no numbers, no special chars
                 text = "".join(c for c in raw_text.upper() if c.isalpha() and c.isascii())
 
                 _LOGGER.debug("OCR: raw='%s' → filtered='%s'", raw_text, text)
 
-                # CAPTCHA must be exactly 4 characters
+                # CAPTCHA must be exactly 4 characters. A demo-key response fails
+                # here because the provider prepends its notice to the parsed text.
                 if len(text) != 4:
                     _LOGGER.warning("OCR failed - expected 4 chars, got %d: '%s'", len(text), text)
                     return None
