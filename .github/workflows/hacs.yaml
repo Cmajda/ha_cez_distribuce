@@ -11,6 +11,8 @@ on:
 
 jobs:
     validate-hacs:
+        # Forks do not inherit the upstream issue tracker and topics.
+        if: github.event.repository.fork == false
         runs-on: "ubuntu-latest"
         steps:
             - uses: "actions/checkout@v7.0.1"
