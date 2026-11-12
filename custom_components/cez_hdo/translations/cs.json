@@ -62,7 +62,7 @@
                     "low_tariff_price_entity": "Volitelné. Cena se průběžně načítá z vybraného číselného senzoru nebo pomocníka.",
                     "high_tariff_price_entity": "Volitelné. Cena se průběžně načítá z vybraného číselného senzoru nebo pomocníka.",
                     "auto_refresh": "Povolit automatické obnovení HDO dat (max. 24 pokusů denně)",
-                    "ocr_api_key": "Volitelný klíč zdarma z https://ocr.space/ocrapi/freekey - zaregistrujte svůj e-mail a vložte klíč z potvrzovací zprávy. Bez něj se používá sdílený demo klíč, který poskytovatel výrazně omezuje a označuje jako testovací."
+                    "ocr_api_key": "Volitelný klíč zdarma z {ocr_key_url} - zaregistrujte svůj e-mail a vložte klíč z potvrzovací zprávy. Bez něj se používá sdílený demo klíč, který poskytovatel výrazně omezuje a označuje jako testovací."
                 }
             }
         },
@@ -133,7 +133,7 @@
                     "low_tariff_price_entity": "Volitelné. Cena se průběžně načítá z vybraného číselného senzoru nebo pomocníka.",
                     "high_tariff_price_entity": "Volitelné. Cena se průběžně načítá z vybraného číselného senzoru nebo pomocníka.",
                     "auto_refresh": "Povolit automatické obnovení HDO dat (max. 24 pokusů denně)",
-                    "ocr_api_key": "Volitelný klíč zdarma z https://ocr.space/ocrapi/freekey - zaregistrujte svůj e-mail a vložte klíč z potvrzovací zprávy. Bez něj se používá sdílený demo klíč, který poskytovatel výrazně omezuje a označuje jako testovací."
+                    "ocr_api_key": "Volitelný klíč zdarma z {ocr_key_url} - zaregistrujte svůj e-mail a vložte klíč z potvrzovací zprávy. Bez něj se používá sdílený demo klíč, který poskytovatel výrazně omezuje a označuje jako testovací."
                 }
             }
         },

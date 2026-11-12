@@ -20,6 +20,7 @@ from .const import (
     CONF_LOW_TARIFF_PRICE_ENTITY,
     CONF_OCR_API_KEY,
     DEFAULT_AUTO_REFRESH,
+    OCR_SPACE_FREE_KEY_URL,
     mask_ean,
 )
 
@@ -325,6 +326,9 @@ class CezHdoConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):  # type: ignor
                     ),
                 }
             ),
+            description_placeholders={
+                "ocr_key_url": OCR_SPACE_FREE_KEY_URL,
+            },
         )
 
     @staticmethod
@@ -589,6 +593,9 @@ class CezHdoOptionsFlow(config_entries.OptionsFlow):
                     ),
                 }
             ),
+            description_placeholders={
+                "ocr_key_url": OCR_SPACE_FREE_KEY_URL,
+            },
         )
 
     async def _update_auto_refresh(self, enabled: bool) -> None:

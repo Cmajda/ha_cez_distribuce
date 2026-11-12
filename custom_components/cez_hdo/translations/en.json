@@ -62,7 +62,7 @@
                     "low_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
                     "high_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
                     "auto_refresh": "Enable automatic HDO data refresh (max 24 attempts per day)",
-                    "ocr_api_key": "Optional free key from https://ocr.space/ocrapi/freekey - sign up with your email and paste the key from the confirmation message. Without it, the shared demo key is used, which the provider rate limits and marks as testing-only."
+                    "ocr_api_key": "Optional free key from {ocr_key_url} - sign up with your email and paste the key from the confirmation message. Without it, the shared demo key is used, which the provider rate limits and marks as testing-only."
                 }
             }
         },
@@ -133,7 +133,7 @@
                     "low_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
                     "high_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
                     "auto_refresh": "Enable automatic HDO data refresh (max 24 attempts per day)",
-                    "ocr_api_key": "Optional free key from https://ocr.space/ocrapi/freekey - sign up with your email and paste the key from the confirmation message. Without it, the shared demo key is used, which the provider rate limits and marks as testing-only."
+                    "ocr_api_key": "Optional free key from {ocr_key_url} - sign up with your email and paste the key from the confirmation message. Without it, the shared demo key is used, which the provider rate limits and marks as testing-only."
                 }
             }
         },
