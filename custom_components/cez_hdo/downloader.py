@@ -31,7 +31,8 @@ CEZ_TIMEZONE = ZoneInfo("Europe/Prague")
 
 # OCR.space API configuration
 OCR_SPACE_API_URL = "https://api.ocr.space/parse/image"
-# Shared OCR.space demo key. The provider rate limits it aggressively.
+# Fallback OCR.space demo key, used when the user has not configured a personal
+# key in the integration options. The provider rate limits it aggressively.
 OCR_SPACE_API_KEY = "helloworld"
 
 # OCR.space flags results made with the shared demo key in a top-level
@@ -232,12 +233,13 @@ def _log_ocr_provider_notice(result: dict[str, Any]) -> None:
     _LOGGER.debug("OCR.space provider notice: %s", notice.strip())
 
 
-def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
+def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1, api_key: str | None = None) -> str | None:
     """Solve CAPTCHA using OCR.space Engine 3 with retry logic.
 
     Args:
         captcha_base64: Base64 encoded CAPTCHA image (PNG).
         attempt: Current attempt number (for logging).
+        api_key: Personal OCR.space API key. Falls back to the shared demo key.
 
     Returns:
         Recognized 4-letter uppercase code or None if failed.
@@ -255,6 +257,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
     }
 
     data = urllib.parse.urlencode(payload).encode("utf-8")
+    request_api_key = api_key or OCR_SPACE_API_KEY
     ocr_attempt = 1
     max_ocr_attempts = 10  # Max retries for OCR timeouts
 
@@ -267,7 +270,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
         )
 
         req = urllib.request.Request(OCR_SPACE_API_URL, data=data)
-        req.add_header("apikey", OCR_SPACE_API_KEY)
+        req.add_header("apikey", request_api_key)
 
         try:
             # OCR.space free tier can be slow, use 90s timeout
@@ -334,7 +337,7 @@ def solve_captcha_with_ocr(captcha_base64: str, attempt: int = 1) -> str | None:
     return None
 
 
-def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
+def fetch_data_with_auto_captcha(ean: str, api_key: str | None = None) -> dict[str, Any] | None:
     """Fetch HDO data with automatic CAPTCHA solving using OCR.
 
     This function attempts to:
@@ -345,6 +348,7 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
 
     Args:
         ean: EAN number to fetch data for.
+        api_key: Personal OCR.space API key. Falls back to the shared demo key.
 
     Returns:
         API response dict if successful, None if failed.
@@ -374,7 +378,7 @@ def fetch_data_with_auto_captcha(ean: str) -> dict[str, Any] | None:
 
             # Step 2: Solve CAPTCHA with OCR
             _LOGGER.debug("CAPTCHA attempt %d/%d: Sending to OCR.space...", attempt, max_captcha_attempts)
-            captcha_code = solve_captcha_with_ocr(captcha_session.image_base64, attempt)
+            captcha_code = solve_captcha_with_ocr(captcha_session.image_base64, attempt, api_key)
 
             if not captcha_code:
                 _LOGGER.warning(

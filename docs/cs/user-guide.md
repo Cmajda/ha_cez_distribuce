@@ -124,6 +124,7 @@ Zadejte ceny elektřiny pro nízký a vysoký tarif.
 | **Cena NT (Kč/kWh)** | Cena za kWh v nízkém tarifu   |
 | **Cena VT (Kč/kWh)** | Cena za kWh ve vysokém tarifu |
 | **Automatické obnovení dat** | Povolit automatické obnovování HDO dat |
+| **OCR.space API klíč** | Volitelný klíč pro automatické řešení CAPTCHA, viz [OCR API klíč](#ocr-api-klíč) |
 | **Použít cenu z entity NT/VT** | Použít cenu z vybraného senzoru nebo pomocníka místo pevné ceny |
 | **Senzor nebo číselný pomocník ceny NT/VT** | Volitelný zdroj ceny; použije se jen při zapnutí příslušného přepínače |
 
@@ -251,6 +252,18 @@ Každá instance má vlastní zařízení a entity s unikátní příponou.
 ČEZ Distribuce používá CAPTCHA ochranu na svém API. Data jsou platná **6 dní**. Pokud je automatické obnovování povolené,
 integrace se je pokusí obnovit automaticky. Ruční obnovu můžete spustit kdykoli tlačítkem **Manuálně obnovit** na kartě.
 Po ověření CAPTCHA vyberete signál z abecedně seřazeného seznamu vráceného ČEZ; tento výběr se uloží jako signál instance.
+
+### OCR API klíč
+
+Automatické obnovení řeší CAPTCHA ČEZ pomocí služby OCR.space. Ve výchozím nastavení používá sdílený demo klíč, který
+poskytovatel výrazně omezuje a označuje jako testovací. Vlastní klíč je zdarma a není sdílený s ostatními uživateli:
+
+1. Otevřete <https://ocr.space/ocrapi/freekey> a zaregistrujte se svým e-mailem
+2. V doručené poště najděte e-mail od OCR.space a zkopírujte z něj API klíč
+3. V Home Assistant otevřete **Nastavení → Zařízení a služby → ČEZ HDO → Konfigurovat** a vložte klíč do pole
+   **OCR.space API klíč** v kroku nastavení cen
+
+Pokud pole necháte prázdné, používá se nadále sdílený demo klíč. Klíč se ukládá do konfigurace integrace.
 
 ### Sledování platnosti dat
 

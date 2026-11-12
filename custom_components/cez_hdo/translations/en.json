@@ -51,7 +51,8 @@
                     "use_high_tariff_price_entity": "Use VT price from entity",
                     "low_tariff_price_entity": "NT price sensor or number helper (optional)",
                     "high_tariff_price_entity": "VT price sensor or number helper (optional)",
-                    "auto_refresh": "Auto refresh data"
+                    "auto_refresh": "Auto refresh data",
+                    "ocr_api_key": "OCR.space API key (optional)"
                 },
                 "data_description": {
                     "low_tariff_price": "Price per kWh in low tariff",
@@ -60,7 +61,8 @@
                     "use_high_tariff_price_entity": "When disabled, the fixed VT price above is used.",
                     "low_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
                     "high_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
-                    "auto_refresh": "Enable automatic HDO data refresh (max 24 attempts per day)"
+                    "auto_refresh": "Enable automatic HDO data refresh (max 24 attempts per day)",
+                    "ocr_api_key": "Optional free key from https://ocr.space/ocrapi/freekey - sign up with your email and paste the key from the confirmation message. Without it, the shared demo key is used, which the provider rate limits and marks as testing-only."
                 }
             }
         },
@@ -120,7 +122,8 @@
                     "use_high_tariff_price_entity": "Use VT price from entity",
                     "low_tariff_price_entity": "NT price sensor or number helper (optional)",
                     "high_tariff_price_entity": "VT price sensor or number helper (optional)",
-                    "auto_refresh": "Auto refresh data"
+                    "auto_refresh": "Auto refresh data",
+                    "ocr_api_key": "OCR.space API key (optional)"
                 },
                 "data_description": {
                     "low_tariff_price": "Price per kWh in low tariff",
@@ -129,7 +132,8 @@
                     "use_high_tariff_price_entity": "When disabled, the fixed VT price above is used.",
                     "low_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
                     "high_tariff_price_entity": "Optional. The price is updated from the selected numeric sensor or helper.",
-                    "auto_refresh": "Enable automatic HDO data refresh (max 24 attempts per day)"
+                    "auto_refresh": "Enable automatic HDO data refresh (max 24 attempts per day)",
+                    "ocr_api_key": "Optional free key from https://ocr.space/ocrapi/freekey - sign up with your email and paste the key from the confirmation message. Without it, the shared demo key is used, which the provider rate limits and marks as testing-only."
                 }
             }
         },

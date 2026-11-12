@@ -51,7 +51,8 @@
                     "use_high_tariff_price_entity": "Použít cenu z entity VT",
                     "low_tariff_price_entity": "Senzor nebo číselný pomocník ceny NT (volitelné)",
                     "high_tariff_price_entity": "Senzor nebo číselný pomocník ceny VT (volitelné)",
-                    "auto_refresh": "Automatické obnovení dat"
+                    "auto_refresh": "Automatické obnovení dat",
+                    "ocr_api_key": "OCR.space API klíč (volitelné)"
                 },
                 "data_description": {
                     "low_tariff_price": "Cena za kWh v nízkém tarifu",
@@ -60,7 +61,8 @@
                     "use_high_tariff_price_entity": "Pokud je vypnuto, použije se pevná cena VT zadaná výše.",
                     "low_tariff_price_entity": "Volitelné. Cena se průběžně načítá z vybraného číselného senzoru nebo pomocníka.",
                     "high_tariff_price_entity": "Volitelné. Cena se průběžně načítá z vybraného číselného senzoru nebo pomocníka.",
-                    "auto_refresh": "Povolit automatické obnovení HDO dat (max. 24 pokusů denně)"
+                    "auto_refresh": "Povolit automatické obnovení HDO dat (max. 24 pokusů denně)",
+                    "ocr_api_key": "Volitelný klíč zdarma z https://ocr.space/ocrapi/freekey - zaregistrujte svůj e-mail a vložte klíč z potvrzovací zprávy. Bez něj se používá sdílený demo klíč, který poskytovatel výrazně omezuje a označuje jako testovací."
                 }
             }
         },
@@ -120,7 +122,8 @@
                     "use_high_tariff_price_entity": "Použít cenu z entity VT",
                     "low_tariff_price_entity": "Senzor nebo číselný pomocník ceny NT (volitelné)",
                     "high_tariff_price_entity": "Senzor nebo číselný pomocník ceny VT (volitelné)",
-                    "auto_refresh": "Automatické obnovení dat"
+                    "auto_refresh": "Automatické obnovení dat",
+                    "ocr_api_key": "OCR.space API klíč (volitelné)"
                 },
                 "data_description": {
                     "low_tariff_price": "Cena za kWh v nízkém tarifu",
@@ -129,7 +132,8 @@
                     "use_high_tariff_price_entity": "Pokud je vypnuto, použije se pevná cena VT zadaná výše.",
                     "low_tariff_price_entity": "Volitelné. Cena se průběžně načítá z vybraného číselného senzoru nebo pomocníka.",
                     "high_tariff_price_entity": "Volitelné. Cena se průběžně načítá z vybraného číselného senzoru nebo pomocníka.",
-                    "auto_refresh": "Povolit automatické obnovení HDO dat (max. 24 pokusů denně)"
+                    "auto_refresh": "Povolit automatické obnovení HDO dat (max. 24 pokusů denně)",
+                    "ocr_api_key": "Volitelný klíč zdarma z https://ocr.space/ocrapi/freekey - zaregistrujte svůj e-mail a vložte klíč z potvrzovací zprávy. Bez něj se používá sdílený demo klíč, který poskytovatel výrazně omezuje a označuje jako testovací."
                 }
             }
         },

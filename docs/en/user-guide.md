@@ -126,6 +126,7 @@ Enter electricity prices for low and high tariff.
 | **NT Price (CZK/kWh)** | Price per kWh in low tariff  |
 | **VT Price (CZK/kWh)** | Price per kWh in high tariff |
 | **Auto refresh data** | Enable automatic HDO data refresh |
+| **OCR.space API key** | Optional key for automatic CAPTCHA solving, see [OCR API Key](#ocr-api-key) |
 | **Use NT/VT price from entity** | Use the selected sensor or helper instead of the fixed price |
 | **NT/VT price sensor or number helper** | Optional price source; used only when its toggle is enabled |
 
@@ -254,6 +255,18 @@ Each instance has its own device and entities with a unique suffix.
 integration will try to renew it automatically. You can start a manual renewal at any time with **Manually refresh** on
 the card. After CAPTCHA verification, choose a signal from the alphabetically sorted list returned by ČEZ; the selection
 is saved as the instance's configured signal.
+
+### OCR API Key
+
+Automatic refresh solves the ČEZ CAPTCHA with OCR.space. By default it uses a shared demo key that the provider rate
+limits and marks as testing-only. A personal key is free and is not shared with other users:
+
+1. Open <https://ocr.space/ocrapi/freekey> and sign up with your email address
+2. Find the email from OCR.space and copy the API key it contains
+3. In Home Assistant open **Settings → Devices & services → ČEZ HDO → Configure** and paste the key into
+   **OCR.space API key** on the price settings step
+
+Leave the field empty to keep using the shared demo key. The key is stored in the integration configuration entry.
 
 ### Tracking Data Validity
 
