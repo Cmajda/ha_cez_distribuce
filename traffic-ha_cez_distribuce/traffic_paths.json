@@ -2,32 +2,32 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 244,
-    "uniques": 100
+    "count": 247,
+    "uniques": 110
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues",
     "title": "/issues",
-    "count": 54,
-    "uniques": 16
+    "count": 50,
+    "uniques": 15
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/pulls",
-    "title": "/pulls",
-    "count": 36,
-    "uniques": 6
+    "path": "/Cmajda/ha_cez_distribuce/releases",
+    "title": "/releases",
+    "count": 37,
+    "uniques": 13
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
     "title": "/blob/main/docs/cs/user-guide.md",
     "count": 35,
-    "uniques": 16
+    "uniques": 15
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/releases",
-    "title": "/releases",
-    "count": 35,
-    "uniques": 11
+    "path": "/Cmajda/ha_cez_distribuce/pulls",
+    "title": "/pulls",
+    "count": 34,
+    "uniques": 4
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/new",
@@ -38,8 +38,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.3.1",
     "title": "/releases/tag/v3.3.1",
-    "count": 23,
-    "uniques": 20
+    "count": 29,
+    "uniques": 25
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS",
@@ -56,7 +56,7 @@
   {
     "path": "/Cmajda/ha_cez_distribuce/issues/80",
     "title": "/issues/80",
-    "count": 16,
-    "uniques": 6
+    "count": 15,
+    "uniques": 5
   }
 ]
