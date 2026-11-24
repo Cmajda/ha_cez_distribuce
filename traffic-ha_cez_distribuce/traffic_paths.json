@@ -2,8 +2,8 @@
   {
     "path": "/Cmajda/ha_cez_distribuce",
     "title": "Overview",
-    "count": 190,
-    "uniques": 100
+    "count": 155,
+    "uniques": 104
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases/tag/v3.3.1",
@@ -12,51 +12,51 @@
     "uniques": 33
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
-    "title": "/blob/main/docs/cs/user-guide.md",
-    "count": 34,
-    "uniques": 15
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS",
-    "title": "/wiki/User-Guide-CS",
-    "count": 31,
-    "uniques": 16
-  },
-  {
     "path": "/Cmajda/ha_cez_distribuce/compare/v3.2.3...v3.3.1",
     "title": "/compare/v3.2.3...v3.3.1",
-    "count": 31,
+    "count": 32,
     "uniques": 9
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/issues/new",
-    "title": "/issues/new",
-    "count": 30,
-    "uniques": 1
-  },
-  {
-    "path": "/Cmajda/ha_cez_distribuce/issues",
-    "title": "/issues",
-    "count": 27,
-    "uniques": 14
+    "path": "/Cmajda/ha_cez_distribuce/blob/main/docs/cs/user-guide.md",
+    "title": "/blob/main/docs/cs/user-guide.md",
+    "count": 31,
+    "uniques": 15
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/releases",
     "title": "/releases",
-    "count": 27,
-    "uniques": 13
+    "count": 22,
+    "uniques": 12
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/wiki/User-Guide-CS",
+    "title": "/wiki/User-Guide-CS",
+    "count": 20,
+    "uniques": 17
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/issues",
+    "title": "/issues",
+    "count": 19,
+    "uniques": 12
+  },
+  {
+    "path": "/Cmajda/ha_cez_distribuce/releases/v3.3.1",
+    "title": "/releases/v3.3.1",
+    "count": 11,
+    "uniques": 7
   },
   {
     "path": "/Cmajda/ha_cez_distribuce/pulls",
     "title": "/pulls",
-    "count": 22,
+    "count": 9,
     "uniques": 5
   },
   {
-    "path": "/Cmajda/ha_cez_distribuce/actions",
-    "title": "/actions",
-    "count": 16,
-    "uniques": 2
+    "path": "/Cmajda/ha_cez_distribuce/wiki",
+    "title": "/wiki",
+    "count": 6,
+    "uniques": 6
   }
 ]
