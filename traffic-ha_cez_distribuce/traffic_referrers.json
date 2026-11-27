@@ -6,8 +6,18 @@
   },
   {
     "referrer": "github.com",
-    "count": 16,
-    "uniques": 14
+    "count": 13,
+    "uniques": 11
+  },
+  {
+    "referrer": "DuckDuckGo",
+    "count": 1,
+    "uniques": 1
+  },
+  {
+    "referrer": "bike-forum.cz",
+    "count": 1,
+    "uniques": 1
   },
   {
     "referrer": "l.facebook.com",
