@@ -2,12 +2,12 @@
   {
     "referrer": "Google",
     "count": 31,
-    "uniques": 27
+    "uniques": 26
   },
   {
     "referrer": "github.com",
-    "count": 13,
-    "uniques": 11
+    "count": 10,
+    "uniques": 8
   },
   {
     "referrer": "DuckDuckGo",
@@ -16,11 +16,6 @@
   },
   {
     "referrer": "bike-forum.cz",
-    "count": 1,
-    "uniques": 1
-  },
-  {
-    "referrer": "l.facebook.com",
     "count": 1,
     "uniques": 1
   }
